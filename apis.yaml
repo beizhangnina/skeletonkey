@@ -1,0 +1,147 @@
+# apis.yaml -- index of APIs SkeletonKey knows how to reach.
+#
+# This file is documentation + machine-readable index. It contains NO secrets and
+# NO credentials: only how an API is paid for and whether signup can be assisted.
+# Validate it with `skeletonkey apis validate` (also covered by `npm test`).
+#
+# SCHEMA
+# ------
+# version: 1                 Literal 1.
+# entries: list of:
+#   name                 string, required, unique. Short slug for the API.
+#   url                  string, required. http(s) URL of the API or its docs.
+#   access_mode          string, required. One of:
+#                          x402          -- pay per request over HTTP 402 / x402
+#                          intermediary  -- a gateway resells access; you top up the gateway
+#                          own-account   -- you hold the account and the billing relationship
+#                          byok          -- the service accepts a key you got elsewhere
+#   min_topup            number >= 0 in USD, or null. NULL MEANS UNKNOWN.
+#                        Never put a guessed number here -- an unknown price is null.
+#   billing_unit         string or null. e.g. "per request", "per 1M input tokens".
+#   signup_automatable   boolean or null. Can an agent complete signup unattended?
+#                        null = not assessed. Even `true` still requires a human
+#                        final confirmation before money or identity is committed.
+#   tos_notes            string or null. Anything in the terms that constrains
+#                        automated signup, key sharing, or proxying.
+#   source               http(s) URL or null. Where the facts above came from.
+#   checked_date         "YYYY-MM-DD" or null. When a human last verified this row.
+#                        null = never verified; treat every field as unverified.
+#   example              boolean, optional. true for the placeholder rows shipped
+#                        with this repo. Example rows are not real offers and
+#                        must never be treated as pricing data.
+#   capabilities         list of strings, optional. Free-text tags the MCP
+#                        `find_api` tool matches against, e.g. ["embeddings"].
+#   domain               string, optional. API hostname, so an agent can suggest
+#                        `skeletonkey add --domain <domain>` without guessing.
+
+version: 1
+entries:
+  - name: example-x402-endpoint
+    url: https://example.com/x402-demo
+    access_mode: x402
+    min_topup: null
+    billing_unit: per request
+    signup_automatable: null
+    tos_notes: >-
+      Placeholder row demonstrating the x402 access mode: the endpoint answers
+      402 with payment instructions and no account is created. Terms not reviewed.
+    source: null
+    checked_date: null
+    example: true
+
+  - name: example-intermediary-gateway
+    url: https://example.com/gateway
+    access_mode: intermediary
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >-
+      Placeholder row demonstrating the intermediary access mode: one prepaid
+      balance at a gateway fans out to several upstream APIs. Prices unknown --
+      min_topup and billing_unit stay null until a human checks them.
+    source: null
+    checked_date: null
+    example: true
+
+  - name: example-byok-service
+    url: https://example.com/byok
+    access_mode: byok
+    min_topup: null
+    billing_unit: null
+    signup_automatable: false
+    tos_notes: >-
+      Placeholder row demonstrating the byok access mode: the service accepts a
+      key issued by an upstream provider, so the billing relationship lives
+      elsewhere. Marked not automatable because signup needs a human. Terms not reviewed.
+    source: null
+    checked_date: null
+    example: true
+
+  # --- The three north-star scenarios from docs/v0.1-acceptance.md -----------
+  # Every factual field below is null: nobody has verified prices or terms for
+  # this repo, and a guessed price is worse than no price. `example: true` means
+  # treat the row as a shape, not as an offer.
+
+  - name: example-x-twitter-api
+    url: https://developer.x.com/en/docs/x-api
+    domain: api.x.com
+    capabilities:
+      - social data
+      - tweets
+      - posts
+      - x.com
+      - twitter
+      - social media search
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >-
+      Scenario row for "agent needs X/Twitter data". Access, tiers, and whether
+      automated signup is permitted have NOT been reviewed -- X has historically
+      required developer-portal approval, so assume a human is needed. Verify the
+      developer terms yourself before letting an agent drive signup.
+    source: null
+    checked_date: null
+    example: true
+
+  - name: example-apify-scraping
+    url: https://docs.apify.com/api/v2
+    domain: api.apify.com
+    capabilities:
+      - web scraping
+      - scraping
+      - crawling
+      - browser automation
+      - data extraction
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >-
+      Scenario row for "agent needs web scraping via Apify". Prices, free
+      allowances, and signup automation rules not reviewed. Note that scraping
+      terms belong to the *target* site as well as to Apify; an agent must not
+      assume either is permissive.
+    source: null
+    checked_date: null
+    example: true
+
+  - name: example-voyage-embeddings
+    url: https://docs.voyageai.com
+    domain: api.voyageai.com
+    capabilities:
+      - embeddings
+      - text embeddings
+      - reranking
+      - vector search
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >-
+      Scenario row for "agent needs embeddings via Voyage". Pricing and any free
+      tier not reviewed; min_topup stays null. Terms not reviewed.
+    source: null
+    checked_date: null
+    example: true

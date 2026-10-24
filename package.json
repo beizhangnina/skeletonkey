@@ -1,0 +1,59 @@
+{
+  "name": "skeletonkey",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-only vault, injecting proxy, and MCP server for your personal API keys.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beizhangnina/skeletonkey.git"
+  },
+  "homepage": "https://github.com/beizhangnina/skeletonkey#readme",
+  "bugs": {
+    "url": "https://github.com/beizhangnina/skeletonkey/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "bin": {
+    "skeletonkey": "./dist/cli.js",
+    "skk": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "apis.yaml",
+    "skills",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "skeletonkey": "node --no-warnings dist/cli.js",
+    "pretest": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "commander": "^14.0.0",
+    "yaml": "^2.8.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0"
+  },
+  "keywords": [
+    "api-keys",
+    "skeletonkey",
+    "secrets",
+    "proxy",
+    "mcp",
+    "agents",
+    "bitwarden"
+  ]
+}
