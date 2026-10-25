@@ -51,6 +51,11 @@ export interface SecretRequest {
   field: string;
   /** Vault alias to read (or write) when Bitwarden can answer. */
   alias?: string;
+  /**
+   * Vendor domain the value belongs to, used to find the vendor's own vault
+   * item (by bound email + domain). Defaults to the host of `origin`.
+   */
+  domain?: string;
   /** Free text shown on the popup so the human knows why they are being asked. */
   reason?: string;
 }

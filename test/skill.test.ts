@@ -42,6 +42,16 @@ describe("skills/skeletonkey/SKILL.md", () => {
     expect(SKILL).toMatch(/never pick a work address on the user's behalf/i);
   });
 
+  it("never lets the agent touch the Bitwarden master password", () => {
+    expect(SKILL).toMatch(/skeletonkey bitwarden status/);
+    expect(SKILL).toMatch(/Never ask the user for their Bitwarden master password/i);
+    expect(SKILL).toMatch(/never run `bw login` or `bw unlock`\s+yourself/i);
+    // It points at the command that prints the steps, rather than reciting a
+    // session variable into a file an agent reads.
+    expect(SKILL).toMatch(/relay the steps it printed verbatim/i);
+    expect(SKILL).not.toContain("BW_SESSION");
+  });
+
   it("documents the human gates and the merged index", () => {
     expect(SKILL).toMatch(/human_gates/);
     expect(SKILL).toMatch(/skeletonkey-policy/);

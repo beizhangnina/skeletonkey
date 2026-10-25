@@ -21,11 +21,17 @@ export interface CliResult {
   stderr: string;
 }
 
-/** Runs the built CLI with SKELETONKEY_HOME pointed at a temp directory. */
+/**
+ * Runs the built CLI with SKELETONKEY_HOME pointed at a temp directory.
+ *
+ * `env` overrides single variables (PATH, so a fake `bw` can be put in front
+ * of the real one; BW_SESSION; ...). It is applied last, so it wins.
+ */
 export function runCli(
   home: string,
   args: string[],
   stdin?: string,
+  env: Record<string, string> = {},
 ): Promise<CliResult> {
   if (!fs.existsSync(CLI)) {
     throw new Error(`${CLI} is missing. Run \`npm run build\` first (npm test does this for you).`);
@@ -40,6 +46,7 @@ export function runCli(
         // that inside the temp home: the suite must never write to the real one.
         SKELETONKEY_USER_HOME: path.join(home, "fake-user-home"),
         NO_COLOR: "1",
+        ...env,
       },
       stdio: ["pipe", "pipe", "pipe"],
     });

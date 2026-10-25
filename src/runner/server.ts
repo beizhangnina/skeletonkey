@@ -43,6 +43,7 @@ import {
   type PublicRequest,
 } from "../requests.js";
 import { BitwardenSecretSource } from "../secrets/bitwarden.js";
+import { childProcessBw } from "../vault/bw-account.js";
 import { BoundInboxSource } from "../secrets/inbox.js";
 import { resolveSecret, type LadderResult } from "../secrets/ladder.js";
 import { PopupRegistry, PopupSecretSource } from "../secrets/popup.js";
@@ -167,6 +168,15 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       ...(options.userIndexFile === undefined ? {} : { userIndexFile: options.userIndexFile }),
     });
 
+  /** The bound email from config.yaml, when `init` has run. */
+  const email = (): string | null => {
+    try {
+      return readConfig(home).email;
+    } catch {
+      return null;
+    }
+  };
+
   let baseUrl = `http://${host}:${options.port ?? DEFAULT_RUNNER_PORT}`;
   const approvalUrl = (id: string): string => `${baseUrl}/approve/${id}`;
   const inputUrl = (id: string): string => `${baseUrl}/input/${id}`;
@@ -179,9 +189,37 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
     ...(options.popupTimeoutMs === undefined ? {} : { timeoutMs: options.popupTimeoutMs }),
     log,
   });
+  /**
+   * First secret use: if `bw` is missing, logged out or locked, the human gets
+   * the steps (in the log and as one notification) instead of the agent being
+   * asked to work around it. The master password is never part of this.
+   */
+  const bwGuidanceSink = (lines: string[]): void => {
+    log("! Bitwarden cannot answer the first secret request of this session:");
+    for (const line of lines) log(`  bitwarden: ${line}`);
+    void notifier
+      .notify({
+        title: "SkeletonKey: Bitwarden needs you",
+        body:
+          "`bw` is not installed, not logged in, or locked, so SkeletonKey cannot read a secret " +
+          "from it. The steps are in the runner log; SkeletonKey never asks for your master " +
+          "password.",
+      })
+      .catch(() => {
+        // A missing notifier is never a reason to stop; the log has the steps.
+      });
+  };
+
   const sources: SecretSource[] =
     options.secretSources === undefined
-      ? [new BitwardenSecretSource(), new BoundInboxSource(), popupSource]
+      ? [
+          new BitwardenSecretSource(childProcessBw(), {
+            boundEmail: email(),
+            onGuidance: bwGuidanceSink,
+          }),
+          new BoundInboxSource(),
+          popupSource,
+        ]
       : typeof options.secretSources === "function"
         ? options.secretSources(popupSource)
         : options.secretSources;
@@ -190,14 +228,6 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
     resolveSecret(request, { sources, allowlist, redactor, log, notifier });
 
   // --- the flow ----------------------------------------------------------
-
-  const email = (): string | null => {
-    try {
-      return readConfig(home).email;
-    } catch {
-      return null;
-    }
-  };
 
   /** Spend so far this calendar month, from the ledger's reported costs. */
   const monthToDate = (): number => {

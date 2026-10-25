@@ -247,6 +247,15 @@ key straight into the vault on their own terminal (or tells them the one
 without passing through you. If the tool reports `stored: false`, relay the
 command it gives you and wait — do not offer to handle the key yourself.
 
+If anything comes back saying Bitwarden is **locked, not logged in, or not
+installed**, relay the steps it printed verbatim and ask the user to run
+`skeletonkey bitwarden status` in their own terminal — that command prints the
+`bw login` and unlock steps for their bound email, and exits non-zero until the
+vault is usable. **Never ask the user for their Bitwarden master password,
+never accept it if they offer it, and never run `bw login` or `bw unlock`
+yourself** — unlocking a vault is a human action, and the password must never
+pass through you.
+
 ### 4. Call the API through the proxy
 
 Send the request to the proxy's URL with **no credential of your own**:

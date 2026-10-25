@@ -56,6 +56,15 @@ import {
   type UpstreamScheme,
 } from "./types.js";
 import { createVault, testBackendAllowed } from "./vault/index.js";
+import {
+  bwAccountStatus,
+  bwGuidance,
+  bwGuidanceError,
+  describeVendorItems,
+  findVendorItems,
+  sameMailbox,
+  type BwAccount,
+} from "./vault/bw-account.js";
 
 const DEFAULT_HEADER = "Authorization";
 const DEFAULT_FORMAT = "Bearer {key}";
@@ -103,6 +112,25 @@ export function buildProgram(): Command {
     .option("--agent <id>", "only `claude-code` or only `codex`")
     .action(async (options: RegisterCliOptions) => {
       await cmdRegister(options);
+    });
+
+  const bitwarden = program
+    .command("bitwarden")
+    .alias("bw")
+    .description("check the `bw` CLI, and find vendor accounts by the bound email");
+  bitwarden
+    .command("status", { isDefault: true })
+    .description("is `bw` installed, logged in, unlocked -- and as the bound email?")
+    .option("--json", "machine-readable output", false)
+    .action(async (options: { json: boolean }) => {
+      await cmdBitwardenStatus(options.json);
+    });
+  bitwarden
+    .command("find <domain>")
+    .description("list vault items for the bound email that match a vendor domain (never values)")
+    .option("--json", "machine-readable output", false)
+    .action(async (domain: string, options: { json: boolean }) => {
+      await cmdBitwardenFind(domain, options.json);
     });
 
   program
@@ -388,7 +416,13 @@ async function cmdInit(options: InitOptions): Promise<void> {
   };
 
   const vault = createVault(config, home);
-  await vault.check();
+  if (backend === "bitwarden") {
+    // Guided, and re-checkable: `init` is where a human finds out that `bw` is
+    // missing or locked, not three commands later.
+    await guideBitwarden(email, interactive);
+  } else {
+    await vault.check();
+  }
 
   writeConfig(config, home);
   // Create keys.yaml and the ledger up front so their permissions are right from the start.
@@ -491,6 +525,163 @@ async function cmdRegister(options: RegisterCliOptions): Promise<void> {
     confirm: false,
     dryRun: options.dryRun === true,
   });
+}
+
+/** The bound email, or null when `init` has not run yet. */
+function boundEmail(home: string): string | null {
+  try {
+    return readConfig(home).email;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * `skeletonkey bitwarden status`: installed, logged in, unlocked, and as which
+ * account -- plus the commands the human runs when the answer is no. Exits 1
+ * when `bw` cannot be read, so a script can gate on it.
+ */
+async function cmdBitwardenStatus(json: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  const bound = boundEmail(home);
+  const status = await bwAccountStatus({ bound });
+  const guidance = bwGuidance(status);
+  if (json) {
+    console.log(
+      JSON.stringify(
+        {
+          state: status.state,
+          usable: status.usable,
+          account: status.account,
+          bound_email: status.bound,
+          matches_bound_email: status.matchesBound,
+          summary: status.summary,
+          guidance,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(`Bitwarden: ${status.summary}.`);
+    console.log(`  bw CLI:       ${status.state === "not-installed" ? "NOT on PATH" : "installed"}`);
+    console.log(
+      `  logged in:    ${status.state === "unlocked" || status.state === "locked" ? "yes" : "no"}`,
+    );
+    console.log(`  unlocked:     ${status.usable ? "yes" : "no"}`);
+    console.log(`  account:      ${status.account ?? "unknown (`bw status` reports none)"}`);
+    console.log(
+      `  bound email:  ${status.bound ?? "unset -- run `skeletonkey init --email <address>`"}` +
+        (status.matchesBound === null ? "" : status.matchesBound ? " (matches)" : " (DIFFERENT)"),
+    );
+    if (guidance.length > 0) {
+      console.log("");
+      for (const line of guidance) console.log(`  ${line}`);
+    }
+  }
+  if (!status.usable) process.exitCode = 1;
+}
+
+/**
+ * `skeletonkey bitwarden find <domain>`: the vendor accounts already in the
+ * vault for the bound email. Names, ids and which field matched -- never a
+ * password, never an API key.
+ */
+async function cmdBitwardenFind(domain: string, json: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  const bound = boundEmail(home);
+  const lookup = await findVendorItems({ domain, bound });
+  // Deliberately rebuilt field by field: `lookup.items` carries the values.
+  const safe = lookup.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    username: item.username,
+    email_match: item.email_match,
+    domain_match: item.domain_match,
+    has_password: item.has_password,
+    api_key_field: item.api_key_field,
+    has_api_key: item.api_key !== null,
+  }));
+  if (json) {
+    console.log(
+      JSON.stringify(
+        {
+          domain: normalizeDomain(domain),
+          bound_email: bound,
+          state: lookup.account.state,
+          searched: lookup.searched,
+          detail: lookup.detail,
+          items: safe,
+          note: "Values are never printed. The runner reads them in memory only.",
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(lookup.detail);
+    for (const line of describeVendorItems(lookup)) console.log(`  ${line}`);
+    if (!lookup.account.usable) {
+      for (const line of bwGuidance(lookup.account)) console.log(`  ${line}`);
+    } else if (safe.length > 0) {
+      console.log("");
+      console.log(
+        "No value was printed. `skeletonkey add <alias> --platform ... --domain ...` stores a key " +
+          "SkeletonKey injects; the runner reads these items in memory only.",
+      );
+    }
+  }
+  if (!lookup.account.usable) process.exitCode = 1;
+}
+
+/**
+ * The guided Bitwarden setup `init` runs for the default backend: detect the
+ * state, print the exact commands, and re-check when the human says they have
+ * done it. SkeletonKey never collects the master password -- `bw login` and
+ * `bw unlock` happen in the human's own terminal, and only the BW_SESSION they
+ * export comes back here.
+ */
+async function guideBitwarden(email: string, interactive: boolean): Promise<BwAccount> {
+  let status = await bwAccountStatus({ bound: email });
+  let loginAs = email;
+  let asked = false;
+  while (!status.usable) {
+    // Confirm the address rather than guessing it into a `bw login` line.
+    if (
+      interactive &&
+      !asked &&
+      (status.state === "unauthenticated" || status.state === "not-installed")
+    ) {
+      asked = true;
+      loginAs = await promptLine(`Bitwarden account email [${email}]: `, email);
+      if (!sameMailbox(loginAs, email)) {
+        console.error(
+          `Note: ${loginAs} is not the bound email ${email}. SkeletonKey looks vendor accounts up ` +
+            "by the bound email, so keep the two the same unless you mean it.",
+        );
+      }
+    }
+    console.error(`\nBitwarden: ${status.summary}.`);
+    for (const line of bwGuidance(status, loginAs)) console.error(`  ${line}`);
+    if (!interactive) throw bwGuidanceError(status, loginAs);
+    const answer = await promptLine(
+      "Press Enter once you have done that and I will re-check, or type `skip`: ",
+      "recheck",
+    );
+    if (/^(skip|s|no?)$/i.test(answer)) {
+      console.error(
+        "Carrying on without Bitwarden. `skeletonkey add` and the proxy will refuse with these " +
+          "same steps until `bw` is unlocked; re-check any time with `skeletonkey bitwarden status`.",
+      );
+      return status;
+    }
+    status = await bwAccountStatus({ bound: email });
+  }
+  console.error(`Bitwarden: ${status.summary}.`);
+  if (status.matchesBound === false) {
+    for (const line of bwGuidance(status, loginAs)) console.error(`  ${line}`);
+  }
+  return status;
 }
 
 async function cmdRunner(options: RunnerCliOptions): Promise<void> {
