@@ -51,3 +51,5 @@ export {
   OnePasswordVault,
   type Vault,
 } from "./vault/index.js";
+
+export * from "./signup/executor.js";

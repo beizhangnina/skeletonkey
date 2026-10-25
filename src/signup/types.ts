@@ -1,12 +1,4 @@
-/**
- * Vendor signup automation: interfaces only in v0.3.
- *
- * The playbook-driven Playwright runner lands in v0.5 (§8). What exists here is
- * the shape the runner will call, plus the honest default: every vendor is a
- * human handoff until a playbook exists for it. The point of shipping the
- * interface now is that the runner's request flow, the approval page, and the
- * ladder are all wired to something real rather than to a TODO.
- */
+/** Signup contracts: secret values stay inside the trusted runner. */
 import type { SecretRequest, SecretResolution } from "../secrets/types.js";
 
 export type SignupOutcomeStatus = "ready" | "needs_human" | "failed";
@@ -19,6 +11,8 @@ export interface SignupOutcome {
   reason: string;
   /** Lines for the ledger and the human's page. Never a secret. */
   log: string[];
+  /** Fixed vendor URL for the local human approval page. */
+  vendorUrl?: string;
 }
 
 export interface SignupContext {
@@ -32,6 +26,8 @@ export interface SignupContext {
   resolveSecret(request: SecretRequest): Promise<SecretResolution | null>;
   /** Appends to the request's log. Redacted by the caller. */
   log(line: string): void;
+  /** Popup only: signup OTPs must never use inbox integration. */
+  resolvePopup?(request: SecretRequest): Promise<SecretResolution | null>;
 }
 
 /** One vendor's steps. YAML/TS playbooks arrive in v0.5. */
@@ -64,7 +60,7 @@ export class HumanHandoffSignupRunner implements SignupRunner {
   async run(context: SignupContext): Promise<SignupOutcome> {
     context.log(
       `No signup playbook exists for ${context.vendor} in v0.3, so signup is a guided human ` +
-        "handoff. Automated signup (Apify, TikHub, Apollo, DropLeads) lands in v0.5.",
+        "handoff. Open the vendor signup page to continue.",
     );
     return {
       status: "needs_human",

@@ -62,7 +62,8 @@ import { BoundInboxSource } from "../secrets/inbox.js";
 import { resolveSecret, type LadderResult } from "../secrets/ladder.js";
 import { PopupRegistry, PopupSecretSource } from "../secrets/popup.js";
 import type { SecretRequest, SecretSource } from "../secrets/types.js";
-import { HumanHandoffSignupRunner, type SignupRunner } from "../signup/types.js";
+import { type SignupRunner } from "../signup/types.js";
+import { AutoSignupExecutor, SIGNUP_URLS } from "../signup/executor.js";
 import type { LedgerRow } from "../types.js";
 import { openVault, type Vault } from "../vault/index.js";
 import crypto from "node:crypto";
@@ -186,7 +187,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
   const notifier = options.notifier ?? new OsNotifier();
   const ledger = options.ledger ?? openLedger(home);
   const ownLedger = options.ledger === undefined;
-  const signup = options.signupRunner ?? new HumanHandoffSignupRunner();
+  const signup = options.signupRunner ?? new AutoSignupExecutor();
   const payments = options.paymentSubmitter ?? new HumanHandoffPaymentSubmitter();
 
   /** Which index files this runner reads: the allowlist and the router share them. */
@@ -423,7 +424,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
 
   /**
    * What happens after a human clicks Approve: v0.3 hands straight to the
-   * signup runner, which has no playbooks yet and so reports a human handoff.
+   * signup executor; missing live drivers produce an explicit human handoff.
    * On that outcome D14 applies -- the human is asked whether to route via the
    * cheapest aggregator instead, as a *new* approval.
    */
@@ -442,7 +443,8 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
     const outcome = await signup.run({
       vendor: request.vendor,
       domain: request.domain,
-      signupUrl: null,
+      signupUrl: SIGNUP_URLS[request.vendor.toLowerCase()] ?? null,
+      resolvePopup: (request) => popupSource.resolve(request),
       email: email(),
       resolveSecret: async (secretRequest) => {
         const result = await resolve(secretRequest);
@@ -497,6 +499,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       {
         status: outcome.status === "failed" ? "failed" : "needs_human",
         reason: outcome.reason,
+        notes: [...request.notes, ...outcome.log],
         ...(followUp === null ? {} : { follow_up_id: followUp.id }),
       },
       "runner",
@@ -1215,7 +1218,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
         `<p>${escapeHtml(settled.vendor)} approved. The agent now sees ` +
           `<code>${escapeHtml(settled.status)}</code>` +
           (settled.reason === null ? "" : ` (${escapeHtml(settled.reason)})`) +
-          `.</p><p>Caps now: global <strong>$${policy.global_monthly_cap_usd}</strong>, ` +
+          `.</p><p><a href="/approve/${escapeHtml(settled.id)}">View signup steps and vendor link</a></p><p>Caps now: global <strong>$${policy.global_monthly_cap_usd}</strong>, ` +
           `${escapeHtml(settled.vendor)} <strong>$${vendorCap(policy, settled.vendor)}</strong>.</p>` +
           (settled.follow_up_id === null
             ? ""
@@ -1495,9 +1498,11 @@ function indexPage(pending: AccessRequest[], killed: boolean): string {
 
 function approvalPage(request: AccessRequest, policy: SpendPolicy, problem?: string): string {
   const settled = request.status !== "pending_approval";
+  const signupUrl = SIGNUP_URLS[request.vendor.toLowerCase()];
   const capsAreUnset = capsUnset(policy);
   const vendorCapNow = vendorCap(policy, request.vendor);
   const details = `
+    ${request.status === "needs_human" && signupUrl ? `<p>Complete the signup step (${escapeHtml(request.reason ?? "human action")}) at <a href="${escapeHtml(signupUrl)}" rel="noreferrer noopener">${escapeHtml(signupUrl)}</a>.</p>` : ""}
     <table>
       <tr><th>Vendor</th><td>${escapeHtml(request.vendor)}</td></tr>
       <tr><th>What for</th><td>${escapeHtml(request.purpose ?? "not stated")}</td></tr>

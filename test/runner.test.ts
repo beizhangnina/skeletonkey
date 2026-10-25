@@ -14,6 +14,7 @@ import {
   startRunner,
   type RunnerHandle,
 } from "../src/runner/server.js";
+import { AutoSignupExecutor } from "../src/signup/executor.js";
 import type { SignupContext, SignupOutcome, SignupRunner } from "../src/signup/types.js";
 import { initWithKey, makeHome, removeHome, REPO_ROOT } from "./helpers/env.js";
 
@@ -204,10 +205,32 @@ describe("the trusted local runner", () => {
     expect(vendorCap(policy, "TikHub")).toBe(5);
     expect(policy.last_change_by).toBe(`approval-page (${created.request_id})`);
 
-    // v0.3 has no playbooks, so the approved request lands on a human handoff.
+    // No live driver is installed, so the approved request lands on a human handoff.
     const status = await started.client.getRequest(created.request_id);
     expect(status.status).toBe("needs_human");
-    expect(status.reason).toBe("no_playbook");
+    expect(status.reason).toBe("live_driver_unavailable");
+  });
+
+  it.each(["captcha", "phone"] as const)("shows the %s handoff on the local approval page", async kind => {
+    const other = await start({ signupRunner: new AutoSignupExecutor({ driverFor: () => ({
+      open: async () => ({ kind }),
+      oauth: async () => { throw new Error("unexpected"); },
+      password: async () => { throw new Error("unexpected"); },
+      otp: async () => { throw new Error("unexpected"); },
+    }) }) });
+    try {
+      const created = await other.client.createRequest({ vendor: "Apify", est_budget_usd: 1 });
+      const request = other.runner.requests.get(created.request_id)!;
+      await postForm(created.approval_url!, { page_token: request.page_token, action: "approve",
+        global_cap: "10", vendor_cap: "5" });
+      const html = await (await fetch(created.approval_url!)).text();
+      expect(html).toContain(`Signup stopped: ${kind}.`);
+      expect(html).toContain('href="https://console.apify.com/sign-up"');
+      expect(other.runner.requests.get(created.request_id)?.reason).toBe(kind);
+    } finally {
+      await other.runner.close();
+      removeHome(other.home);
+    }
   });
 
   it("will not approve the first paid action with every cap still $0 (D11)", async () => {
@@ -256,7 +279,7 @@ describe("the trusted local runner", () => {
     expect(settled?.routed_via).toBeNull();
     // Signup is not re-run, and no second handoff is raised off this decision.
     expect(settled?.follow_up_id).toBeNull();
-    const signupLines = started.logs.filter((line) => /no signup playbook exists/i.test(line));
+    const signupLines = started.logs.filter((line) => /Signup stopped: live_driver_unavailable/i.test(line));
     expect(signupLines).toHaveLength(1);
   });
 
