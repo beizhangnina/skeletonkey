@@ -20,6 +20,15 @@ export interface RunnerRequestInput {
   fallback_price_usd?: number | null;
 }
 
+export interface RunnerPaymentInput {
+  vendor: string;
+  domain?: string | null;
+  purpose?: string | null;
+  /** The exact amount, in USD. There is no "unknown amount" payment. */
+  amount_usd: number;
+  tos_url?: string | null;
+}
+
 export type RunnerRequestView = PublicRequest & Record<string, unknown>;
 
 export class RunnerUnavailableError extends Error {
@@ -64,6 +73,22 @@ export class RunnerClient {
     return (await this.call("POST", `/v1/requests/${encodeURIComponent(id)}/cancel`, {
       reason,
     })) as RunnerRequestView;
+  }
+
+  /** Raises a `payment` approval. The human decides; this returns an id. */
+  async createPayment(input: RunnerPaymentInput): Promise<RunnerRequestView> {
+    return (await this.call("POST", "/v1/payments", input)) as RunnerRequestView;
+  }
+
+  /**
+   * Submits an approved payment -- but only after the runner re-checks the caps
+   * against a freshly read policy and ledger. A payment that no longer fits
+   * comes back `{submitted: false, blocked: true, needs_new_approval: true}`
+   * with a new request id: the earlier approval has been voided, and only the
+   * human can give another one.
+   */
+  async submitPayment(requestId: string): Promise<Record<string, unknown>> {
+    return this.call("POST", `/v1/payments/${encodeURIComponent(requestId)}/submit`);
   }
 
   async policy(): Promise<Record<string, unknown>> {

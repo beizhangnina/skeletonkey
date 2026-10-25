@@ -21,6 +21,7 @@ export * from "./ledger.js";
 export * from "./match.js";
 export * from "./mcp.js";
 export * from "./paths.js";
+export * from "./payments.js";
 export * from "./proxy.js";
 export * from "./tailscale.js";
 export * from "./types.js";

@@ -87,6 +87,7 @@ but everything that *does* touch a secret now lives in a second process.
 | **Secure Input Popup** | A localhost-only page for a card number, a CVV, a password, or an OTP. It shows the vendor domain and the **verified origin**, masks the field, and sends the value to the runner only — never to the agent, a log, or the page's own response. | `src/secrets/popup.ts` |
 | **Domain allowlist** | Built from the API index plus the keys already in the vault. A secret is filled only on an allowlisted origin, over https; a lookalike domain is refused before any rung of the ladder is asked, and the human is told. | `src/allowlist.ts` |
 | **Spend policy** | `policy.yaml`: one global monthly cap plus per-vendor caps, **both $0 by default with no preset numbers**. The first paid action raises an approval asking the human to set them. Caps move only from the approval page or `skeletonkey policy set`. | `src/policy.ts` |
+| **Payment submit gate** | A `payment` approval carries an exact amount, and the caps are checked **twice**: once when the approval is raised, and again in the runner immediately before the submit, against a freshly read `policy.yaml` and a freshly read ledger. If a cap was lowered or the ledger grew in between, the submit is blocked, the stale approval is **voided**, and a new approval is raised for the human. v0.3 still submits nothing itself — the default submitter is a human handoff — but every future submit path has to come through this gate. | `src/payments.ts` |
 | **`cancel_request`** | An agent may disable a key and cancel its own request. It may never enable a key or raise a cap — there is no tool, and no runner verb, that can. | `src/mcp.ts` |
 | **Log redaction** | One utility applied to every log line, the ledger's text columns, the request store, and **every MCP response**. Two layers: values this process has loaded, plus secret *shapes* (card numbers by Luhn, `sk-`-style keys, bearer tokens, `password=` assignments). | `src/redact.ts` |
 | **Kill switch** | `skeletonkey disable --all` disables every key, writes the flag both processes read, voids every pending approval, and closes any open Secure Input Popup. The proxy then answers `403 {"error":"kill_switch"}` locally. Only a human clears it, with `skeletonkey resume`. | `src/killswitch.ts` |
@@ -207,7 +208,9 @@ secrets.
   no virtual-card integration (D12), fiat only (D6). The card number is read by
   the runner and typed into the vendor's own checkout; it is never stored outside
   your vault and never passes through the agent. Today, if a provider wants
-  money, you enter your own card on their site, by hand.
+  money, you enter your own card on their site, by hand. The submit-time cap
+  re-check that any future card flow has to pass is already in place
+  (`src/payments.ts`).
 - **Tailscale or any private network.** Only needed if you want **gateway
   mode** — one always-on host holding the keys for your laptop, phone, and
   anything else. A single-machine setup needs no network at all beyond the
@@ -228,6 +231,7 @@ What this tool does:
 - **Secrets are only filled on allowlisted origins.** The allowlist is built from the API index and the keys already in the vault; a lookalike domain is refused before any rung of the ladder is asked, and the human is notified.
 - **Everything written is redacted.** One utility covers logs, the ledger's text columns, the request store, and every MCP response — known values plus secret shapes. A canary test pushes a fake key, password, card number and CVV through the real code paths and then greps every tool response, every page, every file under `SKELETONKEY_HOME`, and all CLI output for them.
 - **Caps start at $0 and only a human moves them.** `policy.yaml` is written only by the approval page or `skeletonkey policy set`; an agent can disable a key and cancel a request, and nothing more.
+- **An approval is not a blank cheque.** The caps are re-checked immediately before any payment is submitted, against a freshly read policy and a freshly read ledger — so an approval that was fine when the human clicked it is still blocked if a cap has since been lowered or the month's spend has since grown. The stale approval is voided and a new one is raised; an agent cannot spend past a cap by holding on to an old yes.
 - **Client-supplied auth headers are stripped.** `authorization`, `proxy-authorization`, `x-api-key`, `api-key`, `x-auth-token`, `x-access-token`, `x-skeletonkey-token`, and the key's own header are removed from every request before the vault header is injected. A caller cannot smuggle its own credential through, cannot override yours, and the gateway token never reaches the upstream.
 - **The MCP server cannot reveal a key.** There is no such tool, and a test calls every handler with a stored secret and asserts no response contains it. The only tool that touches a secret, `register_key`, does so by prompting the human on `/dev/tty` — out of band from the agent entirely.
 - **Nothing is logged that could leak a key.** Log lines carry method, domain, path, status, byte count, and alias. As a backstop, the proxy redacts any secret it has loaded from any line it is about to print.
@@ -981,7 +985,7 @@ Phases, following the PRD:
 
 - **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, and guided Bitwarden account detection with vendor lookup by the bound email. See [What v0.3 adds](#what-v03-adds).
 - **v0.5 — automated signup.** Publish to npm (drop `"private": true`) so `npx skeletonkey init` works; bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
-- **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger, per-vendor caps checked before submit, and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
+- **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger (the per-vendor cap re-check before submit already landed in v0.3), and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
 - **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.
 
 Smaller things, unscheduled:

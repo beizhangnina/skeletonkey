@@ -57,6 +57,12 @@ export interface AccessRequest {
   purpose: string | null;
   /** The agent's own estimate. Never treated as a price. */
   est_budget_usd: number | null;
+  /**
+   * The exact amount a `payment` request would move, in USD. Not an estimate:
+   * it is the number the caps are re-checked against at submit time. Null on
+   * every other kind of request.
+   */
+  amount_usd: number | null;
   status: RequestStatus;
   created: string;
   updated: string;
@@ -141,6 +147,7 @@ export interface CreateRequest {
   domain?: string | null;
   purpose?: string | null;
   est_budget_usd?: number | null;
+  amount_usd?: number | null;
   domain_allowlisted?: boolean;
   asks_human_to_set_caps?: boolean;
   reason?: string | null;
@@ -190,6 +197,7 @@ export class RequestStore {
       domain: input.domain ?? null,
       purpose: input.purpose ?? null,
       est_budget_usd: input.est_budget_usd ?? null,
+      amount_usd: input.amount_usd ?? null,
       status,
       created: now,
       updated: now,

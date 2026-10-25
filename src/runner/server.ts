@@ -34,6 +34,12 @@ import {
   vendorCap,
   type SpendPolicy,
 } from "../policy.js";
+import {
+  gatePaymentSubmit,
+  HumanHandoffPaymentSubmitter,
+  type PaymentSubmitDecision,
+  type PaymentSubmitter,
+} from "../payments.js";
 import { globalRedactor, Redactor } from "../redact.js";
 import {
   publicRequest,
@@ -49,6 +55,7 @@ import { resolveSecret, type LadderResult } from "../secrets/ladder.js";
 import { PopupRegistry, PopupSecretSource } from "../secrets/popup.js";
 import type { SecretRequest, SecretSource } from "../secrets/types.js";
 import { HumanHandoffSignupRunner, type SignupRunner } from "../signup/types.js";
+import type { LedgerRow } from "../types.js";
 import crypto from "node:crypto";
 
 /** Header the MCP server authenticates to the runner with. */
@@ -101,6 +108,8 @@ export interface RunnerOptions {
    */
   secretSources?: SecretSource[] | ((popup: PopupSecretSource) => SecretSource[]);
   signupRunner?: SignupRunner;
+  /** How an approved payment is submitted. Defaults to a human handoff. */
+  paymentSubmitter?: PaymentSubmitter;
   allowlist?: Allowlist;
   /** Where log lines go, after redaction. Defaults to a file plus stderr. */
   logger?: (line: string) => void;
@@ -158,6 +167,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
   const ledger = options.ledger ?? openLedger(home);
   const ownLedger = options.ledger === undefined;
   const signup = options.signupRunner ?? new HumanHandoffSignupRunner();
+  const payments = options.paymentSubmitter ?? new HumanHandoffPaymentSubmitter();
 
   const allowlist =
     options.allowlist ??
@@ -229,12 +239,33 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
 
   // --- the flow ----------------------------------------------------------
 
-  /** Spend so far this calendar month, from the ledger's reported costs. */
-  const monthToDate = (): number => {
+  /**
+   * Rows from this calendar month that carry a reported cost. Read on every
+   * call rather than cached: the submit-time re-check has to see a ledger that
+   * grew after the human approved something.
+   */
+  const costedRowsThisMonth = (): LedgerRow[] => {
     const prefix = new Date().toISOString().slice(0, 7);
-    return ledger
-      .all()
-      .filter((row) => row.timestamp.startsWith(prefix) && row.cost !== null)
+    return ledger.all().filter((row) => row.timestamp.startsWith(prefix) && row.cost !== null);
+  };
+
+  /** Spend so far this calendar month, from the ledger's reported costs. */
+  const monthToDate = (): number =>
+    costedRowsThisMonth().reduce((total, row) => total + (row.cost ?? 0), 0);
+
+  /**
+   * Spend so far this month with one vendor. The ledger holds no vendor column,
+   * so a row counts when its domain or alias matches the vendor's name or its
+   * API domain -- which is what both the proxy and this file write.
+   */
+  const vendorToDate = (vendor: string, domain: string | null): number => {
+    const names = new Set([vendor.toLowerCase(), ...(domain === null ? [] : [domain.toLowerCase()])]);
+    return costedRowsThisMonth()
+      .filter(
+        (row) =>
+          names.has(row.domain.toLowerCase()) ||
+          (row.alias !== null && names.has(row.alias.toLowerCase())),
+      )
       .reduce((total, row) => total + (row.cost ?? 0), 0);
   };
 
@@ -260,7 +291,10 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       .find(
         (request) =>
           request.kind === input.kind &&
-          request.vendor.toLowerCase() === input.vendor.toLowerCase(),
+          request.vendor.toLowerCase() === input.vendor.toLowerCase() &&
+          // Two payments for the same vendor are only the same decision when
+          // they are for the same money.
+          (input.kind !== "payment" || (request.amount_usd ?? null) === (input.amount_usd ?? null)),
       );
     if (open !== undefined) {
       log(`request ${open.id}: reusing the pending approval for ${open.vendor}`);
@@ -271,8 +305,9 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
     const spend = checkSpend({
       policy,
       vendor: input.vendor,
-      amount_usd: input.est_budget_usd ?? null,
+      amount_usd: input.amount_usd ?? input.est_budget_usd ?? null,
       month_to_date_usd: monthToDate(),
+      vendor_to_date_usd: vendorToDate(input.vendor, input.domain ?? null),
     });
     const domainCheck =
       input.domain === undefined || input.domain === null
@@ -439,6 +474,137 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
     return { request: updated, policy };
   }
 
+  /**
+   * The payment chokepoint (B). The caps are re-checked here, immediately
+   * before the submitter is called, against a freshly read policy and a freshly
+   * read ledger -- because both can have moved since the human approved. A
+   * payment that no longer fits is blocked, its approval is voided, and a new
+   * approval is raised; nothing is submitted and nothing is charged.
+   */
+  async function submitPayment(request: AccessRequest): Promise<Record<string, unknown>> {
+    if (submitting.has(request.id)) {
+      // The store is a file, not a transaction log: two submits racing on one
+      // approval could both pass the gate and charge twice. One at a time.
+      log(`payment ${request.id}: refused -- a submit for it is already running`);
+      return {
+        submitted: false,
+        blocked: true,
+        blocked_code: "in_flight",
+        reason: `A submit for ${request.id} is already running. Wait for it rather than retrying.`,
+        needs_new_approval: false,
+        request: view(request),
+        new_request: null,
+        spend_check: null,
+      };
+    }
+    submitting.add(request.id);
+    try {
+      return await runSubmit(request);
+    } finally {
+      submitting.delete(request.id);
+    }
+  }
+
+  /** One payment id at a time; `submitPayment` holds the lock. */
+  const submitting = new Set<string>();
+
+  async function runSubmit(request: AccessRequest): Promise<Record<string, unknown>> {
+    const decision: PaymentSubmitDecision = gatePaymentSubmit({
+      request,
+      policy: readPolicy(home),
+      requests,
+      month_to_date_usd: monthToDate(),
+      vendor_to_date_usd: vendorToDate(request.vendor, request.domain),
+      killed: killSwitchState(home).engaged,
+      raise: (input) => createRequest(input),
+      log,
+    });
+
+    if (!decision.allowed) {
+      if (decision.replacement !== null) {
+        log(
+          `payment ${request.id}: the human must decide again -> ` +
+            `${approvalUrl(decision.replacement.id)}`,
+        );
+      }
+      return {
+        submitted: false,
+        blocked: true,
+        blocked_code: decision.code,
+        reason: decision.reason,
+        needs_new_approval: decision.replacement !== null,
+        request: view(decision.request),
+        new_request: decision.replacement === null ? null : view(decision.replacement),
+        spend_check:
+          decision.check === null
+            ? null
+            : {
+                global_cap_usd: decision.check.global_cap_usd,
+                vendor_cap_usd: decision.check.vendor_cap_usd,
+                month_to_date_usd: decision.check.month_to_date_usd,
+                vendor_to_date_usd: decision.check.vendor_to_date_usd,
+                reason: decision.check.reason,
+              },
+        note:
+          "The caps are checked when the approval is raised and again here, immediately before " +
+          "the submit. The earlier approval is void; only the human can give a new one, on the " +
+          "local approval page. You cannot raise a cap.",
+      };
+    }
+
+    // Allowed: nothing happens between the gate and the submit.
+    const lines: string[] = [];
+    const outcome = await payments.submit({
+      request_id: request.id,
+      vendor: request.vendor,
+      domain: request.domain,
+      amount_usd: decision.amount_usd,
+      log: (line) => lines.push(redactor.redact(line)),
+    });
+    for (const line of lines) log(`payment ${request.id}: ${line}`);
+
+    // One ledger row per submit: the amount charged when there was one, null
+    // when a human still has to finish it (unknown is not zero).
+    const charged =
+      outcome.status === "paid" ? (outcome.charged_usd ?? decision.amount_usd) : null;
+    ledger.record({
+      alias: null,
+      domain: request.domain ?? request.vendor,
+      status: null,
+      bytes: 0,
+      cost: charged,
+    });
+
+    const status = outcome.status === "paid" ? "ready" : outcome.status;
+    const settled = requests.update(
+      request.id,
+      { status, reason: outcome.reason },
+      "runner",
+      `payment ${outcome.status}`,
+    );
+    log(
+      `payment ${request.id}: ${outcome.status} (${outcome.reason})` +
+        (charged === null ? ", nothing recorded as charged" : `, $${charged} recorded in the ledger`),
+    );
+    return {
+      submitted: outcome.status === "paid",
+      blocked: false,
+      amount_usd: decision.amount_usd,
+      charged_usd: charged,
+      outcome: outcome.status,
+      reason: outcome.reason,
+      request: view(settled),
+      submitter: payments.id,
+      spend_check: {
+        global_cap_usd: decision.check.global_cap_usd,
+        vendor_cap_usd: decision.check.vendor_cap_usd,
+        month_to_date_usd: decision.check.month_to_date_usd,
+        vendor_to_date_usd: decision.check.vendor_to_date_usd,
+        reason: decision.check.reason,
+      },
+    };
+  }
+
   // --- HTTP --------------------------------------------------------------
 
   const server = http.createServer((req, res) => {
@@ -565,6 +731,60 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
         return;
       }
       sendJson(res, 405, { error: "method_not_allowed" });
+      return;
+    }
+
+    if (route === "/v1/payments" && method === "POST") {
+      const body = await readJson(req);
+      const vendor = typeof body["vendor"] === "string" ? body["vendor"].trim() : "";
+      if (vendor === "") {
+        sendJson(res, 400, { error: "vendor_required" });
+        return;
+      }
+      const amount = typeof body["amount_usd"] === "number" ? body["amount_usd"] : Number.NaN;
+      if (!Number.isFinite(amount) || amount <= 0) {
+        sendJson(res, 400, {
+          error: "amount_required",
+          hint:
+            "A payment needs an exact `amount_usd` greater than 0. An unknown amount is never " +
+            "approved: unknown is not zero.",
+        });
+        return;
+      }
+      const request = createRequest({
+        kind: "payment",
+        vendor,
+        domain: typeof body["domain"] === "string" ? body["domain"] : null,
+        purpose: typeof body["purpose"] === "string" ? body["purpose"] : null,
+        amount_usd: amount,
+        // The request-time check reads the same number the submit-time one will.
+        est_budget_usd: amount,
+        requires_payment: true,
+        tos_url: typeof body["tos_url"] === "string" ? body["tos_url"] : null,
+        data_shared: ["the bound email address", "the card the human enters on the vendor's checkout"],
+        notes: [
+          "The caps are checked now and again immediately before the submit. If a cap has been " +
+            "lowered or the ledger has grown by then, this approval is voided and the human is " +
+            "asked again.",
+        ],
+      });
+      sendJson(res, 200, view(request));
+      return;
+    }
+
+    const submit = /^\/v1\/payments\/([^/]+)\/submit$/.exec(route);
+    if (submit !== null) {
+      if (method !== "POST") {
+        sendJson(res, 405, { error: "method_not_allowed" });
+        return;
+      }
+      const id = decodeURIComponent(submit[1] ?? "");
+      const request = requests.get(id);
+      if (request === undefined) {
+        sendJson(res, 404, { error: "unknown_request", request_id: id });
+        return;
+      }
+      sendJson(res, 200, await submitPayment(request));
       return;
     }
 
@@ -770,6 +990,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       // Extra context an agent may safely see: never a secret, never a cap it
       // could act on.
       kind: request.kind,
+      amount_usd: request.amount_usd,
       asks_human_to_set_caps: request.asks_human_to_set_caps,
       domain_allowlisted: request.domain_allowlisted,
       follow_up_request_id: request.follow_up_id,
@@ -983,6 +1204,14 @@ function approvalPage(request: AccessRequest, policy: SpendPolicy, problem?: str
           ? "unknown (and unknown is not zero)"
           : `$${request.est_budget_usd}`
       }</td></tr>
+      ${
+        request.amount_usd === null
+          ? ""
+          : `<tr><th>Payment amount</th><td><strong>$${request.amount_usd}</strong> — checked
+              against the caps now <em>and again immediately before it is submitted</em>. If a cap
+              is lower or more has been spent by then, this approval is voided and you are asked
+              again.</td></tr>`
+      }
       <tr><th>Terms of service</th><td>${
         request.tos_url === null
           ? "no link recorded in the index — read the vendor's own terms"
