@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import path from "node:path";
+import { realpathSync } from "node:fs";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
@@ -1212,5 +1213,5 @@ export async function main(argv: string[] = process.argv): Promise<void> {
 
 const invokedDirectly =
   process.argv[1] !== undefined &&
-  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+  fileURLToPath(import.meta.url) === realpathSync(process.argv[1]);
 if (invokedDirectly) void main();

@@ -264,12 +264,19 @@ not contain the plaintext secret.
 ## Installing: from source today, npm after release
 
 SkeletonKey is **not published yet**: `package.json` still has `"private": true`
-so it cannot be pushed to the registry by accident. The package name
-**`skeletonkey` is free** on npm — `npm view skeletonkey name` returns `404 Not
-Found`, checked 2026-10-25 — and v0.3 is otherwise publish-ready: `bin` entries
-(`skeletonkey`, `skk`, `skeletonkey-runner`) and a `files` whitelist
-(`dist`, `apis.yaml`, `data/apis`, `data/discovered.example.yaml`, `skills`,
-`docs`, `README.md`, `LICENSE`) are in place.
+so it cannot be pushed to the registry by accident. The tarball includes compiled
+JavaScript and declarations, runtime API catalogs, skills, docs, README and LICENSE;
+raw catalog downloads, build scripts, source maps and tests are excluded.
+
+From a source checkout after `npm install`, the one-line local tarball install is:
+
+```bash
+npm pack && npm install -g ./skeletonkey-0.3.0.tgz
+```
+
+`npm pack` builds fresh output automatically. Use a writable npm global prefix
+(and put its `bin` directory on PATH). This installs `skeletonkey`, `skk` and
+`skeletonkey-runner` without publishing anything.
 
 **After the npm release** (v0.5, per the roadmap), these one-liners are the
 install path (D9):
@@ -1037,7 +1044,8 @@ Smaller things, unscheduled:
 ```bash
 npm install
 npm run build        # tsc -> dist/
-npm test             # builds, then runs vitest
+npm test             # builds, then runs vitest (including the tarball smoke test)
+npm run test:pack    # dry-run, pack, install in a temp prefix, check every bin
 ./scripts/demo.sh    # end-to-end, localhost only
 ```
 

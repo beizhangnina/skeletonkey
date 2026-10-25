@@ -23,12 +23,14 @@
   },
   "main": "./dist/index.js",
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
     "apis.yaml",
-    "data/apis",
+    "data/apis/*.yaml",
+    "data/apis/README.md",
     "data/discovered.example.yaml",
-    "skills",
-    "docs",
+    "skills/**/SKILL.md",
+    "docs/*.md",
     "README.md",
     "LICENSE"
   ],
@@ -37,7 +39,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "skeletonkey": "node --no-warnings dist/cli.js",
-    "pretest": "npm run build"
+    "pretest": "npm run build",
+    "prepack": "node --input-type=module -e 'import { rmSync } from \"node:fs\"; rmSync(\"dist\", { recursive: true, force: true });' && npm run build",
+    "test:pack": "node scripts/check-pack.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
