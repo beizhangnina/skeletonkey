@@ -37,10 +37,17 @@ describe("keys.yaml metadata store", () => {
 
   it("leaks no secret into any file except the dev vault", async () => {
     await initWithKey(home, { secret: SECRET });
-    const leaked = fs
-      .readdirSync(home)
-      .filter((name) => name !== "dev-vault.json")
-      .filter((name) => fs.readFileSync(path.join(home, name)).includes(SECRET));
+    // Walks subdirectories too: `init` also writes the agent config (into a
+    // temp home under here, never the real one).
+    const walk = (dir: string): string[] =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) return walk(full);
+        return [full];
+      });
+    const leaked = walk(home)
+      .filter((file) => path.basename(file) !== "dev-vault.json")
+      .filter((file) => fs.readFileSync(file).includes(SECRET));
     expect(leaked).toEqual([]);
   });
 

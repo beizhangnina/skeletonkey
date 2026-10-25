@@ -36,6 +36,9 @@ export function runCli(
         ...process.env,
         SKELETONKEY_HOME: home,
         SKELETONKEY_ALLOW_TEST_BACKEND: "1",
+        // `skeletonkey init` registers itself with Claude Code and Codex. Keep
+        // that inside the temp home: the suite must never write to the real one.
+        SKELETONKEY_USER_HOME: path.join(home, "fake-user-home"),
         NO_COLOR: "1",
       },
       stdio: ["pipe", "pipe", "pipe"],

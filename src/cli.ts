@@ -7,6 +7,19 @@ import { loadApiIndex, resolveApisPath, validateApisFile } from "./apis.js";
 import { resolveBind, TAILSCALE_SENTINEL } from "./bind.js";
 import { configExists, ensureHome, readConfig, writeConfig } from "./config.js";
 import {
+  applyRegistration,
+  planRegistration,
+  renderDiff,
+  type AgentId,
+  type RegistrationAction,
+} from "./agents/register.js";
+import { engageKillSwitch, killSwitchState, releaseKillSwitch } from "./killswitch.js";
+import { capsUnset, policyPath, readPolicy, setCaps, vendorCap } from "./policy.js";
+import { RequestStore } from "./requests.js";
+import { DEFAULT_RUNNER_PORT, startRunner } from "./runner/server.js";
+import { RunnerClient } from "./runner/client.js";
+import { NoopNotifier } from "./notify.js";
+import {
   findKey,
   normalizeDomain,
   readKeys,
@@ -55,7 +68,7 @@ export function buildProgram(): Command {
       "Local-only vault for your personal API keys, with a header-injecting proxy.\n" +
         "Set SKELETONKEY_HOME to point every command at a different directory.",
     )
-    .version("0.1.0")
+    .version("0.3.0")
     .showHelpAfterError();
 
   program
@@ -70,8 +83,68 @@ export function buildProgram(): Command {
     .option("--op-vault <name>", "1Password vault name (1password backend only)", "Private")
     .option("--bw-folder <name>", "Bitwarden folder name (bitwarden backend only)")
     .option("--force", "overwrite an existing config", false)
+    .option("--no-register", "skip registering the MCP server with Claude Code and Codex")
+    .option("--yes", "do not ask before writing the agent config files", false)
+    .option(
+      "--user-home <dir>",
+      "home directory the agent config files live under (default: your home; used by tests)",
+    )
+    .option("--agent-command <cmd>", "command the agents should run (default: npx)")
     .action(async (options: InitOptions) => {
       await cmdInit(options);
+    });
+
+  program
+    .command("register")
+    .description("register the MCP server + skill with Claude Code and Codex (re-runnable)")
+    .option("--dry-run", "show what would change and write nothing", false)
+    .option("--user-home <dir>", "home directory to register into (default: your home)")
+    .option("--agent-command <cmd>", "command the agents should run (default: npx)")
+    .option("--agent <id>", "only `claude-code` or only `codex`")
+    .action(async (options: RegisterCliOptions) => {
+      await cmdRegister(options);
+    });
+
+  program
+    .command("runner")
+    .description("run the trusted local runner: approvals, spend policy, secure input, secrets")
+    .option("--port <n>", "port to listen on (loopback only)", (value: string) => Number(value))
+    .option("--no-notify", "do not send OS notifications (the URL is still printed)")
+    .action(async (options: RunnerCliOptions) => {
+      await cmdRunner(options);
+    });
+
+  const policy = program.command("policy").description("read or set the spend caps (human only)");
+  policy
+    .command("show", { isDefault: true })
+    .description("print the current caps")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      cmdPolicyShow(options.json);
+    });
+  policy
+    .command("set")
+    .description("set the global monthly cap and/or one vendor cap")
+    .option("--global <usd>", "global monthly cap in USD", (value: string) => Number(value))
+    .option("--vendor <name>", "vendor to cap")
+    .option("--vendor-cap <usd>", "that vendor's cap in USD", (value: string) => Number(value))
+    .action((options: PolicySetOptions) => {
+      cmdPolicySet(options);
+    });
+
+  program
+    .command("requests")
+    .description("list the approval requests agents have raised")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      cmdRequests(options.json);
+    });
+
+  program
+    .command("resume")
+    .description("clear the kill switch (human only)")
+    .action(() => {
+      cmdResume();
     });
 
   program
@@ -113,10 +186,10 @@ export function buildProgram(): Command {
   program
     .command("disable")
     .description("stop the proxy from injecting a key (metadata stays, secret stays in vault)")
-    .argument("<alias>")
-    .action((alias: string) => {
-      setDisabled(alias, true);
-      console.log(`Disabled ${alias}. The proxy will no longer inject its header.`);
+    .argument("[alias]")
+    .option("--all", "kill switch: disable every key, halt the runner, void pending approvals", false)
+    .action(async (alias: string | undefined, options: { all: boolean }) => {
+      await cmdDisable(alias, options.all);
     });
 
   program
@@ -204,6 +277,30 @@ interface InitOptions {
   opVault: string;
   bwFolder?: string;
   force: boolean;
+  /** Commander turns `--no-register` into `register: false`. */
+  register: boolean;
+  yes: boolean;
+  userHome?: string;
+  agentCommand?: string;
+}
+
+interface RegisterCliOptions {
+  dryRun: boolean;
+  userHome?: string;
+  agentCommand?: string;
+  agent?: string;
+}
+
+interface RunnerCliOptions {
+  port?: number;
+  /** `--no-notify` becomes `notify: false`. */
+  notify: boolean;
+}
+
+interface PolicySetOptions {
+  global?: number;
+  vendor?: string;
+  vendorCap?: number;
 }
 
 interface AddOptions {
@@ -305,12 +402,257 @@ async function cmdInit(options: InitOptions): Promise<void> {
   console.log(`  metadata: ${keysPath(home)} (never contains secrets)`);
   console.log(`  ledger:   ${ledgerPath(home)}`);
   console.log(`  proxy:    http://127.0.0.1:${DEFAULT_PROXY_PORT} (edit \`proxy\` in ${configPath(home)})`);
+  console.log(`  policy:   ${policyPath(home)} (caps default to $0 -- a human sets them)`);
+  console.log(
+    `  runner:   start it with \`skeletonkey runner\` (holds the secrets, raises approvals)`,
+  );
   if (isTestOnlyBackend(backend)) {
     console.log(
       "\nWARNING: the `file` backend stores secrets in PLAINTEXT and is test-only. " +
         "Never put a real key in it.",
     );
   }
+
+  if (options.register === false) {
+    console.log(
+      "\nSkipped agent registration (--no-register). Run `skeletonkey register` when you want it.",
+    );
+    return;
+  }
+  await registerAgents({
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+    confirm: options.yes !== true && interactive,
+  });
+}
+
+/**
+ * Writes the Claude Code and Codex config (D8: those two only), after showing
+ * the human exactly what is about to change (§5.1).
+ */
+async function registerAgents(options: {
+  userHome?: string;
+  command?: string;
+  agents?: readonly AgentId[];
+  confirm: boolean;
+  dryRun?: boolean;
+}): Promise<RegistrationAction[]> {
+  const planOptions = {
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.command === undefined ? {} : { command: options.command }),
+    ...(options.agents === undefined ? {} : { agents: options.agents }),
+  };
+  const planned = planRegistration(planOptions);
+  const changes = planned.filter((action) => action.change !== "unchanged");
+
+  console.log("\nAgent registration (Claude Code and Codex only):");
+  for (const action of planned) console.log(renderDiff(action));
+
+  if (changes.length === 0) {
+    console.log("  Nothing to do: both agents are already registered.");
+    return planned;
+  }
+  if (options.dryRun === true) {
+    console.log("  --dry-run: nothing was written.");
+    return planned;
+  }
+  if (options.confirm) {
+    const answer = await promptLine(`Write these ${changes.length} change(s)? [Y/n]: `, "y");
+    if (!/^y(es)?$/i.test(answer)) {
+      console.log("  Skipped. Run `skeletonkey register` later.");
+      return planned;
+    }
+  }
+  const applied = applyRegistration(planOptions);
+  for (const action of applied.filter((item) => item.change !== "unchanged")) {
+    console.log(`  wrote ${action.target}`);
+  }
+  console.log(
+    "  Restart Claude Code / Codex to pick the server up. If it still does not appear, re-run " +
+      "`skeletonkey register` and see the install troubleshooting table in the README.",
+  );
+  return applied;
+}
+
+async function cmdRegister(options: RegisterCliOptions): Promise<void> {
+  const agents =
+    options.agent === undefined
+      ? undefined
+      : ([options.agent] as AgentId[]).filter(
+          (id) => id === "claude-code" || id === "codex",
+        );
+  if (options.agent !== undefined && (agents === undefined || agents.length === 0)) {
+    throw new Error("--agent must be `claude-code` or `codex` (those are the supported agents).");
+  }
+  await registerAgents({
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+    ...(agents === undefined ? {} : { agents }),
+    confirm: false,
+    dryRun: options.dryRun === true,
+  });
+}
+
+async function cmdRunner(options: RunnerCliOptions): Promise<void> {
+  const home = skeletonKeyHome();
+  readConfig(home); // fail early and clearly when `init` has not run
+  const handle = await startRunner({
+    home,
+    port: options.port ?? DEFAULT_RUNNER_PORT,
+    ...(options.notify === false ? { notifier: new NoopNotifier() } : {}),
+  });
+  const policy = readPolicy(home);
+  console.log(`skeletonkey runner listening on ${handle.url}`);
+  console.log(`  approvals:    ${handle.url}/ (localhost only, no token)`);
+  console.log(`  secure input: ${handle.url}/input/<id> (announced by an OS notification)`);
+  console.log(`  agent API:    ${handle.url}/v1/... (needs the token in runner.json)`);
+  console.log(
+    `  caps:         global $${policy.global_monthly_cap_usd}/month` +
+      (capsUnset(policy) ? " -- unset, so the first paid action will ask you to set them" : ""),
+  );
+  console.log(`  allowlist:    ${handle.allowlist.size} vendor domain(s) from the API index`);
+  console.log(`  kill switch:  ${killSwitchState(home).engaged ? "ENGAGED" : "clear"}`);
+  console.log("  secrets stay in this process. No MCP tool and no runner verb can read one.");
+
+  const shutdown = (): void => {
+    void handle.close().then(() => process.exit(0));
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+  // Keep the process alive until a signal arrives.
+  await new Promise<void>(() => {});
+}
+
+function cmdPolicyShow(json: boolean): void {
+  const home = skeletonKeyHome();
+  const policy = readPolicy(home);
+  if (json) {
+    console.log(JSON.stringify({ file: policyPath(home), ...policy }, null, 2));
+    return;
+  }
+  console.log(`policy file: ${policyPath(home)}`);
+  console.log(`global monthly cap: $${policy.global_monthly_cap_usd}`);
+  const vendors = Object.entries(policy.vendor_caps_usd);
+  if (vendors.length === 0) console.log("per-vendor caps:    none set");
+  else printTable(["VENDOR", "CAP (USD)"], vendors.map(([name, cap]) => [name, `$${cap}`]));
+  console.log(`last change by:     ${policy.last_change_by ?? "nobody yet"}`);
+  if (capsUnset(policy)) {
+    console.log(
+      "\nEvery cap is $0, so nothing can be spent. The first paid action raises an approval " +
+        "asking you to set them -- there are no preset numbers.",
+    );
+  }
+  console.log("Agents can never raise these. Only this command and the approval page can.");
+}
+
+function cmdPolicySet(options: PolicySetOptions): void {
+  const home = skeletonKeyHome();
+  if (options.global === undefined && options.vendorCap === undefined) {
+    throw new Error("Pass --global <usd> and/or --vendor <name> --vendor-cap <usd>.");
+  }
+  if ((options.vendor === undefined) !== (options.vendorCap === undefined)) {
+    throw new Error("--vendor and --vendor-cap go together.");
+  }
+  const updated = setCaps(
+    {
+      ...(options.global === undefined ? {} : { global_monthly_cap_usd: options.global }),
+      ...(options.vendor === undefined || options.vendorCap === undefined
+        ? {}
+        : { vendor: options.vendor, vendor_cap_usd: options.vendorCap }),
+    },
+    { by: "cli" },
+    home,
+  );
+  console.log(`Caps written to ${policyPath(home)}.`);
+  console.log(`  global monthly: $${updated.global_monthly_cap_usd}`);
+  if (options.vendor !== undefined) {
+    console.log(`  ${options.vendor}: $${vendorCap(updated, options.vendor)}`);
+  }
+}
+
+function cmdRequests(json: boolean): void {
+  const home = skeletonKeyHome();
+  const requests = RequestStore.open(home).list();
+  if (json) {
+    console.log(JSON.stringify(requests, null, 2));
+    return;
+  }
+  if (requests.length === 0) {
+    console.log("No requests yet. An agent raises one with request_access.");
+    return;
+  }
+  printTable(
+    ["ID", "KIND", "VENDOR", "STATUS", "EST", "CREATED"],
+    requests.map((request) => [
+      request.id,
+      request.kind,
+      request.vendor,
+      request.status,
+      request.est_budget_usd === null ? "-" : `$${request.est_budget_usd}`,
+      request.created,
+    ]),
+  );
+  const pending = requests.filter((request) => request.status === "pending_approval");
+  if (pending.length > 0) {
+    const state = readRunnerStateForHints(home);
+    console.log(
+      `\n${pending.length} pending. Decide them at ` +
+        (state === null ? "the runner's /approve/<id> page (start `skeletonkey runner`)" : `${state}/`),
+    );
+  }
+}
+
+function readRunnerStateForHints(home: string): string | null {
+  const client = RunnerClient.fromHome(home);
+  return client === null ? null : client.url;
+}
+
+async function cmdDisable(alias: string | undefined, all: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  if (!all) {
+    if (alias === undefined) throw new Error("Pass an alias, or --all for the kill switch.");
+    setDisabled(alias, true, home);
+    console.log(`Disabled ${alias}. The proxy will no longer inject its header.`);
+    return;
+  }
+
+  const keys = readKeys(home).keys;
+  for (const key of keys) if (!key.disabled) setDisabled(key.alias, true, home);
+  const state = engageKillSwitch({ reason: "skeletonkey disable --all", by: "cli" }, home);
+
+  // Tell a running runner, so pending approvals are voided now rather than at
+  // its next restart.
+  let voided: unknown = "no runner was running";
+  const client = RunnerClient.fromHome(home);
+  if (client !== null) {
+    try {
+      const result = await client.kill("skeletonkey disable --all");
+      voided = result["voided_requests"] ?? [];
+    } catch {
+      voided = "the runner did not answer; its pending approvals are voided when it next starts";
+    }
+  } else {
+    const store = RequestStore.open(home);
+    const localVoided = store.voidPending("Voided by `skeletonkey disable --all`.");
+    voided = localVoided.map((request) => request.id);
+  }
+
+  console.log(`Kill switch engaged at ${state.at}.`);
+  console.log(`  keys disabled:      ${keys.length}`);
+  console.log(`  pending approvals:  ${JSON.stringify(voided)}`);
+  console.log("  the proxy now answers every call with 403 {\"error\":\"kill_switch\"} locally");
+  console.log("  clear it with `skeletonkey resume` (only a human can).");
+}
+
+function cmdResume(): void {
+  const home = skeletonKeyHome();
+  const before = killSwitchState(home);
+  releaseKillSwitch(home);
+  console.log(
+    before.engaged
+      ? "Kill switch cleared. Keys you disabled stay disabled: re-enable them with `skeletonkey enable <alias>`."
+      : "The kill switch was not engaged; nothing to clear.",
+  );
 }
 
 async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
