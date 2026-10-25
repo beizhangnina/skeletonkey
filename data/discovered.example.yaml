@@ -1,0 +1,192 @@
+# SkeletonKey user-index SEED -- example discovered rows, not a live index.
+#
+# Copy this to $SKELETONKEY_HOME/discovered.yaml (or point SKELETONKEY_DISCOVERED
+# at it) to start with two real, researched rows instead of an empty file. Both
+# were produced by the MCP tools `discover_api` + `propose_entry` on 2026-10-24
+# and every field was read off the URLs in their source_urls.
+#
+# Both say status: unverified here on purpose. In the session that wrote them,
+# nvd-cve-api WAS promoted to verified by a real 2xx through the proxy -- but
+# that proof lives in that session's ledger, not in yours. Make the call
+# yourself and SkeletonKey will promote the row in your home.
+#
+# SkeletonKey local user index -- rows an agent discovered itself.
+#
+# Written by the MCP tool `propose_entry`, read by `find_api` alongside the
+# packaged apis.yaml (which always wins on a name or domain clash). Contains NO
+# secrets: only how an API is reached, how it authenticates, and how it bills.
+#
+# status: unverified  nothing here has been confirmed by a working call. The
+#                     facts came off the pages listed in source_urls.
+# status: verified    a call to this domain through the SkeletonKey proxy came
+#                     back 2xx; promoted_by names the ledger row that did it.
+#
+# Prices obey the same rule as everywhere else: read off the vendor's own page
+# with billing.verified_url set, or left null. Never guessed.
+version: 1
+entries:
+  - name: abuseipdb-check
+    url: https://docs.abuseipdb.com/
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered on 2026-10-24 via discover_api, status unverified. Auth
+      comes from AbuseIPDB's own docs, whose curl examples read `-H \"Key:
+      YOUR_OWN_API_KEY\" -H \"Accept: application/json\"` -- the header is
+      literally `Key`, not Authorization and not x-api-key, and the API also
+      wants `Accept: application/json`, which SkeletonKey does not inject. The
+      API returns an identical 401 (\"Authentication failed. Your API key is
+      either missing, incorrect, or revoked\") whether the Key header is absent
+      or wrong, so a wrong header name here is indistinguishable from a bad key.
+      Rate limits are per day and documented per plan; redistribution terms were
+      NOT reviewed."
+    source: null
+    checked_date: null
+    capabilities:
+      - ip reputation
+      - abuse reports
+      - ip blacklist
+      - blocklist
+      - threat intelligence
+      - abuseipdb
+    domain: api.abuseipdb.com
+    auth_header: Key
+    auth_format: "{key}"
+    base_url: https://api.abuseipdb.com/api/v2
+    signup_url: https://www.abuseipdb.com/register?plan=free
+    requires_card: false
+    human_steps:
+      - Sign up at https://www.abuseipdb.com/register?plan=free (the link the
+        pricing page puts on the free plan), then read the key from the account
+        dashboard -- the docs say "Grab a new API key at from account dashboard"
+        without giving that page's URL, so key_page_url stays null.
+      - www.abuseipdb.com answers HTTP 403 to a fetch with no User-Agent and the
+        /register path 403s even with one, so drive signup with a real browser
+        tool rather than a fetch.
+    billing:
+      model: free_tier+subscription
+      free_tier_note: 'Pricing page: the "Individual" plan is "FREE Forever!" and "No
+        Credit Card Required", with 1,000 IP checks & reports per day, 100 block
+        checks per day, 5 bulk reports per day and a basic blacklist of up to
+        10,000 IPs. Paid plans are monthly subscriptions: Basic $25/mo
+        ($228/year) for 10,000 checks/day, Premium $99/mo ($1,068/year) for
+        50,000 checks/day, Enterprise "Contact Sales". All plans include a free
+        30-day trial.'
+      verified_url: https://www.abuseipdb.com/pricing
+      verified_date: 2026-10-24
+      free_tier_covers_api: true
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.monid.ai/public/v1/providers
+        x402: null
+        price_note: Absent from all 93 providers paged from Monid's public provider list
+          on 2026-10-24.
+      - name: glasser
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.glasser.ai/public/catalog
+        x402: null
+        price_note: Absent from all 105 providers in Glasser's public catalog on
+          2026-10-24.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        x402: null
+        price_note: Flatkey's public catalog is model vendors only; its tool catalog is
+          behind a login.
+    status: unverified
+    source_urls:
+      - https://docs.abuseipdb.com/
+      - https://www.abuseipdb.com/pricing
+      - https://api.abuseipdb.com/api/v2/check
+    discovered_date: 2026-10-25
+  - name: nvd-cve-api
+    url: https://nvd.nist.gov/developers/vulnerabilities
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered on 2026-10-24 via discover_api, status unverified. The
+      auth header was verified against the live API rather than only the docs:
+      `apiKey: not-a-real-key` returns HTTP 404 with the response header
+      `message: Invalid apiKey.`, while `Authorization: Bearer not-a-real-key`
+      is IGNORED and the call succeeds anonymously -- exactly the silent failure
+      a guessed Bearer header produces here. No OpenAPI spec is published
+      (/openapi.json, /swagger.json and /rest/json/cves/2.0/openapi.json all
+      404), and NVD is absent from APIs.guru's 2,529-API list
+      (https://api.apis.guru/v2/list.json). The human docs pages could not be
+      read by fetch: nvd.nist.gov returns Cloudflare 403 to a bare client and an
+      empty Angular shell to a client with a User-Agent, so documented rate
+      limits and ToS were NOT verified and are not recorded."
+    source: null
+    checked_date: null
+    capabilities:
+      - cve lookup
+      - vulnerability data
+      - cvss scores
+      - security advisories
+      - nvd
+      - cpe
+    domain: services.nvd.nist.gov
+    auth_header: apiKey
+    auth_format: "{key}"
+    base_url: https://services.nvd.nist.gov/rest/json/cves/2.0
+    signup_url: https://nvd.nist.gov/developers/request-an-api-key
+    requires_card: false
+    requires_phone: false
+    requires_work_email: false
+    human_steps:
+      - "Request the key at https://nvd.nist.gov/developers/request-an-api-key:
+        NIST emails an activation link to the address given on the form.
+        nvd.nist.gov is a Cloudflare-fronted single-page app, so a fetch tool
+        receives only the app shell -- open the form with a real browser tool,
+        or hand this step to the human."
+      - "No key is needed to begin: the API answers anonymously at a lower rate
+        limit, so a SkeletonKey key is a throughput upgrade rather than an
+        access gate."
+    billing:
+      model: free
+      free_tier_note: "No paid tier exists and no account is needed to start: GET
+        /rest/json/cves/2.0?cveId=CVE-2021-44228 answered HTTP 200 with no
+        credential at all on 2026-10-24. NIST publishes no price page for the
+        API; a key is issued free of charge and, per NVD's own guidance, only
+        raises the request rate. Rate limits were NOT read off the vendor page
+        (see tos_notes) and are therefore not recorded here."
+      verified_url: https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-44228
+      verified_date: 2026-10-24
+      free_tier_covers_api: true
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.monid.ai/public/v1/providers
+        x402: null
+        price_note: Absent from all 93 providers paged from Monid's public provider list
+          on 2026-10-24.
+      - name: glasser
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.glasser.ai/public/catalog
+        x402: null
+        price_note: Absent from all 105 providers in Glasser's public catalog on
+          2026-10-24.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        x402: null
+        price_note: Flatkey's public catalog is model vendors only; its tool catalog is
+          behind a login.
+    status: unverified
+    source_urls:
+      - https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-44228
+      - https://nvd.nist.gov/developers/vulnerabilities
+      - https://nvd.nist.gov/developers/request-an-api-key
+      - https://api.apis.guru/v2/list.json
+    discovered_date: 2026-10-25

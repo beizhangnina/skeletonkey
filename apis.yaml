@@ -26,13 +26,112 @@
 #   source               http(s) URL or null. Where the facts above came from.
 #   checked_date         "YYYY-MM-DD" or null. When a human last verified this row.
 #                        null = never verified; treat every field as unverified.
-#   example              boolean, optional. true for the placeholder rows shipped
-#                        with this repo. Example rows are not real offers and
-#                        must never be treated as pricing data.
+#   example              boolean, optional. true for the demonstration rows
+#                        shipped with this repo: they exist to show the shape of
+#                        the file and give `find_api` something to match, and
+#                        they are not a curated recommendation.
+#                        NOTE: `example: true` is about the ROW, not about the
+#                        `billing` block inside it. Where billing.verified_url
+#                        is set, that model WAS read off the vendor's own page on
+#                        billing.verified_date and may be quoted as such. What an
+#                        example row still never carries is a reviewed
+#                        min_topup or a checked_date -- see the two rules below.
 #   capabilities         list of strings, optional. Free-text tags the MCP
 #                        `find_api` tool matches against, e.g. ["embeddings"].
 #   domain               string, optional. API hostname, so an agent can suggest
 #                        `skeletonkey add --domain <domain>` without guessing.
+#
+# AUTH FIELDS (all optional, all null-when-unknown)
+# -------------------------------------------------
+# These exist so an agent never has to guess how a vendor authenticates. A wrong
+# guess fails as an indistinguishable vendor 401. `null` means nobody checked --
+# it never means "none needed".
+#
+#   auth_header          string or null. Header the vendor documents for the key,
+#                        e.g. "Authorization", "x-api-key". No colon, no spaces.
+#   auth_format          string or null. Header value template; MUST contain the
+#                        {key} placeholder. e.g. "Bearer {key}" or "{key}".
+#                        Requires auth_header to be set too.
+#   base_url             http(s) URL or null. What requests are actually sent to,
+#                        e.g. "https://api.apollo.io/api/v1".
+#   signup_url           http(s) URL or null. Where signup STARTS. Usually not
+#                        the docs root in `url`.
+#   key_page_url         http(s) URL or null. Where the key is created/copied.
+#                        Leave null when that page is behind a login and its URL
+#                        is not documented -- describe it in human_steps instead.
+#   email_only_signup    boolean or null. true = an email address alone finishes
+#                        signup: no card, no phone. Cannot be true alongside
+#                        requires_card or requires_phone.
+#   requires_card        boolean or null. Vendor requires a saved payment card.
+#   requires_phone       boolean or null. Vendor requires phone/SMS verification.
+#   requires_work_email  boolean or null. Vendor requires a work email address,
+#                        so a `+alias` on a generic mailbox may be refused.
+#   human_steps          list of strings or null. Steps only a human can do, in
+#                        the vendor's own terms. request_access turns these into
+#                        explicit human gates in the signup plan.
+#
+# BILLING + ROUTING (optional, verified-or-null)
+# ----------------------------------------------
+# `billing` is how the vendor charges, and `aggregators` is who resells it. The
+# MCP tools turn the two into a {route, reason}: direct when the vendor is
+# pay-as-you-go or its free tier covers the API, through the cheapest aggregator
+# that publishes a per-call price when direct access needs a monthly
+# subscription, or x402 where that exists. A number with no URL behind it is not
+# allowed in either block -- the validator rejects it.
+#
+#   billing:
+#     model                 payg | subscription | free_tier+payg |
+#                           free_tier+subscription | x402 | free, or null.
+#                           null = nobody checked. It never means free.
+#                           `free` means no paid tier exists at all.
+#     free_tier_note        string or null. REQUIRED when model names a free
+#                           tier: say what the free tier actually is, with the
+#                           numbers off the vendor's page -- not its slogan.
+#     verified_url          http(s) URL or null. The vendor's own page the model
+#                           above was read from.
+#     verified_date         "YYYY-MM-DD" or null. Required whenever
+#                           verified_url is set, and vice versa.
+#     free_tier_covers_api  boolean or null. Does the free tier include API
+#                           access? null = not established, and the router then
+#                           refuses to treat the free tier as a usable route.
+#     x402_url              http(s) URL or null. Vendor page documenting that it
+#                           accepts x402 / agentic payment.
+#
+#   aggregators: list of:
+#     name                  monid | glasser | flatkey.
+#     carries               boolean. Does this catalog resell the provider?
+#     per_call_price        number or null, USD. The LOWEST flat per-call (or
+#                           per-run) price the catalog publishes for this
+#                           provider, excluding zero. null = the catalog prices
+#                           it per result or in tiers, so no comparable per-call
+#                           number exists. null is never "free".
+#     price_verified_url    http(s) URL. REQUIRED whenever per_call_price is set.
+#     x402                  boolean or null. Does the catalog accept x402 here?
+#     price_note            string or null. What the number means, or why it is
+#                           null. Carriage for rows that do not state their own
+#                           is inherited from the generated shards' `seen_in`.
+#
+# Re-check the verified_url set with `skeletonkey stale-check`: it re-fetches
+# each page, fingerprints its visible text, and flags changed / unreachable /
+# verified-too-long-ago.
+#
+# DISCOVERED ROWS (written by the agent, not by hand)
+# ---------------------------------------------------
+# `status`, `source_urls`, `discovered_date`, `promoted_date` and `promoted_by`
+# belong to rows the MCP tool `propose_entry` wrote into the LOCAL user index
+# ($SKELETONKEY_HOME/discovered.yaml), not to this file. status is `unverified`
+# on write and becomes `verified` only after a call to that domain through the
+# proxy returns 2xx, with the ledger row recorded in promoted_by.
+#
+# THE GENERATED SHARDS
+# --------------------
+# `find_api` also reads the generated provider index in `data/apis/*.yaml` and
+# merges it with this file. This file wins: a shard row is dropped when a row
+# here has the same name or the same registrable domain. Shard rows carry no
+# auth facts at all (the shards record `auth_type: api_key`, which does not say
+# *which* header), so a vendor worth calling belongs here, with its auth fields
+# filled in. Point `SKELETONKEY_API_SHARDS` at other directories, or set it to
+# `none` to search this file only.
 
 version: 1
 entries:
@@ -77,10 +176,12 @@ entries:
     checked_date: null
     example: true
 
-  # --- The three north-star scenarios from docs/v0.1-acceptance.md -----------
-  # Every factual field below is null: nobody has verified prices or terms for
-  # this repo, and a guessed price is worse than no price. `example: true` means
-  # treat the row as a shape, not as an offer.
+  # --- The north-star scenarios from docs/v0.1-acceptance.md ----------------
+  # `min_topup`, `billing_unit` and `checked_date` are still null on every row
+  # below: nobody has reviewed a whole row, and a guessed price is worse than no
+  # price. What IS verified is each row's `billing` block and its auth fields,
+  # each carrying the vendor page it was read from and the date it was read.
+  # `example: true` means treat the row as a shape, not as a recommendation.
 
   - name: example-x-twitter-api
     url: https://developer.x.com/en/docs/x-api
@@ -96,12 +197,65 @@ entries:
     min_topup: null
     billing_unit: null
     signup_automatable: null
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    base_url: https://api.x.com/2
+    signup_url: https://console.x.com
+    key_page_url: https://console.x.com
+    email_only_signup: false
+    requires_card: true
+    requires_phone: null
+    requires_work_email: false
+    human_steps:
+      - Create an X account, then a project and app in the developer console, and
+        accept the developer terms.
+      - >-
+        Save a payment card and complete a first credit purchase. X's own
+        getting-started docs describe pay-per-use credits; even the advertised
+        free credits are gated on a saved card and a completed purchase.
+    billing:
+      model: payg
+      free_tier_note: >-
+        No free usage allowance. X's own pricing page says the API "uses pay-per-usage
+        pricing with no subscriptions" and bills credits per resource: $0.005 per post
+        read, $0.010 per user read, $0.015 per post created, capped at 3 million post reads
+        per monthly billing cycle. The advertised free credits ($20, plus a match of the
+        first auto-recharge up to $50) require saving an eligible payment card AND
+        completing a first credit purchase, so they are an incentive, not a free tier.
+      free_tier_covers_api: null
+      verified_url: https://docs.x.com/x-api/getting-started/pricing
+      verified_date: "2026-10-24"
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.monid.ai/public/v1/providers
+        price_note: >-
+          Not in Monid's public provider list: all 93 providers were paged from
+          https://api.monid.ai/public/v1/providers on 2026-10-24 and none is this vendor.
+      - name: glasser
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.glasser.ai/public/catalog
+        price_note: >-
+          Not in Glasser's public catalog: all 105 providers in
+          https://api.glasser.ai/public/catalog on 2026-10-24, none is this vendor.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        price_note: >-
+          Flatkey's public catalog is model vendors only (its tool catalog is behind a
+          login), and this vendor is not among them.
     tos_notes: >-
-      Scenario row for "agent needs X/Twitter data". Access, tiers, and whether
-      automated signup is permitted have NOT been reviewed -- X has historically
-      required developer-portal approval, so assume a human is needed. Verify the
-      developer terms yourself before letting an agent drive signup.
-    source: null
+      Scenario row for "agent needs X/Twitter data". The auth fields come from
+      X's own API docs; prices, tiers, and whether automated signup is permitted
+      have NOT been reviewed, and no human has verified this row on a date
+      (checked_date stays null). X's docs now describe self-serve pay-per-use
+      credits rather than the older developer-portal approval, so re-read them
+      before letting an agent drive signup.
+    source: https://docs.x.com/x-api/posts/recent-search
     checked_date: null
     example: true
 
@@ -114,16 +268,82 @@ entries:
       - crawling
       - browser automation
       - data extraction
+      - apify
+      - actors
     access_mode: own-account
     min_topup: null
-    billing_unit: null
+    billing_unit: per compute unit
     signup_automatable: null
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    base_url: https://api.apify.com/v2
+    signup_url: https://console.apify.com/sign-up
+    key_page_url: null
+    email_only_signup: null
+    requires_card: false
+    requires_phone: null
+    requires_work_email: null
+    human_steps:
+      - >-
+        Read the API token from the Integrations page in the Apify Console. Apify's
+        API docs name that page but not its URL, so key_page_url stays null.
+      - >-
+        Decide whether the free plan's $5/month of prepaid usage is enough. Past it the
+        free plan blocks until the next monthly cycle; continuing means a $19/month (or
+        larger) subscription, which is a human's call.
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        Free plan: $0/month with "$5 to spend in Apify Store or on your own Actors" at
+        $0.2 per compute unit, community support, "No credit card required", and no
+        rollover -- the pricing FAQ says a free plan that exceeds its prepaid usage is
+        "blocked until the beginning of the next monthly cycle". Paid plans are monthly
+        and each include that much prepaid usage plus pay-as-you-go overage: Starter
+        $19/month, Scale $199/month at $0.16/CU, Business $999/month at $0.13/CU.
+      free_tier_covers_api: true
+      verified_url: https://apify.com/pricing
+      verified_date: "2026-10-24"
+      x402_url: https://apify.com/pricing
+    aggregators:
+      - name: monid
+        carries: true
+        per_call_price: 0.002
+        price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apify
+        x402: true
+        price_note: >-
+          Monid lists 62 Apify endpoints. Only 2 of them carry a flat PER_CALL price
+          ($0.002); 40 are PER_RESULT ($0.0001-$0.01 per row), 18 are TIERED and 2 are
+          PER_UNIT_MATRIX, so $0.002 is the lowest flat per-call price and NOT a typical
+          cost per scrape. Every endpoint advertises
+          supportedX402Networks ["eip155:8453", "eip155:143"].
+      - name: glasser
+        carries: true
+        per_call_price: 0.001
+        price_verified_url: https://api.glasser.ai/public/catalog
+        x402: null
+        price_note: >-
+          Glasser lists 83 Apify endpoints: 26 priced per run ($0.001 and up, the lowest
+          flat per-call price) and 57 priced per result (from $0.00015). Glasser's catalog
+          says nothing about x402, so that stays null.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        price_note: >-
+          Flatkey's public catalog is model vendors only (its tool catalog is behind a
+          login), and Apify is not among them.
     tos_notes: >-
-      Scenario row for "agent needs web scraping via Apify". Prices, free
-      allowances, and signup automation rules not reviewed. Note that scraping
-      terms belong to the *target* site as well as to Apify; an agent must not
-      assume either is permissive.
-    source: null
+      Scenario row for "agent needs web scraping via Apify". The auth facts come from
+      Apify's own API docs: "Add the token to your request's Authorization header as
+      Bearer <token>" (the `token` query parameter is also accepted and is explicitly
+      called less secure -- do not use it). Billing is verified on Apify's own pricing
+      page; signup automation rules are NOT reviewed. Apify's pricing FAQ answers "Can an
+      AI agent pay for Actor runs without an Apify account?" with "Yes. An autonomous
+      agent with a crypto wallet can pay through the agentic payment protocols x402 and
+      MPP, with no account", which is why billing.x402_url is set. Note that scraping
+      terms belong to the *target* site as well as to Apify; an agent must not assume
+      either is permissive.
+    source: https://docs.apify.com/api/v2
     checked_date: null
     example: true
 
@@ -139,9 +359,239 @@ entries:
     min_topup: null
     billing_unit: null
     signup_automatable: null
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    base_url: https://api.voyageai.com/v1
+    signup_url: https://dash.voyageai.com
+    key_page_url: https://dash.voyageai.com
+    email_only_signup: null
+    requires_card: null
+    requires_phone: null
+    requires_work_email: null
+    human_steps:
+      - >-
+        Sign in to the Voyage dashboard (Auth0 universal login: email or a social
+        provider), then create the key under API keys -> "Create new secret key".
+      - >-
+        Accept the terms, and check on the dashboard whether a card is required
+        before any key is issued -- nobody has confirmed that signup is card-free.
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        Voyage's pricing page: "All pricing is usage-based" and "the first 200 million
+        tokens for voyage-4-large, voyage-4, voyage-4-lite, voyage-context-4 and
+        voyage-code-3, or the first 50 million tokens for voyage-multilingual-2,
+        voyage-finance-2, voyage-law-2 and voyage-code-2, are free for every account".
+        Beyond that it is per-token (voyage-4-lite $0.02 per million, voyage-4 $0.06,
+        voyage-4-large $0.12). Free token credits do NOT apply to the Batch API.
+      free_tier_covers_api: true
+      verified_url: https://docs.voyageai.com/docs/pricing
+      verified_date: "2026-10-24"
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.monid.ai/public/v1/providers
+        price_note: >-
+          Not in Monid's public provider list: all 93 providers were paged from
+          https://api.monid.ai/public/v1/providers on 2026-10-24 and none is this vendor.
+      - name: glasser
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.glasser.ai/public/catalog
+        price_note: >-
+          Not in Glasser's public catalog: all 105 providers in
+          https://api.glasser.ai/public/catalog on 2026-10-24, none is this vendor.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        price_note: >-
+          Flatkey's public catalog is model vendors only (its tool catalog is behind a
+          login), and this vendor is not among them.
     tos_notes: >-
-      Scenario row for "agent needs embeddings via Voyage". Pricing and any free
-      tier not reviewed; min_topup stays null. Terms not reviewed.
-    source: null
+      Scenario row for "agent needs embeddings via Voyage". The auth fields come
+      from Voyage's own API docs. Voyage's pricing page advertises a free token
+      allowance per account, but no price or allowance is asserted here:
+      min_topup stays null and no human has verified this row on a date. Terms
+      not reviewed.
+    source: https://docs.voyageai.com/docs/api-key-and-installation
+    checked_date: null
+    example: true
+
+  # --- Added during the v0.1 dry-run acceptance test (2026-10-24) ------------
+  # Same convention as the rows above: `example: true`, min_topup and
+  # checked_date null. Nobody has verified a price or a terms clause. The only
+  # fact taken from the vendor's own documentation is the auth header name,
+  # recorded in tos_notes because the schema has nowhere else to put it.
+
+  - name: example-apollo-contacts
+    url: https://docs.apollo.io/reference/authentication
+    domain: api.apollo.io
+    capabilities:
+      - contact enrichment
+      - people enrichment
+      - company enrichment
+      - b2b contacts
+      - sales intelligence
+      - apollo
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    auth_header: x-api-key
+    auth_format: "{key}"
+    base_url: https://api.apollo.io/api/v1
+    signup_url: https://app.apollo.io/#/signup
+    key_page_url: null
+    email_only_signup: null
+    requires_card: null
+    requires_phone: null
+    requires_work_email: true
+    human_steps:
+      - >-
+        Decide which address to register. Apollo's people-enrichment reference
+        states that free-account API access requires an account registered with a
+        work email address, so a +alias on a generic mailbox may be refused --
+        that choice is the human's, not the agent's.
+      - >-
+        Create the key in the app under Settings > Integrations > API Keys. That
+        page is behind a login and its URL is not documented, so key_page_url
+        stays null rather than guessing one.
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        A free "Starter" plan exists and "stays free with no time limit" (pricing-page
+        FAQ), and the People Enrichment reference says free-account access to
+        /people/match "Requires an Apollo account registered with a work email address.
+        Additional account eligibility requirements may apply." But the create-an-API-key
+        doc says plainly "Access to Apollo API depends on your Apollo plan. If you need
+        access, upgrade your plan" -- so which endpoints a free account may call is NOT
+        established, and free_tier_covers_api stays null rather than guessing either way.
+        The plan table itself is client-rendered, so no plan price and no free credit
+        allowance could be read off the page; credits reset each billing cycle and do not
+        roll over.
+      free_tier_covers_api: null
+      verified_url: https://www.apollo.io/pricing
+      verified_date: "2026-10-24"
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: true
+        per_call_price: 0.026
+        price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apollo
+        x402: true
+        price_note: >-
+          Monid lists 8 Apollo endpoints: 7 flat PER_CALL ($0.026 for organization and
+          people enrichment, news and company search; $0 for /mixed_people/api_search)
+          and /people/match as TIERED. $0.026 is the lowest non-zero flat per-call price.
+          Every endpoint advertises supportedX402Networks
+          ["eip155:8453", "eip155:143"].
+      - name: glasser
+        carries: true
+        per_call_price: 0.026
+        price_verified_url: https://api.glasser.ai/public/catalog
+        x402: null
+        price_note: >-
+          Glasser lists 10 Apollo endpoints: $0.026 per run for people/match,
+          organizations/enrich, mixed_companies/search and news_articles/search, $0.05 per
+          run for the two by-id lookups, $0.026-$0.027225 per result for the two bulk
+          endpoints, and $0.00 for mixed_people/api_search. Lowest non-zero flat price is
+          $0.026, the same as Monid's.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        price_note: >-
+          Flatkey's public catalog is model vendors only (its tool catalog is behind a
+          login), and Apollo is not among them.
+    tos_notes: >-
+      Scenario row for "agent needs B2B contact data". The auth fields come from
+      Apollo's own auth docs: the key goes in the `x-api-key` header, NOT
+      `Authorization: Bearer`. Prices, credit costs, and whether automated signup
+      is permitted are NOT reviewed, and no human has verified this row on a date.
+    source: https://docs.apollo.io/reference/authentication
+    checked_date: null
+    example: true
+
+  - name: example-dropleads-contacts
+    url: https://dropleads.readme.io
+    domain: api.dropleads.io
+    capabilities:
+      - email finder
+      - phone finder
+      - email verification
+      - lead data
+      - dropleads
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    auth_header: x-api-key
+    auth_format: "{key}"
+    base_url: https://api.dropleads.io
+    signup_url: https://app.dropleads.io/auth/signup
+    key_page_url: null
+    email_only_signup: null
+    requires_card: null
+    requires_phone: null
+    requires_work_email: null
+    human_steps:
+      - >-
+        Read the key from the app dashboard. The docs page for API keys is
+        login-gated ("Log in to see your API keys"), so key_page_url stays null.
+      - >-
+        Confirm which host the endpoint lives on before registering the key. The
+        docs use https://api.dropleads.io while the marketing page shows
+        https://prime.dropleads.io/api/v2; a key registered for api.dropleads.io
+        is NOT injected for prime.dropleads.io.
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        The pricing section of the DropLeads homepage lists a $0/month plan with 100
+        credits, "Rollover: No rollover", "API Access", community support and a "Start
+        Free Plan (no card required)" button. Credit costs on that same table: 0.2 per
+        verified contact, 0.1 per company export, 1 per email-finder lookup, 3 per mobile
+        find, 0.1 per email verify -- so 100 credits is about 500 contacts or 33 mobile
+        numbers. Paid plans are monthly: $29 for 2,000 credits, $49 for 6,000, $99 for
+        16,000, all with rollover. Note the hero copy on the same page quotes "Company
+        0.05" where the pricing table says 0.1; the table is the figure recorded here.
+      free_tier_covers_api: true
+      verified_url: https://www.dropleads.io/#pricing
+      verified_date: "2026-10-24"
+      x402_url: null
+    aggregators:
+      - name: monid
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.monid.ai/public/v1/providers
+        price_note: >-
+          Not in Monid's public provider list: all 93 providers were paged from
+          https://api.monid.ai/public/v1/providers on 2026-10-24 and none is this vendor.
+      - name: glasser
+        carries: false
+        per_call_price: null
+        price_verified_url: https://api.glasser.ai/public/catalog
+        price_note: >-
+          Not in Glasser's public catalog (105 providers,
+          https://api.glasser.ai/public/catalog, 2026-10-24), and absent from the
+          generated shards for the same reason.
+      - name: flatkey
+        carries: false
+        per_call_price: null
+        price_verified_url: https://flatkey.ai/models
+        price_note: >-
+          Flatkey's public catalog is model vendors only (its tool catalog is behind a
+          login), and this vendor is not among them.
+    tos_notes: >-
+      Scenario row for "agent needs an email/phone finder". The auth fields come
+      from DropLeads' own docs: the key goes in the `x-api-key` header (NOT
+      `Authorization: Bearer`). Credits are consumed per lookup and the API
+      answers 402 when they run out. The site advertises "start free, no credit
+      card", but that is marketing copy rather than a pricing page, so
+      requires_card and email_only_signup stay null. Free-tier claims, prices,
+      and terms are NOT reviewed.
+    source: https://dropleads.readme.io/reference/authentication
     checked_date: null
     example: true

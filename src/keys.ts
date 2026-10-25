@@ -2,7 +2,7 @@ import fs from "node:fs";
 import YAML from "yaml";
 import { ensureHome } from "./config.js";
 import { skeletonKeyHome, keysPath } from "./paths.js";
-import type { KeyMeta, KeysFile } from "./types.js";
+import { isUpstreamScheme, type KeyMeta, type KeysFile } from "./types.js";
 
 const HEADER = `# SkeletonKey metadata index -- NO SECRET VALUES ARE STORED HERE.
 # Secrets live in the configured vault (Bitwarden, 1Password, OS keychain, or the
@@ -96,5 +96,10 @@ function coerceKey(raw: unknown): KeyMeta {
     created: str("created"),
     last_used: typeof obj["last_used"] === "string" ? (obj["last_used"] as string) : null,
     disabled: obj["disabled"] === true,
+    // An unreadable scheme is left undefined (decide per host) rather than
+    // guessed: downgrading an upstream to http would send the key in clear.
+    ...(typeof obj["scheme"] === "string" && isUpstreamScheme(obj["scheme"].trim().toLowerCase())
+      ? { scheme: obj["scheme"].trim().toLowerCase() as KeyMeta["scheme"] }
+      : {}),
   };
 }

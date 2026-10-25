@@ -117,6 +117,37 @@ export class Ledger {
     return this.db.prepare(`SELECT * FROM calls ORDER BY id ASC`).all().map(toRow);
   }
 
+  /**
+   * Domains that have answered 2xx at least once, with the most recent such
+   * call. This is what promotes a discovered index row from `unverified` to
+   * `verified`: a row is only trusted once a real call through the proxy worked.
+   */
+  succeededDomains(): Map<string, { status: number; timestamp: string; calls: number }> {
+    const rows = this.db
+      .prepare(
+        `SELECT domain,
+                COUNT(*)       AS calls,
+                MAX(timestamp) AS last_ok,
+                MIN(status)    AS status
+         FROM calls
+         WHERE status >= 200 AND status < 300
+         GROUP BY domain`,
+      )
+      .all();
+    const map = new Map<string, { status: number; timestamp: string; calls: number }>();
+    for (const row of rows) {
+      const domain = row["domain"];
+      const timestamp = row["last_ok"];
+      if (typeof domain !== "string" || domain === "" || typeof timestamp !== "string") continue;
+      map.set(domain.toLowerCase(), {
+        status: Number(row["status"] ?? 200),
+        timestamp,
+        calls: Number(row["calls"] ?? 0),
+      });
+    }
+    return map;
+  }
+
   /** Most recent successful-or-not call timestamp per alias. */
   lastUsedByAlias(): Map<string, string> {
     const rows = this.db

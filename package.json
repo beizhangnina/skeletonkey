@@ -24,6 +24,8 @@
   "files": [
     "dist",
     "apis.yaml",
+    "data/apis",
+    "data/discovered.example.yaml",
     "skills",
     "docs",
     "README.md",

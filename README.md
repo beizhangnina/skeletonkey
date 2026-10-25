@@ -183,6 +183,10 @@ printf '%s' "$MY_KEY" | skeletonkey add some-api \
 printf '%s' "$OTHER_KEY" | skeletonkey add other-api \
   --platform OtherCo --domain api.otherco.example \
   --header X-Api-Key --format '{key}'
+
+# a vendor you really do reach over plain HTTP (a box on your own LAN):
+printf '%s' "$LAB_KEY" | skeletonkey add lab-box \
+  --platform LabBox --domain box.lab.internal --scheme http
 ```
 
 Run the proxy and call through it:
@@ -198,7 +202,8 @@ Then look at what happened:
 skeletonkey list              # metadata, never secrets
 skeletonkey ledger            # recent calls: alias, domain, time, status, bytes, cost
 skeletonkey idle --days 30    # keys you have not used in a month
-skeletonkey disable old-api   # stop injecting, keep the metadata and the secret
+skeletonkey disable old-api   # stop injecting: the proxy now answers 403 key_disabled itself
+skeletonkey stale-check        # re-read every verified price page and flag what moved
 ```
 
 ### See it work without any real key
@@ -240,6 +245,44 @@ client = OpenAI(base_url="http://127.0.0.1:8787/api.openai.com/v1", api_key="unu
 Leave the client's API-key field blank or set it to a dummy value. The proxy
 strips client-supplied auth headers before injecting the real one, so a dummy
 cannot leak through and cannot override your key.
+
+### Which scheme the proxy uses upstream
+
+Reverse mode has to decide whether `/<domain>/<path>` means `https://<domain>`
+or `http://<domain>`. It is decided per host, most specific rule first:
+
+1. **The key's own scheme**, recorded with `skeletonkey add <alias> --scheme http`
+   (or `register_key(..., scheme: "http")`). Use it only for a vendor that really
+   is plain HTTP — your key goes into that request.
+2. **The global `--upstream-scheme http|https`** flag, when you pass one. It
+   forces the scheme for every host, and exists so older setups keep working.
+3. **`http` for a loopback host** — `localhost`, `127.0.0.0/8`, `::1`. Nothing
+   leaves the machine, and a local test server speaking HTTPS is the rare case.
+4. **`https` otherwise.**
+
+So a local echo server on `127.0.0.1:9000` works with no flags at all, while
+`api.vendor.com` is still reached over TLS. `skeletonkey list` shows the scheme
+per key, with a `*` when it was decided per host rather than recorded on the key.
+
+### Disabled keys are refused locally
+
+`skeletonkey disable <alias>` (or the `disable` MCP tool) does not merely stop
+injection. The proxy answers calls to that key's domain itself:
+
+```json
+HTTP/1.1 403 Forbidden
+{
+  "error": "key_disabled",
+  "alias": "voyage-personal",
+  "domain": "api.voyageai.com",
+  "hint": "The key voyage-personal for api.voyageai.com is disabled, so SkeletonKey did not inject it and did not forward this request. A human can re-enable it with `skeletonkey enable voyage-personal`."
+}
+```
+
+Nothing is sent upstream, so nothing can be charged and the caller's own
+credential cannot leak to the vendor in place of yours. The refusal is recorded
+in the ledger with status `403`, and the agent is told to ask a human for
+`skeletonkey enable <alias>` rather than work around it.
 
 ### Forward-proxy mode — plain HTTP upstreams only
 
@@ -328,13 +371,15 @@ its body into your `AGENTS.md`, or point to it from there.
 
 | Tool | Returns |
 | --- | --- |
-| `find_api(capability)` | Matching `apis.yaml` entries: how each is paid for, whether signup is automatable, and whether you already hold a key. Unknown prices are `null`. |
+| `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
-| `request_access(platform, reason, est_budget)` | Either `has_key: true` with the proxy URL to use, or a signup plan whose final step is **human confirms**. |
-| `register_key(alias, platform, domain)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. |
+| `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or a signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
+| `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
+| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
+| `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
 | `ledger(alias?)` | Recent calls and a spend summary. `cost_usd: null` means unknown, not zero. |
-| `disable(alias)` | Stops injection. The secret stays in the vault; only a human can re-enable it. |
+| `disable(alias)` | Stops injection **and** makes the proxy refuse calls to that domain locally with `403 {"error": "key_disabled"}`. The secret stays in the vault; only a human can re-enable it. |
 
 The skill file tells the agent the surrounding rules: check SkeletonKey before
 hitting any API; if there is no key, use **its own** computer-use/browser tool
@@ -478,14 +523,15 @@ editing the config and restarting.
 | Command | What it does |
 | --- | --- |
 | `skeletonkey init` | Creates `SKELETONKEY_HOME`, records the dedicated email and vault backend. `--email`, `--backend`, `--op-vault`, `--bw-folder`, `--force`. Defaults to `bitwarden`. |
-| `skeletonkey add <alias>` | Stores a secret in the vault and its metadata in `keys.yaml`. `--platform`, `--domain` (required), `--header`, `--format`, `--stdin`. |
-| `skeletonkey list` | Shows all keys, their domains, state, and last use. `--json`. |
+| `skeletonkey add <alias>` | Stores a secret in the vault and its metadata in `keys.yaml`. `--platform`, `--domain` (required), `--header`, `--format`, `--scheme http\|https` (per-key upstream scheme), `--stdin`. |
+| `skeletonkey list` | Shows all keys, their domains, upstream scheme, state, and last use. `--json`. |
 | `skeletonkey idle --days N` | Keys with no recorded use in N days (never-used keys always appear). `--json`. |
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
-| `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https`. |
+| `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
 | `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret. |
 | `skeletonkey ledger` | Prints recent calls. `--limit`, `--json`. |
-| `skeletonkey apis validate [file]` | Validates `apis.yaml` against the documented schema. |
+| `skeletonkey apis validate [file]` | Validates `apis.yaml` (or any index file, including `discovered.yaml`) against the documented schema. |
+| `skeletonkey stale-check` | Re-fetches every `billing.verified_url` / `price_verified_url` in the index, fingerprints each page's visible text, and flags **changed**, **unreachable**, and verified-too-long-ago rows. `--max-age-days` (default 90), `--only <name>`, `--no-fetch` (dates only), `--json`. Exits non-zero when a page moved or stopped answering. |
 
 Environment:
 
@@ -496,6 +542,9 @@ Environment:
 | `SKELETONKEY_PASSPHRASE` | Passphrase for the `encrypted-file` backend. Prompts if unset and a terminal is available. |
 | `SKELETONKEY_GATEWAY_TOKEN` | Shared gateway token, instead of putting it in `config.yaml`. |
 | `SKELETONKEY_APIS` | Path to an `apis.yaml` to use instead of the packaged one (a copy in `SKELETONKEY_HOME` is also picked up automatically). |
+| `SKELETONKEY_API_SHARDS` | Directories of generated provider shards to merge into the index, separated by the platform path separator. `none` searches `apis.yaml` only. Default: `$SKELETONKEY_HOME/apis.d` if present, then the packaged `data/apis`. |
+| `SKELETONKEY_DISCOVERED` | Path to the local user index that `propose_entry` writes and `find_api` reads. Default `$SKELETONKEY_HOME/discovered.yaml`. |
+| `SKELETONKEY_STALE_DAYS` | How old a verified fact may be before `find_api`, `request_access` and `stale-check` warn about it. Default `90`. A `max_age_days` argument on the tool, or `--max-age-days` on `stale-check`, wins over it. |
 | `SKELETONKEY_ALLOW_TEST_BACKEND` | Permits the plaintext `file` backend. Only the test suite and `scripts/demo.sh` should set this. |
 | `BW_SESSION` | Bitwarden session, from `bw unlock --raw`. Required by the `bitwarden` backend. |
 
@@ -525,14 +574,221 @@ for that alias, so `skeletonkey idle` keeps working even if one of the two is re
 A hand-maintained index of APIs and how they are paid for: `name`, `url`,
 `access_mode` (`x402` | `intermediary` | `own-account` | `byok`), `min_topup`,
 `billing_unit`, `signup_automatable`, `tos_notes`, `source`, `checked_date`, plus
-optional `capabilities` (the tags `find_api` matches) and `domain`. The full
+optional `capabilities` (the tags `find_api` matches), `domain`, the auth fields
+below, and the `billing` / `aggregators` blocks that drive routing. The full
 schema is documented in comments at the top of the file and enforced by
 `skeletonkey apis validate`.
 
+### How `find_api` matches a capability
+
+Matching is **whole-word**, scored, and ranked — never substring. A substring
+matcher is worse than useless here: `"zzz-vendor-not-in-any-index"` used to
+return 41 providers, because `any` is inside `comp**any**`, and `"CVE lookup"`
+returned car auctions and phone-number tools, because the word `lookup` turns up
+in half the descriptions in the index.
+
+What happens to a query:
+
+1. **It is split into words and lightly stemmed**, on both sides, so `scrape`
+   finds `scraping` and `tweets` finds `tweet`.
+2. **Generic words are dropped** — `api`, `data`, `search`, `lookup`, `platform`,
+   `free`, `the`, `for`, `any`, … The response lists them as `ignored_terms`. A
+   query made of nothing *but* generic words (`"any data api"`) returns **no
+   matches** and says why, rather than returning a third of the index.
+3. **What is left is scored by where it matched**: the vendor's name or API
+   domain is strong evidence (3), a short capability tag is good evidence (2), a
+   word inside a prose description is weak evidence (1), and matching the whole
+   query as an exact tag adds a bonus.
+4. **A row is returned** only if it matched at least half the query's words, or
+   matched the vendor's own name or domain. Results come back **best score
+   first**; ties keep index order, so the hand-written `apis.yaml` row still
+   arrives ahead of the generated shard row for the same vendor.
+
+Each match carries its own `match_score` and `matched_terms`. A genuine miss
+returns `match_count: 0` — which is the signal to call `discover_api`, not to
+invent a vendor.
+
+The merged index (`apis.yaml` + every shard + your discovered rows) is **parsed
+once and cached**, keyed by the file list plus each file's mtime and size, so
+repeated tool calls in one agent turn do not re-parse ~180 rows of YAML. Editing
+any of those files — including `propose_entry` writing a new row — is picked up
+on the very next call.
+
+### Auth fields
+
+Each row can also record **how the vendor authenticates**, so an agent never has
+to guess: `auth_header` (`Authorization`, `x-api-key`, …), `auth_format` (a
+template containing `{key}`, e.g. `Bearer {key}` or `{key}`), `base_url`,
+`signup_url` (where signup starts — usually not the docs root in `url`),
+`key_page_url`, and the signup gates `email_only_signup`, `requires_card`,
+`requires_phone`, `requires_work_email`, plus `human_steps` for anything only a
+person can do.
+
+`request_access` returns these, together with ready-made `register_key`
+arguments and an explicit `human_gates` list, and `register_key` defaults its
+header and format to what the index records for that domain instead of always
+`Authorization: Bearer {key}`. That default was wrong for every vendor that uses
+`x-api-key`, and a wrong header fails as a vendor `401` indistinguishable from a
+bad key. A `null` auth field means **nobody checked** — it never means "none
+needed", and the tools say so in their output.
+
+### Billing and routing
+
+Each row can record **how the vendor charges**, and who resells it:
+
+```yaml
+billing:
+  model: free_tier+payg          # payg | subscription | free_tier+payg
+                                 # | free_tier+subscription | x402 | free | null
+  free_tier_note: >-             # what the free tier IS, in the vendor's numbers
+    the first 200 million tokens ... are free for every account
+  free_tier_covers_api: true     # true | false | null -- does it cover the API?
+  verified_url: https://docs.voyageai.com/docs/pricing
+  verified_date: "2026-10-24"
+  x402_url: null                 # vendor page documenting x402, if any
+aggregators:
+  - name: glasser                # monid | glasser | flatkey
+    carries: true
+    per_call_price: 0.001        # lowest flat per-call price, USD, or null
+    price_verified_url: https://api.glasser.ai/public/catalog
+    x402: null
+    price_note: >-
+      26 endpoints priced per run from $0.001; 57 priced per result ...
+```
+
+The validator refuses the shapes that let an unverified claim pass for a
+verified one: a `verified_date` without a `verified_url` (or the reverse), a
+free-tier model that does not say what the free tier is, a `per_call_price`
+with no `price_verified_url`, and a price on a catalog whose `carries` is
+`false`. `model: null` means nobody checked — it never means free, and
+`per_call_price: null` means that catalog publishes no comparable per-call
+price, not that the call is free.
+
+`find_api` and `request_access` turn the two blocks into a **`{route, reason}`**:
+
+| `route` | When |
+| --- | --- |
+| `direct` | The vendor is pay-as-you-go, is free outright, or its free tier verifiably covers the API (`free_tier_covers_api: true`). Also whenever a key is already in the vault. |
+| `aggregator:<name>` | Direct access needs a **monthly subscription**, and this catalog resells the vendor per call at a verified price. Cheapest verified price wins; a tie breaks by catalog order and the reason says so. |
+| `x402` | The vendor is an x402 endpoint, documents accepting x402 on its own page, or an aggregator accepts x402 for it — payable per call from a wallet, with no account. |
+| `unknown` | No billing model is recorded. |
+
+The reason always carries the evidence (which page, read on which date), and
+contains the literal words **`price unverified`** whenever no verified price
+backs the route. Every route the router did not pick is listed in
+`alternatives`, so the subscription it skipped and the x402 path it noticed stay
+visible. The route is a recommendation about money only: it never overrides a
+human gate, and an `aggregator:` route still means somebody has to hold an
+account with that aggregator.
+
+Carriage for a row that does not state its own is **inherited** from the
+generated shards: the shards record `seen_in: [glasser, monid]` per provider, so
+a hand-written row that displaced a shard row keeps what the catalogs knew
+(carriage only — the shards publish no prices, so `per_call_price` stays `null`).
+
+### Keeping verified prices honest: `stale-check`
+
+A `verified_url` is a promise that somebody read a number off that page on a
+date. Pages change silently, which is how an index starts lying.
+
+```bash
+skeletonkey stale-check                 # re-fetch everything, compare, exit 1 if anything moved
+skeletonkey stale-check --no-fetch      # dates only, no network
+skeletonkey stale-check --only apollo --json
+```
+
+Each URL is fetched **once** however many rows cite it, and fingerprinted over
+its *visible text* — scripts, styles, tags and machine-generated timestamps
+stripped — so a rotated token or a rebuilt page does not cry wolf while a price
+change still does. Findings are `ok`, `new` (first fingerprint), `changed`,
+`unreachable`, `old` (verified outside `--max-age-days`), or `undated`.
+`changed` and `unreachable` exit non-zero; `old` is a warning, because the facts
+may still be right. Fingerprints live in `$SKELETONKEY_HOME/stale-check.json`.
+The fetcher identifies itself with a descriptive `User-Agent` — some vendors
+(`nvd.nist.gov`, `www.abuseipdb.com`) answer `403` to an anonymous client.
+
+### Staleness warnings in the tools
+
+`stale-check` is the thing you run; the warning is what an agent sees without
+running anything. Every `find_api` match carries a `freshness` block, and
+`request_access` adds a `staleness_warning` for the row it is about to
+recommend:
+
+```json
+"freshness": {
+  "checked_date": "2025-02-01",
+  "checked_age_days": 631,
+  "billing_verified_date": "2025-02-01",
+  "billing_age_days": 631,
+  "max_age_days": 90,
+  "stale": true,
+  "warnings": [
+    "checked_date is 2025-02-01, 631 days ago -- older than the 90-day window. Re-verify the row (`skeletonkey stale-check`) before trusting its facts.",
+    "billing.verified_date is 2025-02-01, 631 days ago -- older than the 90-day window. ..."
+  ]
+}
+```
+
+A row is flagged when `checked_date` or `billing.verified_date` is older than
+the window (default **90** days; set `SKELETONKEY_STALE_DAYS`, or pass
+`max_age_days` to either tool), **or** when the date is missing altogether on a
+row that presents itself as real. Rows that are honest about what they are do
+not nag: an `example: true` placeholder and a discovered row still marked
+`status: unverified` are exempt, because they already say so in their own field.
+
+### Discover-on-miss
+
+When `find_api` misses, an agent must not invent a vendor, a header, or a price.
+`discover_api(capability)` returns the research recipe instead — vendor docs for
+the exact auth header, the vendor's pricing page for the billing model, an
+OpenAPI/Swagger spec if one exists, [APIs.guru](https://api.apis.guru/v2/list.json),
+the signup and key pages, and the aggregator catalogs for carriage — with the
+field each source fills and the rules that apply. The agent does the research
+with its own tools, then calls `propose_entry`.
+
+Proposed rows go to a **local user index** (`$SKELETONKEY_HOME/discovered.yaml`,
+or `SKELETONKEY_DISCOVERED`), never into the packaged `apis.yaml`, and they are
+written `status: unverified` whatever the caller passes. **An agent cannot
+verify its own research.** A row becomes `status: verified` only when a call to
+its domain through the proxy returns `2xx`; the next `find_api` or
+`request_access` promotes it and records the ledger row that earned it in
+`promoted_by`:
+
+```yaml
+status: verified
+promoted_date: 2026-10-25
+promoted_by: "ledger: 200 from services.nvd.nist.gov at 2026-10-25T00:32:38.284Z"
+```
+
+`propose_entry` also refuses a row with no `source_urls`, a price with no URL
+behind it, a name or domain already covered by a reviewed `apis.yaml` row, and
+any field that looks like a credential — record the header *name* and the
+template (`Bearer {key}`), never a value.
+
+[`data/discovered.example.yaml`](data/discovered.example.yaml) holds two real
+discoveries made this way (the NVD CVE API and AbuseIPDB); copy it to
+`$SKELETONKEY_HOME/discovered.yaml` to start from them. Both ship `unverified`:
+the proof belongs to the home that made the call.
+
+### The generated shards
+
+`find_api` and `request_access` search `apis.yaml` **merged with** the generated
+provider index in [`data/apis/*.yaml`](data/apis/README.md) (163 providers across
+26 category shards, machine-built from three aggregator catalogs). `apis.yaml`
+wins: a shard row is dropped when a row in `apis.yaml` has the same name or the
+same registrable domain, so the hand-written row — the one that knows the auth
+header — is what an agent sees. Shard rows carry no auth facts and no API domain,
+because the shards record `auth_type: api_key` (which does not say *which*
+header) and the vendor's homepage (which is not the API host); each row is tagged
+`index_origin: shard` so the difference is visible. Point
+`SKELETONKEY_API_SHARDS` somewhere else, or set it to `none`, to change that.
+
 Two rules, enforced by tests:
 
-- **Unknown prices are `null`.** Never a guess, never "about $5". `min_topup: null` means nobody has checked.
-- **Unverified rows have `checked_date: null`.** A date means a human looked at the source on that day.
+- **Unknown prices are `null`.** Never a guess, never "about $5". A row with `checked_date: null` has been checked by nobody, so it may not claim a `min_topup` at all.
+- **A verified row ships its evidence.** A `checked_date` means a human (or a generated catalog read) looked at the source on that day, so the row must name that `source` URL — and any `min_topup` it does claim must come with the `billing_unit` that makes the number mean something. Verified rows *are* allowed here; what is not allowed is a number with nothing behind it.
+
+Both rules are enforced across the whole merged index, not just `apis.yaml`.
 
 The entries shipped in this repo are all marked `example: true`, including the
 three that back the scenarios in
@@ -545,7 +801,7 @@ offers and contain no verified prices.**
 
 - **Payments.** Per-key virtual cards (one merchant lock per key, low limits, so a compromised or forgotten key cannot drain anything) and native [x402](https://x402.org) support, so the proxy can answer a `402` with a payment rather than needing an account at all. The card itself stays in your own vault; SkeletonKey code never handles the number. Includes real cost attribution in the ledger instead of today's mostly-`NULL` column.
 - **Assisted signup, further along.** v0.1 produces the plan and stores the result; the agent's own browser and email do the work. Next: filling in `signup_automatable` from verified terms, and a dry-run mode that shows exactly what is about to be agreed to and paid. A human presses the last button. Always.
-- **Weekly discovery scan.** A local job that refreshes `apis.yaml` — new APIs, changed prices, changed terms — filling in `source` and `checked_date` and flagging rows that have gone stale. Still `null` for anything it cannot verify.
+- **Weekly discovery scan.** `skeletonkey stale-check` already re-reads every verified price page and flags what moved, and `discover_api`/`propose_entry` already add vendors the index was missing. Next: running both on a schedule, and filling in `source` and `checked_date` from a human review step. Still `null` for anything it cannot verify.
 - **Rotation and expiry.** `skeletonkey rotate <alias>` against providers with a key-management API, plus warnings on keys older than a chosen age.
 - **Per-key budgets.** Decline at the proxy when an alias passes a spend or call-count ceiling, instead of finding out from a bill.
 - **Smaller things.** `skeletonkey remove <alias>` (vault plus metadata), ledger export to CSV, `x402`-aware retry, request-scoped tokens so one agent run cannot reuse the proxy later.

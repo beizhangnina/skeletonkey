@@ -3,7 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
-import { resolveApisPath, validateApisFile } from "./apis.js";
+import { loadApiIndex, resolveApisPath, validateApisFile } from "./apis.js";
 import { resolveBind, TAILSCALE_SENTINEL } from "./bind.js";
 import { configExists, ensureHome, readConfig, writeConfig } from "./config.js";
 import {
@@ -18,7 +18,16 @@ import { openLedger } from "./ledger.js";
 import { configPath, skeletonKeyHome, keysPath, ledgerPath } from "./paths.js";
 import { promptLine, readSecret } from "./prompt.js";
 import { startMcpServer } from "./mcp.js";
-import { startProxy } from "./proxy.js";
+import { startProxy, upstreamSchemeFor } from "./proxy.js";
+import {
+  DEFAULT_STALE_DAYS,
+  httpFetcher,
+  readStaleCache,
+  runStaleCheck,
+  staleCachePath,
+  writeStaleCache,
+  type StaleFinding,
+} from "./stale.js";
 import { silenceSqliteExperimentalWarning } from "./quiet.js";
 import { tailscaleIPv4 } from "./tailscale.js";
 import {
@@ -28,8 +37,10 @@ import {
   isTestOnlyBackend,
   resolveBackendId,
   type BackendId,
+  UPSTREAM_SCHEMES,
   type Config,
   type KeyMeta,
+  type UpstreamScheme,
 } from "./types.js";
 import { createVault, testBackendAllowed } from "./vault/index.js";
 
@@ -71,6 +82,12 @@ export function buildProgram(): Command {
     .requiredOption("-d, --domain <domain>", "destination domain the key is for")
     .option("--header <name>", "header to inject", DEFAULT_HEADER)
     .option("--format <template>", "header value template containing {key}", DEFAULT_FORMAT)
+    .addOption(
+      new Option(
+        "--scheme <scheme>",
+        "scheme the proxy uses for this domain (default: https, or http for a loopback host)",
+      ).choices([...UPSTREAM_SCHEMES]),
+    )
     .option("--stdin", "always read the secret from stdin", false)
     .action(async (alias: string, options: AddOptions) => {
       await cmdAdd(alias, options);
@@ -125,9 +142,11 @@ export function buildProgram(): Command {
     .option("--allow-all-interfaces", "permit binding 0.0.0.0 / :: (not recommended)", false)
     .option("--insecure-no-token", "run gateway mode with no shared token", false)
     .addOption(
-      new Option("--upstream-scheme <scheme>", "scheme for /<domain>/<path> requests")
-        .choices(["https", "http"])
-        .default("https"),
+      new Option(
+        "--upstream-scheme <scheme>",
+        "force the scheme for every /<domain>/<path> request (default: per key, " +
+          "then http for loopback hosts, then https)",
+      ).choices([...UPSTREAM_SCHEMES]),
     )
     .action(async (options: ProxyCliOptions) => {
       await cmdProxy(options);
@@ -158,7 +177,25 @@ export function buildProgram(): Command {
       cmdApisValidate(file);
     });
 
+  program
+    .command("stale-check")
+    .description("re-fetch every billing/pricing verified_url in the index and flag what moved")
+    .option("--max-age-days <n>", "flag rows verified longer ago than this", (value: string) => Number(value), DEFAULT_STALE_DAYS)
+    .option("--only <name>", "limit to index rows whose name contains this")
+    .option("--no-fetch", "skip the network and report recorded dates only")
+    .option("--json", "machine-readable output", false)
+    .action(async (options: StaleCliOptions) => {
+      await cmdStaleCheck(options);
+    });
+
   return program;
+}
+
+interface StaleCliOptions {
+  maxAgeDays: number;
+  only?: string;
+  fetch: boolean;
+  json: boolean;
 }
 
 interface InitOptions {
@@ -174,6 +211,7 @@ interface AddOptions {
   domain: string;
   header: string;
   format: string;
+  scheme?: UpstreamScheme;
   stdin: boolean;
 }
 
@@ -185,7 +223,7 @@ interface ProxyCliOptions {
   token?: string;
   allowAllInterfaces: boolean;
   insecureNoToken: boolean;
-  upstreamScheme: "http" | "https";
+  upstreamScheme?: UpstreamScheme;
 }
 
 async function cmdInit(options: InitOptions): Promise<void> {
@@ -300,6 +338,7 @@ async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
   }
 
   const existing = findKey(alias, home);
+  const scheme = options.scheme ?? existing?.scheme;
   const meta: KeyMeta = {
     alias,
     platform: options.platform,
@@ -309,12 +348,20 @@ async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
     created: existing?.created ?? new Date().toISOString(),
     last_used: existing?.last_used ?? null,
     disabled: existing?.disabled ?? false,
+    ...(scheme === undefined ? {} : { scheme }),
   };
   upsertKey(meta, home);
 
   console.log(`Stored secret for ${alias} in ${vault.location}.`);
   console.log(`Metadata recorded in ${keysPath(home)} (${secret.length} chars of secret NOT written there).`);
   console.log(`The proxy will send: ${meta.header}: ${meta.format.replace("{key}", "<secret>")} -> ${domain}`);
+  console.log(
+    `Upstream scheme:     ${
+      meta.scheme === undefined
+        ? `${upstreamSchemeFor(domain, meta)} (decided per host; override with --scheme)`
+        : `${meta.scheme} (recorded on this key)`
+    }`,
+  );
 }
 
 function cmdList(json: boolean): void {
@@ -335,16 +382,18 @@ function cmdList(json: boolean): void {
     return;
   }
   printTable(
-    ["ALIAS", "PLATFORM", "DOMAIN", "HEADER", "STATE", "LAST USED"],
+    ["ALIAS", "PLATFORM", "DOMAIN", "HEADER", "SCHEME", "STATE", "LAST USED"],
     rows.map((row) => [
       row.alias,
       row.platform,
       row.domain,
       row.header,
+      row.scheme ?? `${upstreamSchemeFor(row.domain, row)}*`,
       row.disabled ? "disabled" : "enabled",
       row.last_used ?? "never",
     ]),
   );
+  console.log("* scheme decided per host (no --scheme recorded on the key).");
 }
 
 function cmdIdle(days: number, json: boolean): void {
@@ -448,7 +497,7 @@ async function cmdProxy(options: ProxyCliOptions): Promise<void> {
     port,
     host: decision.host,
     home,
-    upstreamScheme: options.upstreamScheme,
+    ...(options.upstreamScheme === undefined ? {} : { upstreamScheme: options.upstreamScheme }),
     token,
     requireToken: decision.requireToken,
   });
@@ -458,7 +507,13 @@ async function cmdProxy(options: ProxyCliOptions): Promise<void> {
   if (decision.source === "tailscale") {
     console.log(`  bind:           ${decision.host} (resolved from \`tailscale ip -4\`)`);
   }
-  console.log(`  reverse mode:   curl ${handle.url}/<domain>/<path>  (upstream scheme: ${options.upstreamScheme})`);
+  console.log(
+    `  reverse mode:   curl ${handle.url}/<domain>/<path>  (upstream scheme: ${
+      options.upstreamScheme === undefined
+        ? "per key, then http for loopback, else https"
+        : `${options.upstreamScheme} -- forced for every host`
+    })`,
+  );
   console.log(`  forward proxy:  export HTTP_PROXY=${handle.url}  (plain HTTP upstreams only)`);
   console.log(`  forward proxy:  HTTPS_PROXY is NOT supported -- CONNECT tunnels cannot be injected`);
   console.log(
@@ -502,6 +557,87 @@ function cmdApisValidate(file: string): void {
   const examples = entries.filter((entry) => entry.example === true).length;
   const unknownPrice = entries.filter((entry) => entry.min_topup === null).length;
   console.log(`${file}: valid -- ${entries.length} entries (${examples} example, ${unknownPrice} with unknown min_topup)`);
+}
+
+/**
+ * Re-reads the pages the index claims its prices came from. Exit code 1 when
+ * something needs a human: a page moved, or stopped answering. "Verified N days
+ * ago" is a warning, not a failure -- the facts may still be right.
+ */
+async function cmdStaleCheck(options: StaleCliOptions): Promise<void> {
+  const home = skeletonKeyHome();
+  const index = loadApiIndex({ home });
+  const cacheFile = staleCachePath(home);
+  const result = await runStaleCheck({
+    entries: index.entries,
+    cache: readStaleCache(cacheFile),
+    fetchUrl: options.fetch ? httpFetcher() : null,
+    maxAgeDays: options.maxAgeDays,
+    ...(options.only === undefined ? {} : { only: options.only }),
+  });
+  if (options.fetch) writeStaleCache(cacheFile, result.cache);
+
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          index_files: index.files.length,
+          entries_checked: index.entries.length,
+          urls_checked: result.findings.length,
+          fetched: result.fetched,
+          max_age_days: options.maxAgeDays,
+          cache_file: cacheFile,
+          counts: result.counts,
+          needs_attention: result.needs_attention,
+          findings: result.findings,
+        },
+        null,
+        2,
+      ),
+    );
+  } else if (result.findings.length === 0) {
+    console.log(
+      "stale-check: no verified_url anywhere in the index" +
+        (options.only === undefined ? "" : ` matching ${JSON.stringify(options.only)}`) +
+        " -- nothing to re-check. A row with no verified_url is unverified by definition.",
+    );
+  } else {
+    printTable(
+      ["status", "entry", "field", "age", "http", "url"],
+      result.findings.map((finding: StaleFinding) => [
+        finding.status.toUpperCase(),
+        finding.entry,
+        finding.field,
+        finding.age_days === null ? "-" : `${finding.age_days}d`,
+        finding.http_status === null ? "-" : String(finding.http_status),
+        finding.url,
+      ]),
+    );
+    console.log("");
+    for (const finding of result.findings) {
+      if (finding.status === "ok") continue;
+      console.log(`${finding.status.toUpperCase()}  ${finding.entry} ${finding.field}: ${finding.detail}`);
+    }
+    const parts = Object.entries(result.counts)
+      .filter(([, count]) => count > 0)
+      .map(([status, count]) => `${count} ${status}`);
+    console.log("");
+    console.log(
+      `stale-check: ${result.findings.length} url(s), ${parts.join(", ")}` +
+        (result.fetched ? "" : " (dates only, --no-fetch)"),
+    );
+    if (!result.fetched) {
+      console.log("Re-run without --no-fetch to compare each page against its recorded fingerprint.");
+    }
+  }
+
+  if (result.needs_attention) {
+    console.error(
+      "stale-check: a page a price was read from changed or stopped answering. Re-read it and " +
+        "update billing.verified_date, or set the price back to null.",
+    );
+    process.exitCode = 1;
+  }
 }
 
 function ledgerLastUsed(home: string): Map<string, string> {

@@ -3,6 +3,7 @@ export * from "./bind.js";
 export * from "./config.js";
 export * from "./keys.js";
 export * from "./ledger.js";
+export * from "./match.js";
 export * from "./mcp.js";
 export * from "./paths.js";
 export * from "./proxy.js";

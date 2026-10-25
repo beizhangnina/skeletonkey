@@ -82,6 +82,14 @@ export interface Config {
   created: string;
 }
 
+/** Scheme the proxy uses to reach an upstream in reverse (`/<domain>/<path>`) mode. */
+export const UPSTREAM_SCHEMES = ["https", "http"] as const;
+export type UpstreamScheme = (typeof UPSTREAM_SCHEMES)[number];
+
+export function isUpstreamScheme(value: string): value is UpstreamScheme {
+  return (UPSTREAM_SCHEMES as readonly string[]).includes(value);
+}
+
 export interface KeyMeta {
   alias: string;
   platform: string;
@@ -93,6 +101,12 @@ export interface KeyMeta {
   created: string;
   last_used: string | null;
   disabled: boolean;
+  /**
+   * Scheme for this key's domain in reverse mode. Undefined means "decide per
+   * host": https, except for loopback addresses. Set it to `http` only for a
+   * vendor you reach over plain HTTP on purpose -- a key goes into that header.
+   */
+  scheme?: UpstreamScheme;
 }
 
 export interface KeysFile {

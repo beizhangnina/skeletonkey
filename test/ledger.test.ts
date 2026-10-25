@@ -79,4 +79,34 @@ describe("ledger", () => {
       second.close();
     }
   });
+
+  it("reports only the domains that actually answered 2xx", () => {
+    const ledger = openLedger(home);
+    try {
+      ledger.record({ alias: null, domain: "ok.test", status: 200, bytes: 1, timestamp: "2026-10-24T01:00:00.000Z" });
+      ledger.record({ alias: null, domain: "ok.test", status: 204, bytes: 0, timestamp: "2026-10-24T02:00:00.000Z" });
+      ledger.record({ alias: null, domain: "denied.test", status: 401, bytes: 1 });
+      ledger.record({ alias: null, domain: "broken.test", status: 500, bytes: 1 });
+      ledger.record({ alias: null, domain: "moved.test", status: 302, bytes: 1 });
+      ledger.record({ alias: null, domain: "nostatus.test", status: null, bytes: 1 });
+
+      const succeeded = ledger.succeededDomains();
+      expect([...succeeded.keys()]).toEqual(["ok.test"]);
+      // The most recent success, so promotion can name the call that earned it.
+      expect(succeeded.get("ok.test")?.timestamp).toBe("2026-10-24T02:00:00.000Z");
+      expect(succeeded.get("ok.test")?.calls).toBe(2);
+    } finally {
+      ledger.close();
+    }
+  });
+
+  it("lowercases the domain it reports, so host comparison is predictable", () => {
+    const ledger = openLedger(home);
+    try {
+      ledger.record({ alias: null, domain: "API.Example.COM", status: 201, bytes: 1 });
+      expect([...ledger.succeededDomains().keys()]).toEqual(["api.example.com"]);
+    } finally {
+      ledger.close();
+    }
+  });
 });
