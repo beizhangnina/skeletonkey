@@ -21,7 +21,7 @@ describe("skills/skeletonkey/SKILL.md", () => {
   });
 
   it("tells the agent to read verification codes from its own inbox", () => {
-    const section = SKILL.slice(SKILL.indexOf("### 2a."), SKILL.indexOf("### 3."));
+    const section = SKILL.slice(SKILL.indexOf("### 2b."), SKILL.indexOf("### 3."));
     expect(section).not.toBe("");
     expect(section).toMatch(/own email connector or inbox/i);
     expect(section).toMatch(/verification code/i);
@@ -97,6 +97,37 @@ describe("skills/skeletonkey/SKILL.md", () => {
   it("forbids quoting an unverified price or self-verifying a discovery", () => {
     expect(SKILL).toMatch(/Never quote a price whose `verified_url`/);
     expect(SKILL).toMatch(/Never mark your own discovery verified/);
+  });
+
+  it("describes the v0.3 async approval flow and the tools that drive it", () => {
+    for (const tool of ["access_status", "cancel_request", "spend_policy"]) {
+      expect(SKILL, tool).toContain(tool);
+    }
+    const section = SKILL.slice(SKILL.indexOf("### 2. No key?"), SKILL.indexOf("### 2a."));
+    expect(section).toMatch(/pending_approval/);
+    expect(section).toMatch(/outside this\s+conversation|out of band/i);
+    expect(section).toMatch(/Poll `access_status/);
+    expect(section).toMatch(/Do not ask the user to approve it here/);
+    expect(section).toMatch(/needs_human/);
+    // The caps and the kill switch, as rules the agent cannot route around.
+    expect(section).toMatch(/start at \*\*\$0\*\*/);
+    expect(section).toMatch(/can never raise one/);
+    expect(section).toMatch(/kill_switch/);
+    expect(section).toMatch(/skeletonkey resume/);
+  });
+
+  it("forbids collecting a card, a password, or an OTP through the agent", () => {
+    expect(SKILL).toMatch(/Never ask a human for a card number, a CVV, a password, or an OTP/);
+    expect(SKILL).toMatch(/Secure Input Popup/);
+    expect(SKILL).toMatch(/Never approve your own request/);
+    expect(SKILL).toMatch(/never ask for a cap to be raised/);
+  });
+
+  it("points at the trusted runner, and says it cannot return a secret", () => {
+    expect(SKILL).toMatch(/trusted runner/);
+    expect(SKILL).toMatch(/skeletonkey runner/);
+    expect(SKILL).toMatch(/no\s+verb that returns a secret value/);
+    expect(SKILL).toMatch(/runner_unavailable/);
   });
 
   it("keeps the no-secrets rules it had before", () => {

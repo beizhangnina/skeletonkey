@@ -29,15 +29,23 @@ a secret value — there is deliberately no such tool.
 | `list_keys()` | List every key: alias, platform, domain, state. Metadata only. |
 | `key_status(alias)` | One key's state, last use, and recorded spend. |
 | `request_access(platform, reason, est_budget)` | Get either a proxy URL to call through, or a signup plan with the vendor's auth facts, ready-made `register_key` arguments, and the explicit list of human-only gates. **Start here.** |
+| `access_status(request_id)` | Poll the request `request_access` raised: `pending_approval`, `approved`, `ready`, `needs_human`, `denied`, `cancelled`, `voided`. Statuses only — never a key, a card, an OTP, a screenshot, or page text. |
+| `cancel_request(request_id, reason?)` | Withdraw a request you no longer need, so the user is not left with a stale approval. You may cancel; you may never approve. |
+| `spend_policy()` | The global monthly cap and per-vendor caps. Read-only: **there is no tool that can raise a cap or enable a key.** |
 | `register_key(alias, platform, domain)` | After signup: ask the human to enter the key out of band. Header and format default to what the index records for that domain, not to `Bearer`. Pass `scheme: "http"` only for a vendor that genuinely is plain HTTP; the default is https (http for loopback hosts). |
 | `ledger(alias?)` | Recent calls and spend, so you can report what a task cost. |
 | `disable(alias)` | Stop a key being injected. Use the moment one looks compromised. |
 | `discover_api(capability)` | **When `find_api` misses.** Returns the research recipe — which sources to read in which order, which field each one fills, and the rules. Reaches no network itself; you do the research. |
 | `propose_entry(...)` | Write what you discovered into the local user index, `status: unverified`. Promoted to `verified` only after a call through the proxy returns `2xx`. |
 
+A second process, the **trusted runner** (`skeletonkey runner`), is what actually
+holds secrets and raises approvals. You never talk to it directly and it has no
+verb that returns a secret value. If `access_status` comes back
+`runner_unavailable`, ask the user to start it — do not attempt the work yourself.
+
 If the MCP server is not available, the same things work from the shell:
 `skeletonkey list`, `skeletonkey ledger`, `skeletonkey add <alias> ...` (the human runs
-this one), `skeletonkey disable <alias>`. `skeletonkey stale-check` re-reads every page
+this one), `skeletonkey disable <alias>`, `skeletonkey policy show`. `skeletonkey stale-check` re-reads every page
 the index claims a price was verified on and flags what moved — run it, or suggest it,
 before trusting an old `verified_date`.
 
@@ -132,10 +140,45 @@ Say plainly that a discovered row is unverified when you report it. If the
 vendor's docs are behind a login, a captcha, or a bot wall, leave those fields
 `null` and say so — do not work around it.
 
-### 2. No key? Sign up yourself, with your own tools
+### 2. No key? The human approves it, out of band
 
-`request_access` returns a plan. The signup is yours to drive, using **your own**
-capabilities, not SkeletonKey's:
+When no key exists, `request_access` does two things:
+
+1. It asks the trusted runner to raise an **approval with the user, outside this
+   conversation**: an OS notification plus a page on `127.0.0.1`. You get back
+   `access_request: {request_id, status: "pending_approval"}`.
+2. It returns the vendor's facts and a signup plan, so you know what is coming.
+
+What that means for you:
+
+- **Poll `access_status(request_id)`.** Do not ask the user to approve it here,
+  do not ask them to read you anything from that page, and do not ask again and
+  again — the page is theirs, on their screen.
+- `needs_human` means a person has to finish a step (a captcha, a phone check, or
+  simply that v0.3 ships no signup playbook for this vendor). Report the reason
+  and stop. `denied` is an answer: accept it and say so.
+- `ready` means a key now exists. Call `request_access` again for the proxy URL.
+- When you no longer need it, call `cancel_request(request_id)`.
+
+**Spend caps gate everything.** The global monthly cap and every per-vendor cap
+start at **$0**, so the first paid action asks the user to set them on that same
+page. `spend_policy()` shows where they stand. You can never raise one, and
+asking the user to raise one in chat is not how it is done — the approval page
+is the place.
+
+**If the kill switch is engaged** (`kill_switch: true` in a tool response, or the
+proxy answering `403 {"error":"kill_switch"}`), stop. Everything is refused on
+purpose, and only the user clears it with `skeletonkey resume`.
+
+### 2a. Driving a signup yourself (v0.3)
+
+**Wait for the approval first.** Until `access_status` says `approved` (or
+`needs_human` naming a step you can help with), there is nothing to drive: a
+`pending_approval` means the user has not agreed to this vendor yet.
+
+Once it is approved, and while a vendor has no runner playbook, the signup is
+yours to drive using **your own** capabilities, not SkeletonKey's — and every
+secret still stays out of your hands (§ "Never" below):
 
 - Your **computer-use or browser tool** opens `signup_url` — the page where
   signup actually starts, not the docs root.
@@ -158,7 +201,7 @@ which gates are coming, so nobody is surprised halfway through a signup. A gate
 whose source is `unknown` means **nobody checked** — if that screen appears
 (a card, an SMS code, a captcha), stop and hand over.
 
-### 2a. Use your own inbox for verification codes
+### 2b. Use your own inbox for verification codes
 
 Almost every signup sends a code or a confirmation link to the address you sign
 up with. That mailbox is yours to read with **your own email connector or inbox
@@ -239,7 +282,13 @@ Finish with `ledger(alias)` and tell the user what the task actually used.
 - Never write a key to a file, a commit, an environment variable, or your own
   notes. If one ends up in your context anyway, say so immediately and
   recommend `skeletonkey disable <alias>` plus rotation at the provider.
+- Never ask a human for a card number, a CVV, a password, or an OTP, and never
+  accept one if it is offered. The runner's **Secure Input Popup** collects those
+  on localhost, and a card number or password must never pass through you at all.
+  If one lands in your context, say so at once and recommend rotating it.
 - Never complete a payment or accept terms on the user's behalf.
+- Never approve your own request, and never ask for a cap to be raised in this
+  conversation. Approving and raising caps happen on the local approval page.
 - Never re-enable a disabled key, or route around the proxy to call an API
   directly with a credential you found somewhere.
 - Never state a price that is not in the index. Unknown is `null`.

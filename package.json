@@ -1,8 +1,8 @@
 {
   "name": "skeletonkey",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "Local-only vault, injecting proxy, and MCP server for your personal API keys.",
+  "description": "Local-only vault, injecting proxy, trusted runner, and MCP server for your personal API keys.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
   },
   "bin": {
     "skeletonkey": "./dist/cli.js",
-    "skk": "./dist/cli.js"
+    "skk": "./dist/cli.js",
+    "skeletonkey-runner": "./dist/runner-bin.js"
   },
   "main": "./dist/index.js",
   "files": [
@@ -56,6 +57,8 @@
     "proxy",
     "mcp",
     "agents",
-    "bitwarden"
+    "bitwarden",
+    "approvals",
+    "spend-policy"
   ]
 }

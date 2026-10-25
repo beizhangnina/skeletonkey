@@ -10,8 +10,15 @@ them for you and an MCP server your agent can talk to. Your agents and scripts
 call the proxy; the proxy holds the keys. Nothing is uploaded anywhere, there is
 no account, and there is no server component.
 
-Status: MVP. TypeScript, Node 22+, MIT licensed. Repo:
+Status: **v0.3 — zero-knowledge foundation.** TypeScript, Node 22+, MIT licensed. Repo:
 [`beizhangnina/skeletonkey`](https://github.com/beizhangnina/skeletonkey) (public, MIT).
+
+v0.3 adds the pieces that keep a secret away from the model entirely: a
+**trusted runner** process that holds the secrets, **async approvals** the human
+decides outside the agent's context, a **spend policy** that starts at $0, a
+**Secure Input Popup** on localhost for the values that must never pass through
+an AI, and a **kill switch** that stops the proxy and the runner at once. See
+[What v0.3 adds](#what-v03-adds).
 
 ## Why
 
@@ -66,6 +73,104 @@ SkeletonKey addresses both with four pieces:
 Your code never sees the key. It sends a request to `127.0.0.1` without any
 credential, and the proxy attaches the credential on the way out.
 
+## What v0.3 adds
+
+The agent-facing surface is unchanged in spirit — it still cannot see a key —
+but everything that *does* touch a secret now lives in a second process.
+
+| Piece | What it is | Where |
+| --- | --- | --- |
+| **Trusted runner** | A separate process (`skeletonkey runner`, or the `skeletonkey-runner` binary) that holds the `bw` session, anything the ladder resolves, and anything typed into the Secure Input Popup. The MCP server talks to it over loopback with a token from `runner.json` and gets back opaque ids and statuses. Its API has **no verb that returns a secret value**. | `src/runner/` |
+| **Async approvals** | `request_access` no longer waits on anything in the chat: the runner raises an OS notification (`notify-send` / `osascript`, best effort) plus a page at `http://127.0.0.1:8788/approve/<id>`. The agent gets `{request_id, status: "pending_approval"}` and polls `access_status`. | `src/requests.ts` |
+| **Secret resolution ladder** | Bitwarden → bound inbox → Secure Input Popup, stopping at the first rung that answers, behind one interface per rung. `bw` is driven through `child_process` and is faked in the tests. | `src/secrets/` |
+| **Secure Input Popup** | A localhost-only page for a card number, a CVV, a password, or an OTP. It shows the vendor domain and the **verified origin**, masks the field, and sends the value to the runner only — never to the agent, a log, or the page's own response. | `src/secrets/popup.ts` |
+| **Domain allowlist** | Built from the API index plus the keys already in the vault. A secret is filled only on an allowlisted origin, over https; a lookalike domain is refused before any rung of the ladder is asked, and the human is told. | `src/allowlist.ts` |
+| **Spend policy** | `policy.yaml`: one global monthly cap plus per-vendor caps, **both $0 by default with no preset numbers**. The first paid action raises an approval asking the human to set them. Caps move only from the approval page or `skeletonkey policy set`. | `src/policy.ts` |
+| **`cancel_request`** | An agent may disable a key and cancel its own request. It may never enable a key or raise a cap — there is no tool, and no runner verb, that can. | `src/mcp.ts` |
+| **Log redaction** | One utility applied to every log line, the ledger's text columns, the request store, and **every MCP response**. Two layers: values this process has loaded, plus secret *shapes* (card numbers by Luhn, `sk-`-style keys, bearer tokens, `password=` assignments). | `src/redact.ts` |
+| **Kill switch** | `skeletonkey disable --all` disables every key, writes the flag both processes read, voids every pending approval, and closes any open Secure Input Popup. The proxy then answers `403 {"error":"kill_switch"}` locally. Only a human clears it, with `skeletonkey resume`. | `src/killswitch.ts` |
+| **`init` auto-registration** | `skeletonkey init` registers the MCP server and installs the skill for **Claude Code and Codex only**, after showing the diff. Idempotent, and it never rewrites a config it cannot parse or an entry you wrote yourself. | `src/agents/register.ts` |
+
+Deliberately **not** in v0.3:
+
+- **No automated vendor signup.** `src/signup/types.ts` ships the interfaces and
+  the honest default (every vendor is a human handoff). Playbooks for Apify,
+  TikHub, Apollo and DropLeads land in v0.5.
+- **No crypto rails.** Fiat only (D6). v0.3 added no x402, USDC, stablecoin or
+  wallet code, and nothing here pays for anything over a crypto rail. The index
+  still *records* `billing.x402_url` where a vendor advertises one, and the v0.2
+  router can still report an `x402` route as an observation — that is a note
+  about the vendor, not a payment path SkeletonKey implements.
+- **No virtual cards.** One card in Bitwarden, plus SkeletonKey's own caps and
+  approvals.
+- **No inbox reader yet.** The bound-inbox rung exists with its filter rules
+  (vendor sender domain, time window) and reports "nothing is bound" until v0.5.
+  It never asks the agent to read the mailbox in its place.
+
+### Try v0.3 locally
+
+Three terminals, no vendor account, no card, nothing published to npm:
+
+```bash
+git clone https://github.com/beizhangnina/skeletonkey.git
+cd skeletonkey && npm install && npm run build
+
+# 1. set up, and register with Claude Code / Codex (shows a diff first)
+node dist/cli.js init --email apis@example.com --backend encrypted-file
+
+# 2. the trusted runner: approvals, caps, secure input, secrets
+node dist/cli.js runner
+#   approvals:    http://127.0.0.1:8788/
+#   agent API:    http://127.0.0.1:8788/v1/...  (token in ~/.skeletonkey/runner.json)
+
+# 3. the proxy, as before
+node dist/cli.js proxy
+```
+
+Then, as the agent would:
+
+```bash
+# No key for this vendor, so the runner raises an approval and hands back an id.
+#   (through the MCP server in a real agent; this is the same code path)
+node dist/cli.js requests        # what is waiting for you
+node dist/cli.js policy show     # every cap is $0 until you say otherwise
+```
+
+Open `http://127.0.0.1:8788/` in a browser: the approval page shows the vendor,
+the terms link, what is shared (the bound email), whether payment is expected,
+and two cap fields with **no numbers filled in**. Approve it and the agent's
+`access_status` turns into `needs_human` with the reason `no_playbook` — which is
+the honest state of v0.3, and exactly what a captcha will look like in v0.5.
+
+To see the kill switch:
+
+```bash
+node dist/cli.js disable --all   # every key off, approvals voided, proxy refuses
+curl -s http://127.0.0.1:8787/api.openai.com/v1/models   # 403 kill_switch
+node dist/cli.js resume          # human-only
+```
+
+## Install troubleshooting
+
+One-line installs (`npx skeletonkey init`) work **after the npm release** — see
+[Installing](#installing-from-source-today-npm-after-release). Until then, clone
+and build. These are the things that actually go wrong:
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `SyntaxError: Unexpected token` on startup, or `node:sqlite` not found | **Node too old.** SkeletonKey needs **Node 22.5+** for the built-in `node:sqlite`. | `node --version`, then install Node 22.5 or newer (`nvm install 22`). The `engines` field refuses older versions on install. |
+| `EACCES: permission denied, mkdir '/usr/local/lib/node_modules'` | A **global npm install** without permission to write the global prefix. | Do not install globally: run `npx skeletonkey init` (after release), or clone and use `node dist/cli.js`. If you want a global install, set a user prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to `PATH`. Never `sudo npm install -g`. |
+| `` `bw` was not found on PATH `` | The **Bitwarden CLI is not installed**. | Install it (<https://bitwarden.com/help/cli/>), or run `skeletonkey init --backend encrypted-file`, which needs nothing. |
+| `Bitwarden is not logged in. Run `bw login` first.` | `bw` is installed but **not logged in**. | `bw login` in your own terminal. SkeletonKey never logs in for you. |
+| `Bitwarden is locked.` | Logged in but **locked**; the session is a human action. | `export BW_SESSION="$(bw unlock --raw)"` in the shell you run SkeletonKey from, then retry. The runner holds that session in memory only. |
+| `EADDRINUSE: address already in use 127.0.0.1:8787` | **Port 8787 is busy** (often an older `skeletonkey proxy`). | `lsof -nP -iTCP:8787 -sTCP:LISTEN` (or `ss -ltnp | grep 8787`) and stop it, or pick another port: `skeletonkey proxy --port 8799` and set `proxy.port` in `config.yaml`. The runner's own port is `8788`: `skeletonkey runner --port 8799`. |
+| The ladder falls straight through to the popup | Expected when `bw` is **locked, missing, or has no card item**. The runner says which in its log. | Unlock `bw`, or store a card item named `skeletonkey: card`. The popup is the designed fallback, not a failure. |
+| **MCP server not showing in Claude Code or Codex** | The config was written before the agent started, the agent was not restarted, or you registered into a different home. | Re-run **`skeletonkey register`** (or `skeletonkey init`), then restart the agent. `skeletonkey register --dry-run` prints exactly which files it would touch. Check `~/.claude.json` has `mcpServers.skeletonkey` and `~/.codex/config.toml` has `[mcp_servers.skeletonkey]`. Claude Code and Codex are the only supported agents. |
+| `register` says "already defines [mcp_servers.skeletonkey]" and changes nothing | You (or `codex mcp add`) wrote that entry by hand. **Yours wins.** | Nothing to do, unless the command inside it is wrong — edit it yourself, or delete it and re-run `skeletonkey register`. |
+| Approval page says "This page is served to localhost only" | Reached over a hostname that is not loopback (a tunnel, a reverse proxy). | Open it as `http://127.0.0.1:8788/...` on the same machine. The approval and secure-input pages are loopback-only by design. |
+| Agent says `runner_unavailable` | The **runner is not running**; it is the only thing that can hold a secret or raise an approval. | `skeletonkey runner` (or `skeletonkey-runner`). The MCP server finds it through `~/.skeletonkey/runner.json`. |
+| Every call returns `403 {"error":"kill_switch"}` | The **kill switch is engaged**. | `skeletonkey resume`, then `skeletonkey enable <alias>` for each key you want back. Two separate switches, on purpose. |
+
 ## Prerequisites
 
 ### Required
@@ -92,14 +197,15 @@ secrets.
   `+aliases` out of the box. Works fine without one — you just lose the
   per-vendor sorting.
 
-### Not needed in v0.1
+### Not needed in v0.3
 
-- **A credit card.** v0.1 stores and injects keys; it does not pay for anything.
-  Payments are phase 2, and the plan there is a **capped virtual card** per key
-  (one merchant lock, a low limit, so a forgotten key cannot drain anything).
-  Even then the **card stays in your own vault and is never touched by SkeletonKey
-  code** — SkeletonKey would hold a reference, not a number. If a provider wants
-  money today, you enter your own card on their site, by hand.
+- **A credit card.** v0.3 stores and injects keys, raises approvals, and holds
+  caps; it still pays for nothing. When payments land (v1.0) it is **one card in
+  your Bitwarden vault** plus SkeletonKey's own caps and per-action approvals —
+  no virtual-card integration (D12), fiat only (D6). The card number is read by
+  the runner and typed into the vendor's own checkout; it is never stored outside
+  your vault and never passes through the agent. Today, if a provider wants
+  money, you enter your own card on their site, by hand.
 - **Tailscale or any private network.** Only needed if you want **gateway
   mode** — one always-on host holding the keys for your laptop, phone, and
   anything else. A single-machine setup needs no network at all beyond the
@@ -114,11 +220,16 @@ What this tool does:
 - **Secrets are not passed in argv.** `skeletonkey add` reads the secret from stdin or a non-echoing prompt. Vault helpers (`bw`, `op`, `security`, `secret-tool`) receive secrets on stdin or via a `0600` temp file, so secrets do not appear in `ps` output or shell history.
 - **The proxy binds to `127.0.0.1` by default,** and refuses to bind `0.0.0.0` or `::` unless you pass `--allow-all-interfaces`. Any non-loopback bind prints a warning first. Treat the port exactly like a credential: anything that can reach it can spend through your keys.
 - **Gateway mode requires a shared token.** `skeletonkey proxy --gateway` will not start without `gateway.token` / `SKELETONKEY_GATEWAY_TOKEN` / `--token` (or an explicit `--insecure-no-token`), and then requires it as `X-SkeletonKey-Token` on every request.
-- **npm publish is intentionally disabled for now.** `package.json` sets `"private": true` so the package cannot be published to npm by accident. Install from source (clone, `npm install`, `npm run build`).
+- **npm publish is intentionally disabled for now.** `package.json` sets `"private": true` so the package cannot be published to npm by accident. Install from source (clone, `npm install`, `npm run build`). The name `skeletonkey` is unclaimed on npm as of 2026-10-25.
+- **Secrets live in the runner, not in the MCP process.** The trusted runner holds the `bw` session and every resolved value in memory; the MCP server reaches it over loopback with a token and can only ask for approvals and statuses. There is no "read secret" verb to call, which is also what a prompt injection would have to find.
+- **Values that must never pass through an AI** — API keys, passwords, card numbers, CVVs — are collected by the runner's Secure Input Popup on localhost, or read straight from Bitwarden. An OTP is the one class §5a of the PRD allows an agent to see, and even then the runner reads it first when an inbox is bound.
+- **Secrets are only filled on allowlisted origins.** The allowlist is built from the API index and the keys already in the vault; a lookalike domain is refused before any rung of the ladder is asked, and the human is notified.
+- **Everything written is redacted.** One utility covers logs, the ledger's text columns, the request store, and every MCP response — known values plus secret shapes. A canary test pushes a fake key, password, card number and CVV through the real code paths and then greps every tool response, every page, every file under `SKELETONKEY_HOME`, and all CLI output for them.
+- **Caps start at $0 and only a human moves them.** `policy.yaml` is written only by the approval page or `skeletonkey policy set`; an agent can disable a key and cancel a request, and nothing more.
 - **Client-supplied auth headers are stripped.** `authorization`, `proxy-authorization`, `x-api-key`, `api-key`, `x-auth-token`, `x-access-token`, `x-skeletonkey-token`, and the key's own header are removed from every request before the vault header is injected. A caller cannot smuggle its own credential through, cannot override yours, and the gateway token never reaches the upstream.
 - **The MCP server cannot reveal a key.** There is no such tool, and a test calls every handler with a stored secret and asserts no response contains it. The only tool that touches a secret, `register_key`, does so by prompting the human on `/dev/tty` — out of band from the agent entirely.
 - **Nothing is logged that could leak a key.** Log lines carry method, domain, path, status, byte count, and alias. As a backstop, the proxy redacts any secret it has loaded from any line it is about to print.
-- **Files are tight by default.** `SKELETONKEY_HOME` is `0700`; `config.yaml`, `keys.yaml`, `vault.enc.json`, `dev-vault.json`, and `ledger.db` are `0600`.
+- **Files are tight by default.** `SKELETONKEY_HOME` is `0700`; `config.yaml`, `keys.yaml`, `vault.enc.json`, `dev-vault.json`, `ledger.db`, and v0.3's `policy.yaml`, `requests.json`, `runner.json` (which holds the runner's loopback token), `killswitch.json` and `runner.log` are all `0600`.
 - **`CONNECT` is refused with 405.** A `CONNECT` tunnel is end-to-end TLS, so the proxy cannot inject into it. Rather than pass traffic through with no credential and look broken, it says no. This is why `HTTPS_PROXY` is not supported — see [Calling APIs through the proxy](#calling-apis-through-the-proxy).
 
 What this tool does *not* do:
@@ -144,15 +255,40 @@ hand rather than by the automated suite. `encrypted-file` and `file` are fully
 covered by tests, including an assertion that the encrypted vault on disk does
 not contain the plaintext secret.
 
-## Quickstart
+## Installing: from source today, npm after release
+
+SkeletonKey is **not published yet**: `package.json` still has `"private": true`
+so it cannot be pushed to the registry by accident. The package name
+**`skeletonkey` is free** on npm — `npm view skeletonkey name` returns `404 Not
+Found`, checked 2026-10-25 — and v0.3 is otherwise publish-ready: `bin` entries
+(`skeletonkey`, `skk`, `skeletonkey-runner`) and a `files` whitelist
+(`dist`, `apis.yaml`, `data/apis`, `data/discovered.example.yaml`, `skills`,
+`docs`, `README.md`, `LICENSE`) are in place.
+
+**After the npm release** (v0.5, per the roadmap), these one-liners are the
+install path (D9):
+
+```bash
+npx skeletonkey init                                       # set up + register both agents
+claude mcp add skeletonkey -s user -- npx -y skeletonkey mcp   # Claude Code, by hand
+# Codex equivalent: `codex mcp add`, or the [mcp_servers.skeletonkey] block below
+```
+
+**Today**, build from source:
 
 ```bash
 git clone https://github.com/beizhangnina/skeletonkey.git
 cd skeletonkey
 npm install
 npm run build
-npm link            # optional: puts `skeletonkey` (and the short alias `skk`) on your PATH
+npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runner` on your PATH
 ```
+
+If anything goes wrong, the [install troubleshooting table](#install-troubleshooting)
+covers the usual causes (Node too old, `EACCES` on a global install, `bw` not
+installed/not logged in/locked, port 8787 busy, MCP server not showing up).
+
+## Quickstart
 
 Every command below can be typed as `skk` instead of `skeletonkey` — the two
 binaries are the same CLI.
@@ -330,12 +466,37 @@ rule is the same: **set a base URL, not a proxy env var.**
 ## Use with Codex / Claude Code
 
 `skeletonkey mcp` is a stdio MCP server. None of its tools can return a secret value
-— there is deliberately no such tool — so it is safe to give an agent.
+— there is deliberately no such tool — so it is safe to give an agent. Claude Code
+and Codex are the **only** supported agents (D8).
 
-### Claude Code
+### Let `init` do it (recommended)
+
+```bash
+skeletonkey init          # or, later: skeletonkey register
+```
+
+`init` detects nothing and guesses nothing: it writes four things, after printing
+a diff and asking (pass `--yes` to skip the question, `--no-register` to skip the
+step entirely):
+
+| File | What goes in it |
+| --- | --- |
+| `~/.claude.json` | `mcpServers.skeletonkey` — the same entry `claude mcp add -s user` writes. Your other settings and servers are left untouched. |
+| `~/.claude/skills/skeletonkey/SKILL.md` | The skill, so the agent knows the workflow and not just the tool list. |
+| `~/.codex/config.toml` | `[mcp_servers.skeletonkey]`, inside a `# skeletonkey:begin/end` block so a re-run replaces exactly what SkeletonKey wrote. An entry you wrote yourself always wins. |
+| `~/.codex/AGENTS.md` + `~/.codex/skills/skeletonkey/SKILL.md` | The same rules for Codex, behind a managed marker block. |
+
+Re-running is safe and reports `unchanged`. `skeletonkey register --dry-run`
+shows what it would do without writing. **Restart the agent afterwards** — and if
+the server still does not appear, that is the first row of the
+[troubleshooting table](#install-troubleshooting).
+
+### Claude Code, by hand
 
 ```bash
 claude mcp add skeletonkey -- skeletonkey mcp
+# after the npm release:
+claude mcp add skeletonkey -s user -- npx -y skeletonkey mcp
 ```
 
 Then drop the skill in so the agent knows the workflow, not just the tools:
@@ -346,7 +507,7 @@ cp skills/skeletonkey/SKILL.md ~/.claude/skills/skeletonkey/SKILL.md
 # or per-project: cp -r skills/skeletonkey .claude/skills/skeletonkey
 ```
 
-### Codex
+### Codex, by hand
 
 Add to `~/.codex/config.toml`:
 
@@ -374,7 +535,10 @@ its body into your `AGENTS.md`, or point to it from there.
 | `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
-| `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or a signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
+| `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. Opaque ids and statuses only — no key, no card, no OTP, no screenshot, no page text. |
+| `cancel_request(request_id, reason?)` | Cancels a request the agent raised, and closes any Secure Input Popup waiting on it. Agents may cancel; only a human approves. |
+| `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
+| `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
 | `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
 | `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
 | `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
@@ -522,13 +686,19 @@ editing the config and restarting.
 
 | Command | What it does |
 | --- | --- |
-| `skeletonkey init` | Creates `SKELETONKEY_HOME`, records the dedicated email and vault backend. `--email`, `--backend`, `--op-vault`, `--bw-folder`, `--force`. Defaults to `bitwarden`. |
+| `skeletonkey init` | Creates `SKELETONKEY_HOME`, records the dedicated email and vault backend, then registers the MCP server + skill with Claude Code and Codex (shows a diff first). `--email`, `--backend`, `--op-vault`, `--bw-folder`, `--force`, `--no-register`, `--yes`, `--user-home <dir>`, `--agent-command <cmd>`. Defaults to `bitwarden`. |
+| `skeletonkey register` | Registers (or re-registers) the MCP server and skill for Claude Code and Codex. `--dry-run`, `--agent claude-code\|codex`, `--user-home`, `--agent-command`. **This is the fix when the server does not show up in an agent.** |
+| `skeletonkey runner` | Runs the trusted runner: approvals, spend policy, Secure Input Popup, and every secret. `--port` (default 8788, loopback only), `--no-notify`. Also installed as the `skeletonkey-runner` binary. |
+| `skeletonkey policy show` / `policy set` | Reads or sets the spend caps. `set --global <usd>`, `--vendor <name> --vendor-cap <usd>`. Human-only: no agent path reaches it. |
+| `skeletonkey requests` | Lists the approval requests agents have raised, and where to decide the pending ones. `--json`. |
+| `skeletonkey resume` | Clears the kill switch. Human-only; keys disabled by `--all` stay disabled until you `enable` them. |
 | `skeletonkey add <alias>` | Stores a secret in the vault and its metadata in `keys.yaml`. `--platform`, `--domain` (required), `--header`, `--format`, `--scheme http\|https` (per-key upstream scheme), `--stdin`. |
 | `skeletonkey list` | Shows all keys, their domains, upstream scheme, state, and last use. `--json`. |
 | `skeletonkey idle --days N` | Keys with no recorded use in N days (never-used keys always appear). `--json`. |
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
+| `skeletonkey disable --all` | **Kill switch.** Disables every key, voids pending approvals, closes any Secure Input Popup, and makes the proxy answer `403 {"error":"kill_switch"}` locally. Cleared by `skeletonkey resume`. |
 | `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
-| `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret. |
+| `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret, and every response is passed through the redactor. |
 | `skeletonkey ledger` | Prints recent calls. `--limit`, `--json`. |
 | `skeletonkey apis validate [file]` | Validates `apis.yaml` (or any index file, including `discovered.yaml`) against the documented schema. |
 | `skeletonkey stale-check` | Re-fetches every `billing.verified_url` / `price_verified_url` in the index, fingerprints each page's visible text, and flags **changed**, **unreachable**, and verified-too-long-ago rows. `--max-age-days` (default 90), `--only <name>`, `--no-fetch` (dates only), `--json`. Exits non-zero when a page moved or stopped answering. |
@@ -545,6 +715,7 @@ Environment:
 | `SKELETONKEY_API_SHARDS` | Directories of generated provider shards to merge into the index, separated by the platform path separator. `none` searches `apis.yaml` only. Default: `$SKELETONKEY_HOME/apis.d` if present, then the packaged `data/apis`. |
 | `SKELETONKEY_DISCOVERED` | Path to the local user index that `propose_entry` writes and `find_api` reads. Default `$SKELETONKEY_HOME/discovered.yaml`. |
 | `SKELETONKEY_STALE_DAYS` | How old a verified fact may be before `find_api`, `request_access` and `stale-check` warn about it. Default `90`. A `max_age_days` argument on the tool, or `--max-age-days` on `stale-check`, wins over it. |
+| `SKELETONKEY_USER_HOME` | Home directory agent registration writes under (`~/.claude.json`, `~/.codex/`). Defaults to your real home; the test suite points it at a temp directory so it can never touch yours. |
 | `SKELETONKEY_ALLOW_TEST_BACKEND` | Permits the plaintext `file` backend. Only the test suite and `scripts/demo.sh` should set this. |
 | `BW_SESSION` | Bitwarden session, from `bw unlock --raw`. Required by the `bitwarden` backend. |
 
@@ -560,6 +731,12 @@ One SQLite row per proxied call, in `$SKELETONKEY_HOME/ledger.db`:
 | `status` | Upstream HTTP status, or `NULL` if the call never completed |
 | `bytes` | Response body bytes |
 | `cost` | `NULL` unless the upstream reported a price in `x-skeletonkey-cost-usd`, `x-cost-usd`, or `x-request-cost-usd` |
+
+v0.3 also writes one row when the runner hands a signup back to a human (§5.4 of
+the PRD asks for the event to be logged): the vendor's domain, `status` and
+`cost` both `NULL`, `bytes` 0. It is a record that a handoff happened, not a
+call that was made — the reason lives in the runner log and in the request's
+history.
 
 `cost` is deliberately `NULL` by default. Almost no API reports per-call cost in
 a response header, and a made-up number is worse than no number. The MCP
@@ -799,12 +976,21 @@ offers and contain no verified prices.**
 
 ## Roadmap
 
-- **Payments.** Per-key virtual cards (one merchant lock per key, low limits, so a compromised or forgotten key cannot drain anything) and native [x402](https://x402.org) support, so the proxy can answer a `402` with a payment rather than needing an account at all. The card itself stays in your own vault; SkeletonKey code never handles the number. Includes real cost attribution in the ledger instead of today's mostly-`NULL` column.
-- **Assisted signup, further along.** v0.1 produces the plan and stores the result; the agent's own browser and email do the work. Next: filling in `signup_automatable` from verified terms, and a dry-run mode that shows exactly what is about to be agreed to and paid. A human presses the last button. Always.
+Phases, following the PRD:
+
+- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, and `init` auto-registration for Claude Code and Codex. See [What v0.3 adds](#what-v03-adds).
+- **v0.5 — automated signup.** Publish to npm (drop `"private": true`) so `npx skeletonkey init` works; bind an inbox and extract OTPs; detect the Bitwarden account for the bound email; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
+- **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger, per-vendor caps checked before submit, and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
+- **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.
+
+Smaller things, unscheduled:
+
+- **Assisted signup, further along.** Filling in `signup_automatable` from verified terms, and a dry-run mode that shows exactly what is about to be agreed to and paid. A human presses the last button. Always.
 - **Weekly discovery scan.** `skeletonkey stale-check` already re-reads every verified price page and flags what moved, and `discover_api`/`propose_entry` already add vendors the index was missing. Next: running both on a schedule, and filling in `source` and `checked_date` from a human review step. Still `null` for anything it cannot verify.
 - **Rotation and expiry.** `skeletonkey rotate <alias>` against providers with a key-management API, plus warnings on keys older than a chosen age.
 - **Per-key budgets.** Decline at the proxy when an alias passes a spend or call-count ceiling, instead of finding out from a bill.
-- **Smaller things.** `skeletonkey remove <alias>` (vault plus metadata), ledger export to CSV, `x402`-aware retry, request-scoped tokens so one agent run cannot reuse the proxy later.
+- **Per-call cost attribution.** Real numbers in the ledger's mostly-`NULL` `cost` column, from receipts and usage endpoints rather than a guess.
+- **Smaller things.** `skeletonkey remove <alias>` (vault plus metadata), ledger export to CSV, request-scoped tokens so one agent run cannot reuse the proxy later, and a native Secure Input window instead of a localhost page (D10).
 
 ## Development
 
@@ -826,6 +1012,16 @@ directories and covers:
 - the bind-safety rules — loopback default, Tailscale resolution and fallback, refusal of `0.0.0.0`/`::`, token required in gateway mode;
 - **every MCP tool handler, called in-process with a stored fake secret, asserting that no response contains it**;
 - the `apis.yaml` validator accepts the shipped file and rejects malformed entries including guessed prices, and the capability matcher finds the right entries without matching junk.
+
+v0.3 adds:
+
+- **the canary sweep** (`test/canary.test.ts`): a fake API key, password, card number and CVV are pushed through the real paths — the vault, the `bw` rung of the ladder, the Secure Input Popup — and then *every* tool response (including with hostile arguments), every runner page and API response, the runner log, every file under `SKELETONKEY_HOME` read as raw bytes, and all CLI output are swept for them; plus a second test proving no tool, argument, or runner route lets an agent enable a key or raise a cap;
+- **the ladder** with fakes for every rung: it stops at Bitwarden, falls through a locked or missing `bw` without trying to unlock it, refuses a lookalike or plain-HTTP origin before asking any rung, redacts a rung that throws, and never logs a value;
+- **the runner**: token-authed agent API with no secret-returning verb, the approval page (approve, deny, stale form token, caps written with the human's authority recorded), cancellation, the aggregator-fallback approval after a failed signup (D14), the kill switch voiding pending approvals, loopback-only human pages, and a masked Secure Input Popup whose response never echoes the value;
+- **the spend policy**: $0 defaults, the first-paid-action prompt, unknown cost never auto-approved, and cap writes refused without a human authority;
+- **the redactor**: cards by Luhn, prefixed keys, labelled secrets, and `null` left alone because "nobody checked" is load-bearing here;
+- **agent registration**: both agents, idempotent, preserving your own settings, refusing a `~/.claude.json` it cannot parse and a Codex entry you wrote yourself — all into a temp home, so the suite never touches your real one;
+- **the kill switch end to end**: through the built CLI and a live proxy, including that `resume` does not re-enable keys.
 
 Node 22's `node:sqlite` is used for the ledger, so there is no native
 dependency to compile. It is still flagged experimental in Node 22, and the CLI
