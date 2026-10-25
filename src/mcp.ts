@@ -1123,8 +1123,10 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       "`pending_approval` (the human has not decided yet -- wait, do not nudge them through this " +
       "channel), `approved`, `ready` (a key exists; call request_access again for the proxy URL), " +
       "`needs_human` (a captcha, a phone check, or no playbook: the human is being walked through " +
-      "it), `denied`, `cancelled`, `voided` (the kill switch). Never returns a key, a password, a " +
-      "card, an OTP, a screenshot, or page content.",
+      "it), `denied`, `cancelled`, `voided` (the kill switch). When the human approved the " +
+      "aggregator fallback, the runner routed the call itself and `routed_via`, " +
+      "`routed_cost_usd`, `routed_http_status` and `routed_result` carry what came back. Never " +
+      "returns a key, a password, a card, an OTP, a screenshot, or page content.",
     readOnly: true,
     inputSchema: {
       request_id: z.string().describe("The opaque id request_access handed you."),
@@ -1140,6 +1142,9 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         reminders: [
           "A `pending_approval` is a human deciding on their own screen. Poll; do not ask them here.",
           "`needs_human` means a person has to finish a step (captcha, phone, terms). Report it and stop.",
+          "`routed_result` is the aggregator's own answer, routed with the aggregator key the " +
+            "runner holds. A `needs_human` on an aggregator route can mean no such key is " +
+            "configured: the reason names where the human signs up.",
           "There is no tool, and no runner verb, that returns the key itself.",
         ],
       };

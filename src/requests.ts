@@ -90,6 +90,18 @@ export interface AccessRequest {
   fallback_price_usd: number | null;
   /** The follow-up request raised when direct signup failed (D14). */
   follow_up_id: string | null;
+  /** Aggregator the route was actually executed through, once one was. */
+  routed_via: string | null;
+  /** What that call cost: the reported price, else the verified per-call price. */
+  routed_cost_usd: number | null;
+  /** The aggregator's HTTP status, or null when it never answered. */
+  routed_http_status: number | null;
+  /**
+   * The aggregator's answer, truncated. This is API data, not a credential:
+   * the key goes in a request header and is registered with the redactor
+   * before the call, so it cannot appear here even if an aggregator echoed it.
+   */
+  routed_result: string | null;
   notes: string[];
   history: RequestEvent[];
   /** CSRF token for the approval page's form. Not a credential for anything else. */
@@ -108,6 +120,10 @@ export interface PublicRequest {
   reason: string | null;
   handle: string | null;
   proxy: string | null;
+  routed_via: string | null;
+  routed_cost_usd: number | null;
+  routed_http_status: number | null;
+  routed_result: string | null;
   notes: string[];
   /** Where the human decides. Printed for the human, not for the agent to open. */
   approval_url: string | null;
@@ -127,6 +143,10 @@ export function publicRequest(request: AccessRequest, approvalUrl: string | null
     handle: request.handle,
     proxy: request.proxy,
     notes: request.notes,
+    routed_via: request.routed_via ?? null,
+    routed_cost_usd: request.routed_cost_usd ?? null,
+    routed_http_status: request.routed_http_status ?? null,
+    routed_result: request.routed_result ?? null,
     approval_url: request.status === "pending_approval" ? approvalUrl : null,
     cancellable: !isTerminal(request.status),
   };
@@ -214,6 +234,10 @@ export class RequestStore {
       fallback_aggregator: input.fallback_aggregator ?? null,
       fallback_price_usd: input.fallback_price_usd ?? null,
       follow_up_id: null,
+      routed_via: null,
+      routed_cost_usd: null,
+      routed_http_status: null,
+      routed_result: null,
       notes: input.notes ?? [],
       history: [{ at: now, status, by: "agent", note: input.reason ?? null }],
       page_token: crypto.randomBytes(16).toString("hex"),

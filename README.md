@@ -541,7 +541,7 @@ its body into your `AGENTS.md`, or point to it from there.
 | `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
-| `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. Opaque ids and statuses only — no key, no card, no OTP, no screenshot, no page text. |
+| `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. After an approved aggregator route it also carries `routed_via`, `routed_cost_usd`, `routed_http_status` and `routed_result` (the aggregator's answer). Opaque ids, statuses and that answer only — no key, no card, no OTP, no screenshot, no page text. |
 | `cancel_request(request_id, reason?)` | Cancels a request the agent raised, and closes any Secure Input Popup waiting on it. Agents may cancel; only a human approves. |
 | `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
 | `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
@@ -863,6 +863,41 @@ over stay visible. The route is a recommendation about money only: it never over
 human gate, and an `aggregator:` route still means somebody has to hold an
 account with that aggregator.
 
+#### Taking the aggregator route: the second approval
+
+A route is a recommendation until a human says yes twice. The first approval is
+about signing up with the vendor directly; when that ends in a handoff (v0.3
+ships no signup playbooks), the runner raises a **second** approval naming the
+cheapest carrier and its verified per-call price. Nothing is routed without it.
+
+On that second yes the runner actually makes the call:
+
+- it re-reads the vendor's index row and takes the **cheapest aggregator that
+  publishes a verified per-call price and that you hold a key for**. An
+  aggregator with no comparable price is not routable — the caps cannot be
+  checked against a number nobody has;
+- the **caps are re-checked immediately before the call**, against a freshly
+  read `policy.yaml` and ledger, exactly as a payment submit is. Over a cap,
+  nothing is called;
+- the aggregator's key is resolved **exactly like any other key**: found in
+  `keys.yaml` by domain, read out of your vault by the runner, injected into the
+  aggregator's documented header. No MCP verb returns it, no log line carries
+  it, and the agent never sees it;
+- the call's cost lands in the ledger (what the aggregator reported, else the
+  verified per-call price), and the agent gets `routed_via`, `routed_cost_usd`,
+  `routed_http_status` and `routed_result` — the answer, never the credential.
+
+**No aggregator key, no route.** The request ends `needs_human` with the
+aggregator's own signup URL and the one `skeletonkey add` command that puts the
+key in the vault — fiat, your own card, no crypto rail. Nothing is called, and
+no credential is ever guessed. The endpoints themselves are a fixed catalog in
+code (`src/aggregators.ts`): an agent names no host on this path. Routes require
+current carriage and verified pricing in the API index; approval metadata alone
+cannot supply either. Redirects are refused, and responses are redacted before
+truncation. The HTTP adapters, authentication, and billing behavior have been
+tested against local fakes only; compatibility with live aggregator services
+has not been verified.
+
 Carriage for a row that does not state its own is **inherited** from the
 generated shards: the shards record `seen_in: [glasser, monid]` per provider, so
 a hand-written row that displaced a shard row keeps what the catalogs knew
@@ -1023,7 +1058,11 @@ v0.3 adds:
 - **the canary sweep** (`test/canary.test.ts`): a fake API key, password, card number and CVV are pushed through the real paths — the vault, the `bw` rung of the ladder, the Secure Input Popup — and then *every* tool response (including with hostile arguments), every runner page and API response, the runner log, every file under `SKELETONKEY_HOME` read as raw bytes, and all CLI output are swept for them; plus a second test proving no tool, argument, or runner route lets an agent enable a key or raise a cap;
 - **the Bitwarden account lookup** (`test/bw-account.test.ts`, `test/bw-cli.test.ts`): every state of `bw` (missing, logged out, locked, unlocked, logged in as the wrong account) through both a fake runner and a **fake `bw` script on PATH** — asserting that the guidance names the install steps, `bw login <bound email>` and `BW_SESSION`, that nothing ever asks for or passes a master password, that `init` refuses to finish while `bw` is unusable, and that a vendor item belonging to a *different* mailbox never answers for that vendor;
 - **the ladder** with fakes for every rung: it stops at Bitwarden, falls through a locked or missing `bw` without trying to unlock it, refuses a lookalike or plain-HTTP origin before asking any rung, redacts a rung that throws, and never logs a value;
-- **the runner**: token-authed agent API with no secret-returning verb, the approval page (approve, deny, stale form token, caps written with the human's authority recorded), cancellation, the aggregator-fallback approval after a failed signup (D14), the kill switch voiding pending approvals, loopback-only human pages, and a masked Secure Input Popup whose response never echoes the value;
+- **the runner**: token-authed agent API with no secret-returning verb, the approval page (approve, deny, stale form token, caps written with the human's authority recorded), cancellation, the aggregator-fallback approval after a failed signup and the
+  execution of that route against a **fake aggregator HTTP server** (cheapest
+  *configured* carrier wins, the key comes out of the vault and appears in no
+  response, log or file, `needs_human` with a signup URL when no key is
+  configured, and the caps re-checked immediately before the call) (D14), the kill switch voiding pending approvals, loopback-only human pages, and a masked Secure Input Popup whose response never echoes the value;
 - **the spend policy**: $0 defaults, the first-paid-action prompt, unknown cost never auto-approved, and cap writes refused without a human authority;
 - **the redactor**: cards by Luhn, prefixed keys, labelled secrets, and `null` left alone because "nobody checked" is load-bearing here;
 - **agent registration**: both agents, idempotent, preserving your own settings, refusing a `~/.claude.json` it cannot parse and a Codex entry you wrote yourself — all into a temp home, so the suite never touches your real one;

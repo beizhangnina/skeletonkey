@@ -61,6 +61,7 @@ async function start(
     home,
     port: 0,
     notifier,
+    secretSources: (popup) => [popup],
     apisFile: APIS_YAML,
     apiShardDirs: [],
     popupTimeoutMs: 0,
@@ -225,7 +226,7 @@ describe("the trusted local runner", () => {
     expect(readPolicy(started.home).global_monthly_cap_usd).toBe(0);
   });
 
-  it("settles an aggregator-route approval without re-running signup (D14)", async () => {
+  it("executes an approved aggregator route, and needs a human when no key is configured (D14)", async () => {
     const created = await started.client.createRequest({
       vendor: "TikHub",
       est_budget_usd: 2,
@@ -247,9 +248,16 @@ describe("the trusted local runner", () => {
     });
     expect(decided.status).toBe(200);
     const settled = started.runner.requests.get(followUpId);
-    expect(settled?.status).toBe("approved");
-    // No second handoff was raised off the back of the fallback decision.
+    // Approving the route runs it. This home holds no Monid key, so nothing
+    // was called and the human is told where to sign up instead.
+    expect(settled?.status).toBe("needs_human");
+    expect(settled?.reason).toMatch(/No aggregator key is available/);
+    expect(settled?.reason).toMatch(/no aggregator route to configure/);
+    expect(settled?.routed_via).toBeNull();
+    // Signup is not re-run, and no second handoff is raised off this decision.
     expect(settled?.follow_up_id).toBeNull();
+    const signupLines = started.logs.filter((line) => /no signup playbook exists/i.test(line));
+    expect(signupLines).toHaveLength(1);
   });
 
   it("refuses a form post with a stale token, and changes nothing", async () => {

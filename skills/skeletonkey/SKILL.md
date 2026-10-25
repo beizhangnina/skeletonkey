@@ -157,6 +157,14 @@ What that means for you:
   simply that v0.3 ships no signup playbook for this vendor). Report the reason
   and stop. `denied` is an answer: accept it and say so.
 - `ready` means a key now exists. Call `request_access` again for the proxy URL.
+- When direct signup ends in a handoff and the vendor has an aggregator
+  fallback, the runner raises a **second** approval. If the user approves that
+  one, the runner routes the call itself through the cheapest aggregator a key is
+  configured for, with that key read from the vault by the runner —
+  `access_status` then reports `routed_via`, `routed_cost_usd`,
+  `routed_http_status` and `routed_result` (the aggregator's own answer). If no
+  aggregator key is configured, the status is `needs_human` and the reason names
+  the aggregator and where the user signs up: report that and stop.
 - When you no longer need it, call `cancel_request(request_id)`.
 
 **Spend caps gate everything.** The global monthly cap and every per-vendor cap

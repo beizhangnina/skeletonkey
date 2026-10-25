@@ -19,8 +19,16 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import type { AddressInfo } from "node:net";
+import {
+  callAggregator,
+  providerSlug,
+  selectAggregator,
+  signupInstructions,
+} from "../aggregators.js";
 import { buildAllowlist, type Allowlist } from "../allowlist.js";
+import { loadApiIndex, registrableDomain, type ApiEntry } from "../apis.js";
 import { ensureHome, readConfig } from "../config.js";
+import { readKeys, touchLastUsed } from "../keys.js";
 import { engageKillSwitch, killSwitchState } from "../killswitch.js";
 import { openLedger, type Ledger } from "../ledger.js";
 import { OsNotifier, type Notifier } from "../notify.js";
@@ -56,6 +64,7 @@ import { PopupRegistry, PopupSecretSource } from "../secrets/popup.js";
 import type { SecretRequest, SecretSource } from "../secrets/types.js";
 import { HumanHandoffSignupRunner, type SignupRunner } from "../signup/types.js";
 import type { LedgerRow } from "../types.js";
+import { openVault, type Vault } from "../vault/index.js";
 import crypto from "node:crypto";
 
 /** Header the MCP server authenticates to the runner with. */
@@ -120,6 +129,17 @@ export interface RunnerOptions {
   ledger?: Ledger;
   /** Popup timeout in ms. 0 disables the timer (tests). */
   popupTimeoutMs?: number;
+  /**
+   * The vault the runner reads keys out of (an aggregator's key, like any
+   * other). Defaults to the one `config.yaml` names, opened on first use.
+   */
+  vault?: Vault;
+  /**
+   * Local base-URL overrides for the aggregator catalog, keyed by lowercased
+   * aggregator name. A human's setting (a self-hosted mirror, or a test's fake
+   * server) -- never anything an agent passed in.
+   */
+  aggregatorBaseUrls?: Record<string, string>;
 }
 
 export interface RunnerHandle {
@@ -169,14 +189,62 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
   const signup = options.signupRunner ?? new HumanHandoffSignupRunner();
   const payments = options.paymentSubmitter ?? new HumanHandoffPaymentSubmitter();
 
-  const allowlist =
-    options.allowlist ??
-    buildAllowlist({
-      home,
-      ...(options.apisFile === undefined ? {} : { apisFile: options.apisFile }),
-      ...(options.apiShardDirs === undefined ? {} : { shardDirs: options.apiShardDirs }),
-      ...(options.userIndexFile === undefined ? {} : { userIndexFile: options.userIndexFile }),
-    });
+  /** Which index files this runner reads: the allowlist and the router share them. */
+  const indexOptions = {
+    home,
+    ...(options.apisFile === undefined ? {} : { apisFile: options.apisFile }),
+    ...(options.apiShardDirs === undefined ? {} : { shardDirs: options.apiShardDirs }),
+    ...(options.userIndexFile === undefined ? {} : { userIndexFile: options.userIndexFile }),
+  };
+
+  const allowlist = options.allowlist ?? buildAllowlist(indexOptions);
+
+  /**
+   * The vendor's own index row, re-read at route time rather than trusted from
+   * the approval: the aggregator prices live there, and `null` simply means the
+   * vendor was never in the index.
+   */
+  const indexEntryFor = (request: AccessRequest): ApiEntry | null => {
+    const index = loadApiIndex(indexOptions);
+    const name = request.vendor.trim().toLowerCase();
+    const byName = index.entries.find((item) => item.name.toLowerCase() === name);
+    if (byName !== undefined) return byName;
+    const domain = request.domain === null ? "" : registrableDomain(request.domain);
+    if (domain === "") return null;
+    return (
+      index.entries.find(
+        (item) => item.domain !== undefined && registrableDomain(item.domain) === domain,
+      ) ?? null
+    );
+  };
+
+  /** Opened on first use: a runner may start before `init` has written a config. */
+  let vaultHandle: Vault | null = options.vault ?? null;
+
+  /**
+   * Reads one key out of the vault, exactly as the proxy does: by alias, into
+   * the runner's memory, registered with the redactor before anything else can
+   * log it. There is no HTTP verb that reaches this.
+   */
+  const readVaultSecret = async (alias: string): Promise<string | null> => {
+    if (vaultHandle === null) {
+      try {
+        vaultHandle = openVault(home);
+      } catch (error) {
+        log(`! no vault available to read ${alias}`);
+        return null;
+      }
+    }
+    try {
+      const value = await vaultHandle.get(alias);
+      if (value === null || value === "") return null;
+      redactor.add(value);
+      return value;
+    } catch (error) {
+      log(`! vault read for ${alias} failed`);
+      return null;
+    }
+  };
 
   /** The bound email from config.yaml, when `init` has run. */
   const email = (): string | null => {
@@ -360,9 +428,13 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
    * cheapest aggregator instead, as a *new* approval.
    */
   async function runApproved(request: AccessRequest): Promise<AccessRequest> {
+    if (request.kind === "aggregator_route") {
+      // The second yes (D14): the call is actually routed now.
+      return runAggregatorRoute(request);
+    }
     if (request.kind !== "access") {
-      // A cap change or an aggregator-route decision is complete the moment the
-      // human makes it; there is no signup to drive.
+      // A cap change is complete the moment the human makes it; there is no
+      // signup to drive and nothing to route.
       log(`request ${request.id}: ${request.kind} approved by human; nothing to run`);
       return request;
     }
@@ -429,6 +501,204 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       },
       "runner",
       outcome.reason,
+    );
+  }
+
+  /**
+   * The second approval's yes (D14): route the vendor's call through the
+   * **cheapest configured fiat aggregator** in the API index.
+   *
+   * Configured means a key for that aggregator is in the keys index and the
+   * vault holds its value. The runner resolves it exactly as the proxy resolves
+   * any other key -- by alias, into its own memory, registered with the
+   * redactor -- and injects it into the aggregator's documented header. The
+   * agent sees the answer, the price and the status; it never sees the key.
+   *
+   * When no aggregator key is available nothing is called: the request ends
+   * `needs_human` carrying the aggregator's signup URL and the one `skeletonkey
+   * add` command that puts the key in the vault.
+   */
+  async function runAggregatorRoute(request: AccessRequest): Promise<AccessRequest> {
+    if (routing.has(request.id)) {
+      // A double-submitted approval form must not pay for two calls.
+      log(`request ${request.id}: refused -- a route for it is already running`);
+      return request;
+    }
+    routing.add(request.id);
+    try {
+      return await executeAggregatorRoute(request);
+    } finally {
+      routing.delete(request.id);
+    }
+  }
+
+  /** One route per request id at a time; `runAggregatorRoute` holds the lock. */
+  const routing = new Set<string>();
+
+  async function executeAggregatorRoute(request: AccessRequest): Promise<AccessRequest> {
+    if (killSwitchState(home).engaged) {
+      log(`request ${request.id}: nothing routed -- the kill switch is engaged`);
+      return requests.update(
+        request.id,
+        {
+          status: "voided",
+          reason:
+            "The SkeletonKey kill switch was engaged after this route was approved, so nothing " +
+            "was routed and nothing was charged. A human clears it with `skeletonkey resume`.",
+        },
+        "runner",
+        "kill switch",
+      );
+    }
+
+    const entry = indexEntryFor(request);
+    const selection = await selectAggregator({
+      entry,
+      keys: readKeys(home).keys,
+      readSecret: readVaultSecret,
+      ...(options.aggregatorBaseUrls === undefined
+        ? {}
+        : { baseUrls: options.aggregatorBaseUrls }),
+    });
+    for (const note of selection.notes) log(`request ${request.id}: ${note}`);
+
+    if (selection.chosen === null) {
+      const instructions = signupInstructions(selection.candidates);
+      const cheapest = selection.candidates[0];
+      // D4: a handoff is logged. No cost: nothing was called.
+      ledger.record({
+        alias: null,
+        domain: request.domain ?? request.vendor,
+        status: null,
+        bytes: 0,
+        cost: null,
+      });
+      const reason =
+        `No aggregator key is available, so nothing was routed for ${request.vendor} and nothing ` +
+        "was charged. " +
+        (cheapest === undefined
+          ? "SkeletonKey's aggregator catalog publishes no verified per-call price for this " +
+            "vendor, so there is no aggregator route to configure."
+          : `Sign up with ${cheapest.name} at ${cheapest.endpoint.signup_url} (fiat -- your own ` +
+            `card, there is no crypto rail) and store the key with \`skeletonkey add ` +
+            `${cheapest.name}\`; the runner reads it from the vault and the agent never sees it.`);
+      log(`request ${request.id}: needs_human -- no configured aggregator key`);
+      void notifier
+        .notify({
+          title: `SkeletonKey: no aggregator key for ${request.vendor}`,
+          body:
+            cheapest === undefined
+              ? "No aggregator in the catalog carries this vendor at a verified price."
+              : `Nothing was routed. Sign up with ${cheapest.name} at ` +
+                `${cheapest.endpoint.signup_url} to use this route.`,
+        })
+        .catch(() => {
+          // The steps are in the request and in the log either way.
+        });
+      return requests.update(
+        request.id,
+        {
+          status: "needs_human",
+          reason,
+          notes: [...request.notes, ...instructions, ...selection.notes],
+        },
+        "runner",
+        "no aggregator key",
+      );
+    }
+
+    // Vault reads yield: cancellation or the kill switch may have intervened.
+    const current = requests.get(request.id);
+    if (current === undefined || current.status !== "approved") return current ?? request;
+    if (killSwitchState(home).engaged) {
+      return requests.update(request.id, { status: "voided", reason: "Kill switch engaged before routing." }, "runner", "kill switch");
+    }
+
+    const { candidate, key, secret } = selection.chosen;
+    const price = candidate.per_call_price_usd;
+
+    // The caps are re-checked immediately before the call, against a freshly
+    // read policy and ledger -- both can have moved since the human approved.
+    const check = checkSpend({
+      policy: readPolicy(home),
+      vendor: request.vendor,
+      amount_usd: price,
+      month_to_date_usd: monthToDate(),
+      vendor_to_date_usd: vendorToDate(request.vendor, request.domain),
+    });
+    if (!check.allowed) {
+      log(`request ${request.id}: route BLOCKED by the caps -- ${check.reason}`);
+      return requests.update(
+        request.id,
+        {
+          status: "needs_human",
+          reason:
+            "Blocked immediately before the call: the caps were re-checked and " +
+            `${check.reason} Nothing was routed through ${candidate.name} and nothing was ` +
+            "charged. An agent can never raise a cap.",
+        },
+        "runner",
+        "over cap at route time",
+      );
+    }
+
+    const provider = providerSlug(entry?.name ?? request.vendor, entry?.domain ?? request.domain);
+    log(
+      `request ${request.id}: routing ${request.vendor} through ${candidate.name} as ` +
+        `${provider} at $${price} per call, with the key in ${key.alias} (value never logged)`,
+    );
+    const result = await callAggregator({
+      endpoint: candidate.endpoint,
+      secret,
+      provider,
+      vendor: request.vendor,
+      purpose: request.purpose,
+    });
+    // What the aggregator reported, else the verified per-call price. A call
+    // that did not succeed is recorded with no cost: unknown is not zero.
+    const cost = result.ok ? (result.cost_usd ?? price) : null;
+    ledger.record({
+      alias: key.alias,
+      domain: request.domain ?? request.vendor,
+      status: result.http_status,
+      bytes: result.bytes,
+      cost,
+    });
+    touchLastUsed(key.alias, new Date().toISOString(), home);
+
+    // 401/402/403 is the aggregator refusing the key or the balance, which only
+    // a human can put right; anything else failed on its own terms.
+    const humanFixable =
+      result.http_status !== null && [401, 402, 403].includes(result.http_status);
+    const status = result.ok ? "ready" : humanFixable ? "needs_human" : "failed";
+    const reason = result.ok
+      ? `Routed through ${candidate.name} at $${cost} for this call (HTTP ${result.http_status}). ` +
+        `The ${candidate.name} key stayed in the runner; the answer is in routed_result and the ` +
+        "cost is in the ledger."
+      : `${result.reason} ` +
+        (humanFixable
+          ? `That is ${candidate.name} refusing the key or the balance, which only a human can ` +
+            `fix: check the account at ${candidate.endpoint.signup_url}. `
+          : "") +
+        "Nothing was recorded as charged.";
+    log(
+      `request ${request.id}: ${status} via ${candidate.name} ` +
+        `(HTTP ${result.http_status ?? "no answer"}, ${result.bytes} bytes, ` +
+        `${cost === null ? "nothing recorded as charged" : `$${cost} in the ledger`})`,
+    );
+    return requests.update(
+      request.id,
+      {
+        status,
+        reason,
+        handle: result.ok ? `aggregator:${candidate.name}` : null,
+        routed_via: candidate.name,
+        routed_cost_usd: cost,
+        routed_http_status: result.http_status,
+        routed_result: result.body === "" ? null : redactor.redact(result.body),
+      },
+      "runner",
+      `routed via ${candidate.name}`,
     );
   }
 
@@ -893,6 +1163,27 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       return;
     }
 
+    if (request.status !== "pending_approval") {
+      // A re-posted form (a double click, a reloaded tab) must not approve the
+      // same thing twice: a second yes to an aggregator route would pay for a
+      // second call.
+      log(`request ${request.id}: approve ignored -- already ${request.status}`);
+      sendHtml(
+        res,
+        200,
+        page(
+          "Already decided",
+          `<p>This request is already <code>${escapeHtml(request.status)}</code>, so nothing was ` +
+            `approved again: one yes is one decision.</p>` +
+            (request.routed_via === null
+              ? ""
+              : `<p>It was routed through <strong>${escapeHtml(request.routed_via)}</strong> ` +
+                "already; a second yes would have paid for a second call.</p>"),
+        ),
+      );
+      return;
+    }
+
     const globalCap = parseMoney(form["global_cap"]);
     const vendorCapInput = parseMoney(form["vendor_cap"]);
     if (request.asks_human_to_set_caps && globalCap === undefined && vendorCapInput === undefined) {
@@ -929,7 +1220,17 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
           (settled.follow_up_id === null
             ? ""
             : `<p>Direct signup did not complete, so a second approval asks about the aggregator ` +
-              `fallback: <a href="/approve/${escapeHtml(settled.follow_up_id)}">decide that one</a>.</p>`),
+              `fallback: <a href="/approve/${escapeHtml(settled.follow_up_id)}">decide that one</a>.</p>`) +
+          (settled.routed_via === null
+            ? ""
+            : `<p>Routed through <strong>${escapeHtml(settled.routed_via)}</strong> (HTTP ` +
+              `${settled.routed_http_status ?? "no answer"}, ` +
+              `${
+                settled.routed_cost_usd === null
+                  ? "nothing recorded as charged"
+                  : `$${settled.routed_cost_usd} recorded in the ledger`
+              }). The aggregator's key was read from your vault by the runner and never shown to ` +
+              `the agent.</p>`),
       ),
     );
   }
@@ -994,6 +1295,7 @@ export async function startRunner(options: RunnerOptions = {}): Promise<RunnerHa
       asks_human_to_set_caps: request.asks_human_to_set_caps,
       domain_allowlisted: request.domain_allowlisted,
       follow_up_request_id: request.follow_up_id,
+
     };
   }
 
