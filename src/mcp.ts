@@ -245,7 +245,6 @@ function billingFacts(entry: ApiEntry | null): Record<string, unknown> {
     free_tier_covers_api: billing?.free_tier_covers_api ?? null,
     verified_url: billing?.verified_url ?? null,
     verified_date: billing?.verified_date ?? null,
-    x402_url: billing?.x402_url ?? null,
     note:
       billing === null || billing.model === null
         ? "No billing model recorded: null means nobody checked, NOT free. Verify the vendor's own " +
@@ -291,7 +290,6 @@ function carriageView(entry: ApiEntry | null): Record<string, unknown>[] {
     carries: item.carries,
     per_call_price_usd: item.per_call_price ?? null,
     price_verified_url: item.price_verified_url ?? null,
-    x402: item.x402 ?? null,
     price_note: item.price_note ?? null,
   }));
 }
@@ -1274,7 +1272,6 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             verified_url: "the vendor page you read the model off, or null",
             verified_date: "YYYY-MM-DD, required whenever verified_url is set",
             free_tier_covers_api: "true | false | null -- does the free tier include API access?",
-            x402_url: "vendor page documenting x402/agentic payment, or null",
           },
           aggregator_shape: {
             name: [...AGGREGATOR_NAMES],
@@ -1312,7 +1309,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       url: z.string().describe("http(s) URL of the API or its docs."),
       access_mode: z
         .string()
-        .describe("x402 | intermediary | own-account | byok -- how access is actually paid for."),
+        .describe("intermediary | own-account | byok -- how access is actually paid for."),
       source_urls: z
         .array(z.string())
         .describe("Every page you read these facts from. At least one is required."),
@@ -1330,7 +1327,6 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           verified_url: z.string().nullable().optional(),
           verified_date: z.string().nullable().optional(),
           free_tier_covers_api: z.boolean().nullable().optional(),
-          x402_url: z.string().nullable().optional(),
         })
         .optional()
         .describe("How the vendor charges, with the page you read it off."),
@@ -1341,7 +1337,6 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             carries: z.boolean(),
             per_call_price: z.number().nullable().optional(),
             price_verified_url: z.string().nullable().optional(),
-            x402: z.boolean().nullable().optional(),
             price_note: z.string().nullable().optional(),
           }),
         )

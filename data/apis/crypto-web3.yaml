@@ -3,36 +3,36 @@
 apis:
   - id: "blockrun"
     name: "BlockRun"
-    capability: "On-chain data and analytics endpoints billed over the x402 payment protocol."
+    capability: "On-chain data and analytics endpoints."
     category: "crypto-web3"
     provider_url: "https://blockrun.ai"
     docs_url: null
-    access_mode: "x402"
-    signup: "self-serve"
-    signup_automatable: "yes"
+    access_mode: "unknown"
+    signup: "unknown"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "unknown"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply."
+    tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools/blockrun"
     checked_date: 2026-10-24
   - id: "capminal"
     name: "Capminal"
-    capability: "AI-assisted deep research reports on crypto tokens, served as an x402-paid endpoint."
+    capability: "AI-assisted deep research reports on crypto tokens."
     category: "crypto-web3"
     provider_url: "https://www.capminal.ai"
     docs_url: null
-    access_mode: "x402"
-    signup: "self-serve"
-    signup_automatable: "yes"
+    access_mode: "unknown"
+    signup: "unknown"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "unknown"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply."
+    tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
   - id: "defillama"
@@ -54,19 +54,19 @@ apis:
     checked_date: 2026-10-24
   - id: "emc2ai"
     name: "EMC2 AI"
-    capability: "Token holder-distribution and concentration-risk checks, served as an x402-paid endpoint."
+    capability: "Token holder-distribution and concentration-risk checks."
     category: "crypto-web3"
     provider_url: "https://emc2ai.io"
     docs_url: null
-    access_mode: "x402"
-    signup: "self-serve"
-    signup_automatable: "yes"
+    access_mode: "unknown"
+    signup: "unknown"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "unknown"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply."
+    tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
   - id: "quicknode"
@@ -75,15 +75,15 @@ apis:
     category: "crypto-web3"
     provider_url: "https://www.quicknode.com"
     docs_url: "https://www.quicknode.com/docs"
-    access_mode: "x402"
+    access_mode: "own-account"
     signup: "self-serve"
-    signup_automatable: "yes"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "api_key"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply. QuickNode also sells ordinary self-serve accounts outside x402."
+    tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/quicknode"
     checked_date: 2026-10-24
   - id: "surf"
@@ -102,21 +102,4 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/surf"
-    checked_date: 2026-10-24
-  - id: "x402atlas"
-    name: "x402 Atlas"
-    capability: "Directory and telemetry for x402 servers and payments on Base; also resells Google Trends data over x402."
-    category: "crypto-web3"
-    provider_url: "https://x402atlas.com"
-    docs_url: null
-    access_mode: "x402"
-    signup: "self-serve"
-    signup_automatable: "yes"
-    min_topup: null
-    billing_unit: null
-    free_tier: null
-    auth_type: "none"
-    seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply. Aggregates other operators' x402 endpoints, so terms vary per underlying endpoint."
-    source_url: "https://monid.ai/tools/x402atlas"
     checked_date: 2026-10-24

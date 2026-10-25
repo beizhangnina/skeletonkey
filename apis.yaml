@@ -11,7 +11,6 @@
 #   name                 string, required, unique. Short slug for the API.
 #   url                  string, required. http(s) URL of the API or its docs.
 #   access_mode          string, required. One of:
-#                          x402          -- pay per request over HTTP 402 / x402
 #                          intermediary  -- a gateway resells access; you top up the gateway
 #                          own-account   -- you hold the account and the billing relationship
 #                          byok          -- the service accepts a key you got elsewhere
@@ -76,12 +75,13 @@
 # MCP tools turn the two into a {route, reason}: direct when the vendor is
 # pay-as-you-go or its free tier covers the API, through the cheapest aggregator
 # that publishes a per-call price when direct access needs a monthly
-# subscription, or x402 where that exists. A number with no URL behind it is not
-# allowed in either block -- the validator rejects it.
+# subscription. Payment is fiat only: there is no crypto rail, and no route that
+# pays per call from a wallet. A number with no URL behind it is not allowed in
+# either block -- the validator rejects it.
 #
 #   billing:
 #     model                 payg | subscription | free_tier+payg |
-#                           free_tier+subscription | x402 | free, or null.
+#                           free_tier+subscription | free, or null.
 #                           null = nobody checked. It never means free.
 #                           `free` means no paid tier exists at all.
 #     free_tier_note        string or null. REQUIRED when model names a free
@@ -94,8 +94,6 @@
 #     free_tier_covers_api  boolean or null. Does the free tier include API
 #                           access? null = not established, and the router then
 #                           refuses to treat the free tier as a usable route.
-#     x402_url              http(s) URL or null. Vendor page documenting that it
-#                           accepts x402 / agentic payment.
 #
 #   aggregators: list of:
 #     name                  monid | glasser | flatkey.
@@ -106,7 +104,6 @@
 #                           it per result or in tiers, so no comparable per-call
 #                           number exists. null is never "free".
 #     price_verified_url    http(s) URL. REQUIRED whenever per_call_price is set.
-#     x402                  boolean or null. Does the catalog accept x402 here?
 #     price_note            string or null. What the number means, or why it is
 #                           null. Carriage for rows that do not state their own
 #                           is inherited from the generated shards' `seen_in`.
@@ -135,19 +132,6 @@
 
 version: 1
 entries:
-  - name: example-x402-endpoint
-    url: https://example.com/x402-demo
-    access_mode: x402
-    min_topup: null
-    billing_unit: per request
-    signup_automatable: null
-    tos_notes: >-
-      Placeholder row demonstrating the x402 access mode: the endpoint answers
-      402 with payment instructions and no account is created. Terms not reviewed.
-    source: null
-    checked_date: null
-    example: true
-
   - name: example-intermediary-gateway
     url: https://example.com/gateway
     access_mode: intermediary
@@ -225,7 +209,6 @@ entries:
       free_tier_covers_api: null
       verified_url: https://docs.x.com/x-api/getting-started/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
@@ -303,28 +286,23 @@ entries:
       free_tier_covers_api: true
       verified_url: https://apify.com/pricing
       verified_date: "2026-10-24"
-      x402_url: https://apify.com/pricing
     aggregators:
       - name: monid
         carries: true
         per_call_price: 0.002
         price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apify
-        x402: true
         price_note: >-
           Monid lists 62 Apify endpoints. Only 2 of them carry a flat PER_CALL price
           ($0.002); 40 are PER_RESULT ($0.0001-$0.01 per row), 18 are TIERED and 2 are
           PER_UNIT_MATRIX, so $0.002 is the lowest flat per-call price and NOT a typical
-          cost per scrape. Every endpoint advertises
-          supportedX402Networks ["eip155:8453", "eip155:143"].
+          cost per scrape.
       - name: glasser
         carries: true
         per_call_price: 0.001
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: >-
           Glasser lists 83 Apify endpoints: 26 priced per run ($0.001 and up, the lowest
-          flat per-call price) and 57 priced per result (from $0.00015). Glasser's catalog
-          says nothing about x402, so that stays null.
+          flat per-call price) and 57 priced per result (from $0.00015).
       - name: flatkey
         carries: false
         per_call_price: null
@@ -337,12 +315,9 @@ entries:
       Apify's own API docs: "Add the token to your request's Authorization header as
       Bearer <token>" (the `token` query parameter is also accepted and is explicitly
       called less secure -- do not use it). Billing is verified on Apify's own pricing
-      page; signup automation rules are NOT reviewed. Apify's pricing FAQ answers "Can an
-      AI agent pay for Actor runs without an Apify account?" with "Yes. An autonomous
-      agent with a crypto wallet can pay through the agentic payment protocols x402 and
-      MPP, with no account", which is why billing.x402_url is set. Note that scraping
-      terms belong to the *target* site as well as to Apify; an agent must not assume
-      either is permissive.
+      page; signup automation rules are NOT reviewed. SkeletonKey holds an ordinary Apify
+      account key and pays in fiat. Note that scraping terms belong to the *target* site
+      as well as to Apify; an agent must not assume either is permissive.
     source: https://docs.apify.com/api/v2
     checked_date: null
     example: true
@@ -387,7 +362,6 @@ entries:
       free_tier_covers_api: true
       verified_url: https://docs.voyageai.com/docs/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
@@ -475,24 +449,19 @@ entries:
       free_tier_covers_api: null
       verified_url: https://www.apollo.io/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: true
         per_call_price: 0.026
         price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apollo
-        x402: true
         price_note: >-
           Monid lists 8 Apollo endpoints: 7 flat PER_CALL ($0.026 for organization and
           people enrichment, news and company search; $0 for /mixed_people/api_search)
           and /people/match as TIERED. $0.026 is the lowest non-zero flat per-call price.
-          Every endpoint advertises supportedX402Networks
-          ["eip155:8453", "eip155:143"].
       - name: glasser
         carries: true
         per_call_price: 0.026
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: >-
           Glasser lists 10 Apollo endpoints: $0.026 per run for people/match,
           organizations/enrich, mixed_companies/search and news_articles/search, $0.05 per
@@ -560,7 +529,6 @@ entries:
       free_tier_covers_api: true
       verified_url: https://www.dropleads.io/#pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false

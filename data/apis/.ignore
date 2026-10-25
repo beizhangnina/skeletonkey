@@ -1,0 +1,6 @@
+# Search-tool ignore (ripgrep, fd). Git already ignores raw/ via the root
+# .gitignore, but that pattern is anchored to the repo root, so it is not
+# applied when a search is rooted at `data/` instead. raw/ holds verbatim
+# third-party catalog captures that build.py reads; it is not repo source and
+# should never show up in a code search.
+raw/

@@ -223,15 +223,6 @@ export function staleTargets(entries: ApiEntry[]): StaleTarget[] {
         claim: billing.model,
       });
     }
-    if (billing?.x402_url != null) {
-      targets.push({
-        entry: entry.name,
-        field: "billing.x402_url",
-        url: billing.x402_url,
-        verified_date: billing.verified_date ?? null,
-        claim: "accepts x402",
-      });
-    }
     for (const carrier of entry.aggregators ?? []) {
       if (carrier.price_verified_url == null) continue;
       targets.push({

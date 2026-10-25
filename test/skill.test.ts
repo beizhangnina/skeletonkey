@@ -64,9 +64,12 @@ describe("skills/skeletonkey/SKILL.md", () => {
   it("explains the route table and the words `price unverified`", () => {
     const section = SKILL.slice(SKILL.indexOf("### 1a."), SKILL.indexOf("### 1b."));
     expect(section).not.toBe("");
-    for (const route of ["`direct`", "`aggregator:<name>`", "`x402`", "`unknown`"]) {
-      expect(section, route).toContain(route);
-    }
+    // The route table documents exactly the fiat route set -- the same three
+    // the router can emit, and no payment rail beyond them. Read the table body
+    // (everything after the `| --- |` separator) so the header is not a route.
+    const body = section.slice(section.indexOf("| --- |"));
+    const documented = [...body.matchAll(/^\| (`[^`]+`) \|/gm)].map((match) => match[1]);
+    expect(documented.sort()).toEqual(["`aggregator:<name>`", "`direct`", "`unknown`"]);
     expect(section).toMatch(/price unverified/);
     expect(section).toMatch(/billing\.model: null` means nobody checked/);
     expect(section).toMatch(/never means free/);

@@ -26,7 +26,7 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
             'source_url', 'checked_date']
 
 ENUMS = {
-    'access_mode': {'x402', 'intermediary', 'own-account', 'byok', 'unknown'},
+    'access_mode': {'intermediary', 'own-account', 'byok', 'unknown'},
     'signup': {'self-serve', 'sales', 'waitlist', 'unknown'},
     'signup_automatable': {'yes', 'partial', 'no', 'unknown'},
     'auth_type': {'api_key', 'oauth', 'none', 'unknown'},

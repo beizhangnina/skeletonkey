@@ -28,7 +28,7 @@ Validate with:
 
 ```
 python3 data/apis/scripts/validate.py
-# shards: 26   entries: 163   unique ids: 163
+# shards: 26   entries: 162   unique ids: 162
 # OK: all entries valid
 ```
 
@@ -39,14 +39,14 @@ the exact shape `build.py` emits, so it runs on a bare interpreter too.
 
 ### Deduped total
 
-**163 providers** across 26 category shards.
+**162 providers** across 26 category shards.
 
 ### Per source (`seen_in`)
 
 | catalog | providers indexed | underlying listings behind them |
 |---|---|---|
 | glasser | 105 | 2,170 endpoints (catalog self-reports 105 providers) |
-| monid   | 93  | 2,900 endpoints + 9 rentable resources (catalog self-reports 2,853–2,900) |
+| monid   | 92  | 2,900 endpoints + 9 rentable resources (catalog self-reports 2,853–2,900) |
 | flatkey | 16  | 85 model rows on the public models directory |
 
 Overlap between catalogs:
@@ -54,14 +54,15 @@ Overlap between catalogs:
 | appears in | providers |
 |---|---|
 | glasser only | 60 |
-| monid only | 43 |
+| monid only | 42 |
 | flatkey only | 10 |
 | glasser + monid | 44 |
 | flatkey + monid | 5 |
 | all three | 1 (`typesafe`) |
 
 Monid markets "1,700+ tools" and Flatkey "1,000+ metered tools". Monid's public
-API confirms the endpoint-level number (2,900 endpoints, 93 providers) — the
+API confirms the endpoint-level number (2,900 endpoints, 93 providers, 92 of
+them indexed here) — the
 inflation is endpoints-per-provider, not missing providers. Flatkey's tool count
 could **not** be confirmed: its tool catalog is login-only (see *Blocked* below),
 so Flatkey contributes only model-layer vendors here.
@@ -91,32 +92,30 @@ so Flatkey contributes only model-layer vendors here.
 
 | access_mode | n | meaning as used here |
 |---|---|---|
-| own-account | 103 | the vendor documents direct API access you can hold your own key for |
+| own-account | 105 | the vendor documents direct API access you can hold your own key for |
 | intermediary | 46 | no first-party public data API identified — the catalogs appear to reach it by scraping |
-| x402 | 7 | exposed as an x402-paid HTTP endpoint, callable from a wallet with no account |
-| unknown | 7 | not determined from public material |
+| unknown | 11 | not determined from public material |
 
 `byok` is a legal value in the schema but no entry warranted it: none of the
 three catalogs documents bring-your-own-key passthrough for a named provider.
 
 ### Other field coverage
 
-- **provider_url resolved: 146 / 163 = 89.6 %.** The 17 nulls are vendors whose
+- **provider_url resolved: 145 / 162 = 89.5 %.** The 17 nulls are vendors whose
   homepage was neither stated by a catalog nor well-known enough to assert:
   `aviato`, `edinet`, `justoneapi`, `kadec0`, `macaron`, `metixai`, `octen`,
   `orbit`, `ploid`, `saperly`, `sfs`, `sonilo`, `surf`, `suzanne`, `tiktok-shop`,
   `typesafe`, `valyu`.
-- **docs_url resolved: 46 / 163 = 28.2 %** — 36 came straight from Monid's
+- **docs_url resolved: 46 / 162 = 28.4 %** — 36 came straight from Monid's
   provider records, the rest are well-known developer-docs domains.
-- `signup`: self-serve 74, sales 8, unknown 81.
-- `auth_type`: api_key 90, unknown 57, none 9, oauth 7.
-- `min_topup`, `billing_unit`, `free_tier`: **null on all 163 entries.** The brief
+- `signup`: self-serve 69, sales 8, unknown 85.
+- `auth_type`: api_key 92, unknown 61, oauth 7, none 2.
+- `min_topup`, `billing_unit`, `free_tier`: **null on all 162 entries.** The brief
   requires these to be verified on the provider's own pricing page, and that
   verification was not performed. The aggregators do publish their own resale
   prices, but copying those would describe the aggregator, not the provider.
-- `signup_automatable`: `yes` only for the 7 x402 entries (the protocol is
-  machine-payable with no account at all), `no` for the 8 sales-gated vendors,
-  `unknown` everywhere else — no signup flow was actually attempted.
+- `signup_automatable`: `no` for the 8 sales-gated vendors and `unknown` for the
+  other 154 — no signup flow was actually attempted, so nothing is `yes`.
 
 ## Method, per catalog
 
@@ -204,19 +203,23 @@ glasser-only providers come from `curated.py`, not from Glasser.
 
 ## Caveats
 
-- **The unit is the provider, not the endpoint.** 163 providers sit on top of
+- **The unit is the provider, not the endpoint.** 162 providers sit on top of
   ~5,100 listed endpoints. Endpoint-level detail was deliberately not copied.
 - **`access_mode` describes the direct path to the vendor**, not how the
   aggregator bills you. A vendor marked `own-account` may still be resold by all
   three catalogs; a vendor marked `intermediary` is one we could not find a
   first-party public API for, which is a statement about our search, not proof
   that none exists.
-- Monid's catalog flags x402 payment support on nearly every endpoint, but that
-  is *Monid* accepting x402. `access_mode: x402` here is reserved for providers
-  exposed directly as x402 endpoints (identified by x402 hostnames or explicit
-  x402 wording): `blockrun`, `browserbase`, `capminal`, `emc2ai`, `kadec0`,
-  `quicknode`, `x402atlas`. Browserbase and QuickNode also sell ordinary
-  self-serve accounts; that is noted in their `tos_notes`.
+- **SkeletonKey pays in fiat only, so the index records no crypto-payment
+  rail.** Monid's catalog advertises per-call wallet payment on nearly every
+  endpoint; none of that is represented here, and there is no `access_mode` for
+  it. Seven providers were previously classified by that rail alone. Six are
+  kept as ordinary APIs: `browserbase` and `quicknode` sell self-serve accounts
+  and are recorded `own-account`, while `blockrun`, `capminal`, `emc2ai` and
+  `kadec0` drop to `access_mode: unknown` because no other access path was
+  verified for them. The seventh was a directory of payment endpoints rather
+  than an API in its own right, and is no longer indexed — `build.py` reports
+  it as an uncurated catalog slug and skips it.
 - Two Alibaba products are kept apart because the catalogs list different
   things: `alibaba-com` (the B2B marketplace, via Glasser) and `alibaba-cloud`
   (Model Studio / Qwen / WAN, via Monid and Flatkey). Likewise `us-census-bureau`

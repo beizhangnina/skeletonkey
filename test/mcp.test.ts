@@ -760,10 +760,10 @@ describe("billing and routing in the tool responses", () => {
     expect(parsed.routing.per_call_price_usd).toBe(0.026);
     expect(parsed.routing.price_verified_url).toMatch(/^https:\/\/api\.monid\.ai\//);
     expect(parsed.routing.billing_model).toBe("free_tier+subscription");
-    // The dearer carrier, the direct subscription, and x402 all stay visible.
+    // The dearer carrier and the direct subscription both stay visible, and
+    // those are the only alternatives: no crypto rail is offered alongside them.
     const alternatives = parsed.routing.alternatives.map((option: any) => option.route);
-    expect(alternatives).toContain("aggregator:glasser");
-    expect(alternatives).toContain("direct");
+    expect(alternatives.sort()).toEqual(["aggregator:glasser", "direct"]);
   });
 
   it("routes to the proxy once a key exists, and still shows the billing facts", async () => {

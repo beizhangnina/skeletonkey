@@ -14,7 +14,7 @@ export {
   type CapabilityScore,
 } from "./match.js";
 
-export const ACCESS_MODES = ["x402", "intermediary", "own-account", "byok"] as const;
+export const ACCESS_MODES = ["intermediary", "own-account", "byok"] as const;
 export type AccessMode = (typeof ACCESS_MODES)[number];
 
 /**
@@ -25,7 +25,6 @@ export type AccessMode = (typeof ACCESS_MODES)[number];
  *   subscription             a recurring plan is required before the API works
  *   free_tier+payg           a free allowance, then metered usage
  *   free_tier+subscription   a free plan, then a recurring plan for more
- *   x402                     payable per call over HTTP 402 / x402, no account
  *   free                     no paid tier exists at all (e.g. a public gov API)
  *
  * `free` is an extension beyond the five models the v0.2 brief named: forcing a
@@ -37,7 +36,6 @@ export const BILLING_MODELS = [
   "subscription",
   "free_tier+payg",
   "free_tier+subscription",
-  "x402",
   "free",
 ] as const;
 export type BillingModel = (typeof BILLING_MODELS)[number];
@@ -67,8 +65,6 @@ export interface BillingFacts {
    * the free tier as a usable route.
    */
   free_tier_covers_api?: boolean | null;
-  /** Vendor page documenting that it accepts x402/agentic payment, or null. */
-  x402_url?: string | null;
 }
 
 /**
@@ -85,8 +81,6 @@ export interface AggregatorCarriage {
   carries: boolean;
   per_call_price: number | null;
   price_verified_url: string | null;
-  /** Does the aggregator accept x402 for this provider? null = not checked. */
-  x402?: boolean | null;
   /** What the number means, or why it is null. */
   price_note?: string | null;
 }
@@ -489,7 +483,6 @@ function validateBilling(errors: string[], at: string, value: unknown): void {
     "verified_url",
     "verified_date",
     "free_tier_covers_api",
-    "x402_url",
   ]);
   for (const key of Object.keys(raw)) {
     if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
@@ -509,11 +502,13 @@ function validateBilling(errors: string[], at: string, value: unknown): void {
   }
   requireStringOrNull(errors, field, "free_tier_note", raw["free_tier_note"]);
 
-  for (const key of ["verified_url", "x402_url"] as const) {
-    const url = raw[key];
-    if (url !== null && url !== undefined && !(typeof url === "string" && isHttpUrl(url))) {
-      errors.push(`${field}.${key}: expected an http(s) URL or null`);
-    }
+  const verifiedUrl = raw["verified_url"];
+  if (
+    verifiedUrl !== null &&
+    verifiedUrl !== undefined &&
+    !(typeof verifiedUrl === "string" && isHttpUrl(verifiedUrl))
+  ) {
+    errors.push(`${field}.verified_url: expected an http(s) URL or null`);
   }
   const date = raw["verified_date"];
   if (date !== null && date !== undefined) {
@@ -556,7 +551,6 @@ function validateAggregators(errors: string[], at: string, value: unknown): void
       "carries",
       "per_call_price",
       "price_verified_url",
-      "x402",
       "price_note",
     ]);
     for (const key of Object.keys(item)) {
@@ -590,10 +584,6 @@ function validateAggregators(errors: string[], at: string, value: unknown): void
     const url = item["price_verified_url"];
     if (url !== null && url !== undefined && !(typeof url === "string" && isHttpUrl(url))) {
       errors.push(`${row}.price_verified_url: expected an http(s) URL or null`);
-    }
-    const x402 = item["x402"];
-    if (x402 !== null && x402 !== undefined && typeof x402 !== "boolean") {
-      errors.push(`${row}.x402: expected a boolean or null`);
     }
     requireStringOrNull(errors, row, "price_note", item["price_note"]);
   });
@@ -672,7 +662,6 @@ function billingFacts(raw: Record<string, unknown>): BillingFacts {
     verified_url: text("verified_url"),
     verified_date: text("verified_date"),
     free_tier_covers_api: flag("free_tier_covers_api"),
-    x402_url: text("x402_url"),
   };
 }
 
@@ -683,7 +672,6 @@ function carriage(raw: Record<string, unknown>): AggregatorCarriage {
     per_call_price: typeof raw["per_call_price"] === "number" ? raw["per_call_price"] : null,
     price_verified_url:
       typeof raw["price_verified_url"] === "string" ? (raw["price_verified_url"] as string) : null,
-    x402: typeof raw["x402"] === "boolean" ? (raw["x402"] as boolean) : null,
     price_note: typeof raw["price_note"] === "string" ? (raw["price_note"] as string) : null,
   };
 }
@@ -871,7 +859,6 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
     carries: seenIn.includes(name),
     per_call_price: null,
     price_verified_url: null,
-    x402: null,
     price_note: seenIn.includes(name)
       ? `Carriage from the generated index (seen_in). ${name} publishes its own resale price; ` +
         "nobody has read it, so per_call_price is null (unknown, not free)."

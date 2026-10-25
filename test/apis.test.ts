@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ACCESS_MODES,
+  BILLING_MODELS,
   apiIndexCacheStats,
   clearApiIndexCache,
   loadApiIndex,
@@ -546,7 +547,14 @@ describe("the billing block", () => {
     validateApis({ version: 1, entries: [entry({ billing: value })] }).errors;
 
   it("accepts every documented model, plus null for nobody-checked", () => {
-    for (const model of ["payg", "subscription", "free_tier+payg", "free_tier+subscription", "x402", "free"]) {
+    expect([...BILLING_MODELS].sort()).toEqual([
+      "free",
+      "free_tier+payg",
+      "free_tier+subscription",
+      "payg",
+      "subscription",
+    ]);
+    for (const model of BILLING_MODELS) {
       const needsNote = model.startsWith("free_tier");
       expect(
         check(billing({ model, ...(needsNote ? { free_tier_note: "10 free calls a day" } : {}) })),
@@ -607,7 +615,7 @@ describe("the aggregators block", () => {
   it("accepts the three catalogs, carrying or not", () => {
     expect(
       check([
-        { name: "monid", carries: true, per_call_price: 0.01, price_verified_url: "https://m.test/p", x402: true },
+        { name: "monid", carries: true, per_call_price: 0.01, price_verified_url: "https://m.test/p" },
         { name: "glasser", carries: true, per_call_price: null, price_verified_url: null, price_note: "per result" },
         { name: "flatkey", carries: false, per_call_price: null, price_verified_url: null },
       ]),
@@ -709,9 +717,10 @@ describe("the verified billing facts shipped in apis.yaml", () => {
     }
   });
 
-  it("records Apify's x402 path, verified on Apify's own pricing page", () => {
+  it("records Apify's auth facts and its fiat billing, read off Apify's own pages", () => {
     const apify = byName.get("example-apify-scraping");
-    expect(apify?.billing?.x402_url).toBe("https://apify.com/pricing");
+    expect(apify?.billing?.model).toBe("free_tier+subscription");
+    expect(apify?.billing?.verified_url).toBe("https://apify.com/pricing");
     expect(apify?.auth_header).toBe("Authorization");
     expect(apify?.auth_format).toBe("Bearer {key}");
     expect(apify?.base_url).toBe("https://api.apify.com/v2");
@@ -758,7 +767,15 @@ describe("carriage derived from the generated shards", () => {
       // The shards record no prices at all, so none may be implied here.
       expect(item.per_call_price, item.name).toBeNull();
       expect(item.price_verified_url, item.name).toBeNull();
-      expect(item.x402, item.name).toBeNull();
+      // Exact key set: a carriage row carries carriage and price provenance and
+      // nothing else, so a new payment-rail field cannot slip in unnoticed.
+      expect(Object.keys(item).sort(), item.name).toEqual([
+        "carries",
+        "name",
+        "per_call_price",
+        "price_note",
+        "price_verified_url",
+      ]);
     }
     // And no billing model is invented from a shard row either.
     expect(apollo?.billing).toBeNull();

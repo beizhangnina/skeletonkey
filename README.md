@@ -96,11 +96,11 @@ Deliberately **not** in v0.3:
 - **No automated vendor signup.** `src/signup/types.ts` ships the interfaces and
   the honest default (every vendor is a human handoff). Playbooks for Apify,
   TikHub, Apollo and DropLeads land in v0.5.
-- **No crypto rails.** Fiat only (D6). v0.3 added no x402, USDC, stablecoin or
-  wallet code, and nothing here pays for anything over a crypto rail. The index
-  still *records* `billing.x402_url` where a vendor advertises one, and the v0.2
-  router can still report an `x402` route as an observation — that is a note
-  about the vendor, not a payment path SkeletonKey implements.
+- **No crypto rails.** Fiat only (D6). There is no stablecoin or wallet code
+  anywhere here, and nothing pays for anything over a crypto rail. The index
+  records no crypto-payment field, and the router has no crypto route to
+  report — not even as an observation about a vendor. The route set is exactly
+  `direct`, `aggregator:<name>` and `unknown`.
 - **No virtual cards.** One card in Bitwarden, plus SkeletonKey's own caps and
   approvals.
 - **No inbox reader yet.** The bound-inbox rung exists with its filter rules
@@ -749,7 +749,7 @@ for that alias, so `skeletonkey idle` keeps working even if one of the two is re
 ## `apis.yaml`
 
 A hand-maintained index of APIs and how they are paid for: `name`, `url`,
-`access_mode` (`x402` | `intermediary` | `own-account` | `byok`), `min_topup`,
+`access_mode` (`intermediary` | `own-account` | `byok`), `min_topup`,
 `billing_unit`, `signup_automatable`, `tos_notes`, `source`, `checked_date`, plus
 optional `capabilities` (the tags `find_api` matches), `domain`, the auth fields
 below, and the `billing` / `aggregators` blocks that drive routing. The full
@@ -816,19 +816,17 @@ Each row can record **how the vendor charges**, and who resells it:
 ```yaml
 billing:
   model: free_tier+payg          # payg | subscription | free_tier+payg
-                                 # | free_tier+subscription | x402 | free | null
+                                 # | free_tier+subscription | free | null
   free_tier_note: >-             # what the free tier IS, in the vendor's numbers
     the first 200 million tokens ... are free for every account
   free_tier_covers_api: true     # true | false | null -- does it cover the API?
   verified_url: https://docs.voyageai.com/docs/pricing
   verified_date: "2026-10-24"
-  x402_url: null                 # vendor page documenting x402, if any
 aggregators:
   - name: glasser                # monid | glasser | flatkey
     carries: true
     per_call_price: 0.001        # lowest flat per-call price, USD, or null
     price_verified_url: https://api.glasser.ai/public/catalog
-    x402: null
     price_note: >-
       26 endpoints priced per run from $0.001; 57 priced per result ...
 ```
@@ -847,14 +845,13 @@ price, not that the call is free.
 | --- | --- |
 | `direct` | The vendor is pay-as-you-go, is free outright, or its free tier verifiably covers the API (`free_tier_covers_api: true`). Also whenever a key is already in the vault. |
 | `aggregator:<name>` | Direct access needs a **monthly subscription**, and this catalog resells the vendor per call at a verified price. Cheapest verified price wins; a tie breaks by catalog order and the reason says so. |
-| `x402` | The vendor is an x402 endpoint, documents accepting x402 on its own page, or an aggregator accepts x402 for it — payable per call from a wallet, with no account. |
 | `unknown` | No billing model is recorded. |
 
 The reason always carries the evidence (which page, read on which date), and
 contains the literal words **`price unverified`** whenever no verified price
 backs the route. Every route the router did not pick is listed in
-`alternatives`, so the subscription it skipped and the x402 path it noticed stay
-visible. The route is a recommendation about money only: it never overrides a
+`alternatives`, so the subscription it skipped and any dearer carrier it passed
+over stay visible. The route is a recommendation about money only: it never overrides a
 human gate, and an `aggregator:` route still means somebody has to hold an
 account with that aggregator.
 

@@ -22,13 +22,29 @@ def r(p): return json.load(open(os.path.join(RAW, p)))
 ALIAS = {
  'levels.fyi': 'levels-fyi', 'cars.com': 'cars-com', 'bid.cars': 'bid-cars',
  'hunterio': 'hunter', 'context.dev': 'context-dev', 'homes.com': 'homes-com',
- 'web3.career': 'web3-career', 'blockrun.ai': 'blockrun', 'api.strale.io': 'strale',
- 'api.itsgloria.ai': 'gloria', 'x402.browserbase.com': 'browserbase',
- 'x402.quicknode.com': 'quicknode', 'google-trends.use.x402atlas.com': 'x402atlas',
- 'censusdata.xyz': 'censusdata-xyz', 'emc2ai.io': 'emc2ai',
- 'www.capminal.ai': 'capminal', 'api.kadec0.xyz': 'kadec0',
+ 'web3.career': 'web3-career', 'censusdata.xyz': 'censusdata-xyz',
  'gemini': 'google-gemini', 'alibaba': 'alibaba-cloud',
 }
+# Monid names a provider by one of its endpoint hostnames, so a slug is often a
+# subdomain of the vendor's own domain. Map the registrable domain to our id and
+# ignore whatever subdomain sits in front of it.
+HOST_PID = {
+ 'blockrun.ai': 'blockrun', 'strale.io': 'strale', 'itsgloria.ai': 'gloria',
+ 'browserbase.com': 'browserbase', 'quicknode.com': 'quicknode',
+ 'emc2ai.io': 'emc2ai', 'capminal.ai': 'capminal', 'kadec0.xyz': 'kadec0',
+}
+
+
+def monid_pid(slug):
+    """Monid's provider slug -> our id, or the slug itself when unmapped."""
+    if slug in ALIAS:
+        return ALIAS[slug]
+    labels = slug.split('.')
+    for i in range(len(labels) - 1):
+        pid = HOST_PID.get('.'.join(labels[i:]))
+        if pid:
+            return pid
+    return slug
 # glasser's "alibaba" is the Alibaba.com marketplace, monid's is Alibaba Cloud;
 # glasser's "census" is the Census Bureau itself, not the censusdata.xyz wrapper.
 G_ALIAS = {'alibaba': 'alibaba-com', 'census': 'us-census-bureau'}
@@ -62,7 +78,7 @@ for p in g['providers']:
 
 # ---- monid -----------------------------------------------------------------
 for p in r('monid_providers.json')['items']:
-    pid = ALIAS.get(p['provider'], p['provider'])
+    pid = monid_pid(p['provider'])
     x = rec[pid]
     x['seen'].add('monid')
     if not x['name'] or x['name'] == p['provider']:
@@ -71,7 +87,7 @@ for p in r('monid_providers.json')['items']:
     x['docs'] = x['docs'] or p.get('docsUrl')
     x['mslug'] = p['provider']; x['counts']['monid'] = p['endpointCount']
 for res in r('monid_resources.json')['items']:
-    pid = ALIAS.get(res['provider'], res['provider'])
+    pid = monid_pid(res['provider'])
     x = rec[pid]
     x['seen'].add('monid')
     x['url'] = x['url'] or res.get('providerUrl')
@@ -116,7 +132,7 @@ NAMES = {  # display names for entries that only exist as a flatkey facet label
  'alibaba-cloud': 'Alibaba Cloud Model Studio', 'alibaba-com': 'Alibaba.com',
  'us-census-bureau': 'US Census Bureau', 'google-gemini': 'Google Gemini',
  'kadec0': 'kadec0', 'capminal': 'Capminal', 'emc2ai': 'EMC2 AI', 'gloria': 'Gloria',
- 'x402atlas': 'x402 Atlas', 'browserbase': 'Browserbase', 'quicknode': 'QuickNode',
+ 'browserbase': 'Browserbase', 'quicknode': 'QuickNode',
  'strale': 'Strale', 'hunter': 'Hunter', 'levels-fyi': 'Levels.fyi',
  'cars-com': 'Cars.com', 'bid-cars': 'bid.cars', 'homes-com': 'Homes.com',
  'web3-career': 'Web3 Career', 'blockrun': 'BlockRun', 'context-dev': 'Context.dev',
@@ -124,13 +140,16 @@ NAMES = {  # display names for entries that only exist as a flatkey facet label
  'bytedance': 'ByteDance', 'openai': 'OpenAI', 'sfs': 'Simple FS',
 }
 
-missing = sorted(set(rec) - set(curated.P))
-extra = sorted(set(curated.P) - set(rec))
-if missing or extra:
-    raise SystemExit('curated table out of sync: missing=%s extra=%s' % (missing, extra))
+stale = sorted(set(curated.P) - set(rec))
+if stale:
+    raise SystemExit('curated table out of sync: no raw record for %s' % stale)
+uncurated = sorted(set(rec) - set(curated.P))
+if uncurated:
+    print('note: %d catalog slug(s) not in the curated table, skipped: %s'
+          % (len(uncurated), uncurated))
 
 entries = []
-for pid in sorted(rec):
+for pid in sorted(set(rec) & set(curated.P)):
     x = rec[pid]
     cat, cap, purl, durl, mode, signup, auth = curated.P[pid]
     tos = curated.TOS[mode] + curated.TOS_EXTRA.get(pid, '')
@@ -143,8 +162,7 @@ for pid in sorted(rec):
         'docs_url': durl or x['docs'],
         'access_mode': mode,
         'signup': signup,
-        'signup_automatable': ('no' if signup == 'sales'
-                               else 'yes' if mode == 'x402' else 'unknown'),
+        'signup_automatable': 'no' if signup == 'sales' else 'unknown',
         'min_topup': None,
         'billing_unit': None,
         'free_tier': None,

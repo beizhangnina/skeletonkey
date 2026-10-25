@@ -80,7 +80,6 @@ from the index's verified `billing` block and the aggregator carriage:
 | --- | --- |
 | `direct` | Go to the vendor. Either it is pay-as-you-go with no plan in the way, or its free tier verifiably covers API access — the `reason` says which, and quotes the free tier. |
 | `aggregator:<name>` | Direct access needs a **monthly subscription**, and this aggregator resells the vendor per call for `per_call_price_usd`, verified at `price_verified_url`. Cheapest verified price wins; ties break by catalog order. |
-| `x402` | Payable per call from a wallet, no account and no key at all. |
 | `unknown` | No billing model is recorded. Nobody checked — which is not the same as free. |
 
 Rules for using it:

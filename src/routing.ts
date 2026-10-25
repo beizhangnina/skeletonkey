@@ -1,6 +1,6 @@
 /**
- * Which way to reach a vendor: the vendor directly, through an aggregator that
- * resells it per call, or over x402 with no account at all.
+ * Which way to reach a vendor: the vendor directly, or through an aggregator
+ * that resells it per call. Payment is fiat only -- there is no crypto rail.
  *
  * Every number this module reasons about has to have come with a URL it was
  * read from (`billing.verified_url`, `aggregators[].price_verified_url`). When
@@ -15,7 +15,7 @@ import {
   type BillingModel,
 } from "./apis.js";
 
-export type RouteKind = "direct" | "aggregator" | "x402" | "unknown";
+export type RouteKind = "direct" | "aggregator" | "unknown";
 
 export interface RouteOption {
   route: RouteKind;
@@ -92,59 +92,17 @@ function aggregatorOption(carrier: AggregatorCarriage, why: string): RouteOption
   };
 }
 
-function x402Option(entry: ApiEntry, carriers: AggregatorCarriage[]): RouteOption | null {
-  const vendorUrl = entry.billing?.x402_url ?? null;
-  const viaCarrier = carriers.find((item) => item.carries && item.x402 === true);
-  if (entry.billing?.model === "x402" || entry.access_mode === "x402") {
-    return {
-      route: "x402",
-      via: null,
-      per_call_price_usd: null,
-      price_verified_url: vendorUrl,
-      reason:
-        `The index records ${entry.name} as an x402 endpoint, so a wallet can pay per call with no ` +
-        "account and no key for SkeletonKey to hold. Nothing to sign up for; nothing to inject.",
-    };
-  }
-  if (vendorUrl !== null) {
-    return {
-      route: "x402",
-      via: null,
-      per_call_price_usd: null,
-      price_verified_url: vendorUrl,
-      reason:
-        `${entry.name} documents accepting x402/agentic payment on its own page (${vendorUrl}), so an ` +
-        "agent with a wallet can pay per call instead of holding a key. Per-call cost not published " +
-        `there, so ${PRICE_UNVERIFIED}.`,
-    };
-  }
-  if (viaCarrier !== undefined) {
-    return {
-      route: "x402",
-      via: viaCarrier.name,
-      per_call_price_usd: viaCarrier.per_call_price,
-      price_verified_url: viaCarrier.price_verified_url,
-      reason:
-        `${viaCarrier.name} accepts x402 for ${entry.name}, so a wallet can pay per call through the ` +
-        "aggregator with no vendor account.",
-    };
-  }
-  return null;
-}
-
 /**
  * Picks a route for one index row.
  *
  * The rules, in order:
  *   1. a key already in the vault wins -- the route is the proxy;
- *   2. x402 as the vendor's own access mode or model => x402, which needs no
- *      account and so no verified subscription price at all;
- *   3. no billing model recorded => `unknown` (null is "nobody checked");
- *   4. `free`, `payg`, `free_tier+payg` => direct;
- *   5. a free tier that verifiably covers the API => direct;
- *   6. otherwise direct needs a monthly subscription => the cheapest carrying
+ *   2. no billing model recorded => `unknown` (null is "nobody checked");
+ *   3. `free`, `payg`, `free_tier+payg` => direct;
+ *   4. a free tier that verifiably covers the API => direct;
+ *   5. otherwise direct needs a monthly subscription => the cheapest carrying
  *      aggregator with a VERIFIED per-call price;
- *   7. no such aggregator => direct, flagged `price unverified`.
+ *   6. no such aggregator => direct, flagged `price unverified`.
  */
 export function routeAccess(
   entry: ApiEntry | null,
@@ -176,7 +134,6 @@ export function routeAccess(
   const model = billing?.model ?? null;
   const priced = pricedCarriers(entry);
   const unpriced = unpricedCarriers(entry);
-  const x402 = x402Option(entry, [...priced, ...unpriced]);
 
   if (billing?.verified_date != null && billing.verified_url != null) {
     const age = daysBetween(billing.verified_date, today);
@@ -210,9 +167,9 @@ export function routeAccess(
     reason,
   });
 
-  const finish = (chosen: RouteOption, rest: (RouteOption | null)[]): RoutingDecision => ({
+  const finish = (chosen: RouteOption, rest: RouteOption[]): RoutingDecision => ({
     ...chosen,
-    alternatives: rest.filter((item): item is RouteOption => item !== null),
+    alternatives: rest,
     billing_model: model,
     billing_verified_url: billing?.verified_url ?? null,
     billing_verified_date: billing?.verified_date ?? null,
@@ -229,19 +186,8 @@ export function routeAccess(
           "send the request with no credential of your own. No signup, no aggregator, no new spend " +
           "decision.",
       ),
-      [...priced.map((c) => aggregatorOption(c, `${c.name} also resells ${entry.name} per call.`)), x402],
+      priced.map((c) => aggregatorOption(c, `${c.name} also resells ${entry.name} per call.`)),
     );
-  }
-
-  if (model === "x402" || entry.access_mode === "x402") {
-    const option = x402 ?? {
-      route: "x402" as const,
-      via: null,
-      per_call_price_usd: null,
-      price_verified_url: billing?.verified_url ?? null,
-      reason: `billing.model is x402 for ${entry.name}: pay per call from a wallet, no account.`,
-    };
-    return finish(option, priced.map((c) => aggregatorOption(c, `${c.name} also resells it per call.`)));
   }
 
   if (model === null) {
@@ -264,7 +210,6 @@ export function routeAccess(
               `(verified: ${c.price_verified_url}), which needs no vendor account.`,
           ),
         ),
-        x402,
       ],
     );
   }
@@ -280,7 +225,7 @@ export function routeAccess(
           "Go direct. A key, where one exists, only raises the rate limit." +
           (billing?.free_tier_note == null ? "" : ` Free tier: ${billing.free_tier_note}`),
       ),
-      [x402],
+      [],
     );
   }
 
@@ -304,7 +249,6 @@ export function routeAccess(
               `(verified: ${c.price_verified_url}) if you would rather not hold an account at all.`,
           ),
         ),
-        x402,
       ],
     );
   }
@@ -327,7 +271,6 @@ export function routeAccess(
               `(verified: ${c.price_verified_url}).`,
           ),
         ),
-        x402,
       ],
     );
   }
@@ -361,7 +304,6 @@ export function routeAccess(
           freeTier && billing?.free_tier_note != null ? ` (free tier: ${billing.free_tier_note})` : ""
         }. A human decides on any recurring charge.`,
       ),
-      x402,
     ]);
   }
 
@@ -373,7 +315,7 @@ export function routeAccess(
         "the subscription." +
         (billing?.free_tier_note == null ? "" : ` Free tier: ${billing.free_tier_note}`),
     ),
-    [x402],
+    [],
   );
 }
 
