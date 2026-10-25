@@ -25,6 +25,9 @@ const TOOL_ARGS: Record<string, Record<string, unknown>> = {
   list_keys: {},
   key_status: { alias: ALIAS },
   request_access: { platform: "Voyage AI", reason: "embed a corpus", est_budget: 5 },
+  access_status: { request_id: "req_0000000000000000" },
+  cancel_request: { request_id: "req_0000000000000000", reason: "test" },
+  spend_policy: {},
   register_key: { alias: "new-key", platform: "Apify", domain: "api.apify.com" },
   ledger: { alias: ALIAS, limit: 50 },
   disable: { alias: ALIAS, reason: "test" },
@@ -71,6 +74,9 @@ describe("skeletonkey MCP server", () => {
       "list_keys",
       "key_status",
       "request_access",
+      "access_status",
+      "cancel_request",
+      "spend_policy",
       "discover_api",
       "propose_entry",
       "register_key",
@@ -666,10 +672,24 @@ describe("skeletonkey MCP server", () => {
       const described = `${tool.name} ${tool.title} ${tool.description}`.toLowerCase();
       expect(described).not.toMatch(/\b(get_secret|reveal|read_key|export_key)\b/);
     }
-    // The only mutating tools are the three that need to be -- and the one
-    // added in v0.2 writes index metadata, never a credential.
+    // The mutating tools are only the ones that need to be: v0.2's index
+    // write, and v0.3's two agent-side permissions (raise a request, cancel
+    // one) plus the two that existed before. None of them can enable a key or
+    // raise a cap -- there is no such tool at all.
     const mutating = SKELETONKEY_TOOLS.filter((tool) => !tool.readOnly).map((tool) => tool.name);
-    expect(mutating.sort()).toEqual(["disable", "propose_entry", "register_key"]);
+    expect(mutating.sort()).toEqual([
+      "cancel_request",
+      "disable",
+      "propose_entry",
+      "register_key",
+      "request_access",
+    ]);
+    for (const tool of SKELETONKEY_TOOLS) {
+      const described = `${tool.name} ${tool.title} ${tool.description}`.toLowerCase();
+      expect(described, tool.name).not.toMatch(/\b(enable_key|raise_cap|set_cap|approve_request)\b/);
+    }
+    expect(SKELETONKEY_TOOL_NAMES).not.toContain("enable");
+    expect(SKELETONKEY_TOOL_NAMES).not.toContain("approve");
   });
 });
 

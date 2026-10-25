@@ -3,6 +3,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { ensureHome } from "./config.js";
 import { skeletonKeyHome, ledgerPath } from "./paths.js";
+import { globalRedactor } from "./redact.js";
 import type { LedgerRow } from "./types.js";
 
 export interface LedgerEntry {
@@ -66,9 +67,12 @@ export class Ledger {
       `INSERT INTO calls (alias, domain, timestamp, status, bytes, cost)
        VALUES (?, ?, ?, ?, ?, ?)`,
     );
+    // The ledger holds metadata only -- alias, domain, status, bytes. Both text
+    // columns go through the redactor anyway, so a mistake upstream cannot
+    // write a secret into the one file a user is most likely to open.
     const result = statement.run(
-      entry.alias,
-      entry.domain,
+      entry.alias === null ? null : globalRedactor.redact(entry.alias),
+      globalRedactor.redact(entry.domain),
       entry.timestamp ?? new Date().toISOString(),
       entry.status,
       Math.max(0, Math.trunc(entry.bytes)),

@@ -4,9 +4,14 @@
  *
  * The hard rule, enforced by a test that calls every handler below: **no tool
  * response ever contains a secret value.** The tools deal in metadata, ledger
- * rows, and the proxy URL. The only tool that touches a secret at all is
- * `register_key`, and it does so by asking the human on `/dev/tty` -- out of
- * band, never through the agent's context.
+ * rows, opaque request ids, and the proxy URL. The only tool that touches a
+ * secret at all is `register_key`, and it does so by asking the human on
+ * `/dev/tty` -- out of band, never through the agent's context.
+ *
+ * v0.3 moves everything that needs a secret or a decision behind the trusted
+ * runner (`src/runner/server.ts`): this process asks it for an approval and
+ * polls a status. The runner's API has no verb that returns a secret value, so
+ * there is nothing here for a prompt injection to ask for.
  */
 import fs from "node:fs";
 import { z } from "zod";
@@ -31,6 +36,10 @@ import {
 } from "./discover.js";
 import { routeAccess, routeSummary, type RoutingDecision } from "./routing.js";
 import { readConfig } from "./config.js";
+import { killSwitchState } from "./killswitch.js";
+import { globalRedactor } from "./redact.js";
+import { policyView, readPolicy } from "./policy.js";
+import { RunnerClient, RunnerUnavailableError } from "./runner/client.js";
 import {
   domainMatches,
   findKey,
@@ -79,6 +88,12 @@ export interface McpContext {
   staleAfterDays?: number;
   /** Test seam: the date freshness is judged against. Defaults to today. */
   today?: string;
+  /**
+   * How the tools reach the trusted runner. Undefined reads `runner.json` from
+   * the home directory; `null` means "there is no runner", which the tools
+   * report honestly rather than papering over.
+   */
+  runner?: RunnerClient | null;
 }
 
 export interface McpToolResult {
@@ -647,6 +662,81 @@ function spendNote(summary: LedgerSummary): string {
   return `$${summary.cost_usd} reported across ${summary.calls - summary.calls_without_cost} of ${summary.calls} call(s); the rest reported no price.`;
 }
 
+// --- the trusted runner ---------------------------------------------------
+
+/**
+ * How the tools reach the runner. `ctx.runner === null` is an explicit "no
+ * runner"; undefined reads `runner.json`, which only exists while one is up.
+ */
+function runnerFor(ctx: McpContext): RunnerClient | null {
+  if (ctx.runner !== undefined) return ctx.runner;
+  return RunnerClient.fromHome(ctx.home);
+}
+
+/** The same honest answer everywhere the runner is not running. */
+function runnerMissing(what: string): Record<string, unknown> {
+  return {
+    status: "runner_unavailable",
+    runner: null,
+    what,
+    hint:
+      "The trusted SkeletonKey runner is not running, and it is the only thing that can hold a " +
+      "secret or raise an approval. Ask the human to start it with `skeletonkey runner`. Do not " +
+      "attempt the signup yourself and do not ask anyone for a key.",
+  };
+}
+
+/** Wraps a runner call so a dead runner is a status, not a stack trace. */
+async function viaRunner<T>(
+  ctx: McpContext,
+  what: string,
+  call: (client: RunnerClient) => Promise<T>,
+): Promise<T | Record<string, unknown>> {
+  const client = runnerFor(ctx);
+  if (client === null) return runnerMissing(what);
+  try {
+    return await call(client);
+  } catch (error) {
+    if (error instanceof RunnerUnavailableError) {
+      return { ...runnerMissing(what), detail: error.message };
+    }
+    throw error;
+  }
+}
+
+/** The cheapest aggregator to offer if direct signup fails (D14). */
+function fallbackAggregator(
+  decision: RoutingDecision,
+): { name: string; per_call_price_usd: number | null } | null {
+  if (decision.route === "aggregator" && decision.via !== null) {
+    return { name: decision.via, per_call_price_usd: decision.per_call_price_usd };
+  }
+  const option = decision.alternatives.find(
+    (item) => item.route === "aggregator" && item.via !== null,
+  );
+  if (option === undefined || option.via === null) return null;
+  return { name: option.via, per_call_price_usd: option.per_call_price_usd };
+}
+
+/** The caps block every spend-adjacent response carries. */
+function policyBlock(ctx: McpContext): Record<string, unknown> {
+  return policyView(readPolicy(ctx.home));
+}
+
+/** Kill-switch state, reported wherever it would change what an agent should do. */
+function killBlock(ctx: McpContext): Record<string, unknown> | null {
+  const state = killSwitchState(ctx.home);
+  if (!state.engaged) return null;
+  return {
+    kill_switch: true,
+    engaged_at: state.at,
+    reason: state.reason,
+    note:
+      "The SkeletonKey kill switch is engaged: the proxy refuses every call locally and the runner " +
+      "accepts no new requests. Only a human clears it (`skeletonkey resume`). Stop and say so.",
+  };
+}
+
 // --- tools ----------------------------------------------------------------
 
 export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
@@ -859,12 +949,13 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
     title: "Request access to a platform",
     description:
       "Ask whether a usable key exists for a platform. If it does, you get the proxy URL to " +
-      "call through (and no key). If it does not, you get the vendor's verified billing model, a " +
-      "recommended {route, reason} (direct, via the cheapest aggregator that resells it per call, " +
-      "or x402), the vendor's auth facts, ready-made register_key arguments, an explicit list of " +
-      "the human-only gates, and a step-by-step signup plan whose final step is a human " +
-      "confirming Terms of Service and payment.",
-    readOnly: true,
+      "call through (and no key). If it does not, the trusted local runner raises an approval " +
+      "with the human OUT OF BAND (OS notification plus a localhost page) and you get back " +
+      "{request_id, status: \"pending_approval\"} -- poll access_status(request_id) and do not " +
+      "ask the human anything yourself. The response also carries the vendor's verified billing " +
+      "model, a recommended {route, reason}, the auth facts, ready-made register_key arguments, " +
+      "the human-only gates, and the current spend caps (which you can never raise).",
+    readOnly: false,
     inputSchema: {
       platform: z.string().describe('Platform or vendor, e.g. "Voyage AI", "Apify".'),
       reason: z.string().optional().describe("Why you need it; recorded in the response for the human."),
@@ -909,6 +1000,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           platform,
           reason: reason ?? null,
           has_key: true,
+          ...(killBlock(ctx) ?? {}),
           alias: key.alias,
           domain: key.domain,
           injected_header: key.header,
@@ -947,11 +1039,35 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         };
       }
 
+      // No key: the human decides whether this happens at all, and they decide
+      // it on the runner's own page -- not in this conversation.
+      const decision = routeAccess(entry, { hasKey: false });
+      const fallback = fallbackAggregator(decision);
+      const accessRequest = await viaRunner(ctx, "raise an access approval", (client) =>
+        client.createRequest({
+          vendor: entry?.name ?? platform,
+          domain: entry?.domain ?? null,
+          purpose: reason ?? null,
+          est_budget_usd: estBudget,
+          tos_url: entry?.signup_url ?? entry?.url ?? null,
+          requires_payment: entry?.requires_card ?? null,
+          fallback_aggregator: fallback?.name ?? null,
+          fallback_price_usd: fallback?.per_call_price_usd ?? null,
+        }),
+      );
+
       return {
         platform,
         reason: reason ?? null,
         has_key: false,
         est_budget_usd: estBudget,
+        ...(killBlock(ctx) ?? {}),
+        access_request: accessRequest,
+        policy: policyBlock(ctx),
+        next_step:
+          "Poll access_status(request_id) until it is `ready`, `denied`, `needs_human` or " +
+          "`cancelled`. The human approves on the localhost page the runner opened; you never " +
+          "collect a secret, a card, or an OTP, and you never raise a cap.",
         apis_yaml_entry: entry
           ? {
               name: entry.name,
@@ -968,7 +1084,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           : null,
         billing: billingFacts(entry),
         aggregators: carriageView(entry),
-        routing: routingView(routeAccess(entry, { hasKey: false })),
+        routing: routingView(decision),
         auth: authFacts(entry),
         freshness: freshness(entry, ctx, maxAgeDays),
         ...staleNote(entry, ctx, maxAgeDays),
@@ -997,6 +1113,87 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           reason,
           estBudget,
         }),
+      };
+    },
+  },
+
+  {
+    name: "access_status",
+    title: "Poll one access request",
+    description:
+      "The status of a request_access request, by its opaque request_id. Statuses: " +
+      "`pending_approval` (the human has not decided yet -- wait, do not nudge them through this " +
+      "channel), `approved`, `ready` (a key exists; call request_access again for the proxy URL), " +
+      "`needs_human` (a captcha, a phone check, or no playbook: the human is being walked through " +
+      "it), `denied`, `cancelled`, `voided` (the kill switch). Never returns a key, a password, a " +
+      "card, an OTP, a screenshot, or page content.",
+    readOnly: true,
+    inputSchema: {
+      request_id: z.string().describe("The opaque id request_access handed you."),
+    },
+    async handler(args, ctx) {
+      const requestId = required(args, "request_id");
+      const status = await viaRunner(ctx, `read the status of ${requestId}`, (client) =>
+        client.getRequest(requestId),
+      );
+      return {
+        ...(killBlock(ctx) ?? {}),
+        ...status,
+        reminders: [
+          "A `pending_approval` is a human deciding on their own screen. Poll; do not ask them here.",
+          "`needs_human` means a person has to finish a step (captcha, phone, terms). Report it and stop.",
+          "There is no tool, and no runner verb, that returns the key itself.",
+        ],
+      };
+    },
+  },
+
+  {
+    name: "cancel_request",
+    title: "Cancel a request you raised",
+    description:
+      "Withdraw a pending access request: the approval is settled as `cancelled` and any Secure " +
+      "Input Popup waiting for the human is closed. Use it the moment you no longer need the " +
+      "access you asked for, so the human is not left with a stale approval. You may cancel a " +
+      "request and disable a key; you may never approve one, enable a key, or raise a cap.",
+    readOnly: false,
+    inputSchema: {
+      request_id: z.string().describe("The opaque id request_access handed you."),
+      reason: z.string().optional().describe("Why, for the human reading the transcript."),
+    },
+    async handler(args, ctx) {
+      const requestId = required(args, "request_id");
+      const reason = str(args, "reason") ?? null;
+      const cancelled = await viaRunner(ctx, `cancel ${requestId}`, (client) =>
+        client.cancelRequest(requestId, reason),
+      );
+      return {
+        ...cancelled,
+        cancelled_reason: reason,
+        note:
+          "Cancelling is yours to do. Approving, re-enabling a key, and raising a cap are the " +
+          "human's, on the local approval page.",
+      };
+    },
+  },
+
+  {
+    name: "spend_policy",
+    title: "Read the spend caps",
+    description:
+      "The current global monthly cap and per-vendor caps, read from policy.yaml. Both default " +
+      "to $0, so the first paid action raises an approval asking the human to set them. This " +
+      "tool is read-only by design: there is no tool that can raise a cap or enable a key.",
+    readOnly: true,
+    inputSchema: {},
+    async handler(_args, ctx) {
+      return {
+        ...(killBlock(ctx) ?? {}),
+        ...policyBlock(ctx),
+        how_caps_change:
+          "A human sets them on the runner's approval page, or runs `skeletonkey policy set`. " +
+          "Asking them to raise a cap in this conversation is not how it is done: the approval " +
+          "page is the place, and it is theirs.",
       };
     },
   },
@@ -1498,6 +1695,11 @@ export const SKELETONKEY_TOOL_NAMES = SKELETONKEY_TOOLS.map((tool) => tool.name)
  * Exported so the test suite can exercise every handler in-process without
  * standing up a transport.
  */
+/** Every tool response goes through here; see the note in the handler below. */
+function redact<T>(value: T): T {
+  return globalRedactor.redactDeep(value);
+}
+
 export async function callSkeletonKeyTool(
   name: string,
   args: Record<string, unknown>,
@@ -1512,11 +1714,15 @@ export async function callSkeletonKeyTool(
   }
   try {
     const result = await tool.handler(args, ctx);
-    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    // Last gate before anything reaches the agent. Covers every value this
+    // process has loaded (there should be none) *and* every secret shape --
+    // which is what catches an agent passing a key as a `reason` and getting
+    // it echoed back into its own transcript.
+    return { content: [{ type: "text", text: JSON.stringify(redact(result), null, 2) }] };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return {
-      content: [{ type: "text", text: JSON.stringify({ error: message }, null, 2) }],
+      content: [{ type: "text", text: JSON.stringify({ error: redact(message) }, null, 2) }],
       isError: true,
     };
   }
@@ -1528,17 +1734,28 @@ secret values, and there is no tool that can reveal a key.
 Before calling any paid API: find_api(capability) to see what exists, then
 request_access(platform, reason, est_budget). If a key is already in the vault you
 get a proxy URL -- send your request there with no credential of your own and the
-proxy attaches the key. If no key exists you get a signup plan: your own
-computer-use/browser tool and your own email connector do the signup, and a human
-performs the final Terms-of-Service confirmation and any payment. Then call
-register_key so the human can enter the key out of band.
+proxy attaches the key.
 
-Both tools return a {route, reason} recommendation: go direct when the vendor is
-pay-as-you-go or its free tier covers the API, go through the cheapest aggregator
-that resells it per call when direct access needs a monthly subscription, or pay
-per call over x402 where that exists. When no verified price backs a route the
-reason says "price unverified" -- repeat that to the human instead of quoting a
-number you do not have.
+If no key exists, a trusted local runner (a separate process that holds the
+secrets) raises an approval with the human out of band: an OS notification and a
+page on localhost. You get {request_id, status: "pending_approval"} and poll
+access_status(request_id). You never collect a secret, a card number, a password,
+or an OTP, and you never ask the human for one in this conversation: the runner's
+Secure Input Popup is where that happens. cancel_request(request_id) withdraws a
+request you no longer need.
+
+Spend is capped by policy.yaml: a global monthly cap plus per-vendor caps, both
+$0 by default, readable with spend_policy(). You may disable a key and cancel a
+request. You may never enable a key or raise a cap -- those are human actions on
+the approval page, and there is no tool here that can do them.
+
+Both find_api and request_access return a {route, reason} recommendation: go
+direct when the vendor is pay-as-you-go or its free tier covers the API, or
+through the cheapest aggregator that resells it per call when direct access needs
+a monthly subscription. When no verified price backs a route the reason says
+"price unverified" -- repeat that to the human instead of quoting a number you do
+not have. If direct signup fails, the runner asks the human about the aggregator
+fallback; it is never routed without that approval.
 
 If find_api misses, call discover_api(capability) for the research recipe, do the
 research with your own tools, and write what you found with propose_entry. Rows you
@@ -1559,7 +1776,7 @@ export async function startMcpServer(ctx: McpContext): Promise<McpServerHandle> 
   const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
 
   const server = new McpServer(
-    { name: "skeletonkey", version: "0.1.0" },
+    { name: "skeletonkey", version: "0.3.0" },
     { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
   );
 
@@ -1573,7 +1790,7 @@ export async function startMcpServer(ctx: McpContext): Promise<McpServerHandle> 
         annotations: {
           readOnlyHint: tool.readOnly,
           destructiveHint: false,
-          openWorldHint: tool.name === "find_api" || tool.name === "discover_api",
+    openWorldHint: tool.name === "find_api" || tool.name === "discover_api",
         },
       },
       async (args: unknown) =>
