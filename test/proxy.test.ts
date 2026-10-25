@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { readKeys } from "../src/keys.js";
 import { openLedger } from "../src/ledger.js";
-import { matchKey, resolveTarget, startProxy, type ProxyHandle } from "../src/proxy.js";
+import {
+  isLoopbackHost,
+  matchKey,
+  matchKeyForHost,
+  resolveTarget,
+  startProxy,
+  upstreamSchemeFor,
+  type ProxyHandle,
+} from "../src/proxy.js";
+import type { KeyMeta } from "../src/types.js";
 import { initWithKey, makeHome, removeHome, runCli } from "./helpers/env.js";
 import { startEchoServer, type EchoServer } from "./helpers/echo-server.js";
 
@@ -75,13 +84,36 @@ describe("proxy header injection", () => {
     expect(body.headers["x-api-key"]).toBeUndefined();
   });
 
-  it("does not inject for a disabled key", async () => {
+  it("answers a disabled key with a local 403 instead of forwarding it", async () => {
     await runCli(home, ["disable", "echo-key"]);
+    const before = echo.requests.length;
     const response = await fetch(`${proxy.url}/127.0.0.1:${echo.port}/v1/hello`, {
       headers: { authorization: "Bearer client-supplied-garbage" },
     });
+    expect(response.status).toBe(403);
+    const body = (await response.json()) as { error: string; alias: string; hint: string };
+    expect(body.error).toBe("key_disabled");
+    expect(body.alias).toBe("echo-key");
+    // The human is told exactly how to undo it, and nothing went upstream --
+    // not even the caller's own garbage credential.
+    expect(body.hint).toContain("skeletonkey enable echo-key");
+    expect(echo.requests.length).toBe(before);
+
+    // The refusal is recorded, so the human can see why a call never landed.
+    const ledger = openLedger(home);
+    const rows = ledger.all();
+    ledger.close();
+    expect(rows.at(-1)?.status).toBe(403);
+    expect(rows.at(-1)?.alias).toBe("echo-key");
+  });
+
+  it("forwards normally again once the key is re-enabled", async () => {
+    await runCli(home, ["disable", "echo-key"]);
+    await runCli(home, ["enable", "echo-key"]);
+    const response = await fetch(`${proxy.url}/127.0.0.1:${echo.port}/v1/hello`);
+    expect(response.status).toBe(200);
     const body = (await response.json()) as EchoBody;
-    expect(body.headers["authorization"]).toBeUndefined();
+    expect(body.headers["authorization"]).toBe(`Bearer ${SECRET}`);
   });
 
   it("does not inject for an unrelated domain", async () => {
@@ -160,7 +192,105 @@ describe("proxy header injection", () => {
   });
 });
 
+describe("upstream scheme", () => {
+  let home: string;
+  let echo: EchoServer;
+  let proxy: ProxyHandle;
+
+  beforeEach(async () => {
+    home = makeHome();
+    echo = await startEchoServer({});
+    await initWithKey(home, { alias: "echo-key", secret: SECRET, domain: "127.0.0.1" });
+    // No --upstream-scheme at all: the proxy has to work this out per host.
+    proxy = await startProxy({ port: 0, home, logger: () => {} });
+  });
+
+  afterEach(async () => {
+    await proxy.close();
+    await echo.close();
+    removeHome(home);
+  });
+
+  it("reaches a loopback upstream over http with no flag and no per-key setting", async () => {
+    const response = await fetch(`${proxy.url}/127.0.0.1:${echo.port}/v1/hello`);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as EchoBody;
+    expect(body.headers["authorization"]).toBe(`Bearer ${SECRET}`);
+  });
+
+  it("reports the per-host default on the health endpoint", async () => {
+    const response = await fetch(`${proxy.url}/__skeletonkey/health`);
+    const body = (await response.json()) as { upstreamScheme: string; upstreamSchemeDefault: string };
+    expect(body.upstreamScheme).toBe("per-host");
+    expect(body.upstreamSchemeDefault).toBe("https");
+  });
+
+  it("honours a scheme recorded on the key itself", async () => {
+    // `localhost` is loopback too, so prove the per-key value is what is used
+    // by setting it on a key whose host would default to http anyway, and by
+    // reading the recorded metadata back.
+    const added = await runCli(
+      home,
+      [
+        "add",
+        "plain-key",
+        "--platform",
+        "PlainCo",
+        "--domain",
+        "plain.example.test",
+        "--scheme",
+        "http",
+      ],
+      "sk-test-FAKE-plain",
+    );
+    expect(added.code).toBe(0);
+    const key = readKeys(home).keys.find((row) => row.alias === "plain-key");
+    expect(key?.scheme).toBe("http");
+    expect(upstreamSchemeFor("plain.example.test", key)).toBe("http");
+    expect(added.stdout).toContain("http (recorded on this key)");
+  });
+
+  it("decides the scheme most-specific-first", () => {
+    const key = (scheme?: "http" | "https"): KeyMeta => ({
+      alias: "a",
+      platform: "p",
+      domain: "api.vendor.test",
+      header: "Authorization",
+      format: "Bearer {key}",
+      created: "2026-01-01T00:00:00.000Z",
+      last_used: null,
+      disabled: false,
+      ...(scheme === undefined ? {} : { scheme }),
+    });
+    // 1. the key's own scheme wins, even over the global override
+    expect(upstreamSchemeFor("api.vendor.test", key("http"), "https")).toBe("http");
+    expect(upstreamSchemeFor("api.vendor.test", key("https"), "http")).toBe("https");
+    // 2. then the global --upstream-scheme override
+    expect(upstreamSchemeFor("api.vendor.test", key(), "http")).toBe("http");
+    // 3. then loopback
+    expect(upstreamSchemeFor("127.0.0.1", undefined)).toBe("http");
+    expect(upstreamSchemeFor("localhost", undefined)).toBe("http");
+    expect(upstreamSchemeFor("[::1]", undefined)).toBe("http");
+    expect(upstreamSchemeFor("127.9.9.9", key())).toBe("http");
+    // ... but an explicit global override still beats the loopback default.
+    expect(upstreamSchemeFor("127.0.0.1", undefined, "https")).toBe("https");
+    // 4. and everything else is https
+    expect(upstreamSchemeFor("api.vendor.test", undefined)).toBe("https");
+    expect(upstreamSchemeFor("notlocalhost.test", undefined)).toBe("https");
+    expect(isLoopbackHost("example.com")).toBe(false);
+    expect(isLoopbackHost("127.0.0.1:8080")).toBe(true);
+  });
+});
+
 describe("target resolution", () => {
+  it("picks the scheme per host when given a resolver", () => {
+    const resolver = (host: string): "http" | "https" => (host === "local.test" ? "http" : "https");
+    expect(resolveTarget("/local.test/v1/x", resolver)?.url.href).toBe("http://local.test/v1/x");
+    expect(resolveTarget("/api.vendor.test/v1/x", resolver)?.url.href).toBe(
+      "https://api.vendor.test/v1/x",
+    );
+  });
+
   it("parses absolute URIs as forward-proxy requests", () => {
     const target = resolveTarget("http://api.example.com/v1/x?y=1", "https");
     expect(target?.mode).toBe("forward");
@@ -207,6 +337,20 @@ describe("key matching", () => {
   it("skips disabled keys", () => {
     const keys = [{ ...base, alias: "off", domain: "example.com", disabled: true }];
     expect(matchKey(keys, "example.com")).toBeUndefined();
+  });
+
+  it("still finds a disabled key when asked who owns the host", () => {
+    const keys = [{ ...base, alias: "off", domain: "example.com", disabled: true }];
+    expect(matchKeyForHost(keys, "api.example.com")?.alias).toBe("off");
+    expect(matchKeyForHost(keys, "elsewhere.test")).toBeUndefined();
+  });
+
+  it("prefers an enabled key over a disabled one for the same domain", () => {
+    const keys = [
+      { ...base, alias: "old", domain: "example.com", disabled: true },
+      { ...base, alias: "current", domain: "example.com" },
+    ];
+    expect(matchKeyForHost(keys, "example.com")?.alias).toBe("current");
   });
 });
 

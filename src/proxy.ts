@@ -6,7 +6,7 @@ import { readConfig } from "./config.js";
 import { domainMatches, normalizeDomain, readKeys, touchLastUsed } from "./keys.js";
 import { Ledger, openLedger } from "./ledger.js";
 import { skeletonKeyHome } from "./paths.js";
-import type { KeyMeta } from "./types.js";
+import type { KeyMeta, UpstreamScheme } from "./types.js";
 import { createVault, type Vault } from "./vault/index.js";
 
 /** Headers the client is never allowed to pass upstream through the proxy. */
@@ -40,8 +40,12 @@ export interface ProxyOptions {
   port: number;
   host?: string;
   home?: string;
-  /** Scheme used for reverse-mode (`/<domain>/<path>`) requests. */
-  upstreamScheme?: "http" | "https";
+  /**
+   * Global override for the reverse-mode (`/<domain>/<path>`) scheme. Omit it
+   * and the scheme is decided per host: a key's own `scheme`, else http for a
+   * loopback address, else https. Kept for compatibility with `--upstream-scheme`.
+   */
+  upstreamScheme?: UpstreamScheme;
   /**
    * Shared secret callers must send as `X-SkeletonKey-Token`. Required in gateway
    * mode; ignored (and not checked) when `requireToken` is false.
@@ -71,7 +75,7 @@ interface Target {
 export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
   const home = options.home ?? skeletonKeyHome();
   const host = options.host ?? "127.0.0.1";
-  const upstreamScheme = options.upstreamScheme ?? "https";
+  const schemeOverride = options.upstreamScheme ?? null;
   const config = readConfig(home);
   const token = options.token ?? null;
   const requireToken = options.requireToken === true;
@@ -126,7 +130,14 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
       // Left unauthenticated on purpose: it reveals nothing but liveness, and
       // other devices need it to wait for the gateway to come up.
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: true, upstreamScheme, requireToken }));
+      res.end(
+        JSON.stringify({
+          ok: true,
+          upstreamScheme: schemeOverride ?? "per-host",
+          upstreamSchemeDefault: DEFAULT_UPSTREAM_SCHEME,
+          requireToken,
+        }),
+      );
       return;
     }
 
@@ -142,7 +153,10 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
       return;
     }
 
-    const target = resolveTarget(req.url ?? "/", upstreamScheme);
+    const keys = readKeys(home).keys;
+    const target = resolveTarget(req.url ?? "/", (host) =>
+      upstreamSchemeFor(host, matchKeyForHost(keys, host), schemeOverride),
+    );
     if (!target) {
       res.writeHead(400, { "content-type": "application/json" });
       res.end(
@@ -156,7 +170,40 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
 
     const targetUrl = target.url;
     const domain = normalizeDomain(targetUrl.host);
-    const key = matchKey(readKeys(home).keys, domain);
+    const matched = matchKeyForHost(keys, domain);
+
+    // A disabled key is a decision, not an accident: answer it here rather than
+    // forwarding a request the vendor can only reject as an anonymous 401.
+    // Nothing leaves this machine, and nothing is charged.
+    if (matched?.disabled === true) {
+      log(`! refused ${req.method ?? "GET"} ${domain}: key ${matched.alias} is disabled`);
+      // Drain the body nobody is going to forward, so a keep-alive connection
+      // is not left half-read.
+      req.resume();
+      res.writeHead(403, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "key_disabled",
+          alias: matched.alias,
+          domain: matched.domain,
+          hint:
+            `The key ${matched.alias} for ${matched.domain} is disabled, so SkeletonKey did not ` +
+            `inject it and did not forward this request. A human can re-enable it with ` +
+            `\`skeletonkey enable ${matched.alias}\`.`,
+        }),
+      );
+      ledger.record({
+        alias: matched.alias,
+        domain,
+        timestamp: new Date().toISOString(),
+        status: 403,
+        bytes: 0,
+        cost: null,
+      });
+      return;
+    }
+
+    const key = matched;
     const headers = sanitizeHeaders(req.headers, key);
     headers["host"] = targetUrl.host;
 
@@ -250,7 +297,8 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
  */
 export function resolveTarget(
   rawUrl: string,
-  upstreamScheme: "http" | "https",
+  /** The reverse-mode scheme, or a function that picks one per hostname. */
+  upstreamScheme: UpstreamScheme | ((host: string) => UpstreamScheme),
 ): Target | null {
   if (/^https?:\/\//i.test(rawUrl)) {
     try {
@@ -274,18 +322,75 @@ export function resolveTarget(
   }
   if (!host || !/^[a-z0-9.\-:[\]]+$/i.test(host)) return null;
   const query = slash === -1 && hostPart.includes("?") ? hostPart.slice(hostPart.indexOf("?")) : "";
+  const scheme =
+    typeof upstreamScheme === "function" ? upstreamScheme(normalizeDomain(host)) : upstreamScheme;
   try {
-    return { url: new URL(`${upstreamScheme}://${host}${rest}${query}`), mode: "reverse" };
+    return { url: new URL(`${scheme}://${host}${rest}${query}`), mode: "reverse" };
   } catch {
     return null;
   }
 }
 
-/** Longest (most specific) enabled domain match wins. */
+/** What an upstream gets when nobody says otherwise. A key is at stake. */
+export const DEFAULT_UPSTREAM_SCHEME: UpstreamScheme = "https";
+
+/**
+ * `localhost`, `127.0.0.0/8`, and `::1` never leave the machine, so plain HTTP
+ * to one of them discloses nothing -- and a local test server speaking https is
+ * the rare case, not the common one.
+ */
+export function isLoopbackHost(host: string): boolean {
+  const value = normalizeDomain(host).replace(/^\[|\]$/g, "");
+  if (value === "localhost" || value.endsWith(".localhost")) return true;
+  if (value === "::1" || value === "0:0:0:0:0:0:0:1") return true;
+  if (/^127(\.\d{1,3}){3}$/.test(value)) return true;
+  return false;
+}
+
+/**
+ * The scheme one upstream is reached over, most specific rule first:
+ *
+ *   1. the key's own `scheme`, set per key with `skeletonkey add --scheme http`;
+ *   2. the global `--upstream-scheme` override, when one was passed;
+ *   3. http for a loopback host;
+ *   4. https.
+ */
+export function upstreamSchemeFor(
+  host: string,
+  key: KeyMeta | undefined,
+  override: UpstreamScheme | null = null,
+): UpstreamScheme {
+  if (key?.scheme !== undefined) return key.scheme;
+  if (override !== null) return override;
+  if (isLoopbackHost(host)) return "http";
+  return DEFAULT_UPSTREAM_SCHEME;
+}
+
+/**
+ * Longest (most specific) *enabled* domain match wins: the key that would
+ * actually be injected. The request path uses `matchKeyForHost` instead, so a
+ * disabled key can be reported rather than silently skipped.
+ */
 export function matchKey(keys: KeyMeta[], host: string): KeyMeta | undefined {
   return keys
     .filter((key) => !key.disabled && domainMatches(key.domain, host))
     .sort((a, b) => normalizeDomain(b.domain).length - normalizeDomain(a.domain).length)[0];
+}
+
+/**
+ * The key that OWNS a host, disabled or not: the proxy has to know that a
+ * disabled key exists so it can say so, instead of forwarding a request that
+ * the vendor would reject as anonymous. Longest domain wins; on a tie an
+ * enabled key beats a disabled one.
+ */
+export function matchKeyForHost(keys: KeyMeta[], host: string): KeyMeta | undefined {
+  return keys
+    .filter((key) => domainMatches(key.domain, host))
+    .sort(
+      (a, b) =>
+        normalizeDomain(b.domain).length - normalizeDomain(a.domain).length ||
+        Number(a.disabled) - Number(b.disabled),
+    )[0];
 }
 
 function sanitizeHeaders(
