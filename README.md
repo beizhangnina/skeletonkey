@@ -115,16 +115,16 @@ Deliberately **not** in v0.3:
   prints the exact command that finishes each deferred item. `--yes` or a
   non-TTY stdin keeps the old flags-only path for CI. See
   [the init wizard](#the-init-wizard).
-- **Published to npm** as `@beizhang/skeletonkey`, so `npx -y
-  @beizhang/skeletonkey init` is the whole install (D9).
+- **Published to npm** as `@dormy/skeletonkey`, so `npx -y
+  @dormy/skeletonkey init` is the whole install (D9).
 
 ### Try v0.3 locally
 
 Three terminals, no vendor account, no card:
 
 ```bash
-npm i -g @beizhang/skeletonkey
-# or prefix every command below with `npx -y @beizhang/skeletonkey`
+npm i -g @dormy/skeletonkey
+# or prefix every command below with `npx -y @dormy/skeletonkey`
 
 # 1. set up, and register with Claude Code / Codex (shows a diff first).
 #    `skeletonkey init` on its own runs the six-step wizard; the flags here
@@ -165,13 +165,13 @@ skeletonkey resume          # human-only
 
 ## Install
 
-Published as **[`@beizhang/skeletonkey`](https://www.npmjs.com/package/@beizhang/skeletonkey)**
+Published as **[`@dormy/skeletonkey`](https://www.npmjs.com/package/@dormy/skeletonkey)**
 — scoped, because npm blocks the unscoped `skeletonkey` as too similar to the
 existing `skeleton-key` package. The one-liner needs no global install and no
 clone:
 
 ```bash
-npx -y @beizhang/skeletonkey init
+npx -y @dormy/skeletonkey init
 ```
 
 That runs the [init wizard](#the-init-wizard) and registers the MCP server with
@@ -179,7 +179,7 @@ Claude Code and Codex. Or install it globally, which puts `skeletonkey`, `skk`
 (the same CLI, shorter to type) and `skeletonkey-runner` on your `PATH`:
 
 ```bash
-npm i -g @beizhang/skeletonkey
+npm i -g @dormy/skeletonkey
 skeletonkey init
 ```
 
@@ -194,9 +194,9 @@ showing a diff. If you would rather do it yourself:
 **Claude Code** — `mcp` is the stdio MCP server subcommand:
 
 ```bash
-claude mcp add skeletonkey -- npx -y @beizhang/skeletonkey mcp
+claude mcp add skeletonkey -- npx -y @dormy/skeletonkey mcp
 # user scope, so every project sees it:
-claude mcp add skeletonkey -s user -- npx -y @beizhang/skeletonkey mcp
+claude mcp add skeletonkey -s user -- npx -y @dormy/skeletonkey mcp
 ```
 
 **Codex** — add to `~/.codex/config.toml`:
@@ -204,7 +204,7 @@ claude mcp add skeletonkey -s user -- npx -y @beizhang/skeletonkey mcp
 ```toml
 [mcp_servers.skeletonkey]
 command = "npx"
-args = ["-y", "@beizhang/skeletonkey", "mcp"]
+args = ["-y", "@dormy/skeletonkey", "mcp"]
 ```
 
 Then drop the skill in so the agent knows the workflow and not just the tool
@@ -223,7 +223,7 @@ npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runne
 To install exactly what would be published, without publishing anything:
 
 ```bash
-npm pack && npm install -g ./beizhang-skeletonkey-0.3.0.tgz
+npm pack && npm install -g ./dormy-skeletonkey-0.3.0.tgz
 ```
 
 `npm pack` rebuilds `dist/` first. The tarball carries compiled JavaScript and
@@ -293,13 +293,13 @@ takes the old straight-line path instead: no wizard, no questions, `--email` and
 
 ## Install troubleshooting
 
-`npx -y @beizhang/skeletonkey init` is the install — see [Install](#install).
+`npx -y @dormy/skeletonkey init` is the install — see [Install](#install).
 These are the things that actually go wrong:
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `SyntaxError: Unexpected token` on startup, or `node:sqlite` not found | **Node too old.** SkeletonKey needs **Node 22.5+** for the built-in `node:sqlite`. | `node --version`, then install Node 22.5 or newer (`nvm install 22`). The `engines` field refuses older versions on install. |
-| `EACCES: permission denied, mkdir '/usr/local/lib/node_modules'` | A **global npm install** without permission to write the global prefix. | Do not install globally: run `npx -y @beizhang/skeletonkey init`, which needs no global prefix. If you want a global install, set a user prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to `PATH`. Never `sudo npm install -g`. |
+| `EACCES: permission denied, mkdir '/usr/local/lib/node_modules'` | A **global npm install** without permission to write the global prefix. | Do not install globally: run `npx -y @dormy/skeletonkey init`, which needs no global prefix. If you want a global install, set a user prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to `PATH`. Never `sudo npm install -g`. |
 | `Bitwarden is not ready: the `bw` CLI was not found on PATH` | The **Bitwarden CLI is not installed**. | Follow the install lines SkeletonKey prints (`npm install -g @bitwarden/cli`, `brew install bitwarden-cli`, `snap install bw`, or <https://bitwarden.com/help/cli/>), or run `skeletonkey init --backend encrypted-file`, which needs nothing. |
 | `Bitwarden is not ready: ... not logged in` | `bw` is installed but **not logged in**. | `bw login <your bound email>` in your own terminal. SkeletonKey never logs in for you and never sees your master password. |
 | `Bitwarden is not ready: ... logged in but locked` | Logged in but **locked**; the session is a human action. | `export BW_SESSION="$(bw unlock --raw)"` in the shell you run SkeletonKey from, then retry. The runner holds that session in memory only. |
@@ -586,7 +586,7 @@ and Codex are the **only** supported agents (D8).
 ### Let `init` do it (recommended)
 
 ```bash
-npx -y @beizhang/skeletonkey init    # or, later: skeletonkey register
+npx -y @dormy/skeletonkey init    # or, later: skeletonkey register
 ```
 
 Step 6 of the [init wizard](#the-init-wizard). `init` detects nothing and guesses
@@ -608,9 +608,9 @@ the server still does not appear, that is the first row of the
 ### Claude Code, by hand
 
 ```bash
-claude mcp add skeletonkey -- npx -y @beizhang/skeletonkey mcp
+claude mcp add skeletonkey -- npx -y @dormy/skeletonkey mcp
 # user scope, so every project sees it:
-claude mcp add skeletonkey -s user -- npx -y @beizhang/skeletonkey mcp
+claude mcp add skeletonkey -s user -- npx -y @dormy/skeletonkey mcp
 # or, with a global install: claude mcp add skeletonkey -- skeletonkey mcp
 ```
 
@@ -621,7 +621,7 @@ Then drop the skill in so the agent knows the workflow, not just the tools:
 
 ```bash
 mkdir -p ~/.claude/skills/skeletonkey
-cp "$(npm root -g)/@beizhang/skeletonkey/skills/skeletonkey/SKILL.md" \
+cp "$(npm root -g)/@dormy/skeletonkey/skills/skeletonkey/SKILL.md" \
   ~/.claude/skills/skeletonkey/SKILL.md
 # from a source checkout: cp skills/skeletonkey/SKILL.md ~/.claude/skills/skeletonkey/SKILL.md
 # or per-project:          cp -r skills/skeletonkey .claude/skills/skeletonkey
@@ -634,7 +634,7 @@ Add to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.skeletonkey]
 command = "npx"
-args = ["-y", "@beizhang/skeletonkey", "mcp"]
+args = ["-y", "@dormy/skeletonkey", "mcp"]
 ```
 
 This is exactly what `skeletonkey register` writes, inside a
@@ -1138,7 +1138,7 @@ offers and contain no verified prices.**
 
 Phases, following the PRD:
 
-- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@beizhang/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
+- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@dormy/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
 - **v0.5 — automated signup.** Bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
 - **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger (the per-vendor cap re-check before submit already landed in v0.3), and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
 - **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.

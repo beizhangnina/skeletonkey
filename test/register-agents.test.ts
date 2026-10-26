@@ -64,7 +64,7 @@ describe("auto-registration for Claude Code and Codex (D8)", () => {
     const toml = fs.readFileSync(path.join(userHome, ".codex", "config.toml"), "utf8");
     expect(toml).toContain("[mcp_servers.skeletonkey]");
     expect(toml).toContain(`command = "${DEFAULT_COMMAND}"`);
-    expect(toml).toContain('args = ["-y", "@beizhang/skeletonkey", "mcp"]');
+    expect(toml).toContain('args = ["-y", "@dormy/skeletonkey", "mcp"]');
     expect(fs.existsSync(path.join(userHome, ".codex", "skills", "skeletonkey", "SKILL.md"))).toBe(
       true,
     );

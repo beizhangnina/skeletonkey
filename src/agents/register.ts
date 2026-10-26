@@ -77,10 +77,10 @@ function resolveSkillFile(options: RegisterOptions): string | null {
 /**
  * The one-line install path (D9): both agents can run SkeletonKey straight from
  * the registry with no global install. The package is scoped, so the `npx`
- * argument is the full `@beizhang/skeletonkey`, not the bare binary name.
+ * argument is the full `@dormy/skeletonkey`, not the bare binary name.
  */
 export const DEFAULT_COMMAND = "npx";
-export const PACKAGE_NAME = "@beizhang/skeletonkey";
+export const PACKAGE_NAME = "@dormy/skeletonkey";
 export const DEFAULT_ARGS = ["-y", PACKAGE_NAME, "mcp"];
 
 function serverSpec(options: RegisterOptions): { command: string; args: string[] } {

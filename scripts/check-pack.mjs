@@ -39,7 +39,7 @@ try {
   const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
   // Publish readiness: the scoped name is claimed, `private` is gone, and the
   // scope is published publicly rather than restricted-by-default.
-  assert.equal(manifest.name, '@beizhang/skeletonkey');
+  assert.equal(manifest.name, '@dormy/skeletonkey');
   assert.equal(manifest.private, undefined, '"private" must be absent so the package can be published');
   assert.equal(manifest.publishConfig?.access, 'public');
   assert.equal(manifest.scripts?.prepublishOnly, 'npm run build && npm test');

@@ -1,6 +1,6 @@
 # PRD — Hosted API index + opt-in anonymous telemetry
 
-**Product:** SkeletonKey (`@beizhang/skeletonkey`) · **Repo branch:** `v0.3` · **Doc date:** 2026-10-25
+**Product:** SkeletonKey (`@dormy/skeletonkey`) · **Repo branch:** `v0.3` · **Doc date:** 2026-10-25
 **Owner:** Bei · **Status:** draft for build
 
 ## Status legend
