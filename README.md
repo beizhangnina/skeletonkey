@@ -108,25 +108,36 @@ Deliberately **not** in v0.3:
 - **No inbox reader yet.** The bound-inbox rung exists with its filter rules
   (vendor sender domain, time window) and reports "nothing is bound" until v0.5.
   It never asks the agent to read the mailbox in its place.
+- **An interactive `init`.** `skeletonkey init` at a terminal is a six-step
+  wizard — bound email, Bitwarden, inbox (coming soon), spend caps, card,
+  agent registration — ticking each step off as it completes. **Only the email
+  is required**; everything else can be deferred, and the closing summary
+  prints the exact command that finishes each deferred item. `--yes` or a
+  non-TTY stdin keeps the old flags-only path for CI. See
+  [the init wizard](#the-init-wizard).
+- **Published to npm** as `@beizhang/skeletonkey`, so `npx -y
+  @beizhang/skeletonkey init` is the whole install (D9).
 
 ### Try v0.3 locally
 
-Three terminals, no vendor account, no card, nothing published to npm:
+Three terminals, no vendor account, no card:
 
 ```bash
-git clone https://github.com/beizhangnina/skeletonkey.git
-cd skeletonkey && npm install && npm run build
+npm i -g @beizhang/skeletonkey
+# or prefix every command below with `npx -y @beizhang/skeletonkey`
 
-# 1. set up, and register with Claude Code / Codex (shows a diff first)
-node dist/cli.js init --email apis@example.com --backend encrypted-file
+# 1. set up, and register with Claude Code / Codex (shows a diff first).
+#    `skeletonkey init` on its own runs the six-step wizard; the flags here
+#    answer every step, so the demo is reproducible.
+skeletonkey init --email apis@example.com --backend encrypted-file --yes
 
 # 2. the trusted runner: approvals, caps, secure input, secrets
-node dist/cli.js runner
+skeletonkey runner
 #   approvals:    http://127.0.0.1:8788/
 #   agent API:    http://127.0.0.1:8788/v1/...  (token in ~/.skeletonkey/runner.json)
 
 # 3. the proxy, as before
-node dist/cli.js proxy
+skeletonkey proxy
 ```
 
 Then, as the agent would:
@@ -134,8 +145,8 @@ Then, as the agent would:
 ```bash
 # No key for this vendor, so the runner raises an approval and hands back an id.
 #   (through the MCP server in a real agent; this is the same code path)
-node dist/cli.js requests        # what is waiting for you
-node dist/cli.js policy show     # every cap is $0 until you say otherwise
+skeletonkey requests        # what is waiting for you
+skeletonkey policy show     # every cap is $0 until you say otherwise
 ```
 
 Open `http://127.0.0.1:8788/` in a browser: the approval page shows the vendor,
@@ -147,21 +158,148 @@ the honest state of v0.3, and exactly what a captcha will look like in v0.5.
 To see the kill switch:
 
 ```bash
-node dist/cli.js disable --all   # every key off, approvals voided, proxy refuses
+skeletonkey disable --all   # every key off, approvals voided, proxy refuses
 curl -s http://127.0.0.1:8787/api.openai.com/v1/models   # 403 kill_switch
-node dist/cli.js resume          # human-only
+skeletonkey resume          # human-only
 ```
+
+## Install
+
+Published as **[`@beizhang/skeletonkey`](https://www.npmjs.com/package/@beizhang/skeletonkey)**
+— scoped, because npm blocks the unscoped `skeletonkey` as too similar to the
+existing `skeleton-key` package. The one-liner needs no global install and no
+clone:
+
+```bash
+npx -y @beizhang/skeletonkey init
+```
+
+That runs the [init wizard](#the-init-wizard) and registers the MCP server with
+Claude Code and Codex. Or install it globally, which puts `skeletonkey`, `skk`
+(the same CLI, shorter to type) and `skeletonkey-runner` on your `PATH`:
+
+```bash
+npm i -g @beizhang/skeletonkey
+skeletonkey init
+```
+
+Use a writable npm global prefix rather than `sudo`: `npm config set prefix
+~/.npm-global`, then put `~/.npm-global/bin` on `PATH`.
+
+### Register the MCP server by hand
+
+`skeletonkey init` and `skeletonkey register` write both of these for you, after
+showing a diff. If you would rather do it yourself:
+
+**Claude Code** — `mcp` is the stdio MCP server subcommand:
+
+```bash
+claude mcp add skeletonkey -- npx -y @beizhang/skeletonkey mcp
+# user scope, so every project sees it:
+claude mcp add skeletonkey -s user -- npx -y @beizhang/skeletonkey mcp
+```
+
+**Codex** — add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.skeletonkey]
+command = "npx"
+args = ["-y", "@beizhang/skeletonkey", "mcp"]
+```
+
+Then drop the skill in so the agent knows the workflow and not just the tool
+list — see [Use with Codex / Claude Code](#use-with-codex--claude-code).
+
+### From a source checkout
+
+```bash
+git clone https://github.com/beizhangnina/skeletonkey.git
+cd skeletonkey
+npm install
+npm run build
+npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runner` on your PATH
+```
+
+To install exactly what would be published, without publishing anything:
+
+```bash
+npm pack && npm install -g ./beizhang-skeletonkey-0.3.0.tgz
+```
+
+`npm pack` rebuilds `dist/` first. The tarball carries compiled JavaScript and
+declarations, the API catalogs, the skill, the docs, the README and the LICENSE;
+raw catalog downloads, catalog build scripts, sources, source maps and tests are
+excluded. `npm run test:pack` asserts exactly that, then installs the tarball in
+a temp prefix and runs `--help` for all three bins.
+
+If anything goes wrong, the [install troubleshooting table](#install-troubleshooting)
+covers the usual causes (Node too old, `EACCES` on a global install, `bw` not
+installed/not logged in/locked, port 8787 busy, MCP server not showing up).
+
+### The init wizard
+
+At a terminal, `skeletonkey init` is a six-step wizard that ticks each step off
+as it completes. **Step 1 is the only required one** — there is nothing to file
+vendor accounts under without an email — and every other step can be deferred
+without ending the run:
+
+| Step | Required? | What it does |
+| --- | --- | --- |
+| **1. Email** | **yes** | Picks the **bound email** — the address every vendor account, password reset and billing notice is filed under, and the one vendor lookups match on. A brand-new address used only for API signups is recommended out loud; `+aliases` (`apis+tikhub@…`) then tell you who leaked it. A malformed answer is re-asked, not accepted. |
+| **2. Bitwarden** | no, recommended | Detects the `bw` CLI. Missing? It prints the install commands. No Bitwarden account? It opens <https://vault.bitwarden.com/#/register> (best effort, and always prints the URL) and you sign up yourself. Then it hands you `bw login <bound email>` and `export BW_SESSION="$(bw unlock --raw)"` to run **in your own terminal**, re-checks `bw status` when you press Enter, and ticks. Not ready? Three ways on: **set it up now** (Enter re-checks), **use the `encrypted-file` vault instead** (AES-256-GCM under `SKELETONKEY_HOME`, nothing to install), or **skip for now**. The last two finish `init`. |
+| **3. Inbox connect** | not available | Says "coming soon" (v0.5) and skips. Until then the runner asks you for an OTP in its Secure Input Popup; no agent is asked to read your mail. |
+| **4. Spend caps** | no | Asks for a global monthly cap and any per-vendor caps. Blank keeps the **$0** default, `skip` skips the step — and skipped means **every cap stays at $0**, so nothing can be spent. Written through the same human-only writer `skeletonkey policy set` uses, recorded as `cli`. |
+| **5. Card** | no | Explains how to create a card item named exactly `skeletonkey: card` **in Bitwarden's own app**, then checks only that an item with that name exists. The number, CVV and expiry are never read, printed or logged. v0.3 pays for nothing, so skipping costs nothing. |
+| **6. Agents** | no | Registers the MCP server and the skill with Claude Code and Codex, after showing a diff. `--no-register`, or declining the diff, defers it. |
+
+It ends with a summary split into **Set up** and **Deferred**, where each
+deferred line is followed by the exact command that finishes it:
+
+```
+  Deferred -- not required now; under each line is the command that finishes it
+    ! bitwarden   the `bw` CLI is logged in but locked
+        skeletonkey bitwarden status
+    — spend caps  every cap is still $0, so nothing can be spent
+        skeletonkey policy set --global <usd>
+    — card        not checked -- create "skeletonkey: card" in Bitwarden when you want payments
+        skeletonkey init --force
+```
+
+The only path that still **refuses** to finish when `bw` is unusable is the
+explicit non-interactive one (`--backend bitwarden` with no TTY, where there is
+no human to ask): it exits non-zero, writes nothing, and prints both ways past
+itself. Full detail, including every skip path and that boundary:
+[docs/init-wizard.md](docs/init-wizard.md). Inbox connect is listed separately as coming soon;
+every deferred setup item has an existing follow-up command. Declining agent
+registration defers it with `skeletonkey register`.
+
+**SkeletonKey never asks for your Bitwarden master password**, and there is no
+step at which it could: `bw login` and `bw unlock` are commands *you* run, and
+the only thing that crosses back is the `BW_SESSION` you export. A test asserts
+that the wizard refuses to put any question containing "password", "passphrase",
+"CVV", "card number", "API key" or "secret" to a human.
+
+Every flag still works, and anything you pass is treated as already answered:
+
+```bash
+skeletonkey init --email apis@example.com --backend bitwarden   # steps 1-2 answered
+skeletonkey init --no-register                                  # skip step 6
+skeletonkey init --email apis@example.com --backend encrypted-file --yes
+```
+
+`--yes`, or any run where **stdin is not a terminal** (CI, a pipe, a script),
+takes the old straight-line path instead: no wizard, no questions, `--email` and
+`--backend` required. That path is unchanged in 0.3.
 
 ## Install troubleshooting
 
-One-line installs (`npx skeletonkey init`) work **after the npm release** — see
-[Installing](#installing-from-source-today-npm-after-release). Until then, clone
-and build. These are the things that actually go wrong:
+`npx -y @beizhang/skeletonkey init` is the install — see [Install](#install).
+These are the things that actually go wrong:
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `SyntaxError: Unexpected token` on startup, or `node:sqlite` not found | **Node too old.** SkeletonKey needs **Node 22.5+** for the built-in `node:sqlite`. | `node --version`, then install Node 22.5 or newer (`nvm install 22`). The `engines` field refuses older versions on install. |
-| `EACCES: permission denied, mkdir '/usr/local/lib/node_modules'` | A **global npm install** without permission to write the global prefix. | Do not install globally: run `npx skeletonkey init` (after release), or clone and use `node dist/cli.js`. If you want a global install, set a user prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to `PATH`. Never `sudo npm install -g`. |
+| `EACCES: permission denied, mkdir '/usr/local/lib/node_modules'` | A **global npm install** without permission to write the global prefix. | Do not install globally: run `npx -y @beizhang/skeletonkey init`, which needs no global prefix. If you want a global install, set a user prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to `PATH`. Never `sudo npm install -g`. |
 | `Bitwarden is not ready: the `bw` CLI was not found on PATH` | The **Bitwarden CLI is not installed**. | Follow the install lines SkeletonKey prints (`npm install -g @bitwarden/cli`, `brew install bitwarden-cli`, `snap install bw`, or <https://bitwarden.com/help/cli/>), or run `skeletonkey init --backend encrypted-file`, which needs nothing. |
 | `Bitwarden is not ready: ... not logged in` | `bw` is installed but **not logged in**. | `bw login <your bound email>` in your own terminal. SkeletonKey never logs in for you and never sees your master password. |
 | `Bitwarden is not ready: ... logged in but locked` | Logged in but **locked**; the session is a human action. | `export BW_SESSION="$(bw unlock --raw)"` in the shell you run SkeletonKey from, then retry. The runner holds that session in memory only. |
@@ -225,7 +363,7 @@ What this tool does:
 - **Secrets are not passed in argv.** `skeletonkey add` reads the secret from stdin or a non-echoing prompt. Vault helpers (`bw`, `op`, `security`, `secret-tool`) receive secrets on stdin or via a `0600` temp file, so secrets do not appear in `ps` output or shell history.
 - **The proxy binds to `127.0.0.1` by default,** and refuses to bind `0.0.0.0` or `::` unless you pass `--allow-all-interfaces`. Any non-loopback bind prints a warning first. Treat the port exactly like a credential: anything that can reach it can spend through your keys.
 - **Gateway mode requires a shared token.** `skeletonkey proxy --gateway` will not start without `gateway.token` / `SKELETONKEY_GATEWAY_TOKEN` / `--token` (or an explicit `--insecure-no-token`), and then requires it as `X-SkeletonKey-Token` on every request.
-- **npm publish is intentionally disabled for now.** `package.json` sets `"private": true` so the package cannot be published to npm by accident. Install from source (clone, `npm install`, `npm run build`). The name `skeletonkey` is unclaimed on npm as of 2026-10-25.
+- **The published package is compiled output only.** `files` in `package.json` is a whitelist: compiled JavaScript and declarations, the API catalogs, the skill, the docs, the README and the LICENSE. Raw catalog downloads (`data/apis/raw/`), the catalog build scripts (`data/apis/scripts/`), the sources, the tests and their fixtures, and anything secret-shaped are excluded, and `npm run test:pack` fails the build if any of them ever appear in the tarball. `prepublishOnly` runs a fresh build and the whole suite before anything is pushed to the registry.
 - **Secrets live in the runner, not in the MCP process.** The trusted runner holds the `bw` session and every resolved value in memory; the MCP server reaches it over loopback with a token and can only ask for approvals and statuses. There is no "read secret" verb to call, which is also what a prompt injection would have to find.
 - **Values that must never pass through an AI** — API keys, passwords, card numbers, CVVs — are collected by the runner's Secure Input Popup on localhost, or read straight from Bitwarden. An OTP is the one class §5a of the PRD allows an agent to see, and even then the runner reads it first when an inbox is bound.
 - **Secrets are only filled on allowlisted origins.** The allowlist is built from the API index and the keys already in the vault; a lookalike domain is refused before any rung of the ladder is asked, and the human is notified.
@@ -261,46 +399,6 @@ hand rather than by the automated suite. `encrypted-file` and `file` are fully
 covered by tests, including an assertion that the encrypted vault on disk does
 not contain the plaintext secret.
 
-## Installing: from source today, npm after release
-
-SkeletonKey is **not published yet**: `package.json` still has `"private": true`
-so it cannot be pushed to the registry by accident. The tarball includes compiled
-JavaScript and declarations, runtime API catalogs, skills, docs, README and LICENSE;
-raw catalog downloads, build scripts, source maps and tests are excluded.
-
-From a source checkout after `npm install`, the one-line local tarball install is:
-
-```bash
-npm pack && npm install -g ./skeletonkey-0.3.0.tgz
-```
-
-`npm pack` builds fresh output automatically. Use a writable npm global prefix
-(and put its `bin` directory on PATH). This installs `skeletonkey`, `skk` and
-`skeletonkey-runner` without publishing anything.
-
-**After the npm release** (v0.5, per the roadmap), these one-liners are the
-install path (D9):
-
-```bash
-npx skeletonkey init                                       # set up + register both agents
-claude mcp add skeletonkey -s user -- npx -y skeletonkey mcp   # Claude Code, by hand
-# Codex equivalent: `codex mcp add`, or the [mcp_servers.skeletonkey] block below
-```
-
-**Today**, build from source:
-
-```bash
-git clone https://github.com/beizhangnina/skeletonkey.git
-cd skeletonkey
-npm install
-npm run build
-npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runner` on your PATH
-```
-
-If anything goes wrong, the [install troubleshooting table](#install-troubleshooting)
-covers the usual causes (Node too old, `EACCES` on a global install, `bw` not
-installed/not logged in/locked, port 8787 busy, MCP server not showing up).
-
 ## Quickstart
 
 Every command below can be typed as `skk` instead of `skeletonkey` — the two
@@ -310,10 +408,13 @@ Set up SkeletonKey. Use a **dedicated email** for API signups so that vendor
 mail, password resets, and billing notices stay out of your main inbox:
 
 ```bash
-skeletonkey init                                                   # interactive: asks for email and backend
+skeletonkey init                                                   # the six-step wizard (only the email is required)
 skeletonkey init --email apis@example.com --backend bitwarden      # the default
 skeletonkey init --email apis@example.com --backend encrypted-file # zero-install option
+skeletonkey init --email apis@example.com --backend bitwarden --yes # no questions (CI)
 ```
+
+See [the init wizard](#the-init-wizard) for what each step does.
 
 Add a key. The secret is read from stdin when piped, and from a hidden prompt otherwise:
 
@@ -485,12 +586,12 @@ and Codex are the **only** supported agents (D8).
 ### Let `init` do it (recommended)
 
 ```bash
-skeletonkey init          # or, later: skeletonkey register
+npx -y @beizhang/skeletonkey init    # or, later: skeletonkey register
 ```
 
-`init` detects nothing and guesses nothing: it writes four things, after printing
-a diff and asking (pass `--yes` to skip the question, `--no-register` to skip the
-step entirely):
+Step 6 of the [init wizard](#the-init-wizard). `init` detects nothing and guesses
+nothing: it writes four things, after printing a diff and asking (pass `--yes` to
+skip the question, `--no-register` to skip the step entirely):
 
 | File | What goes in it |
 | --- | --- |
@@ -507,17 +608,23 @@ the server still does not appear, that is the first row of the
 ### Claude Code, by hand
 
 ```bash
-claude mcp add skeletonkey -- skeletonkey mcp
-# after the npm release:
-claude mcp add skeletonkey -s user -- npx -y skeletonkey mcp
+claude mcp add skeletonkey -- npx -y @beizhang/skeletonkey mcp
+# user scope, so every project sees it:
+claude mcp add skeletonkey -s user -- npx -y @beizhang/skeletonkey mcp
+# or, with a global install: claude mcp add skeletonkey -- skeletonkey mcp
 ```
+
+`mcp` is the subcommand that starts the stdio MCP server; everything after `--`
+is the command Claude Code spawns.
 
 Then drop the skill in so the agent knows the workflow, not just the tools:
 
 ```bash
 mkdir -p ~/.claude/skills/skeletonkey
-cp skills/skeletonkey/SKILL.md ~/.claude/skills/skeletonkey/SKILL.md
-# or per-project: cp -r skills/skeletonkey .claude/skills/skeletonkey
+cp "$(npm root -g)/@beizhang/skeletonkey/skills/skeletonkey/SKILL.md" \
+  ~/.claude/skills/skeletonkey/SKILL.md
+# from a source checkout: cp skills/skeletonkey/SKILL.md ~/.claude/skills/skeletonkey/SKILL.md
+# or per-project:          cp -r skills/skeletonkey .claude/skills/skeletonkey
 ```
 
 ### Codex, by hand
@@ -526,16 +633,22 @@ Add to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.skeletonkey]
-command = "skeletonkey"
-args = ["mcp"]
+command = "npx"
+args = ["-y", "@beizhang/skeletonkey", "mcp"]
 ```
 
-If `skeletonkey` is not on your `PATH`, use the absolute path to the built CLI:
+This is exactly what `skeletonkey register` writes, inside a
+`# skeletonkey:begin/end` block. With a global install, or from a source
+checkout, either of these works instead:
 
 ```toml
 [mcp_servers.skeletonkey]
-command = "node"
-args = ["/absolute/path/to/skeletonkey/dist/cli.js", "mcp"]
+command = "skeletonkey"
+args = ["mcp"]
+
+# or the absolute path to a built CLI:
+# command = "node"
+# args = ["/absolute/path/to/skeletonkey/dist/cli.js", "mcp"]
 ```
 
 `skills/skeletonkey/SKILL.md` doubles as an `AGENTS.md` snippet for Codex — paste
@@ -699,7 +812,7 @@ editing the config and restarting.
 
 | Command | What it does |
 | --- | --- |
-| `skeletonkey init` | Creates `SKELETONKEY_HOME`, records the dedicated email and vault backend, then registers the MCP server + skill with Claude Code and Codex (shows a diff first). `--email`, `--backend`, `--op-vault`, `--bw-folder`, `--force`, `--no-register`, `--yes`, `--user-home <dir>`, `--agent-command <cmd>`. Defaults to `bitwarden`. |
+| `skeletonkey init` | At a terminal, the **[six-step wizard](#the-init-wizard)**: bound email (the only required step), Bitwarden, inbox (coming soon), spend caps, card, agent registration, then a summary of what is set up and what is deferred with the command for each. With `--yes`, or when stdin is not a TTY, the flags-only path instead: creates `SKELETONKEY_HOME`, records the dedicated email and vault backend, then registers the MCP server + skill with Claude Code and Codex (shows a diff first). `--email`, `--backend`, `--op-vault`, `--bw-folder`, `--force`, `--no-register`, `--yes`, `--user-home <dir>`, `--agent-command <cmd>`. Defaults to `bitwarden`. |
 | `skeletonkey register` | Registers (or re-registers) the MCP server and skill for Claude Code and Codex. `--dry-run`, `--agent claude-code\|codex`, `--user-home`, `--agent-command`. **This is the fix when the server does not show up in an agent.** |
 | `skeletonkey bitwarden status` (alias `skeletonkey bw status`) | Is `bw` installed, logged in and unlocked — and as the bound email? Prints the commands to run when the answer is no, and exits non-zero. `--json`. |
 | `skeletonkey bitwarden find <domain>` | Vault items for the **bound email** that match a vendor domain: names, ids, which field matched, whether there is a password or an API key. **Never prints a value.** `--json`. |
@@ -1025,8 +1138,8 @@ offers and contain no verified prices.**
 
 Phases, following the PRD:
 
-- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, and guided Bitwarden account detection with vendor lookup by the bound email. See [What v0.3 adds](#what-v03-adds).
-- **v0.5 — automated signup.** Publish to npm (drop `"private": true`) so `npx skeletonkey init` works; bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
+- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@beizhang/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
+- **v0.5 — automated signup.** Bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
 - **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger (the per-vendor cap re-check before submit already landed in v0.3), and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
 - **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.
 
@@ -1064,7 +1177,7 @@ directories and covers:
 v0.3 adds:
 
 - **the canary sweep** (`test/canary.test.ts`): a fake API key, password, card number and CVV are pushed through the real paths — the vault, the `bw` rung of the ladder, the Secure Input Popup — and then *every* tool response (including with hostile arguments), every runner page and API response, the runner log, every file under `SKELETONKEY_HOME` read as raw bytes, and all CLI output are swept for them; plus a second test proving no tool, argument, or runner route lets an agent enable a key or raise a cap;
-- **the Bitwarden account lookup** (`test/bw-account.test.ts`, `test/bw-cli.test.ts`): every state of `bw` (missing, logged out, locked, unlocked, logged in as the wrong account) through both a fake runner and a **fake `bw` script on PATH** — asserting that the guidance names the install steps, `bw login <bound email>` and `BW_SESSION`, that nothing ever asks for or passes a master password, that `init` refuses to finish while `bw` is unusable, and that a vendor item belonging to a *different* mailbox never answers for that vendor;
+- **the Bitwarden account lookup** (`test/bw-account.test.ts`, `test/bw-cli.test.ts`): every state of `bw` (missing, logged out, locked, unlocked, logged in as the wrong account) through both a fake runner and a **fake `bw` script on PATH** — asserting that the guidance names the install steps, `bw login <bound email>` and `BW_SESSION`, that nothing ever asks for or passes a master password, that explicit non-interactive Bitwarden setup refuses while `bw` is unusable and offers the encrypted-file or interactive skip paths, and that a vendor item belonging to a *different* mailbox never answers for that vendor;
 - **the ladder** with fakes for every rung: it stops at Bitwarden, falls through a locked or missing `bw` without trying to unlock it, refuses a lookalike or plain-HTTP origin before asking any rung, redacts a rung that throws, and never logs a value;
 - **the runner**: token-authed agent API with no secret-returning verb, the approval page (approve, deny, stale form token, caps written with the human's authority recorded), cancellation, the aggregator-fallback approval after a failed signup and the
   execution of that route against a **fake aggregator HTTP server** (cheapest
@@ -1074,6 +1187,7 @@ v0.3 adds:
 - **the spend policy**: $0 defaults, the first-paid-action prompt, unknown cost never auto-approved, and cap writes refused without a human authority;
 - **the redactor**: cards by Luhn, prefixed keys, labelled secrets, and `null` left alone because "nobody checked" is load-bearing here;
 - **agent registration**: both agents, idempotent, preserving your own settings, refusing a `~/.claude.json` it cannot parse and a Codex entry you wrote yourself — all into a temp home, so the suite never touches your real one;
+- **the `init` wizard** (`test/init-wizard.test.ts`): every step driven through injected fakes — a scripted prompt, a fake `bw`, a fake browser opener, a temp home — covering each step, each skip path, the `--yes`/non-TTY path (asserted to produce *no* wizard output), and the two invariants that matter: **no question containing "password", "passphrase", "CVV", "card number", "API key" or "secret" is ever put to a human**, and the card item is matched **by name only** so a stored card number is never read, printed or returned. One check allocates a real pty with `script(1)` to prove the TTY branch is the wizard;
 - **the kill switch end to end**: through the built CLI and a live proxy, including that `resume` does not re-enable keys.
 
 Node 22's `node:sqlite` is used for the ledger, so there is no native

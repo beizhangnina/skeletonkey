@@ -48,7 +48,10 @@ say "temp skeletonkey home"
 echo "SKELETONKEY_HOME=$SKELETONKEY_HOME"
 
 say "skeletonkey init (test-only plaintext file backend)"
-$SKELETONKEY init --email skeletonkey-demo@example.test --backend file
+# `--yes` takes the flags-only path, so the demo never stops at the interactive
+# wizard; `--no-register` keeps a throwaway demo out of your real ~/.claude.json
+# and ~/.codex/ (run `skeletonkey init` yourself for that).
+$SKELETONKEY init --email skeletonkey-demo@example.test --backend file --yes --no-register
 
 say "skeletonkey add $ALIAS (secret piped on stdin, never in argv)"
 printf '%s' "$FAKE_SECRET" | $SKELETONKEY add "$ALIAS" \

@@ -31,6 +31,8 @@ import {
 import { openLedger } from "./ledger.js";
 import { configPath, skeletonKeyHome, keysPath, ledgerPath } from "./paths.js";
 import { promptLine, readSecret } from "./prompt.js";
+import { BITWARDEN_FALLBACK_BACKEND, runInitWizard, wizardDeps } from "./init-wizard.js";
+import { systemOpener } from "./open-url.js";
 import { startMcpServer } from "./mcp.js";
 import { startProxy, upstreamSchemeFor } from "./proxy.js";
 import {
@@ -83,7 +85,10 @@ export function buildProgram(): Command {
 
   program
     .command("init")
-    .description("create ~/.skeletonkey, pick a vault backend, record the dedicated email")
+    .description(
+      "set up ~/.skeletonkey: an interactive step-by-step wizard at a TTY, or the same\n" +
+        "straight-line setup from flags with --yes or a non-TTY stdin",
+    )
     .option("--email <email>", "dedicated email used for API signups")
     .addOption(
       new Option("--backend <backend>", "where secrets are stored (default: bitwarden)").choices([
@@ -94,7 +99,11 @@ export function buildProgram(): Command {
     .option("--bw-folder <name>", "Bitwarden folder name (bitwarden backend only)")
     .option("--force", "overwrite an existing config", false)
     .option("--no-register", "skip registering the MCP server with Claude Code and Codex")
-    .option("--yes", "do not ask before writing the agent config files", false)
+    .option(
+      "--yes",
+      "skip the interactive wizard and the confirmation prompts (the CI path)",
+      false,
+    )
     .option(
       "--user-home <dir>",
       "home directory the agent config files live under (default: your home; used by tests)",
@@ -352,6 +361,18 @@ interface ProxyCliOptions {
   upstreamScheme?: UpstreamScheme;
 }
 
+/**
+ * `skeletonkey init`.
+ *
+ * At a TTY (and without `--yes`) this is the six-step wizard in
+ * `init-wizard.ts`, where the bound email is the only required answer and
+ * everything else can be deferred with the command to finish it printed in the
+ * summary. With `--yes`, or when stdin is not a TTY, it is the straight-line
+ * path below -- the one CI and `scripts/demo.sh` drive, which takes every
+ * answer from a flag and is deliberately unchanged, including its refusal to
+ * finish when an explicitly chosen Bitwarden backend is unusable
+ * (`guideBitwarden`).
+ */
 async function cmdInit(options: InitOptions): Promise<void> {
   const home = skeletonKeyHome();
   if (configExists(home) && !options.force) {
@@ -359,6 +380,11 @@ async function cmdInit(options: InitOptions): Promise<void> {
   }
 
   const interactive = process.stdin.isTTY === true;
+  if (interactive && options.yes !== true) {
+    await initWizard(options, home);
+    return;
+  }
+
   let email = options.email?.trim() ?? "";
   if (!email) {
     if (!interactive) throw new Error("--email is required in non-interactive mode.");
@@ -398,23 +424,10 @@ async function cmdInit(options: InitOptions): Promise<void> {
     );
   }
   const backend: BackendId = resolved;
-  if (isTestOnlyBackend(backend) && !testBackendAllowed()) {
-    throw new Error(
-      `The \`${backend}\` backend stores secrets in PLAINTEXT and exists only for this repo's ` +
-        `tests and demo. Pick one of ${PUBLIC_BACKENDS.join(", ")}, or set ` +
-        "SKELETONKEY_ALLOW_TEST_BACKEND=1 if you really mean it.",
-    );
-  }
+  assertBackendAllowed(backend);
 
   ensureHome(home);
-  const config: Config = {
-    email,
-    backend,
-    ...(backend === "1password" ? { op_vault: options.opVault } : {}),
-    ...(backend === "bitwarden" && options.bwFolder ? { bw_folder: options.bwFolder } : {}),
-    proxy: { bind: "127.0.0.1", port: DEFAULT_PROXY_PORT },
-    created: new Date().toISOString(),
-  };
+  const config = initConfig(options, email, backend);
 
   const vault = createVault(config, home);
   if (backend === "bitwarden") {
@@ -425,28 +438,8 @@ async function cmdInit(options: InitOptions): Promise<void> {
     await vault.check();
   }
 
-  writeConfig(config, home);
-  // Create keys.yaml and the ledger up front so their permissions are right from the start.
-  writeKeys(readKeys(home), home);
-  openLedger(home).close();
-
-  console.log(`SkeletonKey initialised at ${home}`);
-  console.log(`  email:    ${email}`);
-  console.log(`  backend:  ${backend}`);
-  console.log(`  secrets:  ${vault.location}`);
-  console.log(`  metadata: ${keysPath(home)} (never contains secrets)`);
-  console.log(`  ledger:   ${ledgerPath(home)}`);
-  console.log(`  proxy:    http://127.0.0.1:${DEFAULT_PROXY_PORT} (edit \`proxy\` in ${configPath(home)})`);
-  console.log(`  policy:   ${policyPath(home)} (caps default to $0 -- a human sets them)`);
-  console.log(
-    `  runner:   start it with \`skeletonkey runner\` (holds the secrets, raises approvals)`,
-  );
-  if (isTestOnlyBackend(backend)) {
-    console.log(
-      "\nWARNING: the `file` backend stores secrets in PLAINTEXT and is test-only. " +
-        "Never put a real key in it.",
-    );
-  }
+  persistInit(config, home);
+  printInitPaths(config, home, vault.location);
 
   if (options.register === false) {
     console.log(
@@ -462,6 +455,113 @@ async function cmdInit(options: InitOptions): Promise<void> {
 }
 
 /**
+ * The interactive path: the six-step wizard, with the real prompt, the real
+ * `bw` and the real browser opener wired in. Everything the wizard touches
+ * outside this process is a dependency, so the tests drive the same steps with
+ * fakes and a temp home (see `test/init-wizard.test.ts`).
+ */
+async function initWizard(options: InitOptions, home: string): Promise<void> {
+  const deps = wizardDeps(
+    { prompt: promptLine, print: (line: string) => console.log(line) },
+    { openUrl: systemOpener() },
+  );
+  await runInitWizard(deps, {
+    home,
+    answers: {
+      ...(options.email === undefined ? {} : { email: options.email }),
+      ...(options.backend === undefined ? {} : { backend: options.backend }),
+    },
+    registerSkipped: options.register === false,
+    commit: async ({ email, backend }) => {
+      assertBackendAllowed(backend);
+      ensureHome(home);
+      const config = initConfig(options, email, backend);
+      const vault = createVault(config, home);
+      // Step 2 has already read Bitwarden's state (and the human may have
+      // chosen to carry on without it). Every other backend is checked here,
+      // which is where `encrypted-file` asks for its own passphrase.
+      if (backend !== "bitwarden") await vault.check();
+      persistInit(config, home);
+      printInitPaths(config, home, vault.location);
+      return vault.location;
+    },
+    register: async () => {
+      const outcome = await registerAgents({
+        ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+        ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+        confirm: true,
+      });
+      return {
+        summary: describeRegistration(outcome),
+        deferred: !outcome.wrote && outcome.actions.some((action) => action.change !== "unchanged"),
+      };
+    },
+  });
+}
+
+/** The plaintext `file` backend is refused unless it was asked for explicitly. */
+function assertBackendAllowed(backend: BackendId): void {
+  if (isTestOnlyBackend(backend) && !testBackendAllowed()) {
+    throw new Error(
+      `The \`${backend}\` backend stores secrets in PLAINTEXT and exists only for this repo's ` +
+        `tests and demo. Pick one of ${PUBLIC_BACKENDS.join(", ")}, or set ` +
+        "SKELETONKEY_ALLOW_TEST_BACKEND=1 if you really mean it.",
+    );
+  }
+}
+
+function initConfig(options: InitOptions, email: string, backend: BackendId): Config {
+  return {
+    email,
+    backend,
+    ...(backend === "1password" ? { op_vault: options.opVault } : {}),
+    ...(backend === "bitwarden" && options.bwFolder ? { bw_folder: options.bwFolder } : {}),
+    proxy: { bind: "127.0.0.1", port: DEFAULT_PROXY_PORT },
+    created: new Date().toISOString(),
+  };
+}
+
+/**
+ * Create keys.yaml and the ledger up front, alongside the config, so their
+ * permissions are right from the start.
+ */
+function persistInit(config: Config, home: string): void {
+  writeConfig(config, home);
+  writeKeys(readKeys(home), home);
+  openLedger(home).close();
+}
+
+function printInitPaths(config: Config, home: string, location: string): void {
+  console.log(`SkeletonKey initialised at ${home}`);
+  console.log(`  email:    ${config.email}`);
+  console.log(`  backend:  ${config.backend}`);
+  console.log(`  secrets:  ${location}`);
+  console.log(`  metadata: ${keysPath(home)} (never contains secrets)`);
+  console.log(`  ledger:   ${ledgerPath(home)}`);
+  console.log(`  proxy:    http://127.0.0.1:${DEFAULT_PROXY_PORT} (edit \`proxy\` in ${configPath(home)})`);
+  console.log(`  policy:   ${policyPath(home)} (caps default to $0 -- a human sets them)`);
+  console.log(
+    `  runner:   start it with \`skeletonkey runner\` (holds the secrets, raises approvals)`,
+  );
+  if (isTestOnlyBackend(config.backend)) {
+    console.log(
+      "\nWARNING: the `file` backend stores secrets in PLAINTEXT and is test-only. " +
+        "Never put a real key in it.",
+    );
+  }
+}
+
+/** One line for the wizard's step 6 and its summary screen. */
+function describeRegistration(outcome: { actions: RegistrationAction[]; wrote: boolean }): string {
+  const changed = outcome.actions.filter((action) => action.change !== "unchanged");
+  if (changed.length === 0) return "Claude Code and Codex were already registered";
+  if (!outcome.wrote) {
+    return `declined -- ${changed.length} file(s) left alone; run \`skeletonkey register\` later`;
+  }
+  return `registered with Claude Code and Codex (${changed.length} file(s) written)`;
+}
+
+/**
  * Writes the Claude Code and Codex config (D8: those two only), after showing
  * the human exactly what is about to change (§5.1).
  */
@@ -471,7 +571,7 @@ async function registerAgents(options: {
   agents?: readonly AgentId[];
   confirm: boolean;
   dryRun?: boolean;
-}): Promise<RegistrationAction[]> {
+}): Promise<{ actions: RegistrationAction[]; wrote: boolean }> {
   const planOptions = {
     ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
     ...(options.command === undefined ? {} : { command: options.command }),
@@ -485,17 +585,17 @@ async function registerAgents(options: {
 
   if (changes.length === 0) {
     console.log("  Nothing to do: both agents are already registered.");
-    return planned;
+    return { actions: planned, wrote: false };
   }
   if (options.dryRun === true) {
     console.log("  --dry-run: nothing was written.");
-    return planned;
+    return { actions: planned, wrote: false };
   }
   if (options.confirm) {
     const answer = await promptLine(`Write these ${changes.length} change(s)? [Y/n]: `, "y");
     if (!/^y(es)?$/i.test(answer)) {
       console.log("  Skipped. Run `skeletonkey register` later.");
-      return planned;
+      return { actions: planned, wrote: false };
     }
   }
   const applied = applyRegistration(planOptions);
@@ -506,7 +606,7 @@ async function registerAgents(options: {
     "  Restart Claude Code / Codex to pick the server up. If it still does not appear, re-run " +
       "`skeletonkey register` and see the install troubleshooting table in the README.",
   );
-  return applied;
+  return { actions: applied, wrote: true };
 }
 
 async function cmdRegister(options: RegisterCliOptions): Promise<void> {
@@ -636,11 +736,21 @@ async function cmdBitwardenFind(domain: string, json: boolean): Promise<void> {
 }
 
 /**
- * The guided Bitwarden setup `init` runs for the default backend: detect the
- * state, print the exact commands, and re-check when the human says they have
- * done it. SkeletonKey never collects the master password -- `bw login` and
- * `bw unlock` happen in the human's own terminal, and only the BW_SESSION they
- * export comes back here.
+ * The guided Bitwarden setup the **straight-line** `init` path runs for the
+ * Bitwarden backend: detect the state, print the exact commands, and re-check
+ * when the human says they have done it. SkeletonKey never collects the master
+ * password -- `bw login` and `bw unlock` happen in the human's own terminal,
+ * and only the BW_SESSION they export comes back here.
+ *
+ * **Where the refusal lives.** This is the one path that still refuses to
+ * finish when `bw` is unusable, and only in its non-interactive form: there,
+ * `--backend bitwarden` was asked for explicitly (or defaulted to with `--yes`)
+ * by something with no human to answer a question, so the honest outcome is a
+ * non-zero exit and an untouched `~/.skeletonkey` rather than a config naming a
+ * vault that cannot be opened. The two ways out are printed before it throws.
+ * At a TTY this function still offers `skip`, and the interactive wizard
+ * (`init-wizard.ts`, step 2) offers the fuller choice -- set Bitwarden up, take
+ * the `encrypted-file` vault instead, or defer it -- and never aborts the run.
  */
 async function guideBitwarden(email: string, interactive: boolean): Promise<BwAccount> {
   let status = await bwAccountStatus({ bound: email });
@@ -664,7 +774,21 @@ async function guideBitwarden(email: string, interactive: boolean): Promise<BwAc
     }
     console.error(`\nBitwarden: ${status.summary}.`);
     for (const line of bwGuidance(status, loginAs)) console.error(`  ${line}`);
-    if (!interactive) throw bwGuidanceError(status, loginAs);
+    if (!interactive) {
+      // Nothing is written, so there is no half-finished home to clean up --
+      // and the caller is told both ways past this, either of which finishes.
+      console.error("\nBitwarden is not required. Either of these finishes setup instead.");
+      console.error(
+        `  The zero-install vault (AES-256-GCM file under SKELETONKEY_HOME):\n` +
+          `    skeletonkey init --email ${loginAs} --backend ${BITWARDEN_FALLBACK_BACKEND} --yes`,
+      );
+      console.error(
+        "  Or at a terminal, where the wizard offers Bitwarden / " +
+          `${BITWARDEN_FALLBACK_BACKEND} / later and finishes either way:\n` +
+          "    skeletonkey init",
+      );
+      throw bwGuidanceError(status, loginAs);
+    }
     const answer = await promptLine(
       "Press Enter once you have done that and I will re-check, or type `skip`: ",
       "recheck",

@@ -68,7 +68,18 @@ describe("`skeletonkey init --backend bitwarden` against a fake bw", () => {
     expect(fake.calls()).toEqual(["status"]);
   });
 
-  it("refuses to finish, with the unlock steps, when bw is locked", async () => {
+  /**
+   * The one surviving refusal, and the boundary it sits on.
+   *
+   * `init` is non-interactive here (`runCli` pipes stdin) and Bitwarden was
+   * asked for *explicitly*, so there is no human to offer a choice to and no
+   * honest way to finish: a config naming a vault that cannot be opened would
+   * be worse than a non-zero exit. The interactive wizard is the opposite --
+   * step 2 there offers "set it up / encrypted-file instead / later" and
+   * finishes either way (`test/init-wizard.test.ts`). So this path prints both
+   * ways out before it refuses, and the next test walks one of them.
+   */
+  it("refuses to finish on the explicit non-interactive path when bw is locked", async () => {
     const fake = installFakeBw(home, { state: "locked", userEmail: BOUND });
     const result = await runCli(
       home,
@@ -79,9 +90,30 @@ describe("`skeletonkey init --backend bitwarden` against a fake bw", () => {
     expect(result.code).toBe(1);
     expect(result.stderr).toContain('export BW_SESSION="$(bw unlock --raw)"');
     expect(result.stderr).toMatch(/never asks for, stores, or passes on your Bitwarden master password/);
+    // It refuses, but it does not leave the human stuck: Bitwarden is not
+    // required, and both ways past it are spelled out.
+    expect(result.stderr).toContain("Bitwarden is not required.");
+    expect(result.stderr).toContain("--backend encrypted-file --yes");
+    expect(result.stderr).toMatch(
+      /at a terminal, where the wizard offers Bitwarden \/ encrypted-file \/ later/,
+    );
     // Nothing was written: `init` is not half-done.
     expect(fs.existsSync(configFile())).toBe(false);
     expect(fake.calls()).toEqual(["status"]);
+  });
+
+  it("finishes with the encrypted-file vault it points at, locked bw and all", async () => {
+    const fake = installFakeBw(home, { state: "locked", userEmail: BOUND });
+    const result = await runCli(
+      home,
+      ["init", "--email", BOUND, "--backend", "encrypted-file", "--no-register", "--yes"],
+      "",
+      { ...fake.env, SKELETONKEY_PASSPHRASE: "FAKE-test-passphrase-0xC1" },
+    );
+    expect(result.code).toBe(0);
+    expect(fs.readFileSync(configFile(), "utf8")).toContain("backend: encrypted-file");
+    // The way out of the refusal needs no Bitwarden at all.
+    expect(fake.calls()).toEqual([]);
   });
 
   it("gives install steps and a `bw login <bound email>` line when bw is missing", async () => {
