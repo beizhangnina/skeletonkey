@@ -1,16 +1,18 @@
 {
-  "name": "skeletonkey",
+  "name": "@beizhang/skeletonkey",
   "version": "0.3.0",
-  "private": true,
   "description": "Local-only vault, injecting proxy, trusted runner, and MCP server for your personal API keys.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/beizhangnina/skeletonkey.git"
   },
-  "homepage": "https://github.com/beizhangnina/skeletonkey#readme",
+  "homepage": "https://skeletonkey.run",
   "bugs": {
     "url": "https://github.com/beizhangnina/skeletonkey/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "type": "module",
   "engines": {
@@ -30,7 +32,9 @@
     "data/apis/README.md",
     "data/discovered.example.yaml",
     "skills/**/SKILL.md",
-    "docs/*.md",
+    "docs/init-wizard.md",
+    "docs/signup.md",
+    "docs/v0.1-acceptance.md",
     "README.md",
     "LICENSE"
   ],
@@ -41,6 +45,7 @@
     "skeletonkey": "node --no-warnings dist/cli.js",
     "pretest": "npm run build",
     "prepack": "node --input-type=module -e 'import { rmSync } from \"node:fs\"; rmSync(\"dist\", { recursive: true, force: true });' && npm run build",
+    "prepublishOnly": "npm run build && npm test",
     "test:pack": "node scripts/check-pack.mjs"
   },
   "dependencies": {
