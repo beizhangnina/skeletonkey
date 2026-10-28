@@ -4,7 +4,14 @@ import { realpathSync } from "node:fs";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
-import { loadApiIndex, resolveApisPath, validateApisFile } from "./apis.js";
+import {
+  HIGHLIGHTS_MAX,
+  loadApiIndex,
+  rankByCapability,
+  resolveApisPath,
+  validateApisFile,
+  type IndexEntry,
+} from "./apis.js";
 import { resolveBind, TAILSCALE_SENTINEL } from "./bind.js";
 import { configExists, ensureHome, readConfig, writeConfig } from "./config.js";
 import {
@@ -286,6 +293,15 @@ export function buildProgram(): Command {
     .argument("[file]", "path to apis.yaml", resolveApisPath())
     .action((file: string) => {
       cmdApisValidate(file);
+    });
+  apis
+    .command("show")
+    .description("print index entries with what each vendor offers (Layer 1 + highlights)")
+    .argument("[query]", "only entries matching this capability or name")
+    .option("--limit <n>", "entries to show", (value: string) => Number(value), 10)
+    .option("--json", "machine-readable output", false)
+    .action((query: string | undefined, options: { limit: number; json: boolean }) => {
+      cmdApisShow(query, options);
     });
 
   program
@@ -1311,6 +1327,185 @@ function newest(a: string | null, b: string | null): string | null {
   if (a === null) return b;
   if (b === null) return a;
   return Date.parse(a) >= Date.parse(b) ? a : b;
+}
+
+interface ApisShowOptions {
+  limit: number;
+  json: boolean;
+}
+
+/**
+ * Prints index rows the way a human reads them: what the vendor is, what is
+ * free, how to connect, and a few highlighted models/endpoints. The offering
+ * block is optional on every row, so the absence of one is printed as such
+ * rather than as a row of empty fields.
+ */
+function cmdApisShow(query: string | undefined, options: ApisShowOptions): void {
+  const home = skeletonKeyHome();
+  const index = loadApiIndex({ home });
+  const asked = query?.trim() ?? "";
+  const matched =
+    asked === ""
+      ? index.entries
+      : rankByCapability(index.entries, asked).map((scored) => scored.entry);
+  // A name is what a human types when they already know the vendor, and the
+  // capability matcher is whole-word, so `treg` alone would miss `treg.to`.
+  const byName =
+    asked === ""
+      ? []
+      : index.entries.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
+  const seen = new Set<string>();
+  const entries = [...byName, ...matched].filter((entry) => {
+    if (seen.has(entry.name)) return false;
+    seen.add(entry.name);
+    return true;
+  });
+  const limit = Number.isFinite(options.limit) && options.limit > 0 ? Math.trunc(options.limit) : 10;
+  const shown = entries.slice(0, limit);
+
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          query: asked === "" ? null : asked,
+          index_files: index.files,
+          matched: entries.length,
+          returned: shown.length,
+          entries: shown.map((entry) => ({
+            name: entry.name,
+            origin: entry.origin,
+            access_mode: entry.access_mode,
+            url: entry.url,
+            domain: entry.domain ?? null,
+            auth_required: entry.auth_required ?? null,
+            auth_headers: entry.auth_headers ?? null,
+            status: entry.status ?? null,
+            checked_date: entry.checked_date,
+            offering: entry.offering ?? null,
+          })),
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (shown.length === 0) {
+    console.log(
+      asked === ""
+        ? "The index is empty."
+        : `Nothing in the index matches ${JSON.stringify(asked)}. ` +
+            `${index.entries.length} entries searched across ${index.files.length} file(s).`,
+    );
+    return;
+  }
+
+  for (const entry of shown) {
+    printOffering(entry);
+  }
+  console.log(
+    `${shown.length} of ${entries.length} matching entries ` +
+      `(${index.entries.length} in the index). Offering fields are optional: a blank one means ` +
+      "nobody recorded it, never that the vendor does not have it.",
+  );
+}
+
+/** Wraps long prose at a terminal-ish width, with a hanging indent. */
+function wrapped(label: string, value: string, width = 96): string[] {
+  const indent = " ".repeat(13);
+  const head = `  ${label.padEnd(11)}`;
+  const lines: string[] = [];
+  let current = "";
+  for (const word of value.split(/\s+/).filter((part) => part !== "")) {
+    if (current === "") {
+      current = word;
+    } else if (`${current} ${word}`.length > width) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = `${current} ${word}`;
+    }
+  }
+  if (current !== "") lines.push(current);
+  if (lines.length === 0) lines.push("");
+  return lines.map((text, index) => (index === 0 ? head + text : indent + text));
+}
+
+/** One entry as a labelled block. Keeps nested offering fields readable. */
+function printOffering(entry: IndexEntry): void {
+  const line = (label: string, value: string): void => {
+    for (const text of wrapped(label, value)) console.log(text);
+  };
+  const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
+  console.log("");
+  console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+
+  const offering = entry.offering ?? null;
+  if (offering === null) {
+    line("summary", "no offering recorded (the offering block is optional)");
+    if (entry.url !== null) line("url", entry.url);
+    return;
+  }
+  line("summary", offering.summary ?? "unknown");
+  line("categories", (offering.categories ?? []).join(", ") || "unknown");
+
+  const counts: string[] = [];
+  if (offering.model_count !== null) counts.push(`~${offering.model_count} models`);
+  if (offering.endpoint_count !== null) counts.push(`~${offering.endpoint_count} endpoints`);
+  line("size", counts.length === 0 ? "unknown" : counts.join(", "));
+  if (offering.count_note !== null) line("", offering.count_note);
+
+  const free = offering.free_tier;
+  if (free === null) {
+    line("free tier", "unknown (nobody checked)");
+  } else {
+    const available =
+      free.available === true ? "yes" : free.available === false ? "no" : "unknown (nobody checked)";
+    line("free tier", `${available}${free.what === null ? "" : ` -- ${free.what}`}`);
+    if (free.limits !== null) line("", `limits: ${free.limits}`);
+    const needs = [
+      free.requires_account === true ? "account" : free.requires_account === false ? "no account" : null,
+      free.requires_key === true ? "API key" : free.requires_key === false ? "no key" : null,
+    ].filter((item): item is string => item !== null);
+    if (needs.length > 0) line("", `needs: ${needs.join(", ")}`);
+  }
+
+  const connect = offering.connect;
+  if (connect === null) {
+    line("connect", "unknown");
+  } else {
+    const auth =
+      connect.auth === "none"
+        ? "no auth (vendor documents none)"
+        : connect.auth === null
+          ? "auth unknown"
+          : connect.auth_header === null
+            ? connect.auth
+            : `${connect.auth}: ${connect.auth_header}: ${connect.auth_format ?? "{key}"}`;
+    line("connect", `${connect.base_url ?? "base URL unknown"}  (${auth})`);
+  }
+  line("catalog", offering.catalog_url ?? "none published");
+
+  const highlights = offering.highlights ?? [];
+  if (highlights.length > 0) {
+    line(
+      "highlights",
+      `${highlights.length} of at most ${HIGHLIGHTS_MAX} -- a sample, not the catalog`,
+    );
+    for (const item of highlights) {
+      const free_ = item.free === true ? "free" : item.free === false ? "paid" : "cost unknown";
+      console.log(
+        `    - [${free_}] ${item.kind}  ${item.id}${item.note === null ? "" : ` -- ${item.note}`}`,
+      );
+    }
+  }
+  line(
+    "verified",
+    offering.verified_url === null
+      ? "nowhere -- treat the fields above as unverified"
+      : `${offering.verified_url} on ${offering.verified_date ?? "an unrecorded date"}`,
+  );
 }
 
 function printTable(headers: string[], rows: string[][]): void {

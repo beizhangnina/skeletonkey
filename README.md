@@ -658,7 +658,7 @@ its body into your `AGENTS.md`, or point to it from there.
 
 | Tool | Returns |
 | --- | --- |
-| `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
+| `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: what the vendor offers (`offering`: summary, categories, size, free tier, how to connect, its own catalog URL, up to 15 highlighted models/endpoints), the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
 | `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. After an approved aggregator route it also carries `routed_via`, `routed_cost_usd`, `routed_http_status` and `routed_result` (the aggregator's answer). Opaque ids, statuses and that answer only — no key, no card, no OTP, no screenshot, no page text. |
@@ -666,7 +666,7 @@ its body into your `AGENTS.md`, or point to it from there.
 | `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
 | `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
 | `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
-| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
+| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `auth_required` and `auth_headers` too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
 | `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
 | `ledger(alias?)` | Recent calls and a spend summary. `cost_usd: null` means unknown, not zero. |
 | `disable(alias)` | Stops injection **and** makes the proxy refuse calls to that domain locally with `403 {"error": "key_disabled"}`. The secret stays in the vault; only a human can re-enable it. |
@@ -829,7 +829,8 @@ editing the config and restarting.
 | `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret, and every response is passed through the redactor. |
 | `skeletonkey ledger` | Prints recent calls. `--limit`, `--json`. |
 | `skeletonkey apis validate [file]` | Validates `apis.yaml` (or any index file, including `discovered.yaml`) against the documented schema. |
-| `skeletonkey stale-check` | Re-fetches every `billing.verified_url` / `price_verified_url` in the index, fingerprints each page's visible text, and flags **changed**, **unreachable**, and verified-too-long-ago rows. `--max-age-days` (default 90), `--only <name>`, `--no-fetch` (dates only), `--json`. Exits non-zero when a page moved or stopped answering. |
+| `skeletonkey apis show [query]` | Prints index entries with what each vendor offers: summary, categories, approximate size, free tier and its limits, how to connect, the vendor's own catalog URL, and the highlighted models/endpoints. `--limit <n>` (default 10), `--json`. Searches `apis.yaml`, your discovered rows and the generated shards; with no query it prints the first rows of the index. |
+| `skeletonkey stale-check` | Re-fetches every `billing.verified_url` / `offering.verified_url` / `price_verified_url` in the index, fingerprints each page's visible text, and flags **changed**, **unreachable**, and verified-too-long-ago rows. `--max-age-days` (default 90), `--only <name>`, `--no-fetch` (dates only), `--json`. Exits non-zero when a page moved or stopped answering. |
 
 Environment:
 
@@ -877,12 +878,88 @@ for that alias, so `skeletonkey idle` keeps working even if one of the two is re
 ## `apis.yaml`
 
 A hand-maintained index of APIs and how they are paid for: `name`, `url`,
-`access_mode` (`intermediary` | `own-account` | `byok`), `min_topup`,
-`billing_unit`, `signup_automatable`, `tos_notes`, `source`, `checked_date`, plus
-optional `capabilities` (the tags `find_api` matches), `domain`, the auth fields
-below, and the `billing` / `aggregators` blocks that drive routing. The full
-schema is documented in comments at the top of the file and enforced by
-`skeletonkey apis validate`.
+`access_mode` (`intermediary` | `own-account` | `byok` | `keyless` |
+`wallet-x402`), `min_topup`, `billing_unit`, `signup_automatable`, `tos_notes`,
+`source`, `checked_date`, plus optional `capabilities` (the tags `find_api`
+matches), `domain`, the auth fields below, the `billing` / `aggregators` blocks
+that drive routing, and the `offering` block that says what the vendor actually
+sells. The full schema is documented in comments at the top of the file and
+enforced by `skeletonkey apis validate`.
+
+`keyless` and `wallet-x402` were added because the first three modes forced a
+lie: a public endpoint that needs no credential is not an `own-account` vendor,
+and neither is one whose only documented way to pay is a crypto wallet (x402 /
+MPP). SkeletonKey pays in fiat only, so `wallet-x402` is recorded as a fact
+about the vendor and is never routed to.
+
+### What a vendor offers: `offering`
+
+Two layers, both optional, every field null-when-unknown — so adding the block
+to an existing row cannot invalidate it, and 162 shard rows that predate it
+still validate untouched.
+
+**Layer 1**, for every vendor worth indexing: a one-line `summary`, `categories`
+from a closed list of 30 service categories, approximate `endpoint_count` /
+`model_count` **as the vendor states them**, a `free_tier` block (available
+yes/no/unknown, *what* is free, the `limits` the vendor states, and whether a
+key or an account is needed), a `connect` block (`base_url`, `auth`,
+`auth_header`, `auth_format`), and `catalog_url` — a link to the **vendor's own**
+catalog, never an aggregator's.
+
+**Layer 2**, optional: `highlights`, at most **15** rows of
+`{id, kind: model|endpoint, free, note, url}`. A sample — the free models, the
+popular ones, the ones users ask for — and deliberately never a full catalog: a
+copied catalog is stale within a week, so an agent that needs the whole list
+fetches `catalog_url` live. The cap is what enforces that, in both validators.
+
+```yaml
+offering:
+  summary: "NVIDIA NIM: hosted, OpenAI-compatible model APIs for inference, vision, speech, retrieval and more."
+  categories: [llm, vision, speech, embeddings, rerank, image, video, science]
+  model_count: 108                       # approximate, and only ever the vendor's own number
+  count_note: 'build.nvidia.com/models.md said "100 of 108 shown" on 2026-10-28'
+  free_tier:
+    available: true
+    what: 'Every model, LLMs included: "All models offer a free trial tier with no credit card required."'
+    limits: "NVIDIA states NO number -- only that the allowance serves `evaluation and prototyping needs only`."
+    requires_key: true
+    requires_account: true
+  connect:
+    base_url: https://integrate.api.nvidia.com/v1
+    auth: bearer                         # api_key | bearer | basic | oauth | query_param | none | unknown
+    auth_header: Authorization
+    auth_format: Bearer {key}
+  catalog_url: https://build.nvidia.com/models
+  verified_url: https://build.nvidia.com/llms.txt
+  verified_date: "2026-10-28"
+  highlights:                            # at most 15; a sample, not the catalog
+    - id: nvidia/llama-3.1-70b-instruct
+      kind: model
+      free: true
+      note: "The model string in NVIDIA's own curl example."
+```
+
+The rules the validators enforce are the same ones `billing` lives by: a free
+tier that claims to exist must say **what** is free; `verified_url` and
+`verified_date` are required together; `connect.auth: none` may not sit beside
+an `auth_header` (`none` is a fact, `null` is "nobody checked"); a `summary` is
+one line; `categories` come from the closed list; and `highlights` may not be an
+empty list — `null` is how a row says "none recorded".
+
+Read them with `skeletonkey apis show [query]`, or off any `find_api` match.
+
+### Auth facts for a keyless or multi-header vendor
+
+Two fields sit alongside `auth_header` / `auth_format`:
+
+- **`auth_required`** — `false` when the vendor documents **no** credential at
+  all, `true` when one is needed, `null` when nobody checked. Before it,
+  `auth_header: null` had to mean both "needs no key" and "we never looked".
+  A row may not claim `false` while naming a header.
+- **`auth_headers`** — a list of `{header, format, note}` for the vendors that
+  document more than one credential header. Each `format` must contain `{key}`,
+  at most 5, names unique, and element 0 must match `auth_header` /
+  `auth_format` when those are set, because that is the one the proxy injects.
 
 ### How `find_api` matches a capability
 
@@ -1071,7 +1148,8 @@ the window (default **90** days; set `SKELETONKEY_STALE_DAYS`, or pass
 `max_age_days` to either tool), **or** when the date is missing altogether on a
 row that presents itself as real. Rows that are honest about what they are do
 not nag: an `example: true` placeholder and a discovered row still marked
-`status: unverified` are exempt, because they already say so in their own field.
+`status: unverified` or `status: docs-verified` are exempt, because they already
+say so in their own field.
 
 ### Discover-on-miss
 
@@ -1084,12 +1162,20 @@ field each source fills and the rules that apply. The agent does the research
 with its own tools, then calls `propose_entry`.
 
 Proposed rows go to a **local user index** (`$SKELETONKEY_HOME/discovered.yaml`,
-or `SKELETONKEY_DISCOVERED`), never into the packaged `apis.yaml`, and they are
-written `status: unverified` whatever the caller passes. **An agent cannot
-verify its own research.** A row becomes `status: verified` only when a call to
-its domain through the proxy returns `2xx`; the next `find_api` or
-`request_access` promotes it and records the ledger row that earned it in
-`promoted_by`:
+or `SKELETONKEY_DISCOVERED`), never into the packaged `apis.yaml`. There are
+three statuses, and an agent may write only the first two:
+
+| `status` | What it claims |
+| --- | --- |
+| `unverified` | Nothing is confirmed. The facts came off the pages in `source_urls` and nothing has been called. |
+| `docs-verified` | The **vendor's own** docs show the endpoint and how it authenticates (and its price, where the vendor lists one). Still no working call — a doc can be wrong or stale. |
+| `verified` | A call to the row's domain through the proxy returned `2xx`, and `promoted_by` names the ledger row that proved it. |
+
+`verified` passed in by a caller is downgraded to `unverified`: **an agent
+cannot verify its own research.** `docs-verified` is the one claim it may make
+for itself, because it claims only what `source_urls` already backs. Both
+unproven statuses are promoted the same way — the first `2xx` for that domain,
+picked up by the next `find_api` or `request_access`:
 
 ```yaml
 status: verified

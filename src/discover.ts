@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import {
+  UNPROVEN_STATUSES,
   loadUserIndex,
   resolveUserIndexPath,
   validateApis,
@@ -29,10 +30,13 @@ const HEADER = `# SkeletonKey local user index -- rows an agent discovered itsel
 # packaged apis.yaml (which always wins on a name or domain clash). Contains NO
 # secrets: only how an API is reached, how it authenticates, and how it bills.
 #
-# status: unverified  nothing here has been confirmed by a working call. The
-#                     facts came off the pages listed in source_urls.
-# status: verified    a call to this domain through the SkeletonKey proxy came
-#                     back 2xx; promoted_by names the ledger row that did it.
+# status: unverified     nothing here has been confirmed by a working call. The
+#                        facts came off the pages listed in source_urls.
+# status: docs-verified  the VENDOR's own docs show the endpoint and how it
+#                        authenticates. Still no working call, so the row is
+#                        still promotable -- a doc can be wrong or stale.
+# status: verified       a call to this domain through the SkeletonKey proxy came
+#                        back 2xx; promoted_by names the ledger row that did it.
 #
 # Prices obey the same rule as everywhere else: read off the vendor's own page
 # with billing.verified_url set, or left null. Never guessed.
@@ -105,7 +109,8 @@ export const DISCOVERY_SOURCES = [
 
 /** The non-negotiables, repeated to the agent at discovery time. */
 export const DISCOVERY_RULES = [
-  "Write status: unverified. There is no way to write `verified` yourself: a row is promoted only " +
+  "Write status: unverified, or `docs-verified` when the VENDOR's own docs showed you the endpoint " +
+    "and how it authenticates. There is no way to write `verified` yourself: a row is promoted only " +
     "after a call to its domain through the proxy returns 2xx, and promoted_by then names that ledger row.",
   "Every fact needs a URL in source_urls, and every price needs billing.verified_url or " +
     "aggregators[].price_verified_url. No URL means the field stays null.",
@@ -216,12 +221,16 @@ export function proposeEntry(
   const notes: string[] = [];
 
   const candidate: Record<string, unknown> = { ...input };
-  // Provenance is set here, not by the caller.
-  candidate["status"] = "unverified";
+  // Provenance is set here, not by the caller. `docs-verified` is the one claim
+  // an agent may make for itself, because it claims only what source_urls
+  // already backs: the vendor's own docs say so. `verified` means a call came
+  // back 2xx, which no agent can assert on its own behalf.
+  candidate["status"] = input["status"] === "docs-verified" ? "docs-verified" : "unverified";
   if (input["status"] === "verified") {
     notes.push(
       "status was forced to `unverified`: verification is earned by a 2xx call through the proxy, " +
-        "not asserted by the agent that wrote the row.",
+        "not asserted by the agent that wrote the row. Use `docs-verified` when the vendor's own " +
+        "docs showed you the endpoint and its auth.",
     );
   }
   if (typeof candidate["discovered_date"] !== "string") candidate["discovered_date"] = today;
@@ -335,9 +344,10 @@ export interface PromotionResult {
 }
 
 /**
- * Promotes every `unverified` row in the user index whose domain has a 2xx row
- * in the ledger. Cheap and idempotent: called before `find_api` and
- * `request_access` answer, so a row flips the moment the first real call works.
+ * Promotes every row in the user index that no call has proven yet
+ * (`unverified` or `docs-verified`) and whose domain has a 2xx row in the
+ * ledger. Cheap and idempotent: called before `find_api` and `request_access`
+ * answer, so a row flips the moment the first real call works.
  */
 export function promoteFromLedger(
   options: { file?: string; home?: string; today?: string } = {},
@@ -367,7 +377,8 @@ export function promoteFromLedger(
   let changed = false;
 
   for (const entry of existing.document.entries) {
-    if (entry.status !== "unverified") continue;
+    if (entry.status === undefined || entry.status === null) continue;
+    if (!UNPROVEN_STATUSES.includes(entry.status)) continue;
     const domain = entry.domain === undefined ? "" : normalizeDomain(entry.domain);
     if (domain === "") {
       pending.push({

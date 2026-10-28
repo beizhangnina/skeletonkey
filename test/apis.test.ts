@@ -65,10 +65,24 @@ describe("apis.yaml shipped with the repo", () => {
     expect(result.valid).toBe(true);
   });
 
-  it("ships only example rows, never a real offer", () => {
+  it("ships example rows plus vendor-direct rows that name their source", () => {
     const entries = validateApisFile(APIS_YAML).document?.entries ?? [];
     expect(entries.length).toBeGreaterThanOrEqual(3);
-    for (const row of entries) expect(row.example, row.name).toBe(true);
+    // Two kinds of row are allowed here, and nothing in between: a placeholder
+    // that says so, or a row read off the vendor's own pages that names the
+    // page and the day it was read. A row with neither is a rumour.
+    for (const row of entries) {
+      if (row.example === true) {
+        expect(row.checked_date, `${row.name}: an example row is nobody's verified offer`).toBeNull();
+        continue;
+      }
+      expect(row.checked_date, `${row.name}: a vendor-direct row must say when it was read`).toMatch(
+        /^\d{4}-\d{2}-\d{2}$/,
+      );
+      expect(row.source, `${row.name}: a vendor-direct row must name the page it was read from`).toMatch(
+        /^https:\/\//,
+      );
+    }
   });
 
   it("includes the three north-star scenario rows with capabilities and domains", () => {
@@ -664,8 +678,8 @@ describe("the discovery provenance fields", () => {
   const check = (overrides: Record<string, unknown>): string[] =>
     validateApis({ version: 1, entries: [entry(overrides)] }).errors;
 
-  it("accepts the two statuses and null", () => {
-    for (const status of ["unverified", "verified", null]) {
+  it("accepts the three statuses and null", () => {
+    for (const status of ["unverified", "docs-verified", "verified", null]) {
       expect(check({ status }), String(status)).toEqual([]);
     }
     expect(check({ status: "probably" }).join(" ")).toMatch(/status: expected one of/);
@@ -710,10 +724,12 @@ describe("the verified billing facts shipped in apis.yaml", () => {
     }
   });
 
-  it("still claims no min_topup and no checked_date -- nobody signed off on a row", () => {
+  it("still claims no min_topup anywhere, and no checked_date on an example row", () => {
     for (const row of entries) {
+      // A price is the one fact nothing in this file is allowed to assert: no
+      // vendor page read so far publishes a minimum top-up for these APIs.
       expect(row.min_topup, row.name).toBeNull();
-      expect(row.checked_date, row.name).toBeNull();
+      if (row.example === true) expect(row.checked_date, row.name).toBeNull();
     }
   });
 

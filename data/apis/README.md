@@ -14,6 +14,14 @@ Scrape date / `checked_date` on every entry: **2026-10-24**.
 
 ## Layout
 
+Vendor-direct additions that were not observed in these aggregator scrapes belong
+in root `apis.yaml`. NVIDIA API Catalog / NIM (`nvidia-nim`) is recorded there
+with vendor-documented LLM auth and offerings/free-access notes checked on
+2026-10-28. It is not added to `llm-models.yaml`: shard `seen_in` must name at least
+one of the three aggregators, and `build.py` rejects curated providers without
+raw records. Root entries are loaded alongside the generated shards and survive
+regeneration; the counts below describe only the aggregator shards.
+
 ```
 data/apis/
   <category>.yaml        26 shards, top-level key `apis:` (one list per category)
@@ -32,8 +40,52 @@ python3 data/apis/scripts/validate.py
 # OK: all entries valid
 ```
 
-`validate.py` uses PyYAML when importable and falls back to a small parser for
-the exact shape `build.py` emits, so it runs on a bare interpreter too.
+`validate.py` uses PyYAML when importable and falls back to a small
+indentation-driven reader for the YAML subset these shards use — nested
+mappings, block and inline lists, quoted and bare scalars, and folded/literal
+block scalars — so it runs on a bare interpreter too. (The original fallback
+understood only one flat level of keys, which the nested `offering:` block
+below would have broken.) Anchors, aliases, multi-document streams and flow
+mappings are outside the subset and absent from these files.
+
+## The optional `offering` block
+
+Every row may carry one `offering:` mapping describing **what the vendor
+offers**. It is optional and every field inside it is null-when-unknown, so the
+162 rows generated before it existed validate unchanged.
+
+Layer 1 — `summary` (one line, ≤ 200 chars), `categories` (≤ 12, from a closed
+list of 30), `endpoint_count` / `model_count` (approximate, and only a number
+the vendor itself states), `count_note`, `free_tier`
+(`available` / `what` / `limits` / `requires_key` / `requires_account`),
+`connect` (`base_url` / `auth` / `auth_header` / `auth_format`), `catalog_url`
+(the **vendor's own** catalog page), `verified_url` + `verified_date`, and
+`source_urls`.
+
+Layer 2 — `highlights`, at most **15** rows of
+`{id, kind: model|endpoint, free, note, url}`: a sample of the free or notable
+models/endpoints, never a full catalog. An agent that needs the whole list
+fetches `catalog_url` live.
+
+The rules, enforced identically here and by `skeletonkey apis validate` (see
+`src/apis.ts`, and the drift test in `test/offering.test.ts`): a free tier that
+claims to exist must say *what* is free; `verified_url` and `verified_date` are
+required together; `connect.auth: none` is a fact and may not sit beside an
+`auth_header` (`null` is "nobody checked"); `summary` is one line;
+`categories` come from the closed list; `highlights` is capped and may not be an
+empty list.
+
+`access_mode` also accepts **`keyless`** (the vendor documents no credential at
+all) and **`wallet-x402`** (the only documented way to pay is a crypto wallet —
+recorded as a fact; SkeletonKey itself pays in fiat only), beside the original
+`intermediary` / `own-account` / `byok` / `unknown`.
+
+**No shard row carries an `offering` block yet, and `build.py` does not emit
+one.** The three aggregator catalogs do not publish Layer 1 facts about the
+underlying vendor, and copying their descriptions would describe the aggregator
+(see the note at the top of this file). Vendor-direct offerings therefore live
+in root `apis.yaml`; the schema exists here so a future, vendor-sourced shard
+can carry one without a schema change.
 
 ## Counts
 

@@ -16,8 +16,13 @@
 import fs from "node:fs";
 import { z } from "zod";
 import {
+  ACCESS_MODES,
   AGGREGATOR_NAMES,
   BILLING_MODELS,
+  CONNECT_AUTH_KINDS,
+  HIGHLIGHTS_MAX,
+  OFFERING_SUMMARY_MAX,
+  SERVICE_CATEGORIES,
   loadApiIndex,
   queryTokens,
   rankByCapability,
@@ -306,12 +311,54 @@ function authFacts(entry: ApiEntry | null): Record<string, unknown> {
     requires_card: entry?.requires_card ?? null,
     requires_phone: entry?.requires_phone ?? null,
     requires_work_email: entry?.requires_work_email ?? null,
+    auth_required: entry?.auth_required ?? null,
+    auth_headers: entry?.auth_headers ?? null,
     human_steps: entry?.human_steps ?? [],
     note:
-      entry?.auth_header === null || entry?.auth_header === undefined
-        ? "No auth header recorded: null means nobody checked, not `Authorization: Bearer`. " +
-          "Read the vendor's own auth docs before registering a key."
-        : null,
+      entry?.auth_required === false
+        ? "The vendor documents NO credential for this API (auth_required: false), so there is " +
+          "nothing to register. If it answers 401, the row is wrong -- say so rather than inventing " +
+          "a header."
+        : entry?.auth_header === null || entry?.auth_header === undefined
+          ? "No auth header recorded: null means nobody checked, not `Authorization: Bearer`. " +
+            "Read the vendor's own auth docs before registering a key."
+          : null,
+  };
+}
+
+/**
+ * The offering block as a tool reports it: Layer 1 flattened, Layer 2 passed
+ * through as the sample it is. The `note` is there so an agent does not read a
+ * short highlight list as the vendor's whole catalog.
+ */
+function offeringView(entry: ApiEntry | null): Record<string, unknown> | null {
+  const offering = entry?.offering ?? null;
+  if (offering === null) return null;
+  const highlights = offering.highlights ?? [];
+  return {
+    summary: offering.summary,
+    categories: offering.categories ?? [],
+    endpoint_count: offering.endpoint_count,
+    model_count: offering.model_count,
+    count_note: offering.count_note,
+    free_tier: offering.free_tier ?? {
+      available: null,
+      what: null,
+      limits: null,
+      requires_key: null,
+      requires_account: null,
+    },
+    connect: offering.connect ?? { base_url: null, auth: null, auth_header: null, auth_format: null },
+    catalog_url: offering.catalog_url,
+    verified_url: offering.verified_url,
+    verified_date: offering.verified_date,
+    source_urls: offering.source_urls ?? [],
+    highlights,
+    note:
+      highlights.length === 0
+        ? "No highlights recorded. Fetch catalog_url for what this vendor actually offers."
+        : `${highlights.length} highlighted ${highlights.length === 1 ? "entry" : "entries"}: a ` +
+          "SAMPLE, not the catalog. Fetch catalog_url for the current full list.",
   };
 }
 
@@ -829,6 +876,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             billing_unit: entry.billing_unit,
             signup_automatable: entry.signup_automatable,
             billing: billingFacts(entry),
+            offering: offeringView(entry),
             aggregators: carriageView(entry),
             ...(entry.aggregators_source === undefined
               ? {}
@@ -857,6 +905,11 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             "to the human rather than quoting a number you do not have.",
           "status: `unverified` rows were discovered by an agent and proven by nothing yet; they are " +
             "promoted to `verified` only after a 2xx call through the proxy.",
+          "offering.highlights is a SAMPLE of a vendor's models/endpoints, capped on purpose. For the " +
+            "full list fetch offering.catalog_url live -- the vendor's own catalog is current, a copy " +
+            "in this index would not be.",
+          "offering.free_tier.available: null means nobody checked. false means the vendor documents " +
+            "no free tier. Only `true` plus a `what` is a free tier you can rely on.",
           "If nothing here fits, call discover_api(capability) -- do not invent a vendor or a price.",
           "checked_date: null means no human has verified this row.",
           `freshness.stale: true means this row's facts are older than ${maxAgeDays} days, or ` +
@@ -1081,6 +1134,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             }
           : null,
         billing: billingFacts(entry),
+        offering: offeringView(entry),
         aggregators: carriageView(entry),
         routing: routingView(decision),
         auth: authFacts(entry),
@@ -1265,10 +1319,12 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             "capabilities",
             "auth_header",
             "auth_format",
+            "auth_required",
             "base_url",
             "signup_url",
             "key_page_url",
             "billing",
+            "offering",
             "human_steps",
           ],
           billing_shape: {
@@ -1278,6 +1334,34 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             verified_date: "YYYY-MM-DD, required whenever verified_url is set",
             free_tier_covers_api: "true | false | null -- does the free tier include API access?",
           },
+          offering_shape: {
+            summary: `one line, at most ${OFFERING_SUMMARY_MAX} characters: what the vendor does`,
+            categories: [...SERVICE_CATEGORIES],
+            endpoint_count: "approximate integer or null -- only a number the vendor states",
+            model_count: "approximate integer or null -- only a number the vendor states",
+            count_note: "where the counts came from, and that they are approximate",
+            free_tier: {
+              available: "true | false | null (null = nobody checked)",
+              what: "required when available is true: what is free, in the vendor's numbers",
+              limits: "rate/volume/time limits as the vendor states them, or null",
+              requires_key: "true | false | null",
+              requires_account: "true | false | null",
+            },
+            connect: {
+              base_url: "where requests go",
+              auth: [...CONNECT_AUTH_KINDS],
+              auth_header: "header name, no colon",
+              auth_format: "template containing {key}",
+            },
+            catalog_url: "the VENDOR's own catalog/model-list page, never an aggregator's",
+            verified_url: "the vendor page you read this off",
+            verified_date: "YYYY-MM-DD, required whenever verified_url is set",
+            source_urls: "every page these facts came from",
+            highlights:
+              `at most ${HIGHLIGHTS_MAX} rows of {id, kind: model|endpoint, free, note, url} -- ` +
+              "a SAMPLE of notable or free models/endpoints. Never the full catalog: that is what " +
+              "catalog_url is for.",
+          },
           aggregator_shape: {
             name: [...AGGREGATOR_NAMES],
             carries: "boolean",
@@ -1286,9 +1370,11 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           },
         },
         promotion:
-          "propose_entry writes status: unverified. Call the API through the SkeletonKey proxy; the " +
-          "first 2xx recorded in the ledger for that domain promotes the row to status: verified on " +
-          "the next find_api/request_access call. Nothing else promotes it.",
+          "propose_entry writes status: unverified, or `docs-verified` if you pass that and the " +
+          "vendor's OWN docs showed you the endpoint and its auth. Either way, call the API through " +
+          "the SkeletonKey proxy: the first 2xx recorded in the ledger for that domain promotes the " +
+          "row to status: verified on the next find_api/request_access call. Nothing else promotes " +
+          "it, and `verified` passed in by hand is downgraded.",
         human_gates: [
           "Any signup, any payment, any Terms-of-Service click stays with the human, exactly as for " +
             "an indexed vendor.",
@@ -1305,7 +1391,8 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
     description:
       "Record what you found out about a vendor, so the next find_api hits instead of missing. " +
       "Writes to a LOCAL user index, never to the packaged apis.yaml, always with " +
-      "`status: unverified` -- you cannot mark your own research verified. A row is promoted to " +
+      "`status: unverified` (or `docs-verified`, if the vendor's own docs showed you the endpoint " +
+      "and its auth) -- you cannot mark your own research `verified`. A row is promoted to " +
       "`verified` only after a call to its domain through the proxy returns 2xx. Every row needs " +
       "at least one source URL, and any price needs the URL it was read from. Never pass a key.",
     readOnly: false,
@@ -1314,7 +1401,19 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       url: z.string().describe("http(s) URL of the API or its docs."),
       access_mode: z
         .string()
-        .describe("intermediary | own-account | byok -- how access is actually paid for."),
+        .describe(
+          `${ACCESS_MODES.join(" | ")} -- how access is actually paid for. \`keyless\` when the ` +
+            "vendor documents no credential at all; `wallet-x402` when the only way to pay is a " +
+            "crypto wallet (recorded as a fact; SkeletonKey pays in fiat only).",
+        ),
+      status: z
+        .string()
+        .optional()
+        .describe(
+          "`docs-verified` when the VENDOR's own docs showed you the endpoint and how it " +
+            "authenticates; otherwise leave it out (it defaults to `unverified`). `verified` is " +
+            "earned by a 2xx through the proxy and is downgraded if you pass it.",
+        ),
       source_urls: z
         .array(z.string())
         .describe("Every page you read these facts from. At least one is required."),
@@ -1322,6 +1421,23 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       capabilities: z.array(z.string()).optional().describe("Free-text tags find_api matches."),
       auth_header: z.string().optional().describe('Exact header name, e.g. "apiKey". No colon.'),
       auth_format: z.string().optional().describe('Value template containing {key}, e.g. "Bearer {key}".'),
+      auth_required: z
+        .boolean()
+        .optional()
+        .describe("false when the vendor documents NO credential. Omit when nobody checked."),
+      auth_headers: z
+        .array(
+          z.object({
+            header: z.string(),
+            format: z.string(),
+            note: z.string().nullable().optional(),
+          }),
+        )
+        .optional()
+        .describe(
+          "Every credential header, when the vendor documents more than one. Element 0 must match " +
+            "auth_header/auth_format -- that is the one the proxy injects.",
+        ),
       base_url: z.string().optional().describe("Base URL requests go to."),
       signup_url: z.string().optional().describe("Where signup starts (often not the docs root)."),
       key_page_url: z.string().optional().describe("Where the key is created. Omit if login-gated."),
@@ -1335,6 +1451,55 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         })
         .optional()
         .describe("How the vendor charges, with the page you read it off."),
+      offering: z
+        .object({
+          summary: z.string().nullable().optional(),
+          categories: z.array(z.string()).nullable().optional(),
+          endpoint_count: z.number().nullable().optional(),
+          model_count: z.number().nullable().optional(),
+          count_note: z.string().nullable().optional(),
+          free_tier: z
+            .object({
+              available: z.boolean().nullable().optional(),
+              what: z.string().nullable().optional(),
+              limits: z.string().nullable().optional(),
+              requires_key: z.boolean().nullable().optional(),
+              requires_account: z.boolean().nullable().optional(),
+            })
+            .nullable()
+            .optional(),
+          connect: z
+            .object({
+              base_url: z.string().nullable().optional(),
+              auth: z.string().nullable().optional(),
+              auth_header: z.string().nullable().optional(),
+              auth_format: z.string().nullable().optional(),
+            })
+            .nullable()
+            .optional(),
+          catalog_url: z.string().nullable().optional(),
+          verified_url: z.string().nullable().optional(),
+          verified_date: z.string().nullable().optional(),
+          source_urls: z.array(z.string()).nullable().optional(),
+          highlights: z
+            .array(
+              z.object({
+                id: z.string(),
+                kind: z.string(),
+                free: z.boolean().nullable().optional(),
+                note: z.string().nullable().optional(),
+                url: z.string().nullable().optional(),
+              }),
+            )
+            .nullable()
+            .optional(),
+        })
+        .optional()
+        .describe(
+          "What the vendor offers: one-line summary, service categories, approximate counts, what " +
+            `is free, how to connect, its own catalog URL, and at most ${HIGHLIGHTS_MAX} ` +
+            "highlighted models/endpoints. Never copy a full catalog in.",
+        ),
       aggregators: z
         .array(
           z.object({
