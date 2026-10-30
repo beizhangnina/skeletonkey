@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { type ApiEntry } from "./apis.js";
+import { UNPROVEN_STATUSES, type ApiEntry } from "./apis.js";
 import { ensureHome } from "./config.js";
 import { skeletonKeyHome } from "./paths.js";
 
@@ -66,8 +66,9 @@ export interface Freshness {
  * Two things are worth a warning. A date that has gone past the window: a price
  * read off a vendor page eighteen months ago is a rumour, not a fact. And a
  * MISSING date on a row that presents itself as real: an example row is honest
- * about being a placeholder, and a discovered row carries `status: unverified`,
- * but a row that is neither and still has no `checked_date` has nothing behind it.
+ * about being a placeholder, and a discovered row carries `status: unverified`
+ * or `docs-verified` (neither claims a proven call), but a row that is neither
+ * and still has no `checked_date` has nothing behind it.
  */
 export function entryFreshness(
   entry: ApiEntry,
@@ -78,7 +79,12 @@ export function entryFreshness(
   const warnings: string[] = [];
 
   const isExample = entry.example === true;
-  const isUnverifiedDiscovery = entry.status === "unverified";
+  // `unverified` and `docs-verified` are both "no call has proven this", so
+  // neither is held to the reviewed-row standard below.
+  const isUnverifiedDiscovery =
+    entry.status !== undefined &&
+    entry.status !== null &&
+    UNPROVEN_STATUSES.includes(entry.status);
   /** A row that claims to be a real, reviewed offer. */
   const claimsVerified = !isExample && !isUnverifiedDiscovery;
 
@@ -223,13 +229,21 @@ export function staleTargets(entries: ApiEntry[]): StaleTarget[] {
         claim: billing.model,
       });
     }
-    if (billing?.x402_url != null) {
+    // An offering carries the same promise a price does: "read on this page, on
+    // this date". Leaving it out of stale-check would let the free-tier wording
+    // and the catalog URL rot silently, which is the exact failure this command
+    // exists to catch.
+    const offering = entry.offering ?? null;
+    if (offering?.verified_url != null) {
       targets.push({
         entry: entry.name,
-        field: "billing.x402_url",
-        url: billing.x402_url,
-        verified_date: billing.verified_date ?? null,
-        claim: "accepts x402",
+        field: "offering.verified_url",
+        url: offering.verified_url,
+        verified_date: offering.verified_date ?? null,
+        claim:
+          offering.free_tier?.available === true
+            ? "offering + free tier"
+            : offering.summary ?? "offering",
       });
     }
     for (const carrier of entry.aggregators ?? []) {

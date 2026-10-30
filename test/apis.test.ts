@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ACCESS_MODES,
+  BILLING_MODELS,
   apiIndexCacheStats,
   clearApiIndexCache,
   loadApiIndex,
@@ -64,10 +65,24 @@ describe("apis.yaml shipped with the repo", () => {
     expect(result.valid).toBe(true);
   });
 
-  it("ships only example rows, never a real offer", () => {
+  it("ships example rows plus vendor-direct rows that name their source", () => {
     const entries = validateApisFile(APIS_YAML).document?.entries ?? [];
     expect(entries.length).toBeGreaterThanOrEqual(3);
-    for (const row of entries) expect(row.example, row.name).toBe(true);
+    // Two kinds of row are allowed here, and nothing in between: a placeholder
+    // that says so, or a row read off the vendor's own pages that names the
+    // page and the day it was read. A row with neither is a rumour.
+    for (const row of entries) {
+      if (row.example === true) {
+        expect(row.checked_date, `${row.name}: an example row is nobody's verified offer`).toBeNull();
+        continue;
+      }
+      expect(row.checked_date, `${row.name}: a vendor-direct row must say when it was read`).toMatch(
+        /^\d{4}-\d{2}-\d{2}$/,
+      );
+      expect(row.source, `${row.name}: a vendor-direct row must name the page it was read from`).toMatch(
+        /^https:\/\//,
+      );
+    }
   });
 
   it("includes the three north-star scenario rows with capabilities and domains", () => {
@@ -546,7 +561,14 @@ describe("the billing block", () => {
     validateApis({ version: 1, entries: [entry({ billing: value })] }).errors;
 
   it("accepts every documented model, plus null for nobody-checked", () => {
-    for (const model of ["payg", "subscription", "free_tier+payg", "free_tier+subscription", "x402", "free"]) {
+    expect([...BILLING_MODELS].sort()).toEqual([
+      "free",
+      "free_tier+payg",
+      "free_tier+subscription",
+      "payg",
+      "subscription",
+    ]);
+    for (const model of BILLING_MODELS) {
       const needsNote = model.startsWith("free_tier");
       expect(
         check(billing({ model, ...(needsNote ? { free_tier_note: "10 free calls a day" } : {}) })),
@@ -607,7 +629,7 @@ describe("the aggregators block", () => {
   it("accepts the three catalogs, carrying or not", () => {
     expect(
       check([
-        { name: "monid", carries: true, per_call_price: 0.01, price_verified_url: "https://m.test/p", x402: true },
+        { name: "monid", carries: true, per_call_price: 0.01, price_verified_url: "https://m.test/p" },
         { name: "glasser", carries: true, per_call_price: null, price_verified_url: null, price_note: "per result" },
         { name: "flatkey", carries: false, per_call_price: null, price_verified_url: null },
       ]),
@@ -656,8 +678,8 @@ describe("the discovery provenance fields", () => {
   const check = (overrides: Record<string, unknown>): string[] =>
     validateApis({ version: 1, entries: [entry(overrides)] }).errors;
 
-  it("accepts the two statuses and null", () => {
-    for (const status of ["unverified", "verified", null]) {
+  it("accepts the three statuses and null", () => {
+    for (const status of ["unverified", "docs-verified", "verified", null]) {
       expect(check({ status }), String(status)).toEqual([]);
     }
     expect(check({ status: "probably" }).join(" ")).toMatch(/status: expected one of/);
@@ -702,16 +724,19 @@ describe("the verified billing facts shipped in apis.yaml", () => {
     }
   });
 
-  it("still claims no min_topup and no checked_date -- nobody signed off on a row", () => {
+  it("still claims no min_topup anywhere, and no checked_date on an example row", () => {
     for (const row of entries) {
+      // A price is the one fact nothing in this file is allowed to assert: no
+      // vendor page read so far publishes a minimum top-up for these APIs.
       expect(row.min_topup, row.name).toBeNull();
-      expect(row.checked_date, row.name).toBeNull();
+      if (row.example === true) expect(row.checked_date, row.name).toBeNull();
     }
   });
 
-  it("records Apify's x402 path, verified on Apify's own pricing page", () => {
+  it("records Apify's auth facts and its fiat billing, read off Apify's own pages", () => {
     const apify = byName.get("example-apify-scraping");
-    expect(apify?.billing?.x402_url).toBe("https://apify.com/pricing");
+    expect(apify?.billing?.model).toBe("free_tier+subscription");
+    expect(apify?.billing?.verified_url).toBe("https://apify.com/pricing");
     expect(apify?.auth_header).toBe("Authorization");
     expect(apify?.auth_format).toBe("Bearer {key}");
     expect(apify?.base_url).toBe("https://api.apify.com/v2");
@@ -758,7 +783,15 @@ describe("carriage derived from the generated shards", () => {
       // The shards record no prices at all, so none may be implied here.
       expect(item.per_call_price, item.name).toBeNull();
       expect(item.price_verified_url, item.name).toBeNull();
-      expect(item.x402, item.name).toBeNull();
+      // Exact key set: a carriage row carries carriage and price provenance and
+      // nothing else, so a new payment-rail field cannot slip in unnoticed.
+      expect(Object.keys(item).sort(), item.name).toEqual([
+        "carries",
+        "name",
+        "per_call_price",
+        "price_note",
+        "price_verified_url",
+      ]);
     }
     // And no billing model is invented from a shard row either.
     expect(apollo?.billing).toBeNull();

@@ -8,11 +8,9 @@
 #  * min_topup / billing_unit / free_tier - always None here. None of them were
 #                  verified against the vendor's own pricing page, and the brief
 #                  says those three stay null until they are.
-#  * signup_automatable - "no" when signup is sales-gated, "yes" only for x402
-#                  endpoints (payable per call from a wallet, no account at all).
-#                  Everything else is "unknown"; we did not test a signup flow.
+#  * signup_automatable - "no" when signup is sales-gated, "unknown" everywhere
+#                  else; we did not test a signup flow, so nothing is "yes".
 
-X402 = "x402"
 INT = "intermediary"          # no first-party API found; catalogs scrape it
 OWN = "own-account"
 UNK = "unknown"
@@ -39,14 +37,14 @@ P = {
 "aviato": ("people-company-data", "Private-company and founder database used for startup research.", None, None, UNK, UNK, UNK),
 "baidu-qianfan": ("llm-models", "Baidu's cloud model-hosting platform, used as an upstream inference route for Chinese models.", "https://cloud.baidu.com", None, OWN, "self-serve", "api_key"),
 "bid-cars": ("automotive", "Salvage and insurance vehicle auction lots: VIN lookup, photos and historical sale prices.", "https://bid.cars", None, INT, UNK, UNK),
-"blockrun": ("crypto-web3", "On-chain data and analytics endpoints billed over the x402 payment protocol.", "https://blockrun.ai", None, X402, "self-serve", "none"),
+"blockrun": ("crypto-web3", "On-chain data and analytics endpoints.", "https://blockrun.ai", None, UNK, UNK, UNK),
 "booking": ("travel-hospitality", "Guest review data for individual hotels, including score, stay length and stated positives/negatives.", "https://www.booking.com", "https://developers.booking.com", INT, "sales", UNK),
 "brightdata": ("web-scraping", "Large-scale structured datasets and scraping infrastructure covering commerce, social and property sites.", "https://brightdata.com", "https://docs.brightdata.com", OWN, "self-serve", "api_key"),
-"browserbase": ("developer-infra", "Hosted headless browser sessions for agent-driven web automation.", "https://www.browserbase.com", "https://docs.browserbase.com", X402, "self-serve", "none"),
+"browserbase": ("developer-infra", "Hosted headless browser sessions for agent-driven web automation.", "https://www.browserbase.com", "https://docs.browserbase.com", OWN, "self-serve", "api_key"),
 "builtin": ("jobs-compensation", "Tech job listings and job-title suggestions from a US startup jobs board.", "https://builtin.com", None, INT, UNK, UNK),
 "builtwith": ("people-company-data", "Technographics: the analytics, hosting and framework stack detected behind a website.", "https://builtwith.com", None, OWN, "self-serve", "api_key"),
 "bytedance": ("generative-media", "ByteDance's Seedance video-generation family (text-to-video, image animation, reference remix).", "https://www.byteplus.com", None, OWN, "self-serve", "api_key"),
-"capminal": ("crypto-web3", "AI-assisted deep research reports on crypto tokens, served as an x402-paid endpoint.", "https://www.capminal.ai", None, X402, "self-serve", "none"),
+"capminal": ("crypto-web3", "AI-assisted deep research reports on crypto tokens.", "https://www.capminal.ai", None, UNK, UNK, UNK),
 "capterra": ("reviews-ratings", "Software directory listings, product detail and verified user reviews.", "https://www.capterra.com", None, INT, UNK, UNK),
 "carfax": ("automotive", "Used and new vehicle listings with history summaries, valuations and dealer detail.", "https://www.carfax.com", None, INT, UNK, UNK),
 "cars-com": ("automotive", "Vehicle listing search, listing specifications and dealer inventory.", "https://www.cars.com", None, INT, UNK, UNK),
@@ -68,7 +66,7 @@ P = {
 "edinet": ("finance-markets", "Japanese FSA statutory disclosure filings by submission date.", None, None, INT, UNK, UNK),
 "edmunds": ("automotive", "Car inventory search by make/model/year or VIN, with specifications and pricing.", "https://www.edmunds.com", None, INT, UNK, UNK),
 "elevenlabs": ("generative-media", "Text-to-speech, multi-speaker dialogue, speech-to-text and voice cloning across many languages.", "https://elevenlabs.io", "https://elevenlabs.io/docs", OWN, "self-serve", "api_key"),
-"emc2ai": ("crypto-web3", "Token holder-distribution and concentration-risk checks, served as an x402-paid endpoint.", "https://emc2ai.io", None, X402, "self-serve", "none"),
+"emc2ai": ("crypto-web3", "Token holder-distribution and concentration-risk checks.", "https://emc2ai.io", None, UNK, UNK, UNK),
 "exa": ("web-search", "Meaning-ranked neural web search with page retrieval, highlights and structured extraction.", "https://exa.ai", "https://docs.exa.ai", OWN, "self-serve", "api_key"),
 "financialdatasets": ("finance-markets", "US public-company fundamentals: statements, metrics, prices, earnings, filings and news.", "https://www.financialdatasets.ai", None, OWN, "self-serve", "api_key"),
 "finviz": ("finance-markets", "Equity screening, sector performance, insider trades and news sentiment.", "https://finviz.com", None, INT, UNK, UNK),
@@ -94,7 +92,7 @@ P = {
 "iqair": ("weather-environment", "Real-time and historical air-quality readings, city rankings and pollution maps.", "https://www.iqair.com", None, OWN, "self-serve", "api_key"),
 "jd": ("ecommerce-retail", "Product pages and keyword search on the JD.com Chinese marketplace.", "https://www.jd.com", None, INT, UNK, UNK),
 "justoneapi": ("web-search", "Single search surface across Chinese news and social platforms.", None, None, UNK, UNK, UNK),
-"kadec0": ("developer-infra", "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one keyless API.", None, None, X402, "self-serve", "none"),
+"kadec0": ("developer-infra", "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API.", None, None, UNK, UNK, UNK),
 "kbb": ("automotive", "Vehicle reference data, expert ratings, lease deals and OBD-II diagnostic codes.", "https://www.kbb.com", None, INT, UNK, UNK),
 "keenable": ("web-search", "Agent-oriented web search and page fetch over an own index, returning extracted page text.", "https://keenable.ai", None, OWN, UNK, "api_key"),
 "keepa": ("ecommerce-retail", "Amazon price and sales-rank history, marketplace offers, seller data and deal feeds.", "https://keepa.com", None, OWN, "self-serve", "api_key"),
@@ -128,7 +126,7 @@ P = {
 "predictleads": ("people-company-data", "Company event signals: funding, hiring, product launches, partnerships and job postings.", "https://predictleads.com", None, OWN, UNK, "api_key"),
 "producthunt": ("people-company-data", "Product launch pages and launch history from a startup launch community.", "https://www.producthunt.com", None, OWN, "self-serve", "oauth"),
 "prospeo": ("contact-verification", "Email and phone discovery for B2B prospecting, including LinkedIn profile lookups.", "https://prospeo.io", None, OWN, "self-serve", "api_key"),
-"quicknode": ("crypto-web3", "Blockchain RPC and indexer endpoints across chains.", "https://www.quicknode.com", "https://www.quicknode.com/docs", X402, "self-serve", "none"),
+"quicknode": ("crypto-web3", "Blockchain RPC and indexer endpoints across chains.", "https://www.quicknode.com", "https://www.quicknode.com/docs", OWN, "self-serve", "api_key"),
 "recall": ("communications", "Meeting bots that join video calls as a participant and return recordings and transcripts.", "https://www.recall.ai", "https://docs.recall.ai", OWN, UNK, "api_key"),
 "rentcast": ("real-estate", "US property records, owner detail, value and rent estimates, listings and market statistics.", "https://www.rentcast.io", "https://developers.rentcast.io", OWN, "self-serve", "api_key"),
 "saperly": ("communications", "Provisions compliant US phone numbers for agents, with calling and SMS.", None, None, OWN, UNK, "api_key"),
@@ -172,7 +170,6 @@ P = {
 "wechat": ("social-media", "WeChat search index trends, Mini Program search and Channels creator marketplace data.", "https://weixin.qq.com", None, INT, UNK, UNK),
 "wellfound": ("jobs-compensation", "Startup job listings, trending roles and startup company profiles.", "https://wellfound.com", None, INT, UNK, UNK),
 "x": ("social-media", "Posts, threads, verified followers and community moderation data from X.", "https://x.com", "https://docs.x.com", OWN, "self-serve", "oauth"),
-"x402atlas": ("crypto-web3", "Directory and telemetry for x402 servers and payments on Base; also resells Google Trends data over x402.", "https://x402atlas.com", None, X402, "self-serve", "none"),
 "xai": ("llm-models", "First-party API for the Grok text and image/video generation models.", "https://x.ai", "https://docs.x.ai", OWN, "self-serve", "api_key"),
 "xianyu": ("ecommerce-retail", "Second-hand marketplace item pages and keyword search.", "https://www.goofish.com", None, INT, UNK, UNK),
 "yahoo-finance": ("finance-markets", "Quotes, OHLCV history, company profiles and market news.", "https://finance.yahoo.com", None, INT, UNK, UNK),
@@ -191,15 +188,10 @@ TOS = {
       "before scraping it directly.",
  OWN: "Direct vendor account is the documented path; review the vendor's own API "
       "terms, rate limits and redistribution rules.",
- X402: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request "
-       "from a wallet with no account; the operator's own terms still apply.",
  UNK: "Access path and terms were not verified from the vendor's own site.",
 }
 
 TOS_EXTRA = {
- "browserbase": " Browserbase also sells ordinary self-serve accounts outside x402.",
- "quicknode": " QuickNode also sells ordinary self-serve accounts outside x402.",
  "sfs": " Operated by the Monid aggregator itself rather than an independent vendor.",
  "linkedin": " First-party API access is partner-gated; scraped access is contrary to LinkedIn's terms.",
- "x402atlas": " Aggregates other operators' x402 endpoints, so terms vary per underlying endpoint.",
 }

@@ -72,7 +72,6 @@ describe("staleTargets", () => {
           free_tier_note: null,
           verified_url: "https://v.test/pricing",
           verified_date: "2026-10-24",
-          x402_url: "https://v.test/x402",
         },
         aggregators: [
           { name: "monid", carries: true, per_call_price: 0.01, price_verified_url: "https://m.test/p" },
@@ -80,12 +79,13 @@ describe("staleTargets", () => {
         ],
       }),
     ]);
+    // Exactly the two URLs a price claim rests on: the vendor's own page and
+    // the carrying catalog's. There is no third payment-rail URL to re-check.
     expect(targets.map((target) => target.field)).toEqual([
       "billing.verified_url",
-      "billing.x402_url",
       "aggregators[monid].price_verified_url",
     ]);
-    expect(targets[2]?.claim).toBe("$0.01/call");
+    expect(targets[1]?.claim).toBe("$0.01/call");
   });
 
   it("finds nothing in a row that verified nothing", () => {

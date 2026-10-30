@@ -7,15 +7,15 @@ apis:
     category: "developer-infra"
     provider_url: "https://www.browserbase.com"
     docs_url: "https://docs.browserbase.com"
-    access_mode: "x402"
+    access_mode: "own-account"
     signup: "self-serve"
-    signup_automatable: "yes"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "api_key"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply. Browserbase also sells ordinary self-serve accounts outside x402."
+    tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/browserbase"
     checked_date: 2026-10-24
   - id: "github"
@@ -37,19 +37,19 @@ apis:
     checked_date: 2026-10-24
   - id: "kadec0"
     name: "kadec0"
-    capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one keyless API."
+    capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API."
     category: "developer-infra"
     provider_url: null
     docs_url: null
-    access_mode: "x402"
-    signup: "self-serve"
-    signup_automatable: "yes"
+    access_mode: "unknown"
+    signup: "unknown"
+    signup_automatable: "unknown"
     min_topup: null
     billing_unit: null
     free_tier: null
-    auth_type: "none"
+    auth_type: "unknown"
     seen_in: ["monid"]
-    tos_notes: "Exposed as an x402-paid HTTP endpoint, so a call can be paid per request from a wallet with no account; the operator's own terms still apply."
+    tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
   - id: "sfs"

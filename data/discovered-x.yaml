@@ -1,0 +1,1059 @@
+# SkeletonKey X-discovery candidates -- rows found by the weekday "X API discovery"
+# routine from posts on X. Same row shape as discovered.example.yaml.
+# Records only that the API exists, the original vendor, and how to connect.
+# Prices/billing only when read off the vendor's own site (billing.verified_url),
+# otherwise null. Not committed.
+#
+# status: unverified     nothing confirmed; the facts came off source_urls.
+# status: docs-verified  the VENDOR's own docs show the endpoint and its auth.
+#                        No call has been made, so the row is still promotable:
+#                        the first 2xx through the proxy lifts it to `verified`
+#                        and records the ledger row in promoted_by.
+# status: verified       a call through the proxy returned 2xx. Nothing in this
+#                        file claims it -- these rows were read, not called.
+#                        (Migrated 2026-10-28: ten rows that said `verified` on
+#                        documentation alone are now `docs-verified`.)
+version: 1
+entries:
+  - name: wbtc-open-api
+    url: https://docs.wbtc.network/resources/api-reference
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-26 from X. Verified 2026-10-28 against the vendor's
+      own docs at https://docs.wbtc.network/resources/api-reference, which give Base
+      URL `https://openapi.wbtc.network` with API prefix `/public/v1` and state, under
+      Authentication: \"None - all endpoints are public, no API key\". auth_required is
+      false and auth_header/auth_format stay null: the vendor documents no credential,
+      which is a fact about the vendor, not an unchecked field. access_mode is keyless
+      for the same reason -- there is no account to hold. The
+      read-only REST endpoints (transparency/reserves, chains, mint/burn history,
+      participants, providers) are a best-effort public service; an OpenAPI schema is
+      at /public/v1/openapi.json and the vendor also documents an MCP server. Verified
+      from the vendor's docs only -- no call was made through the SkeletonKey proxy,
+      so this is NOT a ledger promotion and promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - wbtc reserves
+      - proof of reserves
+      - mint burn records
+      - crypto transparency data
+    domain: openapi.wbtc.network
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://openapi.wbtc.network/public/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor docs: all endpoints are free, require no API key and
+        support CORS. GET /public/v1/mint-burn?pageIndex=1&pageSize=1 answered
+        HTTP 200 with no credential on 2026-10-26."
+      verified_url: https://docs.wbtc.network/resources/api-reference
+      verified_date: 2026-10-26
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.wbtc.network/resources/api-reference
+      - https://x.com/Ashtonexi/status/2114654250248585562
+    discovered_date: 2026-10-26
+  - name: mastercard-stablecoin-security
+    url: https://www.mastercard.com/us/en/news-and-trends/press/2026/october/Mastercard-brings-risk-intelligence-to-stablecoin-payments.html
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-26 from X, status unverified. Announced by
+      Mastercard at Money20/20 USA as an API-delivered stablecoin payment risk score
+      for financial institutions, launching first in North America with worldwide
+      availability expected in 2027. Re-checked 2026-10-28 and still unverified:
+      Mastercard publishes no developer documentation for this product.
+      https://developer.mastercard.com/product/stablecoin-risk-intelligence is HTTP
+      404, the product is not listed in the API catalogue at
+      https://developer.mastercard.com/apis, and no page on mastercard.com states a
+      base URL or a product-specific auth method -- only the platform-wide one-legged
+      OAuth 1.0a (RSA-SHA256) page, which is not evidence about this API, so
+      auth_header was reset from the guessed `Authorization` back to null. Access
+      appears institution/sales-gated. Pricing not published. No sign-up attempted;
+      ToS not reviewed."
+    source: null
+    checked_date: null
+    capabilities:
+      - stablecoin risk scoring
+      - payment fraud screening
+      - sanctions screening
+      - blockchain risk intelligence
+    domain: developer.mastercard.com
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://developer.mastercard.com
+    requires_card: null
+    human_steps:
+      - "Access appears to be through Mastercard sales/partnerships for financial
+        institutions; no self-serve signup found."
+    billing:
+      model: null
+      free_tier_note: null
+      verified_url: null
+      verified_date: null
+      free_tier_covers_api: null
+    status: unverified
+    source_urls:
+      - https://www.mastercard.com/us/en/news-and-trends/press/2026/october/Mastercard-brings-risk-intelligence-to-stablecoin-payments.html
+      - https://developer.mastercard.com/platform/documentation/using-oauth-1a-to-access-mastercard-apis/
+      - https://x.com/pymtexecutive/status/2114377272593379772
+    discovered_date: 2026-10-26
+  - name: astock-api
+    url: https://docs.astock.fi/reference
+    access_mode: own-account
+    access_modes:
+      - own-account
+      - keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-26 from X. Verified 2026-10-28 from the vendor's own
+      material: https://astock.fi/docs/reference 301-redirects to
+      https://docs.astock.fi/reference, which is client-rendered and yields nothing to
+      a fetch, but the vendor's own OpenAPI document at
+      https://astock.fi/api/openapi.json lists servers `https://astock.fi` and
+      `https://launch.astock.fi`, paths under /api/v2 (/api/v2/stocks, /api/v2/quote,
+      /api/v2/reserves, /api/v2/launch, /api/v2/payouts, /api/v2/orders/{id}) and one
+      security scheme, `apiKey`, carried in the `X-Api-Key` header.
+      https://docs.astock.fi/llms.txt says \"Everything below is public and read
+      without a key; writes are signed by the user's own wallet\" and that \"Webhooks
+      and API keys are under /api/v2/webhooks and /api/v2/keys for integrators\", so
+      X-Api-Key gates integrator features rather than reads -- which is why
+      access_modes records `keyless` alongside `own-account`, and auth_required is true
+      for the credential the vendor does document rather than null (it was checked).
+      AStock tokenises stocks
+      on the Arc chain -- a crypto token project. No API pricing appears anywhere on
+      the vendor site, so billing stays null. Verified from docs only, not by a call
+      through the proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - tokenized stocks
+      - crypto trading quotes
+      - token launch
+    domain: astock.fi
+    auth_required: true
+    auth_header: X-Api-Key
+    auth_format: "{key}"
+    base_url: https://astock.fi/api/v2
+    signup_url: null
+    requires_card: null
+    human_steps: []
+    billing:
+      model: null
+      free_tier_note: null
+      verified_url: null
+      verified_date: null
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://astock.fi/docs/reference
+      - https://x.com/TryArcStocks/status/2114379210106003934
+      - https://astock.fi/api/openapi.json
+      - https://docs.astock.fi/llms.txt
+    discovered_date: 2026-10-26
+  - name: agent-transcript
+    url: https://agent-transcript.fly.dev
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-27 from X. Small indie service: send a YouTube URL,
+      get the transcript as JSON. Verified 2026-10-28 on the vendor's own page
+      https://agent-transcript.fly.dev: base path /agent/v1, with GET
+      /agent/v1/transcript?url=<YouTube URL>&lang=en requiring no account and no key
+      (free caption tiers only), and GET /agent/v1/transcript-paid at $0.01 per call
+      paid as USDC on Base via x402 -- the server answers HTTP 402 and the client
+      retries with an `X-PAYMENT` header. Machine-readable descriptors at
+      /agent/v1/descriptor, /.well-known/x402, /.well-known/agent.json, /openapi.json
+      and /llms.txt. auth_header and auth_format stay null because no API key exists
+      for either route and the schema has no \"none\" value. Verified from the vendor
+      page only, not by a call through the proxy, so promoted_by stays unset. ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - youtube transcripts
+      - video captions
+    domain: agent-transcript.fly.dev
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://agent-transcript.fly.dev/agent/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free_tier+payg
+      free_tier_note: "Vendor page: GET /agent/v1/transcript is free (caption
+        tiers only); GET /agent/v1/transcript-paid is $0.01 per call in USDC on
+        Base via x402. Read on vendor site 2026-10-27."
+      verified_url: https://agent-transcript.fly.dev
+      verified_date: 2026-10-27
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://agent-transcript.fly.dev
+      - https://x.com/george_youye/status/2115083846790336973
+    discovered_date: 2026-10-27
+  - name: elfa-api
+    url: https://docs.elfa.ai
+    access_mode: own-account
+    access_modes:
+      - own-account
+      - wallet-x402
+    min_topup: 20
+    billing_unit: "per call credit"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-27 from X. Crypto social-intelligence API (v3
+      events, mindshare, ranked accounts; v2 mentions, narratives, trending). Verified
+      2026-10-28 against the vendor's own docs:
+      https://docs.elfa.ai/get-started/authentication.md says to send the key \"in the
+      `x-elfa-api-key` header\", with the example `curl
+      \"https://api.elfa.ai/v2/aggregations/trending-tokens\" -H \"x-elfa-api-key:
+      $ELFA_API_KEY\"`, and https://docs.elfa.ai/llms.txt states \"Base URL:
+      https://api.elfa.ai\". The /x402/v2/* routes take a per-request USDC/USDT
+      payment with no key and no account. Keys come from the developer portal at
+      https://go.elfa.ai/dev. Pricing read off
+      https://docs.elfa.ai/get-started/pricing.md the same day: PAYG is a prepaid
+      balance at $0.0145 per call credit with a $20 minimum top-up and 60 RPM; x402 is
+      the same $0.0145 per credit at 1,000 RPM; a Grow subscription is $870/mo (or
+      $8,874/yr) for 120,000 credits a month with $0.009 overage. billing.model is
+      payg because PAYG and x402 need no subscription. access_modes records that x402
+      path as `wallet-x402` next to the primary `own-account`: SkeletonKey pays in
+      fiat, so it routes the keyed path and never the wallet one. Verified from docs
+      only, not by a call through the proxy, so promoted_by stays unset. ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - crypto social sentiment
+      - token mindshare
+      - trending tokens
+      - crypto narratives
+    domain: api.elfa.ai
+    auth_required: true
+    auth_header: x-elfa-api-key
+    auth_format: "{key}"
+    base_url: https://api.elfa.ai
+    signup_url: https://go.elfa.ai/dev
+    requires_card: null
+    human_steps: []
+    billing:
+      model: payg
+      free_tier_note: "Vendor pricing page read 2026-10-28: API v3 is free on
+        Pay-as-you-go and Grow until 31 October 2026 -- those requests take no credits
+        and count toward no monthly limit, though the per-minute rate limit still
+        applies. That is a dated promotion, not a standing free tier, and /v2 and Auto
+        are charged per credit from the first call, so free_tier_covers_api stays
+        null."
+      verified_url: https://docs.elfa.ai/get-started/pricing.md
+      verified_date: 2026-10-28
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://docs.elfa.ai/get-started/authentication.md
+      - https://x.com/elfa_ai/status/2115050650963001741
+      - https://docs.elfa.ai/llms.txt
+      - https://docs.elfa.ai/get-started/pricing.md
+    discovered_date: 2026-10-27
+  - name: glim-sh
+    url: https://glim.sh
+    access_mode: own-account
+    access_modes:
+      - own-account
+      - wallet-x402
+    min_topup: null
+    billing_unit: "per request"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-27 from X. Verified 2026-10-28 from the vendor's own
+      docs: https://glim.sh/llms.txt states \"Base URL: https://glim.sh\" and lists
+      the canonical endpoints under /api/v1 (twitter, reddit, github, web, amazon,
+      youtube, telegram, detect/ai and an OpenAI-compatible
+      /api/v1/inference/v1/chat/completions), plus an MCP server at /mcp.
+      https://glim.sh/docs.md?page=payments says a key created after a top-up at
+      glim.sh/app is sent \"as an `x-api-key` header (or `Authorization: Bearer`)\",
+      and that the keyless path is an HTTP 402 challenge paid in USDC on Base, Solana
+      or Monad (x402) or on Tempo (MPP). Per-call prices are published in the llms.txt
+      table: $0.001-$0.01 per request, /api/v1/detect/ai $0.06 per 100 words rounded
+      up (minimum $0.06), inference per token by model. No minimum top-up is
+      published, so min_topup stays null. Both ways in are recorded: access_modes is
+      [own-account, wallet-x402], with own-account first because that is the one
+      SkeletonKey uses -- payment here is fiat only, so the x402 challenge is a fact
+      about the vendor and is never routed to. auth_required is true for the key path.
+      glim.sh resells third-party data (its web
+      search is \"powered by Exa\"), so this row records the reseller, not the origin.
+      Verified from docs only, not by a call through the proxy, so promoted_by stays
+      unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - social media search
+      - web search
+      - web crawl
+      - github search
+    domain: glim.sh
+    auth_required: true
+    auth_header: x-api-key
+    auth_format: "{key}"
+    base_url: https://glim.sh/api/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: payg
+      free_tier_note: null
+      verified_url: https://glim.sh/llms.txt
+      verified_date: 2026-10-28
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://glim.sh/llms.txt
+      - https://x.com/baagus_zip/status/2115101724881064079
+      - https://glim.sh/docs.md?page=payments
+    discovered_date: 2026-10-27
+  - name: waveleta-api
+    url: https://api.waveleta.com
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-27 from X. Re-checked 2026-10-28 and still
+      unverified: the vendor site documents no connection facts.
+      https://api.waveleta.com/ calls it a \"Prepaid market-data API\" and says to
+      \"Sign up and manage keys on Waveleta\", pointing at /docs;
+      https://api.waveleta.com/docs names no base URL, no endpoint paths and no auth
+      header -- it only says an API key is needed to try requests and routes you to
+      sign up, log in or email plugins@waveleta.com; https://api.waveleta.com/docs/api
+      is HTTP 404. The per-call price was only ever seen in the vendor's X post and
+      appears nowhere on the vendor's own site, so billing stays null. No sign-up
+      attempted; ToS not reviewed."
+    source: null
+    checked_date: null
+    capabilities:
+      - crypto market data
+      - crypto prices
+    domain: api.waveleta.com
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://api.waveleta.com
+    requires_card: null
+    human_steps: []
+    billing:
+      model: null
+      free_tier_note: null
+      verified_url: null
+      verified_date: null
+      free_tier_covers_api: null
+    status: unverified
+    source_urls:
+      - https://api.waveleta.com/docs
+      - https://x.com/waveletamarket/status/2114786988851183946
+    discovered_date: 2026-10-27
+  - name: parallel-decisions-api
+    url: https://docs.parallel.ai/decisions/decisions-quickstart.md
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per request"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-28 from X. Parallel Web Systems' Decisions API
+      returns typed answers (predicates, choices, scores) grounded in live web
+      evidence, up to 100 questions per request. Verified 2026-10-28 against the
+      vendor's own quickstart
+      https://docs.parallel.ai/decisions/decisions-quickstart.md, whose curl example
+      reads `curl https://api.parallel.ai/v1/decisions -H \"Content-Type:
+      application/json\" -H \"x-api-key: $PARALLEL_API_KEY\"`, with the key generated
+      in the Platform dashboard at https://platform.parallel.ai. Parallel also offers
+      Search, Image Search, Extract, Task, Responses, FindAll, Entity Search and
+      Monitor APIs on the same key. Verified from docs only, not by a call through the
+      proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - web-grounded decisions
+      - typed answers with citations
+      - web search for agents
+    domain: api.parallel.ai
+    auth_required: true
+    auth_header: x-api-key
+    auth_format: "{key}"
+    base_url: https://api.parallel.ai/v1
+    signup_url: https://platform.parallel.ai
+    requires_card: null
+    human_steps: []
+    billing:
+      model: free_tier+payg
+      free_tier_note: "Vendor pricing pages read 2026-10-28.
+        https://parallel.ai/pricing heads its table \"Pay as you go -- Run up to 5,000
+        requests per month for free\" and prices Decisions at \"$0.001 for up to 100
+        questions\" per request; https://docs.parallel.ai/getting-started/pricing.md
+        gives the same rate as \"$1 / 1,000 requests\" with \"Up to 100 questions per
+        request\". The free allowance is counted in API requests, so it covers API
+        use. The docs pricing page itself states no free allowance -- that number is
+        on parallel.ai/pricing, which is why verified_url points there."
+      verified_url: https://parallel.ai/pricing
+      verified_date: 2026-10-28
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.parallel.ai/decisions/decisions-quickstart.md
+      - https://parallel.ai/pricing
+      - https://x.com/stretchcloud/status/2115209677210349868
+      - https://docs.parallel.ai/getting-started/pricing.md
+    discovered_date: 2026-10-28
+  - name: mistral-responses-api
+    url: https://docs.mistral.ai/api/endpoint/responses
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per 1M tokens, input and output priced separately"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-28 from X. Mistral launched a Responses API in
+      public preview, in the OpenAI Responses format. Verified 2026-10-28 against the
+      vendor's own API reference https://docs.mistral.ai/api/endpoint/responses, whose
+      curl example reads `curl https://api.mistral.ai/v1/responses -H \"Content-Type:
+      application/json\" -H \"Authorization: Bearer $MISTRAL_API_KEY\"`; both the
+      create-response and count-input-tokens operations POST to that URL. Keys come
+      from the console at https://console.mistral.ai. Pricing read off
+      https://mistral.ai/pricing the same day
+      (https://docs.mistral.ai/getting-started/pricing 308-redirects there): API
+      models are priced per million tokens with input and output counted separately,
+      and usage past a plan is extended with PAYG credits \"at API rate\". The Free
+      plan on that page describes the Vibe/Studio chat product and states no API token
+      allowance, so free_tier_covers_api stays null. Verified from docs only, not by a
+      call through the proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - llm responses api
+      - chat completion
+      - reasoning models
+    domain: api.mistral.ai
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://api.mistral.ai/v1
+    signup_url: https://console.mistral.ai
+    requires_card: null
+    human_steps: []
+    billing:
+      model: payg
+      free_tier_note: null
+      verified_url: https://mistral.ai/pricing
+      verified_date: 2026-10-28
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://docs.mistral.ai/api/endpoint/responses
+      - https://x.com/MartinSzerment/status/2115455329815113988
+      - https://mistral.ai/pricing
+    discovered_date: 2026-10-28
+  - name: askroger-api
+    url: https://askrogerai.readme.io/reference/getting-started-1
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-28 from X. The vendor (askRoger) posted that its API
+      exposes the X social data behind its app: tokens trending by mentions, which
+      accounts mentioned a token and when, and mention/volume spike signals. Verified
+      2026-10-28 against askRoger's own docs: https://askroger.ai/api links \"View API
+      Docs\" to https://askrogerai.readme.io/reference/getting-started-1, which gives
+      Base URL `https://api.askroger.ai/v1` and three required headers -- `api-key`
+      (\"Your private API key\"), `Authorization` (\"Your JWT access token, prefixed
+      with 'Bearer '\") and `source` (\"The source of your API call\"). All three are
+      recorded in auth_headers: the two credentials with a {key} template, and `source`
+      with secret: false and a null format, since the docs enumerate no accepted value.
+      SkeletonKey injects element 0 only, so it carries `api-key`: the JWT and `source`
+      must come from the caller, and the docs do not say how the JWT is obtained. Two
+      vendor pages disagree -- the example on https://askroger.ai/api uses `x-api-key`
+      against https://api.askroger.ai/dev/v1/search/data while the reference uses
+      `api-key` against /v1; the reference is taken as authoritative here and the
+      conflict is unresolved. The reference says \"We currently offer custom pricing
+      plans tailored to your specific needs. Tiered pricing will be launching soon!\"
+      and routes credentials through a Telegram contact, so there is no self-serve
+      signup and billing stays null. https://app.askroger.ai/api/reference is
+      client-rendered and still yields nothing to a fetch. Verified from docs only,
+      not by a call through the proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - crypto social mentions
+      - trending tokens
+      - mention spike signals
+    domain: api.askroger.ai
+    auth_header: api-key
+    auth_format: "{key}"
+    auth_required: true
+    auth_headers:
+      - header: api-key
+        format: "{key}"
+        note: "\"Your private API key\" (the one SkeletonKey injects)."
+      - header: Authorization
+        format: "Bearer {key}"
+        note: "\"Your JWT access token, prefixed with 'Bearer '\" -- a second
+          credential, and the docs do not say how it is obtained."
+      - header: source
+        format: null
+        secret: false
+        note: "\"The source of your API call\" -- required by the reference on every
+          request, but not a credential: secret: false, and format is null because the
+          docs enumerate no accepted value. The caller sends it."
+    base_url: https://api.askroger.ai/v1
+    signup_url: null
+    requires_card: null
+    human_steps:
+      - "Credentials are not self-serve: the API reference tells you to contact the
+        team on Telegram (@innitforthetech) for an API key and a JWT access token."
+      - "Agree the `source` header value with the vendor -- the docs require the header
+        but do not enumerate accepted values."
+    billing:
+      model: null
+      free_tier_note: null
+      verified_url: null
+      verified_date: null
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://app.askroger.ai/api/reference
+      - https://x.com/askRoger_AI/status/2115351242428014921
+      - https://askroger.ai/api
+      - https://askrogerai.readme.io/reference/getting-started-1
+    discovered_date: 2026-10-28
+  - name: autonomo-discovery-api
+    url: https://autonomo.fun/docs
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-28 from X. Autonomo is an x402 launchpad and
+      directory of pay-per-call API endpoints. Verified 2026-10-28 on the vendor's own
+      docs at https://autonomo.fun/docs: base URL `https://autonomo.fun/api/v1`, with
+      GET /api/v1/projects, GET /api/v1/projects/{slug} and GET /api/v1/stats
+      described as free \"with no key\" and open CORS, while the Pro route GET
+      /api/v1/pro/endpoints is x402 pay-per-call and answers 503 until switched on.
+      auth_header and auth_format stay null because the discovery routes take no key
+      and the schema has no \"none\" value. Crypto token project. GET /api/v1/stats
+      answered HTTP 200 with no credential on 2026-10-28. Verified from docs only, not
+      by a call through the SkeletonKey proxy, so promoted_by stays unset. ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - x402 api directory
+      - paid endpoint discovery
+    domain: autonomo.fun
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://autonomo.fun/api/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-10-28: discovery API is free while
+        in beta, no key; Pro API is paid per call via x402."
+      verified_url: https://autonomo.fun/docs
+      verified_date: 2026-10-28
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://autonomo.fun/docs
+      - https://x.com/useautonomo/status/2115363298543845829
+    discovered_date: 2026-10-28
+  - name: xmr-roots-api
+    url: https://xmrroots.xyz/docs/api
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-28 from X. Verified 2026-10-28 against the vendor's
+      own docs at https://xmrroots.xyz/docs/api, which give base URL
+      `https://api.xmrroots.xyz/v1` -- \"One base URL, no key\" -- with GET
+      /v1/params, /v1/coins, /v1/coins/{mint}, /v1/stats, /v1/receipts,
+      /v1/monero-gf/receipts and /v1/health, plus POST /v1/plant/build, which returns
+      an unsigned transaction for the caller's own wallet to sign. An OpenAPI schema
+      is linked from the same page. auth_header and auth_format stay null because the
+      vendor documents no key and the schema has no \"none\" value. Solana crypto
+      project. Verified from docs only, not by a call through the proxy, so
+      promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-28
+    capabilities:
+      - solana token data
+      - crypto on-chain stats
+    domain: api.xmrroots.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.xmrroots.xyz/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-10-28: \"There is no integrator fee and no
+        referral\" -- every documented read endpoint is free and keyless. The 2%
+        creator fee quoted on the same page is the platform's standard fee on an
+        on-chain plant transaction, charged through the website too, not a charge for
+        API access."
+      verified_url: https://xmrroots.xyz/docs/api
+      verified_date: 2026-10-28
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://xmrroots.xyz/docs/api
+      - https://x.com/xmrroots/status/2115189117470564366
+    discovered_date: 2026-10-28
+  - name: sunra-api
+    url: https://docs.sunra.ai/platform/authentication.md
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per request, priced per model endpoint"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X. Sunra.ai puts third-party generative
+      media models (image, video, speech, 3D) and an OpenAI-compatible LLM surface
+      behind one key. Verified 2026-10-29 against the vendor's own docs:
+      https://docs.sunra.ai/platform/authentication.md says \"All requests to the
+      Sunra API are authenticated with an API key\" and that over raw HTTP you \"pass
+      the key in the `Authorization` header\", then tables TWO product APIs --
+      Multimodal (predictions) on `api.sunra.ai` with `Authorization: Key $SUNRA_KEY`
+      and LLM (completions) on `api-llm.sunra.ai` with `Authorization: Bearer
+      $SUNRA_KEY` -- adding \"The same API key works for both APIs\".
+      auth_header/auth_format record the Multimodal pair, because that is the product
+      the X post and the vendor's own framing are about; an LLM call needs the same
+      key re-templated as `Bearer {key}` against the other host, which SkeletonKey
+      would have to route as a second row. The /v1 prefix is the vendor's:
+      https://docs.sunra.ai/multimodal/queue.md gives `POST
+      api.sunra.ai/v1/queue/{model-id}` plus /v1/queue/requests/{request_id}[/status
+      |/cancel], and https://docs.sunra.ai/platform/pricing.md gives /v1/pricing,
+      /v1/models and /v1/pricing/model/{model_id}/endpoint/{endpoint} -- the last two
+      listed with Auth \"none\", so the price catalogue is readable without a key
+      while every prediction needs one. Keys come from
+      https://sunra.ai/dashboard/api-tokens. Sunra resells other vendors' models
+      (Black Forest Labs, ByteDance Seedance, ElevenLabs, Meshy), so this row records
+      the reseller, not the origin. Verified from docs only -- no call was made
+      through the SkeletonKey proxy, so this is NOT a ledger promotion and
+      promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - text to image
+      - text to video
+      - image to video
+      - speech to text
+      - llm chat completion
+    domain: api.sunra.ai
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Key {key}"
+    base_url: https://api.sunra.ai/v1
+    signup_url: https://sunra.ai/dashboard/api-tokens
+    requires_card: null
+    human_steps: []
+    billing:
+      model: payg
+      free_tier_note: "Two vendor pages describe two different things and only one of
+        them is the API. https://docs.sunra.ai/platform/pricing.md (read 2026-10-29)
+        prices the API per request: \"Every model page on sunra.ai shows the price of
+        each endpoint next to the model name -- for example `$0.045-$0.09 per
+        image`\", the amount is \"fixed at submission time\" for most models and
+        settled from usage for the rest, and it is drawn off an account balance
+        (error `412 INSUFFICIENT_CREDIT` when the balance cannot cover the freeze).
+        No minimum balance is stated there, so min_topup stays null. The separate
+        https://sunra.ai/pricing page sells the Sunra visual-suite app as monthly
+        credit plans ($9-$63/mo for 1,200-17,000 credits, top-ups \"from $10 to
+        $10,000 at $1 = 100 credits\") and refers in passing to a free plan with
+        \"daily free credits\" that \"can't top up\" -- it states nothing about API
+        access, so free_tier_covers_api stays null rather than reading an app
+        allowance as an API one."
+      verified_url: https://docs.sunra.ai/platform/pricing.md
+      verified_date: 2026-10-29
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://docs.sunra.ai/platform/authentication.md
+      - https://x.com/andy_429z/status/2115476483754127769
+      - https://docs.sunra.ai/llms.txt
+      - https://docs.sunra.ai/multimodal/queue.md
+      - https://docs.sunra.ai/platform/pricing.md
+      - https://sunra.ai/pricing
+    discovered_date: 2026-10-29
+  - name: decodo-web-data-api
+    url: https://help.decodo.com/docs/web-data-api-introduction.md
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per 1K successful requests"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X. The X post linked an aggregator rather
+      than the vendor, so NOTHING here comes from it: every fact was read off
+      Decodo's own documentation and pricing pages on 2026-10-29. Verified against
+      https://help.decodo.com/docs/web-data-api-introduction.md, which says \"One API
+      key works with every endpoint, and all of them share the same base URL:
+      `https://data.decodo.com/v1`\" and, under Authentication, \"Every endpoint uses
+      the same API key. Copy it from the dashboard and send it in the `Authorization`
+      header: Authorization: Bearer YOUR_API_KEY\". The documented endpoints are POST
+      /scrape (sync, async via /task, or batch), /search (Google SERP), /crawl (up to
+      10,000 pages, always async) and /map (site URLs, up to 147K from the
+      sitemap). The same page's usage policy is explicit: \"Web Data API is intended
+      for collecting publicly accessible web data\" and Decodo does \"not support
+      collecting\" post-login or authenticated content, private user information, or
+      restricted/non-public data, with users \"responsible for ensuring their use of
+      the service complies with applicable website terms\". Decodo (formerly
+      Smartproxy) resells access to other sites' content through its own proxy
+      network, so this row records the scraping vendor, not any origin site.
+      https://help.decodo.com/docs/web-data-api-migration-guide.md warns that legacy
+      Web Scraping API / Fast Search API tokens do not work here -- a key for the
+      older product would fail against this base URL. Verified from docs only, not by
+      a call through the SkeletonKey proxy, so promoted_by stays unset. Full ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - web scraping
+      - serp scraping
+      - site crawl
+      - sitemap url discovery
+    domain: data.decodo.com
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://data.decodo.com/v1
+    signup_url: https://dashboard.decodo.com
+    requires_card: null
+    human_steps:
+      - "Vendor quick start: activate a plan in the dashboard at
+        https://dashboard.decodo.com (the docs link a $0/month free plan directly),
+        then copy the API key from the dashboard. A Web Data API key is a new
+        credential -- the docs say legacy Web Scraping API and Fast Search API tokens
+        are not accepted."
+    billing:
+      model: payg
+      free_tier_note: "Vendor pages read 2026-10-29.
+        https://help.decodo.com/docs/web-data-api-billing.md prices every endpoint
+        per 1,000 requests, with the rate set by plan size: on the Free and $19
+        plans, /scrape is $0.50 per 1K on the standard proxy pool, $0.75 with
+        JavaScript rendering, $1.00 on the premium pool (the default) and $1.50
+        premium + JS; /search is $0.75 per 1K; /crawl and /map bill each fetched page
+        at the premium rates; the Perplexity, ChatGPT, Gemini and Google AI Mode
+        templates are a flat \"$1 per 1K requests on every plan\". Rates fall to
+        $0.15-$0.85 per 1K on the $1,499 plan. \"You only pay for successful
+        requests\" -- 500, 524 and 613 are never charged. billing.model is payg
+        because https://decodo.com/scraping/web/pricing lists a $0/month plan at
+        10 req/s alongside the paid plans and says \"you only pay for what you
+        use\": a subscription raises throughput and lowers the per-1K rate rather
+        than being the thing that unlocks the API. That $0 plan is listed as \"Up to
+        5K crawls or 10K pages scraped\" at the Free-column rates above, and neither
+        vendor page states an allowance of requests that cost nothing, so
+        free_tier_covers_api stays null."
+      verified_url: https://help.decodo.com/docs/web-data-api-billing.md
+      verified_date: 2026-10-29
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://help.decodo.com/docs/web-data-api-introduction.md
+      - https://x.com/Ejudicator/status/2115489422959378594
+      - https://help.decodo.com/docs/web-data-api-billing.md
+      - https://help.decodo.com/docs/web-data-api-migration-guide.md
+      - https://decodo.com/scraping/web/pricing
+      - https://decodo.com/llms.txt
+    discovered_date: 2026-10-29
+  - name: stellar-expert-api
+    url: https://stellar.expert/openapi
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X. Verified 2026-10-29 against the
+      vendor's own OpenAPI documentation at https://stellar.expert/openapi
+      (StellarExpert API 1.4.0, licence MIT, contact info@stellar.expert), whose
+      Intro says the Open APIs are \"publicly available for developers, free of
+      charge\" and that the endpoints \"do not require authentication and can be used
+      directly from the browser\". The embedded spec declares exactly one server,
+      `https://api.stellar.expert`, no security schemes at all, and paths under
+      /explorer: /explorer/directory (plus /{address}, /tags, /blocked-domains and
+      /blocked-domains/{domain}) and, per network, /explorer/{network}/asset,
+      .../asset/{asset}/holders, /position, /rating, /supply and
+      /explorer/{network}/ledger/sequence-from-timestamp and
+      /timestamp-from-sequence. auth_required is false and auth_header/auth_format
+      stay null: the vendor documents no credential, which is a fact about the
+      vendor, not an unchecked field; access_mode is keyless because there is no
+      account to hold. The same page states CORS is \"implemented in compliance with
+      W3C spec\" with a wildcard same-origin, and warns the request rate \"may be a
+      subject to rate limiting\" with HTTP 429 and advises caching -- no numeric
+      limit is published. GET https://api.stellar.expert/ answered HTTP 200 with no
+      credential on 2026-10-29 (the service's own status document); no data endpoint
+      was called and nothing went through the SkeletonKey proxy, so promoted_by stays
+      unset. Stellar blockchain data. The spec links a Terms of Service, which was
+      not reviewed."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - stellar blockchain data
+      - stellar account directory
+      - malicious address tags
+      - stellar asset data
+      - asset holders list
+    domain: api.stellar.expert
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.stellar.expert/explorer
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-10-29: the StellarExpert Open APIs are
+        \"publicly available for developers, free of charge\" and need no
+        authentication, so every documented endpoint is free and keyless. No paid
+        tier is published anywhere on the page. The only stated limit is unquantified
+        rate limiting (HTTP 429), with response caching advised for heavy use."
+      verified_url: https://stellar.expert/openapi
+      verified_date: 2026-10-29
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://stellar.expert/openapi
+      - https://x.com/lumenloop/status/2115800538012844210
+    discovered_date: 2026-10-29
+  - name: public-com-trading-api
+    url: https://public.com/api/docs/quickstart
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X, posted by the vendor. Public.com's
+      brokerage API places real orders in a real brokerage account -- stocks and
+      ETFs, equity and index options, corporate bonds and treasuries, prediction
+      market event contracts, and crypto -- so a wrong call here moves money, not
+      just data. Verified 2026-10-29 against the vendor's own quickstart
+      https://public.com/api/docs/quickstart: authentication is TWO steps, and only
+      the second one carries a header SkeletonKey can inject. First `curl --request
+      POST --url https://api.public.com/userapiauthservice/personal/access-tokens`
+      with a JSON body of `{\"validityInMinutes\": 123, \"secret\":
+      \"YOUR_SECRET_KEY\"}` returns `{\"accessToken\": \"...\"}`; the docs then say
+      \"Subsequently you use the accessToken to authenticate any API request:
+      `Authorization: Bearer YOUR_ACCESS_TOKEN`\", shown against `GET
+      https://api.public.com/userapigateway/trading/account`. auth_header/auth_format
+      therefore describe the SHORT-LIVED access token, not the long-lived secret key:
+      injecting the secret into that header would 401, and the token expires after
+      the validityInMinutes the caller chose, so something has to refresh it. Base
+      URL is https://api.public.com, with auth paths under /userapiauthservice and
+      trading/data paths under /userapigateway. https://public.com/api/docs/faq gives
+      a rate limit of \"10 requests per second per account, across all endpoints\",
+      says there is no WebSocket, webhook or stream (poll instead), and that
+      preflight endpoints return \"the estimated cost, commission, and fees without
+      placing anything\". The usage terms matter for this index: the API Disclosures
+      box on https://public.com/api states \"The Public Individual API is for your
+      own personal, non-commercial use\" and \"You are responsible for all trades
+      made via the API\", pointing at
+      https://public.com/disclosures/individual-API-program (not reviewed) -- so
+      this is a row an agent operating its OWN Public account can use, not something
+      to resell or share. Verified from docs only; no account was created and no call
+      was made, so promoted_by stays unset."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - brokerage trading
+      - stock and etf orders
+      - options orders
+      - bond and treasury orders
+      - prediction market contracts
+      - market data quotes
+    domain: api.public.com
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://api.public.com
+    signup_url: https://public.com/api
+    requires_card: null
+    human_steps:
+      - "Open and fund a Public brokerage account, then generate a secret key:
+        https://public.com/api says \"Our API is now available to all Public
+        members-no approval required\" and to go to Account Settings > Security >
+        API."
+      - "Exchange the secret key for an access token before any other call (POST
+        /userapiauthservice/personal/access-tokens with validityInMinutes and the
+        secret). The credential in the Authorization header is that token, so
+        whatever holds it has to re-mint it when it expires -- the docs state no
+        refresh endpoint."
+    billing:
+      model: free
+      free_tier_note: "Vendor page read 2026-10-29: https://public.com/api publishes
+        no charge for API access at all -- \"Automate your trading strategy with zero
+        commissions and rebates on stock and ETF options contracts\", and \"Our API
+        is now available to all Public members-no approval required\". What the API
+        access costs and what a TRADE costs are different questions: this row records
+        only the former, and the docs' own preflight endpoints exist to return \"the
+        estimated cost, commission, and fees\" of an order, so per-order commissions,
+        regulatory fees and margin interest remain between the caller and the
+        broker. free_tier_covers_api is true because the API is the thing offered at
+        no fee, with no paid API tier published."
+      verified_url: https://public.com/api
+      verified_date: 2026-10-29
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://public.com/api/docs/quickstart
+      - https://x.com/public/status/2115822047993425969
+      - https://public.com/api/docs
+      - https://public.com/api/docs/faq
+      - https://public.com/api
+    discovered_date: 2026-10-29
+  - name: stripe-analytics-api
+    url: https://docs.stripe.com/data/analytics
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X. Stripe's Analytics API is in PREVIEW
+      (beta) and returns Stripe-defined metrics about the caller's own Stripe
+      account -- MRR, ARR, usage revenue -- synchronously as JSON, which the vendor
+      pitches for dashboards and for exposing metrics \"to an AI agent\". Verified
+      2026-10-29 against Stripe's own documentation,
+      https://docs.stripe.com/data/analytics (read as
+      https://docs.stripe.com/data/analytics.md), whose example reads `curl -X POST
+      https://api.stripe.com/v2/data/analytics/metric_query -H \"Authorization:
+      Bearer <<YOUR_SECRET_KEY>>\" -H \"Stripe-Version: 2026-04-22.preview\"`. Both
+      headers are recorded in auth_headers: the Bearer secret key SkeletonKey would
+      inject, and `Stripe-Version` with secret: false, since the docs say \"you must
+      include the `Stripe-Version` header\" and name the preview version literally --
+      it is a required header but not a credential. The key is not any Stripe key:
+      the docs say \"your API key must have the Data > Metrics > Read permission\",
+      enabled on a restricted key at https://dashboard.stripe.com/apikeys, and a key
+      without it returns 403 `metric_inaccessible`. Access is gated on joining the
+      preview, which the docs do by POSTing an email address to
+      https://docs.stripe.com/preview/register with `{\"preview\":
+      \"analytics_core_eng_preview\"}`; that was NOT done -- no sign-up was attempted
+      -- so whether the endpoint answers for a new account is unverified. The docs
+      also note the API works in sandboxes, that metric ids differ between live and
+      sandbox mode, that there is no pagination, and that results come back in minor
+      units (cents) or basis points. Stripe publishes no price for this API on the
+      documentation, so billing stays null. Verified from docs only, not by a call
+      through the proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - stripe revenue metrics
+      - mrr and arr
+      - usage revenue
+      - subscription analytics
+    domain: api.stripe.com
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    auth_headers:
+      - header: Authorization
+        format: "Bearer {key}"
+        note: "The Stripe secret or restricted key (the one SkeletonKey injects). It
+          must carry the Data > Metrics > Read permission or the call returns 403
+          `metric_inaccessible`."
+      - header: Stripe-Version
+        format: "2026-04-22.preview"
+        secret: false
+        note: "\"You must include the `Stripe-Version` header\" -- required on every
+          request while the API is in preview, and the docs' examples pin it to
+          `2026-04-22.preview`. Not a credential, so secret: false; the value is a
+          literal the caller sends, and metric versions are tied to it."
+    base_url: https://api.stripe.com/v2/data/analytics
+    signup_url: https://dashboard.stripe.com/apikeys
+    requires_card: null
+    human_steps:
+      - "Request preview access: the docs' own snippet POSTs your email address to
+        https://docs.stripe.com/preview/register with `{\"preview\":
+        \"analytics_core_eng_preview\"}` and a Referer of
+        https://docs.stripe.com/data/analytics. Not attempted here."
+      - "Create or edit a restricted key at https://dashboard.stripe.com/apikeys and
+        enable Data > Metrics > Read on it."
+    billing:
+      model: null
+      free_tier_note: null
+      verified_url: null
+      verified_date: null
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://docs.stripe.com/data/analytics
+      - https://x.com/Pauline_Cx/status/2115836152145903819
+      - https://docs.stripe.com/data/analytics.md
+    discovered_date: 2026-10-29
+  - name: pare-open-api
+    url: https://parestocks.com/agents.md
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-29 from X, posted by the vendor (@PareStocks).
+      PARE splits a yield-bearing asset into two ERC-20s -- the asset without its
+      yield and the yield to maturity -- for Robinhood stock tokens on Robinhood
+      Chain (chain id 4663) and for sUSDx on Ethereum. A crypto/DeFi protocol, and
+      this row records its read API only. Verified 2026-10-29 on the vendor's own
+      pages: https://parestocks.com/llms.txt says \"Public read API and an MCP
+      server, no key\", and https://parestocks.com/agents.md states \"Everything
+      below is public, needs no key, and can be read or executed by a program\" and,
+      over the read table, \"Read (JSON, no key, cached 30 s)\". The vendor's own
+      OpenAPI 3.0.3 document at https://parestocks.com/openapi.json (\"PARE public
+      API\", version 2026-10-28, \"No key.\") declares one server,
+      `https://parestocks.com`, and paths /api/rates, /api/oracle, /api/markets,
+      /api/market, /api/yield, /api/history, /api/pool, /api/series, /api/rh-tokens,
+      /api/read, /api/tx and /api/liq. auth_required is false and
+      auth_header/auth_format stay null because the vendor documents no credential
+      anywhere and the schema has no \"none\" value; access_mode is keyless because
+      there is no account to hold. Two caveats an agent should carry: agents.md says
+      \"Reads are cached 30 seconds; do not poll faster\", and the write path is not
+      an API write at all -- /api/tx and the MCP `prepare_*` tools \"return unsigned
+      transactions\" for the caller's own wallet to sign, with the server holding no
+      keys. A remote MCP server (Streamable HTTP, no key, no session) is at
+      https://parestocks.com/mcp. Verified from the vendor's own pages only, not by a
+      call through the SkeletonKey proxy, so promoted_by stays unset. ToS not
+      reviewed; the site's own footer says it is \"not investment advice\" and \"not
+      available where Robinhood Stock Tokens are not available\"."
+    source: null
+    checked_date: 2026-10-29
+    capabilities:
+      - tokenized stock rates
+      - dividend oracle
+      - defi pool prices
+      - onchain lending market data
+    domain: parestocks.com
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://parestocks.com/api
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor pages read 2026-10-29: every documented read endpoint
+        is free and keyless -- llms.txt says \"Public read API and an MCP server, no
+        key\" and agents.md \"nothing here is custodial and nothing needs an API
+        key\". No paid API tier is published. The fees agents.md lists are on-chain
+        protocol fees paid in a transaction the caller signs, not charges for API
+        access: for stocks, \"Split: 10 bps of the deposit. Redeem yToken at
+        maturity: 5% of the dividend growth. Merge, redeem pToken, transfers:
+        nothing\", and for the sUSDx market 3% of the yUSDx interest. The only usage
+        condition stated for the API itself is the cache rule: reads are cached 30
+        seconds (five minutes for /api/yield) and \"do not poll faster\"."
+      verified_url: https://parestocks.com/agents.md
+      verified_date: 2026-10-29
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://parestocks.com/agents.md
+      - https://x.com/PareStocks/status/2115594141128372647
+      - https://parestocks.com/llms.txt
+      - https://parestocks.com/openapi.json
+    discovered_date: 2026-10-29

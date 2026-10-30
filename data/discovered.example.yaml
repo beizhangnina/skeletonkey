@@ -76,27 +76,23 @@ entries:
       verified_url: https://www.abuseipdb.com/pricing
       verified_date: 2026-10-24
       free_tier_covers_api: true
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
         per_call_price: null
         price_verified_url: https://api.monid.ai/public/v1/providers
-        x402: null
         price_note: Absent from all 93 providers paged from Monid's public provider list
           on 2026-10-24.
       - name: glasser
         carries: false
         per_call_price: null
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: Absent from all 105 providers in Glasser's public catalog on
           2026-10-24.
       - name: flatkey
         carries: false
         per_call_price: null
         price_verified_url: https://flatkey.ai/models
-        x402: null
         price_note: Flatkey's public catalog is model vendors only; its tool catalog is
           behind a login.
     status: unverified
@@ -160,27 +156,23 @@ entries:
       verified_url: https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-44228
       verified_date: 2026-10-24
       free_tier_covers_api: true
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
         per_call_price: null
         price_verified_url: https://api.monid.ai/public/v1/providers
-        x402: null
         price_note: Absent from all 93 providers paged from Monid's public provider list
           on 2026-10-24.
       - name: glasser
         carries: false
         per_call_price: null
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: Absent from all 105 providers in Glasser's public catalog on
           2026-10-24.
       - name: flatkey
         carries: false
         per_call_price: null
         price_verified_url: https://flatkey.ai/models
-        x402: null
         price_note: Flatkey's public catalog is model vendors only; its tool catalog is
           behind a login.
     status: unverified

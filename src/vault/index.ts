@@ -9,7 +9,27 @@ import { OnePasswordVault } from "./onepassword.js";
 import type { Vault } from "./types.js";
 
 export type { Vault } from "./types.js";
-export { BitwardenVault } from "./bitwarden.js";
+export { BitwardenVault, parseStatus } from "./bitwarden.js";
+export {
+  BW_INSTALL_URL,
+  bwAccountStatus,
+  bwGuidance,
+  bwGuidanceError,
+  childProcessBw,
+  describeVendorItems,
+  findVendorItems,
+  parseBwStatus,
+  sameMailbox,
+  searchTerms,
+  type BwAccount,
+  type BwDomainMatch,
+  type BwEmailMatch,
+  type BwRunResult,
+  type BwRunner,
+  type BwSessionState,
+  type BwVendorItem,
+  type BwVendorLookup,
+} from "./bw-account.js";
 export { EncryptedFileVault, decryptSecrets, encryptSecrets } from "./encrypted-file.js";
 export { FileVault } from "./file.js";
 export { KeychainVault } from "./keychain.js";
@@ -34,7 +54,7 @@ export function createVault(config: Config, home = skeletonKeyHome()): Vault {
   }
   switch (backend) {
     case "bitwarden":
-      return new BitwardenVault(config.bw_folder);
+      return new BitwardenVault(config.bw_folder, config.email);
     case "1password":
       return new OnePasswordVault(config.op_vault ?? "Private", home);
     case "keychain":

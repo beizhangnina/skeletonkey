@@ -3,9 +3,11 @@ import http from "node:http";
 import https from "node:https";
 import type { AddressInfo } from "node:net";
 import { readConfig } from "./config.js";
+import { killSwitchState } from "./killswitch.js";
 import { domainMatches, normalizeDomain, readKeys, touchLastUsed } from "./keys.js";
 import { Ledger, openLedger } from "./ledger.js";
 import { skeletonKeyHome } from "./paths.js";
+import { globalRedactor, Redactor } from "./redact.js";
 import type { KeyMeta, UpstreamScheme } from "./types.js";
 import { createVault, type Vault } from "./vault/index.js";
 
@@ -87,14 +89,13 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
   const ownLedger = options.ledger === undefined;
   const secretCache = new Map<string, string>();
 
-  /** Replaces any secret this process has seen with a placeholder. */
-  const log = (line: string): void => {
-    let safe = line;
-    for (const secret of secretCache.values()) {
-      if (secret.length >= 4) safe = safe.split(secret).join("[redacted]");
-    }
-    (options.logger ?? ((text: string) => console.log(text)))(safe);
-  };
+  /**
+   * Every line goes through the shared redactor: known values (anything this
+   * process has loaded out of the vault) plus secret *shapes* (card numbers,
+   * bearer tokens, `password=` assignments).
+   */
+  const redactor = new Redactor();
+  const log = redactor.logger(options.logger ?? ((text: string) => console.log(text)));
 
   const secretFor = async (alias: string): Promise<string | null> => {
     const cached = secretCache.get(alias);
@@ -102,6 +103,9 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
     const secret = await vault.get(alias);
     if (secret === null) return null;
     secretCache.set(alias, secret);
+    // Registered before it can appear in any later line.
+    redactor.add(secret);
+    globalRedactor.add(secret);
     return secret;
   };
 
@@ -136,6 +140,26 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
           upstreamScheme: schemeOverride ?? "per-host",
           upstreamSchemeDefault: DEFAULT_UPSTREAM_SCHEME,
           requireToken,
+        }),
+      );
+      return;
+    }
+
+    // The kill switch is checked per request, so engaging it takes effect
+    // without restarting anything (`skeletonkey disable --all`).
+    const kill = killSwitchState(home);
+    if (kill.engaged) {
+      log(`! refused ${req.method ?? "GET"} ${req.url ?? "/"}: kill switch engaged`);
+      req.resume();
+      res.writeHead(403, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "kill_switch",
+          engaged_at: kill.at,
+          reason: kill.reason,
+          hint:
+            "The SkeletonKey kill switch is engaged, so no request is forwarded and no key is " +
+            "injected. A human clears it with `skeletonkey resume`.",
         }),
       );
       return;
@@ -285,6 +309,7 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
         server.close(() => {
           if (ownLedger) ledger.close();
           secretCache.clear();
+          redactor.forget();
           resolve();
         });
       }),

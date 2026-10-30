@@ -1,11 +1,32 @@
 #!/usr/bin/env node
 import path from "node:path";
+import { realpathSync } from "node:fs";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
-import { loadApiIndex, resolveApisPath, validateApisFile } from "./apis.js";
+import {
+  HIGHLIGHTS_MAX,
+  loadApiIndex,
+  rankByCapability,
+  resolveApisPath,
+  validateApisFile,
+  type IndexEntry,
+} from "./apis.js";
 import { resolveBind, TAILSCALE_SENTINEL } from "./bind.js";
 import { configExists, ensureHome, readConfig, writeConfig } from "./config.js";
+import {
+  applyRegistration,
+  planRegistration,
+  renderDiff,
+  type AgentId,
+  type RegistrationAction,
+} from "./agents/register.js";
+import { engageKillSwitch, killSwitchState, releaseKillSwitch } from "./killswitch.js";
+import { capsUnset, policyPath, readPolicy, setCaps, vendorCap } from "./policy.js";
+import { RequestStore } from "./requests.js";
+import { DEFAULT_RUNNER_PORT, startRunner } from "./runner/server.js";
+import { RunnerClient } from "./runner/client.js";
+import { NoopNotifier } from "./notify.js";
 import {
   findKey,
   normalizeDomain,
@@ -17,6 +38,8 @@ import {
 import { openLedger } from "./ledger.js";
 import { configPath, skeletonKeyHome, keysPath, ledgerPath } from "./paths.js";
 import { promptLine, readSecret } from "./prompt.js";
+import { BITWARDEN_FALLBACK_BACKEND, runInitWizard, wizardDeps } from "./init-wizard.js";
+import { systemOpener } from "./open-url.js";
 import { startMcpServer } from "./mcp.js";
 import { startProxy, upstreamSchemeFor } from "./proxy.js";
 import {
@@ -43,6 +66,15 @@ import {
   type UpstreamScheme,
 } from "./types.js";
 import { createVault, testBackendAllowed } from "./vault/index.js";
+import {
+  bwAccountStatus,
+  bwGuidance,
+  bwGuidanceError,
+  describeVendorItems,
+  findVendorItems,
+  sameMailbox,
+  type BwAccount,
+} from "./vault/bw-account.js";
 
 const DEFAULT_HEADER = "Authorization";
 const DEFAULT_FORMAT = "Bearer {key}";
@@ -55,12 +87,15 @@ export function buildProgram(): Command {
       "Local-only vault for your personal API keys, with a header-injecting proxy.\n" +
         "Set SKELETONKEY_HOME to point every command at a different directory.",
     )
-    .version("0.1.0")
+    .version("0.3.0")
     .showHelpAfterError();
 
   program
     .command("init")
-    .description("create ~/.skeletonkey, pick a vault backend, record the dedicated email")
+    .description(
+      "set up ~/.skeletonkey: an interactive step-by-step wizard at a TTY, or the same\n" +
+        "straight-line setup from flags with --yes or a non-TTY stdin",
+    )
     .option("--email <email>", "dedicated email used for API signups")
     .addOption(
       new Option("--backend <backend>", "where secrets are stored (default: bitwarden)").choices([
@@ -70,8 +105,91 @@ export function buildProgram(): Command {
     .option("--op-vault <name>", "1Password vault name (1password backend only)", "Private")
     .option("--bw-folder <name>", "Bitwarden folder name (bitwarden backend only)")
     .option("--force", "overwrite an existing config", false)
+    .option("--no-register", "skip registering the MCP server with Claude Code and Codex")
+    .option(
+      "--yes",
+      "skip the interactive wizard and the confirmation prompts (the CI path)",
+      false,
+    )
+    .option(
+      "--user-home <dir>",
+      "home directory the agent config files live under (default: your home; used by tests)",
+    )
+    .option("--agent-command <cmd>", "command the agents should run (default: npx)")
     .action(async (options: InitOptions) => {
       await cmdInit(options);
+    });
+
+  program
+    .command("register")
+    .description("register the MCP server + skill with Claude Code and Codex (re-runnable)")
+    .option("--dry-run", "show what would change and write nothing", false)
+    .option("--user-home <dir>", "home directory to register into (default: your home)")
+    .option("--agent-command <cmd>", "command the agents should run (default: npx)")
+    .option("--agent <id>", "only `claude-code` or only `codex`")
+    .action(async (options: RegisterCliOptions) => {
+      await cmdRegister(options);
+    });
+
+  const bitwarden = program
+    .command("bitwarden")
+    .alias("bw")
+    .description("check the `bw` CLI, and find vendor accounts by the bound email");
+  bitwarden
+    .command("status", { isDefault: true })
+    .description("is `bw` installed, logged in, unlocked -- and as the bound email?")
+    .option("--json", "machine-readable output", false)
+    .action(async (options: { json: boolean }) => {
+      await cmdBitwardenStatus(options.json);
+    });
+  bitwarden
+    .command("find <domain>")
+    .description("list vault items for the bound email that match a vendor domain (never values)")
+    .option("--json", "machine-readable output", false)
+    .action(async (domain: string, options: { json: boolean }) => {
+      await cmdBitwardenFind(domain, options.json);
+    });
+
+  program
+    .command("runner")
+    .description("run the trusted local runner: approvals, spend policy, secure input, secrets")
+    .option("--port <n>", "port to listen on (loopback only)", (value: string) => Number(value))
+    .option("--no-notify", "do not send OS notifications (the URL is still printed)")
+    .action(async (options: RunnerCliOptions) => {
+      await cmdRunner(options);
+    });
+
+  const policy = program.command("policy").description("read or set the spend caps (human only)");
+  policy
+    .command("show", { isDefault: true })
+    .description("print the current caps")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      cmdPolicyShow(options.json);
+    });
+  policy
+    .command("set")
+    .description("set the global monthly cap and/or one vendor cap")
+    .option("--global <usd>", "global monthly cap in USD", (value: string) => Number(value))
+    .option("--vendor <name>", "vendor to cap")
+    .option("--vendor-cap <usd>", "that vendor's cap in USD", (value: string) => Number(value))
+    .action((options: PolicySetOptions) => {
+      cmdPolicySet(options);
+    });
+
+  program
+    .command("requests")
+    .description("list the approval requests agents have raised")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      cmdRequests(options.json);
+    });
+
+  program
+    .command("resume")
+    .description("clear the kill switch (human only)")
+    .action(() => {
+      cmdResume();
     });
 
   program
@@ -113,10 +231,10 @@ export function buildProgram(): Command {
   program
     .command("disable")
     .description("stop the proxy from injecting a key (metadata stays, secret stays in vault)")
-    .argument("<alias>")
-    .action((alias: string) => {
-      setDisabled(alias, true);
-      console.log(`Disabled ${alias}. The proxy will no longer inject its header.`);
+    .argument("[alias]")
+    .option("--all", "kill switch: disable every key, halt the runner, void pending approvals", false)
+    .action(async (alias: string | undefined, options: { all: boolean }) => {
+      await cmdDisable(alias, options.all);
     });
 
   program
@@ -176,6 +294,15 @@ export function buildProgram(): Command {
     .action((file: string) => {
       cmdApisValidate(file);
     });
+  apis
+    .command("show")
+    .description("print index entries with what each vendor offers (Layer 1 + highlights)")
+    .argument("[query]", "only entries matching this capability or name")
+    .option("--limit <n>", "entries to show", (value: string) => Number(value), 10)
+    .option("--json", "machine-readable output", false)
+    .action((query: string | undefined, options: { limit: number; json: boolean }) => {
+      cmdApisShow(query, options);
+    });
 
   program
     .command("stale-check")
@@ -204,6 +331,30 @@ interface InitOptions {
   opVault: string;
   bwFolder?: string;
   force: boolean;
+  /** Commander turns `--no-register` into `register: false`. */
+  register: boolean;
+  yes: boolean;
+  userHome?: string;
+  agentCommand?: string;
+}
+
+interface RegisterCliOptions {
+  dryRun: boolean;
+  userHome?: string;
+  agentCommand?: string;
+  agent?: string;
+}
+
+interface RunnerCliOptions {
+  port?: number;
+  /** `--no-notify` becomes `notify: false`. */
+  notify: boolean;
+}
+
+interface PolicySetOptions {
+  global?: number;
+  vendor?: string;
+  vendorCap?: number;
 }
 
 interface AddOptions {
@@ -226,6 +377,18 @@ interface ProxyCliOptions {
   upstreamScheme?: UpstreamScheme;
 }
 
+/**
+ * `skeletonkey init`.
+ *
+ * At a TTY (and without `--yes`) this is the six-step wizard in
+ * `init-wizard.ts`, where the bound email is the only required answer and
+ * everything else can be deferred with the command to finish it printed in the
+ * summary. With `--yes`, or when stdin is not a TTY, it is the straight-line
+ * path below -- the one CI and `scripts/demo.sh` drive, which takes every
+ * answer from a flag and is deliberately unchanged, including its refusal to
+ * finish when an explicitly chosen Bitwarden backend is unusable
+ * (`guideBitwarden`).
+ */
 async function cmdInit(options: InitOptions): Promise<void> {
   const home = skeletonKeyHome();
   if (configExists(home) && !options.force) {
@@ -233,6 +396,11 @@ async function cmdInit(options: InitOptions): Promise<void> {
   }
 
   const interactive = process.stdin.isTTY === true;
+  if (interactive && options.yes !== true) {
+    await initWizard(options, home);
+    return;
+  }
+
   let email = options.email?.trim() ?? "";
   if (!email) {
     if (!interactive) throw new Error("--email is required in non-interactive mode.");
@@ -272,6 +440,83 @@ async function cmdInit(options: InitOptions): Promise<void> {
     );
   }
   const backend: BackendId = resolved;
+  assertBackendAllowed(backend);
+
+  ensureHome(home);
+  const config = initConfig(options, email, backend);
+
+  const vault = createVault(config, home);
+  if (backend === "bitwarden") {
+    // Guided, and re-checkable: `init` is where a human finds out that `bw` is
+    // missing or locked, not three commands later.
+    await guideBitwarden(email, interactive);
+  } else {
+    await vault.check();
+  }
+
+  persistInit(config, home);
+  printInitPaths(config, home, vault.location);
+
+  if (options.register === false) {
+    console.log(
+      "\nSkipped agent registration (--no-register). Run `skeletonkey register` when you want it.",
+    );
+    return;
+  }
+  await registerAgents({
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+    confirm: options.yes !== true && interactive,
+  });
+}
+
+/**
+ * The interactive path: the six-step wizard, with the real prompt, the real
+ * `bw` and the real browser opener wired in. Everything the wizard touches
+ * outside this process is a dependency, so the tests drive the same steps with
+ * fakes and a temp home (see `test/init-wizard.test.ts`).
+ */
+async function initWizard(options: InitOptions, home: string): Promise<void> {
+  const deps = wizardDeps(
+    { prompt: promptLine, print: (line: string) => console.log(line) },
+    { openUrl: systemOpener() },
+  );
+  await runInitWizard(deps, {
+    home,
+    answers: {
+      ...(options.email === undefined ? {} : { email: options.email }),
+      ...(options.backend === undefined ? {} : { backend: options.backend }),
+    },
+    registerSkipped: options.register === false,
+    commit: async ({ email, backend }) => {
+      assertBackendAllowed(backend);
+      ensureHome(home);
+      const config = initConfig(options, email, backend);
+      const vault = createVault(config, home);
+      // Step 2 has already read Bitwarden's state (and the human may have
+      // chosen to carry on without it). Every other backend is checked here,
+      // which is where `encrypted-file` asks for its own passphrase.
+      if (backend !== "bitwarden") await vault.check();
+      persistInit(config, home);
+      printInitPaths(config, home, vault.location);
+      return vault.location;
+    },
+    register: async () => {
+      const outcome = await registerAgents({
+        ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+        ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+        confirm: true,
+      });
+      return {
+        summary: describeRegistration(outcome),
+        deferred: !outcome.wrote && outcome.actions.some((action) => action.change !== "unchanged"),
+      };
+    },
+  });
+}
+
+/** The plaintext `file` backend is refused unless it was asked for explicitly. */
+function assertBackendAllowed(backend: BackendId): void {
   if (isTestOnlyBackend(backend) && !testBackendAllowed()) {
     throw new Error(
       `The \`${backend}\` backend stores secrets in PLAINTEXT and exists only for this repo's ` +
@@ -279,9 +524,10 @@ async function cmdInit(options: InitOptions): Promise<void> {
         "SKELETONKEY_ALLOW_TEST_BACKEND=1 if you really mean it.",
     );
   }
+}
 
-  ensureHome(home);
-  const config: Config = {
+function initConfig(options: InitOptions, email: string, backend: BackendId): Config {
+  return {
     email,
     backend,
     ...(backend === "1password" ? { op_vault: options.opVault } : {}),
@@ -289,28 +535,456 @@ async function cmdInit(options: InitOptions): Promise<void> {
     proxy: { bind: "127.0.0.1", port: DEFAULT_PROXY_PORT },
     created: new Date().toISOString(),
   };
+}
 
-  const vault = createVault(config, home);
-  await vault.check();
-
+/**
+ * Create keys.yaml and the ledger up front, alongside the config, so their
+ * permissions are right from the start.
+ */
+function persistInit(config: Config, home: string): void {
   writeConfig(config, home);
-  // Create keys.yaml and the ledger up front so their permissions are right from the start.
   writeKeys(readKeys(home), home);
   openLedger(home).close();
+}
 
+function printInitPaths(config: Config, home: string, location: string): void {
   console.log(`SkeletonKey initialised at ${home}`);
-  console.log(`  email:    ${email}`);
-  console.log(`  backend:  ${backend}`);
-  console.log(`  secrets:  ${vault.location}`);
+  console.log(`  email:    ${config.email}`);
+  console.log(`  backend:  ${config.backend}`);
+  console.log(`  secrets:  ${location}`);
   console.log(`  metadata: ${keysPath(home)} (never contains secrets)`);
   console.log(`  ledger:   ${ledgerPath(home)}`);
   console.log(`  proxy:    http://127.0.0.1:${DEFAULT_PROXY_PORT} (edit \`proxy\` in ${configPath(home)})`);
-  if (isTestOnlyBackend(backend)) {
+  console.log(`  policy:   ${policyPath(home)} (caps default to $0 -- a human sets them)`);
+  console.log(
+    `  runner:   start it with \`skeletonkey runner\` (holds the secrets, raises approvals)`,
+  );
+  if (isTestOnlyBackend(config.backend)) {
     console.log(
       "\nWARNING: the `file` backend stores secrets in PLAINTEXT and is test-only. " +
         "Never put a real key in it.",
     );
   }
+}
+
+/** One line for the wizard's step 6 and its summary screen. */
+function describeRegistration(outcome: { actions: RegistrationAction[]; wrote: boolean }): string {
+  const changed = outcome.actions.filter((action) => action.change !== "unchanged");
+  if (changed.length === 0) return "Claude Code and Codex were already registered";
+  if (!outcome.wrote) {
+    return `declined -- ${changed.length} file(s) left alone; run \`skeletonkey register\` later`;
+  }
+  return `registered with Claude Code and Codex (${changed.length} file(s) written)`;
+}
+
+/**
+ * Writes the Claude Code and Codex config (D8: those two only), after showing
+ * the human exactly what is about to change (§5.1).
+ */
+async function registerAgents(options: {
+  userHome?: string;
+  command?: string;
+  agents?: readonly AgentId[];
+  confirm: boolean;
+  dryRun?: boolean;
+}): Promise<{ actions: RegistrationAction[]; wrote: boolean }> {
+  const planOptions = {
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.command === undefined ? {} : { command: options.command }),
+    ...(options.agents === undefined ? {} : { agents: options.agents }),
+  };
+  const planned = planRegistration(planOptions);
+  const changes = planned.filter((action) => action.change !== "unchanged");
+
+  console.log("\nAgent registration (Claude Code and Codex only):");
+  for (const action of planned) console.log(renderDiff(action));
+
+  if (changes.length === 0) {
+    console.log("  Nothing to do: both agents are already registered.");
+    return { actions: planned, wrote: false };
+  }
+  if (options.dryRun === true) {
+    console.log("  --dry-run: nothing was written.");
+    return { actions: planned, wrote: false };
+  }
+  if (options.confirm) {
+    const answer = await promptLine(`Write these ${changes.length} change(s)? [Y/n]: `, "y");
+    if (!/^y(es)?$/i.test(answer)) {
+      console.log("  Skipped. Run `skeletonkey register` later.");
+      return { actions: planned, wrote: false };
+    }
+  }
+  const applied = applyRegistration(planOptions);
+  for (const action of applied.filter((item) => item.change !== "unchanged")) {
+    console.log(`  wrote ${action.target}`);
+  }
+  console.log(
+    "  Restart Claude Code / Codex to pick the server up. If it still does not appear, re-run " +
+      "`skeletonkey register` and see the install troubleshooting table in the README.",
+  );
+  return { actions: applied, wrote: true };
+}
+
+async function cmdRegister(options: RegisterCliOptions): Promise<void> {
+  const agents =
+    options.agent === undefined
+      ? undefined
+      : ([options.agent] as AgentId[]).filter(
+          (id) => id === "claude-code" || id === "codex",
+        );
+  if (options.agent !== undefined && (agents === undefined || agents.length === 0)) {
+    throw new Error("--agent must be `claude-code` or `codex` (those are the supported agents).");
+  }
+  await registerAgents({
+    ...(options.userHome === undefined ? {} : { userHome: options.userHome }),
+    ...(options.agentCommand === undefined ? {} : { command: options.agentCommand }),
+    ...(agents === undefined ? {} : { agents }),
+    confirm: false,
+    dryRun: options.dryRun === true,
+  });
+}
+
+/** The bound email, or null when `init` has not run yet. */
+function boundEmail(home: string): string | null {
+  try {
+    return readConfig(home).email;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * `skeletonkey bitwarden status`: installed, logged in, unlocked, and as which
+ * account -- plus the commands the human runs when the answer is no. Exits 1
+ * when `bw` cannot be read, so a script can gate on it.
+ */
+async function cmdBitwardenStatus(json: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  const bound = boundEmail(home);
+  const status = await bwAccountStatus({ bound });
+  const guidance = bwGuidance(status);
+  if (json) {
+    console.log(
+      JSON.stringify(
+        {
+          state: status.state,
+          usable: status.usable,
+          account: status.account,
+          bound_email: status.bound,
+          matches_bound_email: status.matchesBound,
+          summary: status.summary,
+          guidance,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(`Bitwarden: ${status.summary}.`);
+    console.log(`  bw CLI:       ${status.state === "not-installed" ? "NOT on PATH" : "installed"}`);
+    console.log(
+      `  logged in:    ${status.state === "unlocked" || status.state === "locked" ? "yes" : "no"}`,
+    );
+    console.log(`  unlocked:     ${status.usable ? "yes" : "no"}`);
+    console.log(`  account:      ${status.account ?? "unknown (`bw status` reports none)"}`);
+    console.log(
+      `  bound email:  ${status.bound ?? "unset -- run `skeletonkey init --email <address>`"}` +
+        (status.matchesBound === null ? "" : status.matchesBound ? " (matches)" : " (DIFFERENT)"),
+    );
+    if (guidance.length > 0) {
+      console.log("");
+      for (const line of guidance) console.log(`  ${line}`);
+    }
+  }
+  if (!status.usable) process.exitCode = 1;
+}
+
+/**
+ * `skeletonkey bitwarden find <domain>`: the vendor accounts already in the
+ * vault for the bound email. Names, ids and which field matched -- never a
+ * password, never an API key.
+ */
+async function cmdBitwardenFind(domain: string, json: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  const bound = boundEmail(home);
+  const lookup = await findVendorItems({ domain, bound });
+  // Deliberately rebuilt field by field: `lookup.items` carries the values.
+  const safe = lookup.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    username: item.username,
+    email_match: item.email_match,
+    domain_match: item.domain_match,
+    has_password: item.has_password,
+    api_key_field: item.api_key_field,
+    has_api_key: item.api_key !== null,
+  }));
+  if (json) {
+    console.log(
+      JSON.stringify(
+        {
+          domain: normalizeDomain(domain),
+          bound_email: bound,
+          state: lookup.account.state,
+          searched: lookup.searched,
+          detail: lookup.detail,
+          items: safe,
+          note: "Values are never printed. The runner reads them in memory only.",
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(lookup.detail);
+    for (const line of describeVendorItems(lookup)) console.log(`  ${line}`);
+    if (!lookup.account.usable) {
+      for (const line of bwGuidance(lookup.account)) console.log(`  ${line}`);
+    } else if (safe.length > 0) {
+      console.log("");
+      console.log(
+        "No value was printed. `skeletonkey add <alias> --platform ... --domain ...` stores a key " +
+          "SkeletonKey injects; the runner reads these items in memory only.",
+      );
+    }
+  }
+  if (!lookup.account.usable) process.exitCode = 1;
+}
+
+/**
+ * The guided Bitwarden setup the **straight-line** `init` path runs for the
+ * Bitwarden backend: detect the state, print the exact commands, and re-check
+ * when the human says they have done it. SkeletonKey never collects the master
+ * password -- `bw login` and `bw unlock` happen in the human's own terminal,
+ * and only the BW_SESSION they export comes back here.
+ *
+ * **Where the refusal lives.** This is the one path that still refuses to
+ * finish when `bw` is unusable, and only in its non-interactive form: there,
+ * `--backend bitwarden` was asked for explicitly (or defaulted to with `--yes`)
+ * by something with no human to answer a question, so the honest outcome is a
+ * non-zero exit and an untouched `~/.skeletonkey` rather than a config naming a
+ * vault that cannot be opened. The two ways out are printed before it throws.
+ * At a TTY this function still offers `skip`, and the interactive wizard
+ * (`init-wizard.ts`, step 2) offers the fuller choice -- set Bitwarden up, take
+ * the `encrypted-file` vault instead, or defer it -- and never aborts the run.
+ */
+async function guideBitwarden(email: string, interactive: boolean): Promise<BwAccount> {
+  let status = await bwAccountStatus({ bound: email });
+  let loginAs = email;
+  let asked = false;
+  while (!status.usable) {
+    // Confirm the address rather than guessing it into a `bw login` line.
+    if (
+      interactive &&
+      !asked &&
+      (status.state === "unauthenticated" || status.state === "not-installed")
+    ) {
+      asked = true;
+      loginAs = await promptLine(`Bitwarden account email [${email}]: `, email);
+      if (!sameMailbox(loginAs, email)) {
+        console.error(
+          `Note: ${loginAs} is not the bound email ${email}. SkeletonKey looks vendor accounts up ` +
+            "by the bound email, so keep the two the same unless you mean it.",
+        );
+      }
+    }
+    console.error(`\nBitwarden: ${status.summary}.`);
+    for (const line of bwGuidance(status, loginAs)) console.error(`  ${line}`);
+    if (!interactive) {
+      // Nothing is written, so there is no half-finished home to clean up --
+      // and the caller is told both ways past this, either of which finishes.
+      console.error("\nBitwarden is not required. Either of these finishes setup instead.");
+      console.error(
+        `  The zero-install vault (AES-256-GCM file under SKELETONKEY_HOME):\n` +
+          `    skeletonkey init --email ${loginAs} --backend ${BITWARDEN_FALLBACK_BACKEND} --yes`,
+      );
+      console.error(
+        "  Or at a terminal, where the wizard offers Bitwarden / " +
+          `${BITWARDEN_FALLBACK_BACKEND} / later and finishes either way:\n` +
+          "    skeletonkey init",
+      );
+      throw bwGuidanceError(status, loginAs);
+    }
+    const answer = await promptLine(
+      "Press Enter once you have done that and I will re-check, or type `skip`: ",
+      "recheck",
+    );
+    if (/^(skip|s|no?)$/i.test(answer)) {
+      console.error(
+        "Carrying on without Bitwarden. `skeletonkey add` and the proxy will refuse with these " +
+          "same steps until `bw` is unlocked; re-check any time with `skeletonkey bitwarden status`.",
+      );
+      return status;
+    }
+    status = await bwAccountStatus({ bound: email });
+  }
+  console.error(`Bitwarden: ${status.summary}.`);
+  if (status.matchesBound === false) {
+    for (const line of bwGuidance(status, loginAs)) console.error(`  ${line}`);
+  }
+  return status;
+}
+
+async function cmdRunner(options: RunnerCliOptions): Promise<void> {
+  const home = skeletonKeyHome();
+  readConfig(home); // fail early and clearly when `init` has not run
+  const handle = await startRunner({
+    home,
+    port: options.port ?? DEFAULT_RUNNER_PORT,
+    ...(options.notify === false ? { notifier: new NoopNotifier() } : {}),
+  });
+  const policy = readPolicy(home);
+  console.log(`skeletonkey runner listening on ${handle.url}`);
+  console.log(`  approvals:    ${handle.url}/ (localhost only, no token)`);
+  console.log(`  secure input: ${handle.url}/input/<id> (announced by an OS notification)`);
+  console.log(`  agent API:    ${handle.url}/v1/... (needs the token in runner.json)`);
+  console.log(
+    `  caps:         global $${policy.global_monthly_cap_usd}/month` +
+      (capsUnset(policy) ? " -- unset, so the first paid action will ask you to set them" : ""),
+  );
+  console.log(`  allowlist:    ${handle.allowlist.size} vendor domain(s) from the API index`);
+  console.log(`  kill switch:  ${killSwitchState(home).engaged ? "ENGAGED" : "clear"}`);
+  console.log("  secrets stay in this process. No MCP tool and no runner verb can read one.");
+
+  const shutdown = (): void => {
+    void handle.close().then(() => process.exit(0));
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+  // Keep the process alive until a signal arrives.
+  await new Promise<void>(() => {});
+}
+
+function cmdPolicyShow(json: boolean): void {
+  const home = skeletonKeyHome();
+  const policy = readPolicy(home);
+  if (json) {
+    console.log(JSON.stringify({ file: policyPath(home), ...policy }, null, 2));
+    return;
+  }
+  console.log(`policy file: ${policyPath(home)}`);
+  console.log(`global monthly cap: $${policy.global_monthly_cap_usd}`);
+  const vendors = Object.entries(policy.vendor_caps_usd);
+  if (vendors.length === 0) console.log("per-vendor caps:    none set");
+  else printTable(["VENDOR", "CAP (USD)"], vendors.map(([name, cap]) => [name, `$${cap}`]));
+  console.log(`last change by:     ${policy.last_change_by ?? "nobody yet"}`);
+  if (capsUnset(policy)) {
+    console.log(
+      "\nEvery cap is $0, so nothing can be spent. The first paid action raises an approval " +
+        "asking you to set them -- there are no preset numbers.",
+    );
+  }
+  console.log("Agents can never raise these. Only this command and the approval page can.");
+}
+
+function cmdPolicySet(options: PolicySetOptions): void {
+  const home = skeletonKeyHome();
+  if (options.global === undefined && options.vendorCap === undefined) {
+    throw new Error("Pass --global <usd> and/or --vendor <name> --vendor-cap <usd>.");
+  }
+  if ((options.vendor === undefined) !== (options.vendorCap === undefined)) {
+    throw new Error("--vendor and --vendor-cap go together.");
+  }
+  const updated = setCaps(
+    {
+      ...(options.global === undefined ? {} : { global_monthly_cap_usd: options.global }),
+      ...(options.vendor === undefined || options.vendorCap === undefined
+        ? {}
+        : { vendor: options.vendor, vendor_cap_usd: options.vendorCap }),
+    },
+    { by: "cli" },
+    home,
+  );
+  console.log(`Caps written to ${policyPath(home)}.`);
+  console.log(`  global monthly: $${updated.global_monthly_cap_usd}`);
+  if (options.vendor !== undefined) {
+    console.log(`  ${options.vendor}: $${vendorCap(updated, options.vendor)}`);
+  }
+}
+
+function cmdRequests(json: boolean): void {
+  const home = skeletonKeyHome();
+  const requests = RequestStore.open(home).list();
+  if (json) {
+    console.log(JSON.stringify(requests, null, 2));
+    return;
+  }
+  if (requests.length === 0) {
+    console.log("No requests yet. An agent raises one with request_access.");
+    return;
+  }
+  printTable(
+    ["ID", "KIND", "VENDOR", "STATUS", "EST", "CREATED"],
+    requests.map((request) => [
+      request.id,
+      request.kind,
+      request.vendor,
+      request.status,
+      request.est_budget_usd === null ? "-" : `$${request.est_budget_usd}`,
+      request.created,
+    ]),
+  );
+  const pending = requests.filter((request) => request.status === "pending_approval");
+  if (pending.length > 0) {
+    const state = readRunnerStateForHints(home);
+    console.log(
+      `\n${pending.length} pending. Decide them at ` +
+        (state === null ? "the runner's /approve/<id> page (start `skeletonkey runner`)" : `${state}/`),
+    );
+  }
+}
+
+function readRunnerStateForHints(home: string): string | null {
+  const client = RunnerClient.fromHome(home);
+  return client === null ? null : client.url;
+}
+
+async function cmdDisable(alias: string | undefined, all: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  if (!all) {
+    if (alias === undefined) throw new Error("Pass an alias, or --all for the kill switch.");
+    setDisabled(alias, true, home);
+    console.log(`Disabled ${alias}. The proxy will no longer inject its header.`);
+    return;
+  }
+
+  const keys = readKeys(home).keys;
+  for (const key of keys) if (!key.disabled) setDisabled(key.alias, true, home);
+  const state = engageKillSwitch({ reason: "skeletonkey disable --all", by: "cli" }, home);
+
+  // Tell a running runner, so pending approvals are voided now rather than at
+  // its next restart.
+  let voided: unknown = "no runner was running";
+  const client = RunnerClient.fromHome(home);
+  if (client !== null) {
+    try {
+      const result = await client.kill("skeletonkey disable --all");
+      voided = result["voided_requests"] ?? [];
+    } catch {
+      voided = "the runner did not answer; its pending approvals are voided when it next starts";
+    }
+  } else {
+    const store = RequestStore.open(home);
+    const localVoided = store.voidPending("Voided by `skeletonkey disable --all`.");
+    voided = localVoided.map((request) => request.id);
+  }
+
+  console.log(`Kill switch engaged at ${state.at}.`);
+  console.log(`  keys disabled:      ${keys.length}`);
+  console.log(`  pending approvals:  ${JSON.stringify(voided)}`);
+  console.log("  the proxy now answers every call with 403 {\"error\":\"kill_switch\"} locally");
+  console.log("  clear it with `skeletonkey resume` (only a human can).");
+}
+
+function cmdResume(): void {
+  const home = skeletonKeyHome();
+  const before = killSwitchState(home);
+  releaseKillSwitch(home);
+  console.log(
+    before.engaged
+      ? "Kill switch cleared. Keys you disabled stay disabled: re-enable them with `skeletonkey enable <alias>`."
+      : "The kill switch was not engaged; nothing to clear.",
+  );
 }
 
 async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
@@ -655,6 +1329,185 @@ function newest(a: string | null, b: string | null): string | null {
   return Date.parse(a) >= Date.parse(b) ? a : b;
 }
 
+interface ApisShowOptions {
+  limit: number;
+  json: boolean;
+}
+
+/**
+ * Prints index rows the way a human reads them: what the vendor is, what is
+ * free, how to connect, and a few highlighted models/endpoints. The offering
+ * block is optional on every row, so the absence of one is printed as such
+ * rather than as a row of empty fields.
+ */
+function cmdApisShow(query: string | undefined, options: ApisShowOptions): void {
+  const home = skeletonKeyHome();
+  const index = loadApiIndex({ home });
+  const asked = query?.trim() ?? "";
+  const matched =
+    asked === ""
+      ? index.entries
+      : rankByCapability(index.entries, asked).map((scored) => scored.entry);
+  // A name is what a human types when they already know the vendor, and the
+  // capability matcher is whole-word, so `treg` alone would miss `treg.to`.
+  const byName =
+    asked === ""
+      ? []
+      : index.entries.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
+  const seen = new Set<string>();
+  const entries = [...byName, ...matched].filter((entry) => {
+    if (seen.has(entry.name)) return false;
+    seen.add(entry.name);
+    return true;
+  });
+  const limit = Number.isFinite(options.limit) && options.limit > 0 ? Math.trunc(options.limit) : 10;
+  const shown = entries.slice(0, limit);
+
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          query: asked === "" ? null : asked,
+          index_files: index.files,
+          matched: entries.length,
+          returned: shown.length,
+          entries: shown.map((entry) => ({
+            name: entry.name,
+            origin: entry.origin,
+            access_mode: entry.access_mode,
+            url: entry.url,
+            domain: entry.domain ?? null,
+            auth_required: entry.auth_required ?? null,
+            auth_headers: entry.auth_headers ?? null,
+            status: entry.status ?? null,
+            checked_date: entry.checked_date,
+            offering: entry.offering ?? null,
+          })),
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (shown.length === 0) {
+    console.log(
+      asked === ""
+        ? "The index is empty."
+        : `Nothing in the index matches ${JSON.stringify(asked)}. ` +
+            `${index.entries.length} entries searched across ${index.files.length} file(s).`,
+    );
+    return;
+  }
+
+  for (const entry of shown) {
+    printOffering(entry);
+  }
+  console.log(
+    `${shown.length} of ${entries.length} matching entries ` +
+      `(${index.entries.length} in the index). Offering fields are optional: a blank one means ` +
+      "nobody recorded it, never that the vendor does not have it.",
+  );
+}
+
+/** Wraps long prose at a terminal-ish width, with a hanging indent. */
+function wrapped(label: string, value: string, width = 96): string[] {
+  const indent = " ".repeat(13);
+  const head = `  ${label.padEnd(11)}`;
+  const lines: string[] = [];
+  let current = "";
+  for (const word of value.split(/\s+/).filter((part) => part !== "")) {
+    if (current === "") {
+      current = word;
+    } else if (`${current} ${word}`.length > width) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = `${current} ${word}`;
+    }
+  }
+  if (current !== "") lines.push(current);
+  if (lines.length === 0) lines.push("");
+  return lines.map((text, index) => (index === 0 ? head + text : indent + text));
+}
+
+/** One entry as a labelled block. Keeps nested offering fields readable. */
+function printOffering(entry: IndexEntry): void {
+  const line = (label: string, value: string): void => {
+    for (const text of wrapped(label, value)) console.log(text);
+  };
+  const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
+  console.log("");
+  console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+
+  const offering = entry.offering ?? null;
+  if (offering === null) {
+    line("summary", "no offering recorded (the offering block is optional)");
+    if (entry.url !== null) line("url", entry.url);
+    return;
+  }
+  line("summary", offering.summary ?? "unknown");
+  line("categories", (offering.categories ?? []).join(", ") || "unknown");
+
+  const counts: string[] = [];
+  if (offering.model_count !== null) counts.push(`~${offering.model_count} models`);
+  if (offering.endpoint_count !== null) counts.push(`~${offering.endpoint_count} endpoints`);
+  line("size", counts.length === 0 ? "unknown" : counts.join(", "));
+  if (offering.count_note !== null) line("", offering.count_note);
+
+  const free = offering.free_tier;
+  if (free === null) {
+    line("free tier", "unknown (nobody checked)");
+  } else {
+    const available =
+      free.available === true ? "yes" : free.available === false ? "no" : "unknown (nobody checked)";
+    line("free tier", `${available}${free.what === null ? "" : ` -- ${free.what}`}`);
+    if (free.limits !== null) line("", `limits: ${free.limits}`);
+    const needs = [
+      free.requires_account === true ? "account" : free.requires_account === false ? "no account" : null,
+      free.requires_key === true ? "API key" : free.requires_key === false ? "no key" : null,
+    ].filter((item): item is string => item !== null);
+    if (needs.length > 0) line("", `needs: ${needs.join(", ")}`);
+  }
+
+  const connect = offering.connect;
+  if (connect === null) {
+    line("connect", "unknown");
+  } else {
+    const auth =
+      connect.auth === "none"
+        ? "no auth (vendor documents none)"
+        : connect.auth === null
+          ? "auth unknown"
+          : connect.auth_header === null
+            ? connect.auth
+            : `${connect.auth}: ${connect.auth_header}: ${connect.auth_format ?? "{key}"}`;
+    line("connect", `${connect.base_url ?? "base URL unknown"}  (${auth})`);
+  }
+  line("catalog", offering.catalog_url ?? "none published");
+
+  const highlights = offering.highlights ?? [];
+  if (highlights.length > 0) {
+    line(
+      "highlights",
+      `${highlights.length} of at most ${HIGHLIGHTS_MAX} -- a sample, not the catalog`,
+    );
+    for (const item of highlights) {
+      const free_ = item.free === true ? "free" : item.free === false ? "paid" : "cost unknown";
+      console.log(
+        `    - [${free_}] ${item.kind}  ${item.id}${item.note === null ? "" : ` -- ${item.note}`}`,
+      );
+    }
+  }
+  line(
+    "verified",
+    offering.verified_url === null
+      ? "nowhere -- treat the fields above as unverified"
+      : `${offering.verified_url} on ${offering.verified_date ?? "an unrecorded date"}`,
+  );
+}
+
 function printTable(headers: string[], rows: string[][]): void {
   const widths = headers.map((header, index) =>
     Math.max(header.length, ...rows.map((row) => (row[index] ?? "").length)),
@@ -679,5 +1532,5 @@ export async function main(argv: string[] = process.argv): Promise<void> {
 
 const invokedDirectly =
   process.argv[1] !== undefined &&
-  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+  fileURLToPath(import.meta.url) === realpathSync(process.argv[1]);
 if (invokedDirectly) void main();

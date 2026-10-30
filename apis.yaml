@@ -11,7 +11,6 @@
 #   name                 string, required, unique. Short slug for the API.
 #   url                  string, required. http(s) URL of the API or its docs.
 #   access_mode          string, required. One of:
-#                          x402          -- pay per request over HTTP 402 / x402
 #                          intermediary  -- a gateway resells access; you top up the gateway
 #                          own-account   -- you hold the account and the billing relationship
 #                          byok          -- the service accepts a key you got elsewhere
@@ -66,6 +65,19 @@
 #   requires_phone       boolean or null. Vendor requires phone/SMS verification.
 #   requires_work_email  boolean or null. Vendor requires a work email address,
 #                        so a `+alias` on a generic mailbox may be refused.
+#   auth_required        boolean or null. false = the vendor documents NO
+#                        credential for this API, so there is nothing to
+#                        register and a 401 would be a surprise. true = one is
+#                        needed. null = nobody checked. This exists because
+#                        `auth_header: null` alone could not tell "needs no key"
+#                        from "we never looked". Cannot be false while
+#                        auth_header, auth_format or auth_headers is set.
+#   auth_headers         list of {header, format, note} or null, for the vendors
+#                        that document MORE THAN ONE credential header (a key
+#                        plus a paired secret, say). Each `format` must contain
+#                        {key}; at most 5; header names unique. When
+#                        auth_header/auth_format are also set, element 0 must
+#                        match them -- that is the one the proxy injects.
 #   human_steps          list of strings or null. Steps only a human can do, in
 #                        the vendor's own terms. request_access turns these into
 #                        explicit human gates in the signup plan.
@@ -76,12 +88,13 @@
 # MCP tools turn the two into a {route, reason}: direct when the vendor is
 # pay-as-you-go or its free tier covers the API, through the cheapest aggregator
 # that publishes a per-call price when direct access needs a monthly
-# subscription, or x402 where that exists. A number with no URL behind it is not
-# allowed in either block -- the validator rejects it.
+# subscription. Payment is fiat only: there is no crypto rail, and no route that
+# pays per call from a wallet. A number with no URL behind it is not allowed in
+# either block -- the validator rejects it.
 #
 #   billing:
 #     model                 payg | subscription | free_tier+payg |
-#                           free_tier+subscription | x402 | free, or null.
+#                           free_tier+subscription | free, or null.
 #                           null = nobody checked. It never means free.
 #                           `free` means no paid tier exists at all.
 #     free_tier_note        string or null. REQUIRED when model names a free
@@ -94,8 +107,6 @@
 #     free_tier_covers_api  boolean or null. Does the free tier include API
 #                           access? null = not established, and the router then
 #                           refuses to treat the free tier as a usable route.
-#     x402_url              http(s) URL or null. Vendor page documenting that it
-#                           accepts x402 / agentic payment.
 #
 #   aggregators: list of:
 #     name                  monid | glasser | flatkey.
@@ -106,14 +117,81 @@
 #                           it per result or in tiers, so no comparable per-call
 #                           number exists. null is never "free".
 #     price_verified_url    http(s) URL. REQUIRED whenever per_call_price is set.
-#     x402                  boolean or null. Does the catalog accept x402 here?
 #     price_note            string or null. What the number means, or why it is
 #                           null. Carriage for rows that do not state their own
 #                           is inherited from the generated shards' `seen_in`.
 #
 # Re-check the verified_url set with `skeletonkey stale-check`: it re-fetches
 # each page, fingerprints its visible text, and flags changed / unreachable /
-# verified-too-long-ago.
+# verified-too-long-ago. `offering.verified_url` is re-checked too.
+#
+# WHAT THE VENDOR OFFERS (optional, two layers)
+# ---------------------------------------------
+# `offering` answers "what is this, what is free, and how do I call it" without
+# an agent having to read the vendor's whole site. It is OPTIONAL on every row
+# and every field inside it is null-when-unknown, so adding it to a row cannot
+# invalidate that row. Print it with `skeletonkey apis show [query]`; the MCP
+# tools return it on every find_api match.
+#
+# LAYER 1 -- for every vendor worth indexing:
+#
+#   offering:
+#     summary               string or null. ONE line (no line breaks), at most
+#                           200 characters: what the vendor does.
+#     categories            list from a closed set, or null. At most 12:
+#                           llm, embeddings, rerank, image, video, audio,
+#                           speech, ocr, vision, moderation, translation, code,
+#                           agents, search, web-scraping, data-enrichment, seo,
+#                           social, ecommerce, finance, maps, weather, email,
+#                           sms, analytics, advertising, science, compute,
+#                           payments, other. A closed list keeps the field
+#                           searchable; free text would not.
+#     endpoint_count        non-negative integer or null. APPROXIMATE, and only
+#     model_count           a number the vendor itself states. Never counted by
+#                           hand off a paginated page and rounded up.
+#     count_note            string or null. Where the counts came from, and that
+#                           they move.
+#     free_tier:
+#       available           true | false | null. null = nobody checked; it never
+#                           means "no free tier".
+#       what                string or null. REQUIRED when available is true: what
+#                           is actually free, in the vendor's own numbers. Must
+#                           be null when available is false.
+#       limits              string or null. Rate/volume/time limits AS THE VENDOR
+#                           STATES THEM. When the vendor states none, say that --
+#                           silence is not "unlimited".
+#       requires_key        true | false | null. Does the free tier need a key?
+#       requires_account    true | false | null. Does it need an account at all?
+#     connect:
+#       base_url            http(s) URL or null. Where requests actually go.
+#       auth                api_key | bearer | basic | oauth | query_param |
+#                           none | unknown, or null. `none` is a FACT (the vendor
+#                           documents no credential); null is "nobody checked".
+#                           `none` may not sit beside an auth_header.
+#       auth_header         header name or null. No colon, no spaces.
+#       auth_format         template containing {key}, or null. Needs
+#                           auth_header too.
+#     catalog_url           http(s) URL or null. The VENDOR's own catalog or
+#                           model-list page -- never an aggregator's.
+#     verified_url          http(s) URL or null. The page Layer 1 was read off.
+#     verified_date         "YYYY-MM-DD". Required whenever verified_url is set,
+#                           and vice versa.
+#     source_urls           list of http(s) URLs or null. Every page read.
+#
+# LAYER 2 -- optional, and capped on purpose:
+#
+#     highlights            list of at most 15, or null (never an empty list):
+#       id                  required. The vendor's own model id or endpoint path.
+#       kind                required. model | endpoint.
+#       free                true | false | null. true ONLY when the vendor says
+#                           this one is free.
+#       note                string or null. One line on why it is worth naming.
+#       url                 http(s) URL or null.
+#
+# Highlights are a SAMPLE -- the free models, the popular ones, the ones a user
+# actually asks for. Never paste a vendor's full catalog in: it would be stale
+# within a week, and an agent that needs the whole list should fetch
+# `catalog_url` live. The 15-row cap is what enforces that.
 #
 # DISCOVERED ROWS (written by the agent, not by hand)
 # ---------------------------------------------------
@@ -135,18 +213,334 @@
 
 version: 1
 entries:
-  - name: example-x402-endpoint
-    url: https://example.com/x402-demo
-    access_mode: x402
+  # --- Vendor-direct rows -------------------------------------------------
+  # Read off the vendor's OWN pages, with no sign-up and no live API call. No
+  # `status`: this file records provenance as `checked_date` + `source`, and
+  # proxy-ledger promotion applies to the discovered user index, not here.
+
+  - name: nvidia-nim
+    url: https://build.nvidia.com/
+    domain: integrate.api.nvidia.com
+    capabilities:
+      - NVIDIA API catalog
+      - NIM
+      - LLM inference
+      - chat completions
+      - reasoning
+      - code generation
+      - embeddings and reranking
+      - speech recognition
+      - image generation
+    access_mode: own-account
     min_topup: null
-    billing_unit: per request
+    billing_unit: null
     signup_automatable: null
+    base_url: https://integrate.api.nvidia.com/v1
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    auth_required: true
+    signup_url: https://build.nvidia.com/
+    key_page_url: https://build.nvidia.com/settings
+    requires_card: false
+    human_steps:
+      - >-
+        Sign in to build.nvidia.com (NVIDIA account / NVIDIA Developer Program)
+        and generate a key at https://build.nvidia.com/settings, or use
+        "Get API Key" on any model page.
+    offering:
+      summary: >-
+        NVIDIA NIM: hosted, OpenAI-compatible model APIs for inference, vision,
+        speech, retrieval and more.
+      categories:
+        - llm
+        - vision
+        - speech
+        - embeddings
+        - rerank
+        - image
+        - video
+        - science
+      endpoint_count: null
+      model_count: 108
+      count_note: >-
+        https://build.nvidia.com/models.md said "100 of 108 shown" on
+        2026-10-28, so ~108 models. NVIDIA publishes no endpoint count and does
+        not need one: every chat model answers on the same OpenAI-compatible
+        path, POST /v1/chat/completions. Highlight ids below are the names
+        NVIDIA lists in models.md; the string to send as `model` is shown on
+        each model's own page (NVIDIA's own example: nvidia/llama-3.1-70b-instruct).
+      free_tier:
+        available: true
+        what: >-
+          Every model, LLMs included. NVIDIA's own FAQ at
+          https://build.nvidia.com/llms.txt reads: "Which models are free? All
+          models offer a free trial tier with no credit card required. Sign in
+          to generate an API key." The NIM FAQ adds that "Members of the NVIDIA
+          Developer Program have free access to NIM API endpoints for
+          prototyping".
+        limits: >-
+          NVIDIA states NO number. Its NIM FAQ says only that "The number of
+          calls allowed during a certain period of time is designed to serve
+          evaluation and prototyping needs only" and "The rate of requests will
+          vary per model queried and may vary based on the number of concurrent
+          users", and points you at your signed-in account for the current
+          limit. Free access is "for prototyping, research, development and
+          testing purposes only"; production use requires an NVIDIA AI
+          Enterprise license. No requests-per-minute or per-day figure, and no
+          credit allowance, appears on any NVIDIA page read for this row -- so
+          the numeric limit is unknown, not unlimited.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://integrate.api.nvidia.com/v1
+        auth: bearer
+        auth_header: Authorization
+        auth_format: Bearer {key}
+      catalog_url: https://build.nvidia.com/models
+      verified_url: https://build.nvidia.com/llms.txt
+      verified_date: "2026-10-28"
+      source_urls:
+        - https://build.nvidia.com/llms.txt
+        - https://build.nvidia.com/models.md
+        - https://docs.api.nvidia.com/nim/docs/product
+        - https://docs.api.nvidia.com/nim/docs/api-quickstart
+        - https://docs.api.nvidia.com/nim/reference/llm-apis
+        - https://docs.api.nvidia.com/nim/docs/introduction
+        - https://build.nvidia.com/nvidia/llama-3_3-nemotron-super-49b-v1_5
+        - https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317
+      highlights:
+        - id: nvidia/llama-3.1-70b-instruct
+          kind: model
+          free: true
+          note: >-
+            The model string in NVIDIA's own curl example on
+            https://build.nvidia.com/llms.txt.
+          url: null
+        - id: llama-3_3-nemotron-super-49b-v1_5
+          kind: model
+          free: true
+          note: >-
+            Nemotron Super reasoning model; its page states the base URL, the
+            Bearer header and the API Trial Terms of Service.
+          url: https://build.nvidia.com/nvidia/llama-3_3-nemotron-super-49b-v1_5
+        - id: nemotron-3-ultra-550b-a55b
+          kind: model
+          free: true
+          note: >-
+            NVIDIA's listing: "Open, efficient hybrid Mamba-Transformer MoE with
+            1M context, excelling in agentic reasoning, coding, planning, tool
+            calling".
+          url: null
+        - id: deepseek-v4.1-flash
+          kind: model
+          free: true
+          note: >-
+            NVIDIA's listing: "552B MoE, 8B active params with native multimodal
+            support and lower API cost using smaller KV cache".
+          url: null
+        - id: gpt-oss-20b
+          kind: model
+          free: true
+          note: >-
+            NVIDIA's listing: "Smaller Mixture of Experts (MoE) text-only LLM
+            for efficient AI reasoning and math".
+          url: null
+        - id: gemma-4-31b-it
+          kind: model
+          free: true
+          note: >-
+            NVIDIA's listing: "Dense 31B model delivering frontier reasoning for
+            coding, agentic workflows, and fine-tuning".
+          url: null
+        - id: glm-5-3-flash
+          kind: model
+          free: true
+          note: >-
+            NVIDIA's listing: multimodal 320B-total / 18B-active MoE with
+            reasoning and tool calling.
+          url: null
+        - id: nemotron-3-embed-1b
+          kind: model
+          free: true
+          note: "Embeddings: NVIDIA's listing says semantic search, retrieval and RAG."
+          url: null
+        - id: canary-1b-asr
+          kind: model
+          free: true
+          note: "Speech-to-text and translation, per NVIDIA's listing."
+          url: null
+        - id: FLUX.1-schnell
+          kind: model
+          free: true
+          note: "Image generation; NVIDIA hosts it in the same catalog."
+          url: null
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        Free trial tier on every model with no credit card, for prototyping;
+        NVIDIA states no numeric allowance (see offering.free_tier.limits).
+        Production use is not covered: the NIM FAQ says "Using NIM in production
+        requires an NVIDIA AI Enterprise license", which that page prices from
+        $4,500 per GPU per year. There is no documented self-serve top-up for
+        the hosted endpoints, so min_topup stays null.
+      free_tier_covers_api: true
+      verified_url: https://docs.api.nvidia.com/nim/docs/product
+      verified_date: "2026-10-28"
     tos_notes: >-
-      Placeholder row demonstrating the x402 access mode: the endpoint answers
-      402 with payment instructions and no account is created. Terms not reviewed.
-    source: null
-    checked_date: null
-    example: true
+      Hosted NIM inference plus downloadable microservices: language, reasoning
+      and code, retrieval and reranking, vision and multimodal, speech, image
+      and video, healthcare, route optimization and climate models. The base URL
+      and Bearer header here cover the hosted OpenAI-compatible LLM endpoint,
+      not every catalog service (biology and simulation models have their own
+      paths). Model pages state "GOVERNING TERMS: This trial service is governed
+      by the NVIDIA API Trial Terms of Service"
+      (https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf),
+      which was not read for this row. Everything above came off NVIDIA's own
+      pages on 2026-10-28, with no sign-up and no API call.
+    source: https://build.nvidia.com/llms.txt
+    checked_date: "2026-10-28"
+
+  - name: treg
+    url: https://treg.to/
+    domain: treg.to
+    capabilities:
+      - agent tool gateway
+      - web search
+      - web scraping
+      - serp data
+      - seo and backlinks
+      - people and company enrichment
+      - social media data
+      - ecommerce data
+      - ad libraries
+    access_mode: intermediary
+    min_topup: null
+    billing_unit: per call
+    signup_automatable: null
+    base_url: https://treg.to
+    auth_header: X-Treg-Token
+    auth_format: "{key}"
+    auth_required: true
+    signup_url: https://treg.to/
+    key_page_url: null
+    human_steps:
+      - >-
+        Sign in to treg (GitHub, Google or an emailed code) and create a team
+        token; the token page is behind the login, so no stable URL is recorded.
+      - >-
+        A personal sign-in token must also send `X-Treg-Org: <team-slug>`; a
+        team token (trg_live_...) does not. Only the X-Treg-Token value is a
+        secret, so it is the only header SkeletonKey injects.
+      - >-
+        Top up the prepaid balance before relying on it: treg bills per call
+        once the one-off $1.00 credit is used.
+    offering:
+      summary: >-
+        OpenRouter but for agent tools instead of models: one token and one base
+        URL reach 4,000+ third-party tool endpoints, billed per call.
+      categories:
+        - search
+        - web-scraping
+        - seo
+        - social
+        - data-enrichment
+        - ecommerce
+        - advertising
+        - analytics
+        - image
+        - video
+        - audio
+        - finance
+      endpoint_count: 4064
+      model_count: null
+      count_note: >-
+        https://treg.to/catalog stated "4,064 endpoints across 113 platforms and
+        119 providers" on 2026-10-28; treg's own skill.md rounds the same figure
+        to "4,000+ tools across 119 providers". Counts move as providers are
+        added -- fetch the catalog for the current number.
+      free_tier:
+        available: true
+        what: >-
+          treg's skill.md: "A new verified account gets $1.00 of credit once, on
+          its first eligible team; aliases of one inbox (+tag, Gmail dots) share
+          it." treg also documents tools with "a verified public route: no key,
+          free".
+        limits: >-
+          $1.00 once per verified account, not per team; calls then bill per
+          call from the prepaid balance. A free public route "stays free only
+          while you send no provider credential header yourself". treg states no
+          rate limit on these pages, so any throughput limit is unknown.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://treg.to
+        auth: api_key
+        auth_header: X-Treg-Token
+        auth_format: "{key}"
+      catalog_url: https://treg.to/catalog
+      verified_url: https://treg.to/llms.txt
+      verified_date: "2026-10-28"
+      source_urls:
+        - https://treg.to/llms.txt
+        - https://treg.to/skill.md
+        - https://treg.to/integrate.md
+        - https://treg.to/catalog
+      highlights:
+        - id: treg.web.search
+          kind: endpoint
+          free: null
+          note: >-
+            Called as GET https://treg.to/call/<id>?key=value. Priced per call;
+            treg publishes no single per-call figure for it, so free stays null.
+          url: null
+        - id: treg.web.extract
+          kind: endpoint
+          free: null
+          note: "Fetch and extract a page's content."
+          url: null
+        - id: treg.google.serp.organic
+          kind: endpoint
+          free: null
+          note: "Google organic SERP rows."
+          url: null
+        - id: treg.google.serp.maps
+          kind: endpoint
+          free: null
+          note: "Google Maps local results."
+          url: null
+        - id: treg.people.email.find
+          kind: endpoint
+          free: null
+          note: "Find a work email address."
+          url: null
+        - id: treg.people.email.verify
+          kind: endpoint
+          free: null
+          note: "Verify an email address."
+          url: null
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        "A new verified account gets $1.00 of credit once, on its first eligible
+        team" (treg skill.md, read 2026-10-28). After that, calls are "metered
+        per call from a prepaid balance at cost -- 0% markup", with the cost of
+        each call returned in the X-Treg-Cost-Micro response header. treg
+        describes most lookups as "fractions of a cent" but publishes no single
+        per-call price, so min_topup and a number stay null.
+      free_tier_covers_api: true
+      verified_url: https://treg.to/skill.md
+      verified_date: "2026-10-28"
+    tos_notes: >-
+      treg is an intermediary: it holds the accounts at 119 underlying providers
+      and bills your prepaid balance per call, so the provider's own terms still
+      govern the data you get back. It also documents bring-your-own-key ("Your
+      own tools"), where you register your own provider key and those calls are
+      not billed by treg -- that path would be access_mode byok. Its robots.txt
+      allows / but disallows /call/ and /mcp ("the metered proxy ... Disallowed
+      for cost, not for secrecy"); both were honoured and no call was made. Read
+      off treg's own pages on 2026-10-28, with no sign-up.
+    source: https://treg.to/llms.txt
+    checked_date: "2026-10-28"
 
   - name: example-intermediary-gateway
     url: https://example.com/gateway
@@ -225,7 +619,6 @@ entries:
       free_tier_covers_api: null
       verified_url: https://docs.x.com/x-api/getting-started/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
@@ -303,28 +696,23 @@ entries:
       free_tier_covers_api: true
       verified_url: https://apify.com/pricing
       verified_date: "2026-10-24"
-      x402_url: https://apify.com/pricing
     aggregators:
       - name: monid
         carries: true
         per_call_price: 0.002
         price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apify
-        x402: true
         price_note: >-
           Monid lists 62 Apify endpoints. Only 2 of them carry a flat PER_CALL price
           ($0.002); 40 are PER_RESULT ($0.0001-$0.01 per row), 18 are TIERED and 2 are
           PER_UNIT_MATRIX, so $0.002 is the lowest flat per-call price and NOT a typical
-          cost per scrape. Every endpoint advertises
-          supportedX402Networks ["eip155:8453", "eip155:143"].
+          cost per scrape.
       - name: glasser
         carries: true
         per_call_price: 0.001
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: >-
           Glasser lists 83 Apify endpoints: 26 priced per run ($0.001 and up, the lowest
-          flat per-call price) and 57 priced per result (from $0.00015). Glasser's catalog
-          says nothing about x402, so that stays null.
+          flat per-call price) and 57 priced per result (from $0.00015).
       - name: flatkey
         carries: false
         per_call_price: null
@@ -337,12 +725,9 @@ entries:
       Apify's own API docs: "Add the token to your request's Authorization header as
       Bearer <token>" (the `token` query parameter is also accepted and is explicitly
       called less secure -- do not use it). Billing is verified on Apify's own pricing
-      page; signup automation rules are NOT reviewed. Apify's pricing FAQ answers "Can an
-      AI agent pay for Actor runs without an Apify account?" with "Yes. An autonomous
-      agent with a crypto wallet can pay through the agentic payment protocols x402 and
-      MPP, with no account", which is why billing.x402_url is set. Note that scraping
-      terms belong to the *target* site as well as to Apify; an agent must not assume
-      either is permissive.
+      page; signup automation rules are NOT reviewed. SkeletonKey holds an ordinary Apify
+      account key and pays in fiat. Note that scraping terms belong to the *target* site
+      as well as to Apify; an agent must not assume either is permissive.
     source: https://docs.apify.com/api/v2
     checked_date: null
     example: true
@@ -387,7 +772,6 @@ entries:
       free_tier_covers_api: true
       verified_url: https://docs.voyageai.com/docs/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false
@@ -475,24 +859,19 @@ entries:
       free_tier_covers_api: null
       verified_url: https://www.apollo.io/pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: true
         per_call_price: 0.026
         price_verified_url: https://api.monid.ai/public/v1/endpoints?provider=apollo
-        x402: true
         price_note: >-
           Monid lists 8 Apollo endpoints: 7 flat PER_CALL ($0.026 for organization and
           people enrichment, news and company search; $0 for /mixed_people/api_search)
           and /people/match as TIERED. $0.026 is the lowest non-zero flat per-call price.
-          Every endpoint advertises supportedX402Networks
-          ["eip155:8453", "eip155:143"].
       - name: glasser
         carries: true
         per_call_price: 0.026
         price_verified_url: https://api.glasser.ai/public/catalog
-        x402: null
         price_note: >-
           Glasser lists 10 Apollo endpoints: $0.026 per run for people/match,
           organizations/enrich, mixed_companies/search and news_articles/search, $0.05 per
@@ -560,7 +939,6 @@ entries:
       free_tier_covers_api: true
       verified_url: https://www.dropleads.io/#pricing
       verified_date: "2026-10-24"
-      x402_url: null
     aggregators:
       - name: monid
         carries: false

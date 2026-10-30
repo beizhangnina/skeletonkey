@@ -1,7 +1,13 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { validateApisFile, type ApiEntry } from "../src/apis.js";
-import { PRICE_UNVERIFIED, pricedCarriers, routeAccess, routeSummary } from "../src/routing.js";
+import { BILLING_MODELS, validateApisFile, type ApiEntry } from "../src/apis.js";
+import {
+  PRICE_UNVERIFIED,
+  pricedCarriers,
+  routeAccess,
+  routeSummary,
+  type RoutingDecision,
+} from "../src/routing.js";
 import { REPO_ROOT } from "./helpers/env.js";
 
 const APIS_YAML = path.join(REPO_ROOT, "apis.yaml");
@@ -27,6 +33,54 @@ const CARRIER = {
   per_call_price: 0.01,
   price_verified_url: "https://api.glasser.ai/public/catalog",
 };
+
+/**
+ * Every route the router is allowed to emit. SkeletonKey pays in fiat only, so
+ * the list is exhaustive: reach the vendor directly (including through the
+ * proxy on a key we already hold), buy the call from a reselling aggregator, or
+ * admit that nobody checked. Any fourth value would be a payment rail this
+ * project does not implement -- which is why the assertion below compares the
+ * whole set rather than looking for one route by name.
+ */
+const FIAT_ROUTES = ["aggregator", "direct", "unknown"];
+
+/** Drives routeAccess across every billing model x carriage x key-held shape. */
+function everyDecision(): RoutingDecision[] {
+  const out: RoutingDecision[] = [routeAccess(null)];
+  const carriages = [
+    undefined,
+    [CARRIER],
+    [{ ...CARRIER, per_call_price: null, price_verified_url: null, price_note: "priced per result" }],
+    [{ ...CARRIER, carries: false, per_call_price: null, price_verified_url: null }],
+  ];
+  for (const model of [null, ...BILLING_MODELS]) {
+    for (const covers of [true, false, null]) {
+      for (const aggregators of carriages) {
+        for (const hasKey of [false, true]) {
+          out.push(
+            routeAccess(
+              row({
+                ...(aggregators === undefined ? {} : { aggregators }),
+                billing:
+                  model === null
+                    ? null
+                    : {
+                        model,
+                        free_tier_note: "a free allowance, in the vendor's own numbers",
+                        verified_url: "https://vendor.test/pricing",
+                        verified_date: "2026-10-24",
+                        free_tier_covers_api: covers,
+                      },
+              }),
+              { hasKey, today: "2026-10-25" },
+            ),
+          );
+        }
+      }
+    }
+  }
+  return out;
+}
 
 describe("routeAccess", () => {
   it("routes an unindexed vendor to unknown, and says price unverified", () => {
@@ -224,47 +278,29 @@ describe("routeAccess", () => {
     expect(decision.reason).toMatch(/tie at that price, broken by catalog order/);
   });
 
-  it("prefers x402 when that is the vendor's own access mode", () => {
-    const decision = routeAccess(row({ access_mode: "x402" }));
-    expect(decision.route).toBe("x402");
-    expect(decision.reason).toMatch(/no account/);
+  it("offers no route outside the fiat set, and offers every route in it", () => {
+    const decisions = [
+      ...everyDecision(),
+      ...(validateApisFile(APIS_YAML).document?.entries ?? []).flatMap((entry) => [
+        routeAccess(entry, { today: "2026-10-24" }),
+        routeAccess(entry, { hasKey: true, today: "2026-10-24" }),
+      ]),
+    ];
+    const seen = new Set<string>();
+    for (const decision of decisions) {
+      seen.add(decision.route);
+      for (const option of decision.alternatives) seen.add(option.route);
+    }
+    // Equality both ways: nothing crypto has crept in, and nothing fiat has
+    // been dropped. A new payment rail cannot pass this without editing it.
+    expect([...seen].sort()).toEqual(FIAT_ROUTES);
   });
 
-  it("offers x402 as an alternative when the vendor documents accepting it", () => {
-    const decision = routeAccess(
-      row({
-        billing: {
-          model: "free_tier+subscription",
-          free_tier_note: "$5/month of usage",
-          verified_url: "https://vendor.test/pricing",
-          verified_date: "2026-10-24",
-          free_tier_covers_api: true,
-          x402_url: "https://vendor.test/pricing",
-        },
-      }),
-      { today: "2026-10-25" },
-    );
-    expect(decision.route).toBe("direct");
-    const x402 = decision.alternatives.find((option) => option.route === "x402");
-    expect(x402?.reason).toMatch(/documents accepting x402/);
-    expect(x402?.reason).toContain(PRICE_UNVERIFIED);
-  });
-
-  it("offers x402 through an aggregator that accepts it", () => {
-    const decision = routeAccess(
-      row({
-        billing: {
-          model: "subscription",
-          free_tier_note: null,
-          verified_url: "https://vendor.test/pricing",
-          verified_date: "2026-10-24",
-        },
-        aggregators: [{ ...CARRIER, x402: true }],
-      }),
-      { today: "2026-10-25" },
-    );
-    expect(decision.route).toBe("aggregator");
-    expect(decision.alternatives.some((option) => option.route === "x402")).toBe(true);
+  it("exposes no payment route on an entry whose access mode is unknown", () => {
+    const decision = routeAccess(row({ access_mode: null }));
+    expect(FIAT_ROUTES).toContain(decision.route);
+    expect(decision.route).toBe("unknown");
+    expect(decision.reason).toContain(PRICE_UNVERIFIED);
   });
 
   it("routes to the proxy when a key already exists, whatever the billing says", () => {
@@ -329,7 +365,7 @@ describe("the routes the shipped apis.yaml actually produces", () => {
     const cheapest = decision.alternatives.find((option) => option.route === "aggregator");
     expect(cheapest?.via).toBe("glasser");
     expect(cheapest?.per_call_price_usd).toBe(0.001);
-    expect(decision.alternatives.some((option) => option.route === "x402")).toBe(true);
+    expect(decision.alternatives.every((option) => FIAT_ROUTES.includes(option.route))).toBe(true);
   });
 
   it("sends X direct as pay-per-use, and Voyage direct on its free tokens", () => {

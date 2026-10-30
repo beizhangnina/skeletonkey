@@ -21,7 +21,7 @@ describe("skills/skeletonkey/SKILL.md", () => {
   });
 
   it("tells the agent to read verification codes from its own inbox", () => {
-    const section = SKILL.slice(SKILL.indexOf("### 2a."), SKILL.indexOf("### 3."));
+    const section = SKILL.slice(SKILL.indexOf("### 2b."), SKILL.indexOf("### 3."));
     expect(section).not.toBe("");
     expect(section).toMatch(/own email connector or inbox/i);
     expect(section).toMatch(/verification code/i);
@@ -40,6 +40,16 @@ describe("skills/skeletonkey/SKILL.md", () => {
     expect(SKILL).toMatch(/alias_allowed/);
     // The address itself is the user's call, not the agent's.
     expect(SKILL).toMatch(/never pick a work address on the user's behalf/i);
+  });
+
+  it("never lets the agent touch the Bitwarden master password", () => {
+    expect(SKILL).toMatch(/skeletonkey bitwarden status/);
+    expect(SKILL).toMatch(/Never ask the user for their Bitwarden master password/i);
+    expect(SKILL).toMatch(/never run `bw login` or `bw unlock`\s+yourself/i);
+    // It points at the command that prints the steps, rather than reciting a
+    // session variable into a file an agent reads.
+    expect(SKILL).toMatch(/relay the steps it printed verbatim/i);
+    expect(SKILL).not.toContain("BW_SESSION");
   });
 
   it("documents the human gates and the merged index", () => {
@@ -64,9 +74,12 @@ describe("skills/skeletonkey/SKILL.md", () => {
   it("explains the route table and the words `price unverified`", () => {
     const section = SKILL.slice(SKILL.indexOf("### 1a."), SKILL.indexOf("### 1b."));
     expect(section).not.toBe("");
-    for (const route of ["`direct`", "`aggregator:<name>`", "`x402`", "`unknown`"]) {
-      expect(section, route).toContain(route);
-    }
+    // The route table documents exactly the fiat route set -- the same three
+    // the router can emit, and no payment rail beyond them. Read the table body
+    // (everything after the `| --- |` separator) so the header is not a route.
+    const body = section.slice(section.indexOf("| --- |"));
+    const documented = [...body.matchAll(/^\| (`[^`]+`) \|/gm)].map((match) => match[1]);
+    expect(documented.sort()).toEqual(["`aggregator:<name>`", "`direct`", "`unknown`"]);
     expect(section).toMatch(/price unverified/);
     expect(section).toMatch(/billing\.model: null` means nobody checked/);
     expect(section).toMatch(/never means free/);
@@ -97,6 +110,37 @@ describe("skills/skeletonkey/SKILL.md", () => {
   it("forbids quoting an unverified price or self-verifying a discovery", () => {
     expect(SKILL).toMatch(/Never quote a price whose `verified_url`/);
     expect(SKILL).toMatch(/Never mark your own discovery verified/);
+  });
+
+  it("describes the v0.3 async approval flow and the tools that drive it", () => {
+    for (const tool of ["access_status", "cancel_request", "spend_policy"]) {
+      expect(SKILL, tool).toContain(tool);
+    }
+    const section = SKILL.slice(SKILL.indexOf("### 2. No key?"), SKILL.indexOf("### 2a."));
+    expect(section).toMatch(/pending_approval/);
+    expect(section).toMatch(/outside this\s+conversation|out of band/i);
+    expect(section).toMatch(/Poll `access_status/);
+    expect(section).toMatch(/Do not ask the user to approve it here/);
+    expect(section).toMatch(/needs_human/);
+    // The caps and the kill switch, as rules the agent cannot route around.
+    expect(section).toMatch(/start at \*\*\$0\*\*/);
+    expect(section).toMatch(/can never raise one/);
+    expect(section).toMatch(/kill_switch/);
+    expect(section).toMatch(/skeletonkey resume/);
+  });
+
+  it("forbids collecting a card, a password, or an OTP through the agent", () => {
+    expect(SKILL).toMatch(/Never ask a human for a card number, a CVV, a password, or an OTP/);
+    expect(SKILL).toMatch(/Secure Input Popup/);
+    expect(SKILL).toMatch(/Never approve your own request/);
+    expect(SKILL).toMatch(/never ask for a cap to be raised/);
+  });
+
+  it("points at the trusted runner, and says it cannot return a secret", () => {
+    expect(SKILL).toMatch(/trusted runner/);
+    expect(SKILL).toMatch(/skeletonkey runner/);
+    expect(SKILL).toMatch(/no\s+verb that returns a secret value/);
+    expect(SKILL).toMatch(/runner_unavailable/);
   });
 
   it("keeps the no-secrets rules it had before", () => {

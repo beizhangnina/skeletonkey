@@ -14,7 +14,29 @@ export {
   type CapabilityScore,
 } from "./match.js";
 
-export const ACCESS_MODES = ["x402", "intermediary", "own-account", "byok"] as const;
+/**
+ * How access to a vendor is actually paid for and credentialed.
+ *
+ *   intermediary   a gateway resells access; you top up the gateway
+ *   own-account    you hold the account and the billing relationship
+ *   byok           the service accepts a key you got elsewhere
+ *   keyless        the vendor documents no credential at all: the endpoint
+ *                  answers without a key, so there is nothing to register
+ *   wallet-x402    the endpoint is paid per call from a crypto wallet (x402 /
+ *                  MPP). SkeletonKey pays in fiat only, so this is recorded as
+ *                  a fact about the vendor and never routed to
+ *
+ * `keyless` and `wallet-x402` exist because the three original modes forced a
+ * lie: a keyless public endpoint was being written down as `own-account`, which
+ * says there is an account to hold, and an x402-only endpoint the same.
+ */
+export const ACCESS_MODES = [
+  "intermediary",
+  "own-account",
+  "byok",
+  "keyless",
+  "wallet-x402",
+] as const;
 export type AccessMode = (typeof ACCESS_MODES)[number];
 
 /**
@@ -25,7 +47,6 @@ export type AccessMode = (typeof ACCESS_MODES)[number];
  *   subscription             a recurring plan is required before the API works
  *   free_tier+payg           a free allowance, then metered usage
  *   free_tier+subscription   a free plan, then a recurring plan for more
- *   x402                     payable per call over HTTP 402 / x402, no account
  *   free                     no paid tier exists at all (e.g. a public gov API)
  *
  * `free` is an extension beyond the five models the v0.2 brief named: forcing a
@@ -37,7 +58,6 @@ export const BILLING_MODELS = [
   "subscription",
   "free_tier+payg",
   "free_tier+subscription",
-  "x402",
   "free",
 ] as const;
 export type BillingModel = (typeof BILLING_MODELS)[number];
@@ -67,8 +87,6 @@ export interface BillingFacts {
    * the free tier as a usable route.
    */
   free_tier_covers_api?: boolean | null;
-  /** Vendor page documenting that it accepts x402/agentic payment, or null. */
-  x402_url?: string | null;
 }
 
 /**
@@ -85,15 +103,192 @@ export interface AggregatorCarriage {
   carries: boolean;
   per_call_price: number | null;
   price_verified_url: string | null;
-  /** Does the aggregator accept x402 for this provider? null = not checked. */
-  x402?: boolean | null;
   /** What the number means, or why it is null. */
   price_note?: string | null;
 }
 
-/** Lifecycle of a row discovered by an agent rather than written by a human. */
-export const ENTRY_STATUSES = ["unverified", "verified"] as const;
+/**
+ * Lifecycle of a row discovered by an agent rather than written by a human.
+ *
+ *   unverified     nothing is confirmed; the facts came off the pages in
+ *                  source_urls and nothing has been called
+ *   docs-verified  the vendor's OWN docs show the endpoint and how it
+ *                  authenticates (and its price, where the vendor lists one).
+ *                  Still no working call -- a doc can be wrong or stale
+ *   verified       a call to the row's domain through the proxy returned 2xx,
+ *                  and promoted_by names the ledger row that proved it
+ *
+ * `docs-verified` was added because rows read off vendor documentation were
+ * being written as `verified`, which this repo reserves for a proven call.
+ * A `docs-verified` row is still promotable: promoteFromLedger lifts it to
+ * `verified` on the first 2xx, exactly as it does an `unverified` one.
+ */
+export const ENTRY_STATUSES = ["unverified", "docs-verified", "verified"] as const;
 export type EntryStatus = (typeof ENTRY_STATUSES)[number];
+
+/**
+ * Statuses that have not been proven by a call, so they are not treated as a
+ * reviewed row (no "nobody ever checked this" warning, and still promotable).
+ */
+export const UNPROVEN_STATUSES: readonly EntryStatus[] = ["unverified", "docs-verified"];
+
+// --- vendor offerings: what the vendor sells, in two layers -----------------
+
+/**
+ * Layer 1 of a vendor offering: the closed list of service categories an entry
+ * may claim. A closed list is the point -- free text here would make
+ * "LLM" / "llm" / "language models" three different categories and the field
+ * unsearchable.
+ */
+export const SERVICE_CATEGORIES = [
+  "llm",
+  "embeddings",
+  "rerank",
+  "image",
+  "video",
+  "audio",
+  "speech",
+  "ocr",
+  "vision",
+  "moderation",
+  "translation",
+  "code",
+  "agents",
+  "search",
+  "web-scraping",
+  "data-enrichment",
+  "seo",
+  "social",
+  "ecommerce",
+  "finance",
+  "maps",
+  "weather",
+  "email",
+  "sms",
+  "analytics",
+  "advertising",
+  "science",
+  "compute",
+  "payments",
+  "other",
+] as const;
+export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number];
+
+/**
+ * How the vendor documents authentication on the endpoint in `connect.base_url`.
+ * `none` is a FACT -- the vendor documents no credential -- while null is
+ * "nobody checked". That distinction is the whole reason the field is an enum
+ * and not an empty header string.
+ */
+export const CONNECT_AUTH_KINDS = [
+  "api_key",
+  "bearer",
+  "basic",
+  "oauth",
+  "query_param",
+  "none",
+  "unknown",
+] as const;
+export type ConnectAuthKind = (typeof CONNECT_AUTH_KINDS)[number];
+
+/** Layer 2 rows are either a model you name in a request, or an endpoint path. */
+export const HIGHLIGHT_KINDS = ["model", "endpoint"] as const;
+export type HighlightKind = (typeof HIGHLIGHT_KINDS)[number];
+
+/**
+ * Layer 2 is a SAMPLE, never a catalog. The cap is what enforces it: an agent
+ * that needs the full list fetches `offering.catalog_url` live, where it is
+ * current, instead of reading a copy that went stale in this repo.
+ */
+export const HIGHLIGHTS_MAX = 15;
+
+/** A one-line summary is one line: no newlines, and this many characters. */
+export const OFFERING_SUMMARY_MAX = 200;
+
+/** Layer 1 is a summary too, so the category list stays short. */
+export const OFFERING_CATEGORIES_MAX = 12;
+
+/**
+ * What is free, in the vendor's own words. `available: null` is "nobody
+ * checked" and never "no free tier"; `limits: null` is "the vendor states no
+ * limit on the page we read", which is NOT the same as "unlimited" -- say so
+ * in `limits` when the vendor is silent.
+ */
+export interface OfferingFreeTier {
+  available: boolean | null;
+  /** Required when available is true: what the free allowance actually is. */
+  what: string | null;
+  /** Rate/volume/time limits as the vendor states them. */
+  limits: string | null;
+  /** Does the free tier still need an API key? */
+  requires_key: boolean | null;
+  /** Does it need an account/sign-in at all? */
+  requires_account: boolean | null;
+}
+
+/** The minimum an agent needs to form one request: where to, and how to sign it. */
+export interface OfferingConnect {
+  base_url: string | null;
+  auth: ConnectAuthKind | null;
+  /** Header name, when the vendor documents one. No colon, no spaces. */
+  auth_header: string | null;
+  /** Value template containing `{key}`. Needs auth_header set too. */
+  auth_format: string | null;
+}
+
+/** One highlighted model or endpoint. Never a full catalog row. */
+export interface OfferingHighlight {
+  /** Model id or endpoint path, exactly as the vendor writes it. */
+  id: string;
+  kind: HighlightKind;
+  /** True only when the vendor says this one is free. null = not established. */
+  free: boolean | null;
+  note: string | null;
+  url: string | null;
+}
+
+/**
+ * A vendor offering, in the two layers the requirement names.
+ *
+ * Layer 1 (`summary` ... `catalog_url`) answers "what is this and how do I
+ * reach it" for every entry. Layer 2 (`highlights`) is optional and capped: a
+ * handful of models or endpoints worth naming, with the live catalog one fetch
+ * away at `catalog_url`.
+ *
+ * Every field is optional and null-when-unknown, so adding the block to an
+ * existing row cannot invalidate it, and `verified_url` + `verified_date` say
+ * where and when the facts were read -- the same contract `billing` follows.
+ */
+export interface VendorOffering {
+  summary: string | null;
+  categories: ServiceCategory[] | null;
+  /** Approximate endpoint count, as the vendor states it. */
+  endpoint_count: number | null;
+  /** Approximate model count, as the vendor states it. */
+  model_count: number | null;
+  /** Where the counts came from, and that they are approximate. */
+  count_note: string | null;
+  free_tier: OfferingFreeTier | null;
+  connect: OfferingConnect | null;
+  /** The VENDOR's own catalog/model-list page. Not an aggregator's. */
+  catalog_url: string | null;
+  verified_url: string | null;
+  verified_date: string | null;
+  source_urls: string[] | null;
+  highlights: OfferingHighlight[] | null;
+}
+
+/** One extra credential header, for vendors that document more than one. */
+export interface AuthHeaderSpec {
+  header: string;
+  /** Value template containing `{key}`. */
+  format: string;
+  /** Which credential this one carries, when the vendor names several. */
+  note?: string | null;
+}
+
+/** A vendor may document at most this many credential headers before it is a smell. */
+export const AUTH_HEADERS_MAX = 5;
 
 export interface ApiEntry {
   name: string;
@@ -143,6 +338,25 @@ export interface ApiEntry {
   requires_phone?: boolean | null;
   /** True when the vendor requires a work email (so a `+alias` may be refused). */
   requires_work_email?: boolean | null;
+  /**
+   * Does the vendor require a credential at all?
+   *
+   *   false  the vendor documents NO auth on this API: there is nothing to
+   *          register, and a 401 would be a surprise
+   *   true   a credential is required (`auth_header` says which one, when known)
+   *   null   nobody checked
+   *
+   * Needed because `auth_header: null` alone is ambiguous: it was being used
+   * both for "the vendor needs no key" and for "we never looked".
+   */
+  auth_required?: boolean | null;
+  /**
+   * Every credential header the vendor documents, for the vendors that document
+   * more than one. `auth_header`/`auth_format` stay the primary pair -- when
+   * both are present the first element of this list must match them, so the
+   * proxy and `register_key` keep reading one header and get the right one.
+   */
+  auth_headers?: AuthHeaderSpec[] | null;
   /** Steps only a human can do, in the vendor's own terms. */
   human_steps?: string[] | null;
 
@@ -152,6 +366,15 @@ export interface ApiEntry {
   billing?: BillingFacts | null;
   /** Which aggregators resell this provider, and their published prices. */
   aggregators?: AggregatorCarriage[] | null;
+
+  // --- what the vendor actually offers (Layer 1 + optional Layer 2) ---------
+
+  /**
+   * What this vendor sells, how to reach it, what is free, and a few
+   * highlighted models/endpoints. Optional everywhere: a row without it is
+   * exactly as valid as it was before the block existed.
+   */
+  offering?: VendorOffering | null;
 
   // --- discover-on-miss provenance -----------------------------------------
 
@@ -207,9 +430,12 @@ const OPTIONAL_FIELDS = [
   "requires_card",
   "requires_phone",
   "requires_work_email",
+  "auth_required",
+  "auth_headers",
   "human_steps",
   "billing",
   "aggregators",
+  "offering",
   "status",
   "source_urls",
   "discovered_date",
@@ -226,6 +452,7 @@ const FLAG_FIELDS = [
   "requires_card",
   "requires_phone",
   "requires_work_email",
+  "auth_required",
 ] as const;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -371,8 +598,10 @@ export function validateApis(input: unknown): ValidationResult {
       }
     }
 
+    validateAuthHeaders(errors, at, entry);
     validateBilling(errors, at, entry["billing"]);
     validateAggregators(errors, at, entry["aggregators"]);
+    validateOffering(errors, at, entry["offering"]);
     validateDiscovery(errors, at, entry);
 
     const humanSteps = entry["human_steps"];
@@ -469,6 +698,357 @@ function isHttpUrl(value: string): boolean {
 }
 
 /**
+ * Validates `auth_required` against the auth fields, and `auth_headers`.
+ *
+ * The load-bearing rule is the contradiction: a row may not say the vendor
+ * needs no credential while also naming the header the credential goes in.
+ * One of the two is wrong, and silently picking a winner is how a key ends up
+ * never being sent -- or a keyless API ends up waiting for a key forever.
+ */
+function validateAuthHeaders(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const required = entry["auth_required"];
+  const header = entry["auth_header"];
+  const format = entry["auth_format"];
+  const list = entry["auth_headers"];
+
+  if (required === false) {
+    if (typeof header === "string" && header.trim() !== "") {
+      errors.push(
+        `${at}.auth_required: false contradicts auth_header ${JSON.stringify(header)} -- ` +
+          "a vendor that needs no credential has no header to put one in",
+      );
+    }
+    if (typeof format === "string" && format.trim() !== "") {
+      errors.push(`${at}.auth_required: false contradicts auth_format being set`);
+    }
+    if (Array.isArray(list) && list.length > 0) {
+      errors.push(`${at}.auth_required: false contradicts auth_headers having entries`);
+    }
+  }
+
+  if (list === null || list === undefined) return;
+  const field = `${at}.auth_headers`;
+  if (!Array.isArray(list)) {
+    errors.push(`${field}: expected a list or null`);
+    return;
+  }
+  if (list.length === 0) {
+    errors.push(`${field}: expected a non-empty list or null (null means nobody checked)`);
+    return;
+  }
+  if (list.length > AUTH_HEADERS_MAX) {
+    errors.push(`${field}: expected at most ${AUTH_HEADERS_MAX} headers, got ${list.length}`);
+  }
+  const seen = new Set<string>();
+  list.forEach((raw, index) => {
+    const row = `${field}[${index}]`;
+    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+      errors.push(`${row}: expected a mapping`);
+      return;
+    }
+    const item = raw as Record<string, unknown>;
+    const known = new Set(["header", "format", "note"]);
+    for (const key of Object.keys(item)) {
+      if (!known.has(key)) errors.push(`${row}.${key}: unknown field`);
+    }
+    const name = item["header"];
+    if (typeof name !== "string" || name.trim() === "") {
+      errors.push(`${row}.header: expected a non-empty header name`);
+    } else if (/[\s:]/.test(name)) {
+      errors.push(`${row}.header: expected a header name only, with no colon or spaces`);
+    } else if (seen.has(name.toLowerCase())) {
+      errors.push(`${row}.header: duplicate header ${JSON.stringify(name)}`);
+    } else {
+      seen.add(name.toLowerCase());
+    }
+    const template = item["format"];
+    if (typeof template !== "string" || template.trim() === "") {
+      errors.push(`${row}.format: expected a non-empty template`);
+    } else if (!template.includes("{key}")) {
+      errors.push(`${row}.format: must contain the {key} placeholder`);
+    }
+    requireStringOrNull(errors, row, "note", item["note"]);
+  });
+
+  // The proxy and `register_key` read one header. Keeping element 0 equal to the
+  // primary pair means they read the RIGHT one rather than a list they ignore.
+  const first = list[0] as Record<string, unknown> | undefined;
+  if (first !== undefined && typeof first === "object" && !Array.isArray(first)) {
+    if (typeof header === "string" && typeof first["header"] === "string" && first["header"] !== header) {
+      errors.push(
+        `${field}[0].header: must match auth_header ${JSON.stringify(header)} -- ` +
+          "the primary credential header is the one the proxy injects",
+      );
+    }
+    if (typeof format === "string" && typeof first["format"] === "string" && first["format"] !== format) {
+      errors.push(`${field}[0].format: must match auth_format ${JSON.stringify(format)}`);
+    }
+  }
+}
+
+/**
+ * Validates an `offering:` block -- Layer 1 facts about what the vendor sells,
+ * plus the optional Layer 2 `highlights` sample.
+ *
+ * The rules exist for the same reason the billing rules do: to stop a row from
+ * reading more confidently than the pages it was read off.
+ *   - `summary` is ONE line, so it can be printed in a list without wrecking it.
+ *   - `categories` comes from a closed list, so the field stays searchable.
+ *   - a free tier that claims to exist has to say WHAT is free.
+ *   - `verified_url` and `verified_date` are required together.
+ *   - `highlights` is capped at HIGHLIGHTS_MAX: it is a sample, and the live
+ *     catalog is one fetch away at `catalog_url`.
+ */
+function validateOffering(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.offering`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set([
+    "summary",
+    "categories",
+    "endpoint_count",
+    "model_count",
+    "count_note",
+    "free_tier",
+    "connect",
+    "catalog_url",
+    "verified_url",
+    "verified_date",
+    "source_urls",
+    "highlights",
+  ]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+
+  const summary = raw["summary"];
+  if (summary !== null && summary !== undefined) {
+    if (typeof summary !== "string" || summary.trim() === "") {
+      errors.push(`${field}.summary: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(summary)) {
+      errors.push(`${field}.summary: expected a single line (no line breaks)`);
+    } else if (summary.length > OFFERING_SUMMARY_MAX) {
+      errors.push(
+        `${field}.summary: expected at most ${OFFERING_SUMMARY_MAX} characters, got ${summary.length}`,
+      );
+    }
+  }
+
+  const categories = raw["categories"];
+  if (categories !== null && categories !== undefined) {
+    if (!Array.isArray(categories) || categories.length === 0) {
+      errors.push(`${field}.categories: expected a non-empty list or null`);
+    } else {
+      const bad = categories.filter(
+        (item) => typeof item !== "string" || !(SERVICE_CATEGORIES as readonly string[]).includes(item),
+      );
+      if (bad.length > 0) {
+        errors.push(
+          `${field}.categories: ${JSON.stringify(bad)} not in ${SERVICE_CATEGORIES.join(" | ")}`,
+        );
+      }
+      if (new Set(categories).size !== categories.length) {
+        errors.push(`${field}.categories: has duplicates`);
+      }
+      if (categories.length > OFFERING_CATEGORIES_MAX) {
+        errors.push(
+          `${field}.categories: expected at most ${OFFERING_CATEGORIES_MAX} categories, ` +
+            `got ${categories.length} -- Layer 1 is a summary`,
+        );
+      }
+    }
+  }
+
+  for (const key of ["endpoint_count", "model_count"] as const) {
+    const count = raw[key];
+    if (count === null || count === undefined) continue;
+    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+      errors.push(`${field}.${key}: expected a non-negative integer or null`);
+    }
+  }
+  requireStringOrNull(errors, field, "count_note", raw["count_note"]);
+
+  validateOfferingFreeTier(errors, field, raw["free_tier"]);
+  validateOfferingConnect(errors, field, raw["connect"]);
+
+  const catalog = raw["catalog_url"];
+  if (catalog !== null && catalog !== undefined && !(typeof catalog === "string" && isHttpUrl(catalog))) {
+    errors.push(`${field}.catalog_url: expected an http(s) URL or null`);
+  }
+
+  const verifiedUrl = raw["verified_url"];
+  if (
+    verifiedUrl !== null &&
+    verifiedUrl !== undefined &&
+    !(typeof verifiedUrl === "string" && isHttpUrl(verifiedUrl))
+  ) {
+    errors.push(`${field}.verified_url: expected an http(s) URL or null`);
+  }
+  const date = raw["verified_date"];
+  if (date !== null && date !== undefined) {
+    if (typeof date !== "string" || !DATE_RE.test(date) || Number.isNaN(Date.parse(date))) {
+      errors.push(`${field}.verified_date: expected an ISO date (YYYY-MM-DD) or null`);
+    } else if (typeof raw["verified_url"] !== "string") {
+      errors.push(`${field}.verified_url: required when verified_date is set (verified where?)`);
+    }
+  } else if (typeof raw["verified_url"] === "string") {
+    errors.push(`${field}.verified_date: required when verified_url is set (verified when?)`);
+  }
+
+  const sources = raw["source_urls"];
+  if (sources !== null && sources !== undefined) {
+    if (!Array.isArray(sources) || sources.some((item) => typeof item !== "string" || !isHttpUrl(item))) {
+      errors.push(`${field}.source_urls: expected a list of http(s) URLs or null`);
+    }
+  }
+
+  validateHighlights(errors, field, raw["highlights"]);
+}
+
+/** `free_tier` inside an offering: yes/no, what, limits, and what it costs you to start. */
+function validateOfferingFreeTier(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.free_tier`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set(["available", "what", "limits", "requires_key", "requires_account"]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+  for (const key of ["available", "requires_key", "requires_account"] as const) {
+    const flag = raw[key];
+    if (flag !== null && flag !== undefined && typeof flag !== "boolean") {
+      errors.push(`${field}.${key}: expected a boolean or null`);
+    }
+  }
+  requireStringOrNull(errors, field, "what", raw["what"]);
+  requireStringOrNull(errors, field, "limits", raw["limits"]);
+
+  if (raw["available"] === true && (typeof raw["what"] !== "string" || raw["what"].trim() === "")) {
+    errors.push(
+      `${field}.what: required when available is true -- say what is actually free, ` +
+        "in the vendor's own numbers",
+    );
+  }
+  if (raw["available"] === false && typeof raw["what"] === "string") {
+    errors.push(`${field}.what: must be null when available is false (nothing is free to describe)`);
+  }
+}
+
+/** `connect` inside an offering: the base URL, and how the vendor signs a request. */
+function validateOfferingConnect(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.connect`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set(["base_url", "auth", "auth_header", "auth_format"]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+  const base = raw["base_url"];
+  if (base !== null && base !== undefined && !(typeof base === "string" && isHttpUrl(base))) {
+    errors.push(`${field}.base_url: expected an http(s) URL or null`);
+  }
+  const auth = raw["auth"];
+  if (auth !== null && auth !== undefined) {
+    if (typeof auth !== "string" || !(CONNECT_AUTH_KINDS as readonly string[]).includes(auth)) {
+      errors.push(`${field}.auth: expected one of ${CONNECT_AUTH_KINDS.join(" | ")} or null`);
+    }
+  }
+  const header = raw["auth_header"];
+  if (header !== null && header !== undefined) {
+    if (typeof header !== "string" || header.trim() === "") {
+      errors.push(`${field}.auth_header: expected a non-empty header name or null`);
+    } else if (/[\s:]/.test(header)) {
+      errors.push(`${field}.auth_header: expected a header name only, with no colon or spaces`);
+    }
+  }
+  const format = raw["auth_format"];
+  if (format !== null && format !== undefined) {
+    if (typeof format !== "string" || format.trim() === "") {
+      errors.push(`${field}.auth_format: expected a non-empty template or null`);
+    } else if (!format.includes("{key}")) {
+      errors.push(`${field}.auth_format: must contain the {key} placeholder`);
+    }
+    if (typeof header !== "string") {
+      errors.push(`${field}.auth_header: required when auth_format is set (which header holds it?)`);
+    }
+  }
+  // `auth: none` is a statement that there is no credential. A header name next
+  // to it means one of the two was copied from the wrong vendor page.
+  if (auth === "none" && typeof header === "string") {
+    errors.push(
+      `${field}.auth: "none" contradicts auth_header ${JSON.stringify(header)} -- ` +
+        "use `unknown` if nobody checked",
+    );
+  }
+}
+
+/** Layer 2: a capped sample of models/endpoints, never the catalog. */
+function validateHighlights(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.highlights`;
+  if (!Array.isArray(value)) {
+    errors.push(`${field}: expected a list or null`);
+    return;
+  }
+  if (value.length === 0) {
+    errors.push(`${field}: expected a non-empty list or null (null means none recorded)`);
+    return;
+  }
+  if (value.length > HIGHLIGHTS_MAX) {
+    errors.push(
+      `${field}: expected at most ${HIGHLIGHTS_MAX} entries, got ${value.length} -- ` +
+        "highlights are a sample, not the catalog (point an agent at offering.catalog_url)",
+    );
+  }
+  const seen = new Set<string>();
+  value.forEach((raw, index) => {
+    const row = `${field}[${index}]`;
+    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+      errors.push(`${row}: expected a mapping`);
+      return;
+    }
+    const item = raw as Record<string, unknown>;
+    const known = new Set(["id", "kind", "free", "note", "url"]);
+    for (const key of Object.keys(item)) {
+      if (!known.has(key)) errors.push(`${row}.${key}: unknown field`);
+    }
+    const id = item["id"];
+    if (typeof id !== "string" || id.trim() === "") {
+      errors.push(`${row}.id: expected a non-empty string (the vendor's own model id or path)`);
+    } else if (seen.has(id)) {
+      errors.push(`${row}.id: duplicate highlight ${JSON.stringify(id)}`);
+    } else {
+      seen.add(id);
+    }
+    const kind = item["kind"];
+    if (typeof kind !== "string" || !(HIGHLIGHT_KINDS as readonly string[]).includes(kind)) {
+      errors.push(`${row}.kind: expected one of ${HIGHLIGHT_KINDS.join(" | ")}`);
+    }
+    const free = item["free"];
+    if (free !== null && free !== undefined && typeof free !== "boolean") {
+      errors.push(`${row}.free: expected a boolean or null`);
+    }
+    requireStringOrNull(errors, row, "note", item["note"]);
+    const url = item["url"];
+    if (url !== null && url !== undefined && !(typeof url === "string" && isHttpUrl(url))) {
+      errors.push(`${row}.url: expected an http(s) URL or null`);
+    }
+  });
+}
+
+/**
  * Validates a `billing:` block. The rules all exist to stop an unverified
  * claim from reading like a verified one:
  *   - `model` must be one of BILLING_MODELS, or null for "nobody checked".
@@ -489,7 +1069,6 @@ function validateBilling(errors: string[], at: string, value: unknown): void {
     "verified_url",
     "verified_date",
     "free_tier_covers_api",
-    "x402_url",
   ]);
   for (const key of Object.keys(raw)) {
     if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
@@ -509,11 +1088,13 @@ function validateBilling(errors: string[], at: string, value: unknown): void {
   }
   requireStringOrNull(errors, field, "free_tier_note", raw["free_tier_note"]);
 
-  for (const key of ["verified_url", "x402_url"] as const) {
-    const url = raw[key];
-    if (url !== null && url !== undefined && !(typeof url === "string" && isHttpUrl(url))) {
-      errors.push(`${field}.${key}: expected an http(s) URL or null`);
-    }
+  const verifiedUrl = raw["verified_url"];
+  if (
+    verifiedUrl !== null &&
+    verifiedUrl !== undefined &&
+    !(typeof verifiedUrl === "string" && isHttpUrl(verifiedUrl))
+  ) {
+    errors.push(`${field}.verified_url: expected an http(s) URL or null`);
   }
   const date = raw["verified_date"];
   if (date !== null && date !== undefined) {
@@ -556,7 +1137,6 @@ function validateAggregators(errors: string[], at: string, value: unknown): void
       "carries",
       "per_call_price",
       "price_verified_url",
-      "x402",
       "price_note",
     ]);
     for (const key of Object.keys(item)) {
@@ -590,10 +1170,6 @@ function validateAggregators(errors: string[], at: string, value: unknown): void
     const url = item["price_verified_url"];
     if (url !== null && url !== undefined && !(typeof url === "string" && isHttpUrl(url))) {
       errors.push(`${row}.price_verified_url: expected an http(s) URL or null`);
-    }
-    const x402 = item["x402"];
-    if (x402 !== null && x402 !== undefined && typeof x402 !== "boolean") {
-      errors.push(`${row}.x402: expected a boolean or null`);
     }
     requireStringOrNull(errors, row, "price_note", item["price_note"]);
   });
@@ -649,6 +1225,13 @@ function optionalIndexFields(entry: Record<string, unknown>): Partial<ApiEntry> 
       ? raw.map((item) => carriage(item as Record<string, unknown>))
       : null;
   }
+  if ("offering" in entry) {
+    const raw = entry["offering"];
+    out["offering"] =
+      raw === null || typeof raw !== "object" || Array.isArray(raw)
+        ? null
+        : vendorOffering(raw as Record<string, unknown>);
+  }
   if ("status" in entry) {
     out["status"] = typeof entry["status"] === "string" ? entry["status"] : null;
   }
@@ -672,7 +1255,77 @@ function billingFacts(raw: Record<string, unknown>): BillingFacts {
     verified_url: text("verified_url"),
     verified_date: text("verified_date"),
     free_tier_covers_api: flag("free_tier_covers_api"),
-    x402_url: text("x402_url"),
+  };
+}
+
+/**
+ * Normalises an `offering:` block: every unknown becomes an explicit null, so a
+ * consumer never has to tell `undefined` from "the vendor does not say".
+ * Only reached for a block the validator already accepted.
+ */
+function vendorOffering(raw: Record<string, unknown>): VendorOffering {
+  const text = (field: string): string | null =>
+    typeof raw[field] === "string" ? (raw[field] as string) : null;
+  const count = (field: string): number | null =>
+    typeof raw[field] === "number" ? (raw[field] as number) : null;
+  const flag = (source: Record<string, unknown>, field: string): boolean | null =>
+    typeof source[field] === "boolean" ? (source[field] as boolean) : null;
+  const str = (source: Record<string, unknown>, field: string): string | null =>
+    typeof source[field] === "string" ? (source[field] as string) : null;
+
+  const freeRaw = raw["free_tier"];
+  const freeTier: OfferingFreeTier | null =
+    freeRaw === null || freeRaw === undefined || typeof freeRaw !== "object" || Array.isArray(freeRaw)
+      ? null
+      : {
+          available: flag(freeRaw as Record<string, unknown>, "available"),
+          what: str(freeRaw as Record<string, unknown>, "what"),
+          limits: str(freeRaw as Record<string, unknown>, "limits"),
+          requires_key: flag(freeRaw as Record<string, unknown>, "requires_key"),
+          requires_account: flag(freeRaw as Record<string, unknown>, "requires_account"),
+        };
+
+  const connectRaw = raw["connect"];
+  const connect: OfferingConnect | null =
+    connectRaw === null ||
+    connectRaw === undefined ||
+    typeof connectRaw !== "object" ||
+    Array.isArray(connectRaw)
+      ? null
+      : {
+          base_url: str(connectRaw as Record<string, unknown>, "base_url"),
+          auth: str(connectRaw as Record<string, unknown>, "auth") as ConnectAuthKind | null,
+          auth_header: str(connectRaw as Record<string, unknown>, "auth_header"),
+          auth_format: str(connectRaw as Record<string, unknown>, "auth_format"),
+        };
+
+  const highlightsRaw = raw["highlights"];
+  const highlights: OfferingHighlight[] | null = Array.isArray(highlightsRaw)
+    ? highlightsRaw.map((item) => {
+        const row = item as Record<string, unknown>;
+        return {
+          id: String(row["id"]),
+          kind: row["kind"] as HighlightKind,
+          free: flag(row, "free"),
+          note: str(row, "note"),
+          url: str(row, "url"),
+        };
+      })
+    : null;
+
+  return {
+    summary: text("summary"),
+    categories: Array.isArray(raw["categories"]) ? (raw["categories"] as ServiceCategory[]) : null,
+    endpoint_count: count("endpoint_count"),
+    model_count: count("model_count"),
+    count_note: text("count_note"),
+    free_tier: freeTier,
+    connect,
+    catalog_url: text("catalog_url"),
+    verified_url: text("verified_url"),
+    verified_date: text("verified_date"),
+    source_urls: Array.isArray(raw["source_urls"]) ? (raw["source_urls"] as string[]) : null,
+    highlights,
   };
 }
 
@@ -683,7 +1336,6 @@ function carriage(raw: Record<string, unknown>): AggregatorCarriage {
     per_call_price: typeof raw["per_call_price"] === "number" ? raw["per_call_price"] : null,
     price_verified_url:
       typeof raw["price_verified_url"] === "string" ? (raw["price_verified_url"] as string) : null,
-    x402: typeof raw["x402"] === "boolean" ? (raw["x402"] as boolean) : null,
     price_note: typeof raw["price_note"] === "string" ? (raw["price_note"] as string) : null,
   };
 }
@@ -699,6 +1351,15 @@ function optionalAuthFields(entry: Record<string, unknown>): Partial<ApiEntry> {
   }
   for (const field of FLAG_FIELDS) {
     if (field in entry) out[field] = typeof entry[field] === "boolean" ? entry[field] : null;
+  }
+  if ("auth_headers" in entry) {
+    out["auth_headers"] = Array.isArray(entry["auth_headers"])
+      ? (entry["auth_headers"] as Record<string, unknown>[]).map((item) => ({
+          header: String(item["header"]),
+          format: String(item["format"]),
+          note: typeof item["note"] === "string" ? (item["note"] as string) : null,
+        }))
+      : null;
   }
   if ("human_steps" in entry) {
     out["human_steps"] = Array.isArray(entry["human_steps"]) ? entry["human_steps"] : null;
@@ -871,7 +1532,6 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
     carries: seenIn.includes(name),
     per_call_price: null,
     price_verified_url: null,
-    x402: null,
     price_note: seenIn.includes(name)
       ? `Carriage from the generated index (seen_in). ${name} publishes its own resale price; ` +
         "nobody has read it, so per_call_price is null (unknown, not free)."
@@ -880,6 +1540,21 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
 
   // The only thing auth_type is allowed to produce is a warning for a human:
   // an OAuth vendor may have no static header for the proxy to inject at all.
+  // `offering` is the one nested block a shard row may carry. A malformed one is
+  // reported and dropped rather than thrown: one bad shard row must not take
+  // `find_api` down (readShardFile's contract everywhere else too).
+  const offeringErrors: string[] = [];
+  validateOffering(offeringErrors, `${file}(${id})`, row["offering"]);
+  const offeringRaw = row["offering"];
+  const offering =
+    offeringErrors.length === 0 &&
+    offeringRaw !== null &&
+    offeringRaw !== undefined &&
+    typeof offeringRaw === "object" &&
+    !Array.isArray(offeringRaw)
+      ? vendorOffering(offeringRaw as Record<string, unknown>)
+      : null;
+
   const humanSteps =
     authType === "oauth"
       ? [
@@ -890,6 +1565,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       : [];
 
   return {
+    ...(offeringErrors.length === 0 ? {} : { error: offeringErrors.join("; ") }),
     entry: {
       name: id,
       url: shardUrl(row["docs_url"]) ?? shardUrl(row["provider_url"]),
@@ -906,6 +1582,11 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       // key to the wrong place.
       auth_header: null,
       auth_format: null,
+      // `auth_type: none` on a shard row is the vendor documenting no
+      // credential, which is exactly what auth_required: false records.
+      // `api_key`/`oauth` mean one is required even though the shard never says
+      // which header carries it; anything else stays "nobody checked".
+      auth_required: authType === "none" ? false : authType === "api_key" || authType === "oauth" ? true : null,
       base_url: null,
       signup_url: null,
       key_page_url: null,
@@ -918,6 +1599,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       // no verified billing model to report -- only the carriage above.
       billing: null,
       aggregators,
+      offering,
       vendor_url: shardUrl(row["provider_url"]),
       origin: "shard",
       origin_file: file,
