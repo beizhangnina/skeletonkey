@@ -69,6 +69,31 @@ export interface GatewayConfig {
   fallback_bind?: string;
 }
 
+/**
+ * How SkeletonKey treats secrets that could reach an agent.
+ *
+ * Every key is optional and every default is the safe one, so a config file
+ * that says nothing behaves exactly like one that says all of this.
+ */
+export interface SecretsConfig {
+  /**
+   * The master switch: values are never handed to an agent. Turning it off
+   * does not open a read-a-secret verb -- there is none -- it only relaxes the
+   * defaults below.
+   */
+  never_to_agent?: boolean;
+  /** Scan proxy response bodies for known secret values. */
+  redact_response_bodies?: boolean;
+  response_scan?: ResponseScanConfig;
+}
+
+export interface ResponseScanConfig {
+  /** How many bytes of a compressed response are buffered for scanning. */
+  max_bytes?: number;
+  /** What to do with a response too big to scan: pass it through, or block it. */
+  on_unscannable?: "warn" | "block";
+}
+
 export interface Config {
   /** Dedicated email used to sign up for API accounts and to label vault items. */
   email: string;
@@ -79,6 +104,7 @@ export interface Config {
   bw_folder?: string;
   proxy?: ProxyConfig;
   gateway?: GatewayConfig;
+  secrets?: SecretsConfig;
   created: string;
 }
 

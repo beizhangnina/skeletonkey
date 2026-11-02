@@ -28,6 +28,14 @@ export function ledgerPath(home = skeletonKeyHome()): string {
   return path.join(home, "ledger.db");
 }
 
+/**
+ * Metadata index for the newer entry kinds (`login`). Like `keys.yaml` it holds
+ * no secret values -- only names, labels, and a masked username hint.
+ */
+export function entriesPath(home = skeletonKeyHome()): string {
+  return path.join(home, "entries.yaml");
+}
+
 /** Plaintext vault used by the test-only `file` backend. */
 export function devVaultPath(home = skeletonKeyHome()): string {
   return path.join(home, "dev-vault.json");

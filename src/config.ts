@@ -7,6 +7,8 @@ import {
   type Config,
   type GatewayConfig,
   type ProxyConfig,
+  type ResponseScanConfig,
+  type SecretsConfig,
 } from "./types.js";
 
 export function ensureHome(home = skeletonKeyHome()): string {
@@ -62,6 +64,8 @@ export function readConfig(home = skeletonKeyHome()): Config {
   if (proxy) config.proxy = proxy;
   const gateway = coerceGateway(raw["gateway"]);
   if (gateway) config.gateway = gateway;
+  const secrets = coerceSecrets(raw["secrets"]);
+  if (secrets) config.secrets = secrets;
   return config;
 }
 
@@ -88,5 +92,31 @@ function coerceGateway(value: unknown): GatewayConfig | null {
   if (typeof raw["token"] === "string") out.token = raw["token"];
   if (raw["allow_all_interfaces"] === true) out.allow_all_interfaces = true;
   if (typeof raw["fallback_bind"] === "string") out.fallback_bind = raw["fallback_bind"];
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+/**
+ * The `secrets:` section. Unknown keys are ignored and a value of the wrong
+ * type counts as unset, so a typo can never turn a safe default off.
+ */
+function coerceSecrets(value: unknown): SecretsConfig | null {
+  const raw = section(value);
+  if (!raw) return null;
+  const out: SecretsConfig = {};
+  if (typeof raw["never_to_agent"] === "boolean") out.never_to_agent = raw["never_to_agent"];
+  if (typeof raw["redact_response_bodies"] === "boolean") {
+    out.redact_response_bodies = raw["redact_response_bodies"];
+  }
+  const scan = section(raw["response_scan"]);
+  if (scan) {
+    const outScan: ResponseScanConfig = {};
+    if (typeof scan["max_bytes"] === "number" && Number.isFinite(scan["max_bytes"])) {
+      outScan.max_bytes = scan["max_bytes"];
+    }
+    if (scan["on_unscannable"] === "warn" || scan["on_unscannable"] === "block") {
+      outScan.on_unscannable = scan["on_unscannable"];
+    }
+    if (Object.keys(outScan).length > 0) out.response_scan = outScan;
+  }
   return Object.keys(out).length > 0 ? out : null;
 }
