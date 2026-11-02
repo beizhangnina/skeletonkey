@@ -42,7 +42,6 @@ import { BITWARDEN_FALLBACK_BACKEND, runInitWizard, wizardDeps } from "./init-wi
 import { systemOpener } from "./open-url.js";
 import { startMcpServer } from "./mcp.js";
 import { startProxy, upstreamSchemeFor } from "./proxy.js";
-import { globalRedactor } from "./redact.js";
 import { EXIT, SkeletonKeyError, printCliError } from "./exit-codes.js";
 import { runWithInjectedEnv } from "./run/run.js";
 import {
@@ -1207,6 +1206,15 @@ async function cmdVaultAdd(name: string, options: VaultAddOptions): Promise<void
   const type = options.type ?? "api_key";
 
   const existing = store.resolve(name);
+  if (existing !== null && existing.type !== type) {
+    // One name, one kind of entry: a login and an api_key cannot share it.
+    // Overwriting across kinds would leave one of the two unreachable.
+    throw new SkeletonKeyError(
+      "name_taken",
+      `"${name}" already exists (${existing.type}), and it cannot become a ${type}.`,
+      "Pick another name, or remove the existing entry first.",
+    );
+  }
   if (existing !== null && options.yes !== true) {
     throw new SkeletonKeyError(
       "name_taken",
@@ -1241,9 +1249,8 @@ async function cmdVaultAdd(name: string, options: VaultAddOptions): Promise<void
     return;
   }
 
-  const { username, password } = await readLoginValues(options);
-  await store.putLogin(name, { username, password });
-
+  // Everything that can be refused is refused before a single value is read or
+  // written: a rejected --url must not leave a secret behind in the vault.
   const url = options.url?.trim();
   if (url !== undefined && url !== "" && !/^https?:\/\//i.test(url)) {
     throw new SkeletonKeyError(
@@ -1252,6 +1259,10 @@ async function cmdVaultAdd(name: string, options: VaultAddOptions): Promise<void
       "Example: --url https://github.com/login",
     );
   }
+
+  const { username, password } = await readLoginValues(options);
+  await store.putLogin(name, { username, password });
+
   const domain = url === undefined || url === "" ? null : normalizeDomain(url);
   const entry: VaultEntryMeta = {
     name,
@@ -1293,7 +1304,7 @@ async function readLoginValues(options: VaultAddOptions): Promise<{
   if (options.stdin) {
     const data = await readStdin();
     if (options.username !== undefined) {
-      return { username: options.username, password: data };
+      return { username: options.username, password: requirePassword(data) };
     }
     const newline = data.indexOf("\n");
     if (newline === -1) {
@@ -1319,7 +1330,7 @@ async function readLoginValues(options: VaultAddOptions): Promise<{
         "Pass --username and put only the password on stdin.",
       );
     }
-    return { username, password };
+    return { username, password: requirePassword(password) };
   }
 
   const username = options.username ?? (await promptUsername());
@@ -1342,7 +1353,24 @@ async function readLoginValues(options: VaultAddOptions): Promise<{
       "Try again.",
     );
   }
-  return { username, password };
+  return { username, password: requirePassword(password) };
+}
+
+/**
+ * An empty password is a mistake, not a login.
+ *
+ * Injecting an empty value would put an empty variable in the child's
+ * environment, which looks like a working secret and is not one.
+ */
+function requirePassword(password: string): string {
+  if (password.trim() === "") {
+    throw new SkeletonKeyError(
+      "usage",
+      "An empty password is not an entry; nothing was stored.",
+      "Type the password, or pipe it on stdin.",
+    );
+  }
+  return password;
 }
 
 async function promptUsername(): Promise<string> {
@@ -1400,7 +1428,9 @@ function cmdVaultShow(name: string, json: boolean): void {
   }
   const summary = store.list().find((candidate) => candidate.name === name);
   const refs = entry.fields.map((field) => formatVaultUri(name, field));
-  const primary = entry.fields[0] ?? "api_key";
+  // The example command points at the field a caller usually wants: the secret
+  // of an api_key, the password of a login (never the username, which is PII).
+  const primary = entry.type === "login" ? "password" : "api_key";
   const envName = envNameFor(name, primary);
   const runCommand = `skeletonkey run --env ${envName}=${formatVaultUri(name, primary)} -- <your command>`;
 
@@ -1471,22 +1501,29 @@ async function cmdVaultRm(name: string, yes: boolean): Promise<void> {
  *
  * A literal value is refused here, before anything is read: `run` must not
  * become a way to put a plaintext secret on a command line.
+ *
+ * The flag is never echoed back. A user who pastes a secret into `--env` by
+ * mistake would otherwise see that secret in the error message, and the error
+ * message is exactly what reaches the agent.
  */
 function parseEnvSpec(spec: string): { name: string; value: string } {
   const equals = spec.indexOf("=");
   if (equals <= 0) {
     throw new SkeletonKeyError(
       "usage",
-      `--env expects NAME=vault://<entry>.<field> (got "${globalRedactor.redact(spec)}").`,
+      `--env expects NAME=vault://<entry>.<field> (got "[redacted]").`,
       "Example: --env GITHUB_PASSWORD=vault://github-login.password",
     );
   }
   const name = spec.slice(0, equals);
   const value = spec.slice(equals + 1);
   if (!isVaultUri(value)) {
+    // The name is echoed only when it could be a variable name at all; a flag
+    // like `--env my-secret` is treated as a secret and not repeated.
+    const shown = /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? `${name}=[redacted]` : "[redacted]";
     throw new SkeletonKeyError(
       "usage",
-      `--env expects NAME=vault://<entry>.<field> (got "${name}=[redacted]").`,
+      `--env expects NAME=vault://<entry>.<field> (got "${shown}").`,
       "Example: --env GITHUB_PASSWORD=vault://github-login.password",
     );
   }

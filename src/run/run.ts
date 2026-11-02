@@ -92,7 +92,9 @@ export async function runWithInjectedEnv(options: RunOptions): Promise<RunResult
       throw new SkeletonKeyError(
         "usage",
         `Variable names must start with a letter or underscore and contain only [A-Za-z0-9_].`,
-        `Got ${JSON.stringify(spec.name)}.`,
+        // The name is not echoed back: a user who pasted a secret into --env
+        // would otherwise see it in the error, and the error reaches the agent.
+        "Use a name like GITHUB_PASSWORD.",
       );
     }
     if (seen.has(spec.name)) {
@@ -218,6 +220,19 @@ export async function runWithInjectedEnv(options: RunOptions): Promise<RunResult
     globalRedactor.addExact(value);
     globalRedactor.add(value);
     injected[injection.name] = value;
+
+    // A login's username is a secret of the same class as its password (it is
+    // PII), so it is registered for redaction even when only the password is
+    // injected. It is never put in the child's environment.
+    if (injection.entry.type === "login" && injection.field !== "username") {
+      const username = await store.getField(injection.entry, "username");
+      if (username !== null) {
+        redactor.addExact(username);
+        redactor.add(username);
+        globalRedactor.addExact(username);
+        globalRedactor.add(username);
+      }
+    }
   }
 
   // --- 8. the child ------------------------------------------------------
@@ -361,10 +376,30 @@ function spawnChild(options: SpawnOptions): Promise<SpawnOutcome> {
 
     child.on("error", (error: NodeJS.ErrnoException) => {
       if (error.code === "ENOENT") {
+        options.err.write(
+          `${formatCliError(
+            "run",
+            new SkeletonKeyError(
+              "command_not_found",
+              `${program}: command not found`,
+              "Check the path after --.",
+            ),
+          )}\n`,
+        );
         finish(127);
         return;
       }
       if (error.code === "EACCES") {
+        options.err.write(
+          `${formatCliError(
+            "run",
+            new SkeletonKeyError(
+              "not_executable",
+              `${program}: permission denied`,
+              "Check the path after --.",
+            ),
+          )}\n`,
+        );
         finish(126);
         return;
       }
