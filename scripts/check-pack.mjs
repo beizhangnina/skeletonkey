@@ -59,7 +59,7 @@ try {
   // these by accident: raw catalog downloads, the catalog build scripts, the
   // sources and tests, and anything secret-shaped.
   const forbidden = [
-    /^data\/apis\/raw\//, /^data\/apis\/scripts\//, /\.py$/, /(^|\/)\.ignore$/,
+    /^site\//, /^data\/apis\/raw\//, /^data\/apis\/scripts\//, /\.py$/, /(^|\/)\.ignore$/,
     /^test\//, /^src\//, /^scripts\//, /\.map$/,
     /(^|\/)\.env/, /(^|\/)\.npmrc$/, /vault(\.enc)?\.json$/, /dev-vault\.json$/,
     /(^|\/)discovered\.yaml$/, /\.(?:db|sqlite3?|pem|key|p12)$/,

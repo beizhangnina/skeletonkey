@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clutch API — SkeletonKey API index</title>
+<meta name="description" content="B2B marketplace of 300,000+ service providers with verified client reviews; it runs a public remote MCP server that lets agents search and rank providers, ">
+<link rel="canonical" href="https://skeletonkey.run/apis/clutch/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skeletonkey.run/apis/clutch/">
+<meta property="og:site_name" content="SkeletonKey">
+<meta property="og:title" content="Clutch API — SkeletonKey API index">
+<meta property="og:description" content="B2B marketplace of 300,000+ service providers with verified client reviews; it runs a public remote MCP server that lets agents search and rank providers,">
+<meta property="og:image" content="https://skeletonkey.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
+<link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=4">
+<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="alternate" type="application/json" href="/apis.json">
+</head>
+<body class="apis-page">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="wordmark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <a class="head-link head-apis" href="/apis/">API index</a>
+    <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
+  </div>
+</header>
+<main id="main" class="apis-main"><div class="wrap">
+<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> reviews-ratings</nav>
+<h1 class="ap-title">Clutch</h1>
+<p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
+<p class="ap-lede">B2B marketplace of 300,000+ service providers with verified client reviews; it runs a public remote MCP server that lets agents search and rank providers, read profiles and reviews, browse fixed-price service packages and message a provider.</p>
+<section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://bot.clutch.co/mcp</code></dd><dt>Auth</dt><dd>none · Not confirmed</dd><dt>Docs</dt><dd><a href="https://clutch.co/about-mcp" rel="noopener">https://clutch.co/about-mcp</a></dd></dl></section>
+<section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>Not confirmed</dd><dt>Signup page</dt><dd>—</dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>No</dd><dt>Other checks</dt><dd>clutch.co web pages sit behind a Cloudflare &#x27;Just a moment...&#x27; challenge (curl, r.jina.ai and WebFetch all blocked or 404); bot.clutch.co/mcp is not challenged.</dd></dl></section>
+<section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free</dd><dt>Unit</dt><dd>—</dd><dt>Free tier</dt><dd>Yes · The remote MCP server accepts anonymous requests: an unauthenticated JSON-RPC initialize and tools/list against https://bot.clutch.co/mcp both return HTTP 200 with no key, account or payment.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl></section>
+<section class="ap-card" id="routes"><h2>Routes</h2><p class="ap-note">Ways to reach this data: direct from the vendor, or through an <a href="/apis/aggregators/">aggregator gateway</a> that already holds the key. Every figure here is ours, read on the checked date; unverified routes carry no confirmed price.</p><div class="ap-scroll"><table class="ap-table ap-routes"><thead><tr><th scope="col">Route</th><th scope="col">Price</th><th scope="col">Signup</th><th scope="col">Payment</th><th scope="col">Vendor key</th><th scope="col">Free tier</th><th scope="col">Coverage</th><th scope="col">Verified</th></tr></thead><tbody><tr><th scope="row"><a href="https://clutch.co/about-mcp" rel="noopener nofollow">Direct</a><span class="ap-ex">Clutch</span></th><td data-label="Price">$0 per call</td><td data-label="Signup">No account needed<span class="ap-ex">card: no</span></td><td data-label="Payment">free</td><td data-label="Vendor key">Yes</td><td data-label="Free tier">Yes</td><td data-label="Coverage">All endpoints</td><td data-label="Verified"><span class="ap-badge ap-verified">Verified</span></td></tr><tr><th scope="row"><a href="/apis/aggregators/glasser/">Glasser</a><span class="ap-ex"><a href="https://glasser.ai/data-sources/clutch" rel="noopener nofollow">listing</a> <span aria-hidden="true">&#8599;</span></span></th><td data-label="Price">$0.011 per call</td><td data-label="Signup">google, github, email<span class="ap-ex">card: no</span></td><td data-label="Payment">prepaid_credits, payg</td><td data-label="Vendor key">No</td><td data-label="Free tier">Yes</td><td data-label="Coverage">6 endpoints<span class="ap-ex">e.g. Clutch Agency Office Locations</span></td><td data-label="Verified"><span class="ap-badge ap-verified">Verified</span></td></tr><tr class='ap-r-unver'><th scope="row"><a href="/apis/aggregators/monid/">Monid</a><span class="ap-ex"><a href="https://monid.ai/tools/clutch" rel="noopener nofollow">listing</a> <span aria-hidden="true">&#8599;</span></span></th><td data-label="Price">No price confirmed</td><td data-label="Signup">google<span class="ap-ex">card: no</span></td><td data-label="Payment">prepaid_credits, payg, x402</td><td data-label="Vendor key">No</td><td data-label="Free tier">Yes</td><td data-label="Coverage">—</td><td data-label="Verified"><span class="ap-badge ap-unverified">Unverified</span></td></tr><tr><th scope="row"><a href="/apis/aggregators/apify-store/">Apify Store</a><span class="ap-ex"><a href="https://apify.com/epctex/clutchco-scraper" rel="noopener nofollow">listing</a> <span aria-hidden="true">&#8599;</span></span></th><td data-label="Price">from $2.00 / 1,000 companies</td><td data-label="Signup">google, apple, microsoft, email<span class="ap-ex">card: no</span></td><td data-label="Payment">prepaid_credits, payg, subscription, x402</td><td data-label="Vendor key">Unknown</td><td data-label="Free tier">Yes</td><td data-label="Coverage">—</td><td data-label="Verified"><span class="ap-badge ap-verified">Verified</span></td></tr><tr><th scope="row"><a href="/apis/aggregators/rapidapi/">RapidAPI (Nokia API Hub)</a><span class="ap-ex"><a href="https://rapidapi.com/jaypat87/api/clutch-co-scraper1/pricing" rel="noopener nofollow">listing</a> <span aria-hidden="true">&#8599;</span></span></th><td data-label="Price">Basic $0.00 /mo - Requests 50 / Month</td><td data-label="Signup">email, google, github, facebook<span class="ap-ex">card: —</span></td><td data-label="Payment">prepaid_credits, payg, subscription</td><td data-label="Vendor key">Unknown</td><td data-label="Free tier">Yes</td><td data-label="Coverage">—</td><td data-label="Verified"><span class="ap-badge ap-verified">Verified</span></td></tr></tbody></table></div><h3>When to pick which</h3><ul class="ap-pick"><li>Neither the direct signup nor the Glasser, Monid and Apify Store routes ask for a card.</li><li>Only the direct route exposes all endpoints; Glasser exposes 6 endpoints.</li><li>Listed prices: direct $0 per call; Glasser $0.011 per call; Apify Store from $2.00 / 1,000 companies; RapidAPI (Nokia API Hub) Basic $0.00 /mo - Requests 50 / Month.</li><li>The Monid route is listed unverified: no price was readable there on 2026-10-25.</li></ul><h3>Route notes</h3><dl class="ap-dl ap-rnotes"><dt>Glasser</dt><dd>Six published endpoints at $0.011 or $0.022 per call; office locations was in the cheaper $0.011 group. Free credit or trial: Every new workspace starts with a signup Grant of free balance.</dd><dt>Monid</dt><dd>Page loaded and is titled for this provider, but where the endpoint list should be it reads &quot;No endpoints here yet / Check back soon — the catalog grows weekly&quot;, and the /tools index says &quot;No tools yet - The registry is empty in this environment&quot;, so no catalog price was shown. Free credit or trial: New accounts start with $1 in free credit.</dd><dt>Apify Store</dt><dd>Most-installed Clutch.co Actor (2,655 users, 5.0 rating); per-1,000-companies rate shown in its Pricing block. Free credit or trial: Free plan renewing $5/month of prepaid usage credit, plus paid monthly plans ($19 Starter / $199 Scale / $999 Business) that add pay-as-you-go usage.</dd><dt>RapidAPI (Nokia API Hub)</dt><dd>Clutch.co Scraper listing; pricing tab showed a free Basic tier of 50 requests and a $19.00/mo Pro tier of 13,000. Free credit or trial: Per-API recurring monthly subscription plans (many with a free BASIC tier) plus overage fees per call above a plan&#x27;s quota</dd></dl></section>
+<p class="ap-small">Listed in: Glasser, Monid.</p>
+<section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://clutch.co/" rel="noopener nofollow">https://clutch.co/</a></li><li><a href="https://bot.clutch.co/mcp" rel="noopener nofollow">https://bot.clutch.co/mcp</a></li><li><a href="https://bot.clutch.co/" rel="noopener nofollow">https://bot.clutch.co/</a></li></ul></section>
+</div></main>
+<footer class="site-foot">
+  <div class="wrap">
+    <a class="foot-mark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <div class="foot-bar">
+      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <nav class="foot-nav" aria-label="Footer">
+        <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
+        <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

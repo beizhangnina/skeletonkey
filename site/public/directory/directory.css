@@ -1,0 +1,90 @@
+/* API Directory — the little that /apis/apis.css does not already cover.
+   Everything else on this page reuses .ap-* from there and the tokens in
+   /styles.css, so the directory looks like the rest of the site by default. */
+
+.dr-go {
+  align-self: flex-end;
+  font: inherit;
+  font-size: var(--f-0);
+  font-weight: 600;
+  padding: var(--s-75) var(--s-200);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-base);
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.dr-go:hover { opacity: 0.88; }
+.dr-go:active { transform: translateY(1px); }
+.dr-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The capability shortcuts under the search box. */
+.dr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-75);
+  margin: 0 0 var(--s-300);
+}
+.dr-chip {
+  font: inherit;
+  font-size: var(--f--1);
+  padding: var(--s-50) var(--s-100);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.dr-chip:hover { border-color: var(--accent); color: var(--text); }
+.dr-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dr-chip[aria-pressed="true"] {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* The staging / snapshot notice the manifest carries, when it carries one. */
+.dr-notice {
+  font-size: var(--f--1);
+  line-height: var(--lh-micro);
+  color: var(--muted);
+  background: var(--accent-wash);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-base);
+  padding: var(--s-100) var(--s-200);
+  margin: 0 0 var(--s-300);
+  max-width: 52rem;
+}
+
+/* A result: the vendor, then the three questions the page promises to answer. */
+.dr-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-100);
+  margin: 0 0 var(--s-200);
+}
+.dr-head h2 { margin: 0; }
+.dr-caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-50);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dr-caps li {
+  font-size: var(--f--2);
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+}
+.dr-unchecked { color: var(--meta); font-style: italic; }
+.dr-empty { color: var(--muted); line-height: var(--lh-body); max-width: 44rem; }
+
+@media (max-width: 600px) {
+  .dr-go { align-self: stretch; width: 100%; }
+}

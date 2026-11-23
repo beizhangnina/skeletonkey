@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkeletonKey — let your agent use any API, without handing it your keys</title>
+<meta name="description" content="SkeletonKey lets an agent find an API, sign up for it and call it. Your passwords, API keys and card never reach the model, and you set the spending cap. Open source, MIT.">
+<link rel="canonical" href="https://skeletonkey.run/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skeletonkey.run/">
+<meta property="og:site_name" content="SkeletonKey">
+<meta property="og:title" content="SkeletonKey — let your agent use any API, without handing it your keys">
+<meta property="og:description" content="Your agent gets the access. You keep the keys.">
+<meta property="og:image" content="https://skeletonkey.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
+<link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="/img/hero-mobile.webp" media="(max-width: 700px)" fetchpriority="high">
+<link rel="preload" as="image" imagesrcset="/img/hero-960.webp 960w, /img/hero-1536.webp 1536w" imagesizes="100vw" media="(min-width: 701px)" fetchpriority="high">
+<link rel="stylesheet" href="/styles.css?v=5">
+<script>document.documentElement.classList.add('js');</script>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="wordmark" href="/" aria-current="page" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
+    <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
+  </div>
+</header>
+
+<script type="module">
+  // The nav reads its target from one constant, so T7a's production URL only
+  // ever has to be set in /directory/config.js.
+  import { DIRECTORY_URL } from '/directory/config.js';
+  for (const a of document.querySelectorAll('[data-directory-link]')) a.href = DIRECTORY_URL;
+</script>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero-media">
+      <picture>
+        <source media="(max-width: 700px)" srcset="/img/hero-mobile.webp" width="640" height="1024">
+        <source srcset="/img/hero-960.webp 960w, /img/hero-1536.webp 1536w" sizes="100vw" width="1536" height="1024">
+        <img src="/img/hero-1536.webp" srcset="/img/hero-960.webp 960w, /img/hero-1536.webp 1536w" sizes="100vw"
+             width="1536" height="1024" alt="" fetchpriority="high" decoding="async">
+      </picture>
+    </div>
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <h1 class="display" id="hero-h">Let your agent get its own API access&nbsp;&mdash; without ever handing it <em>your keys</em>.</h1>
+        <p class="sub">Your agent can find the API it needs, sign up for it and call it. Your passwords, your API keys and your card never reach the model. You set the ceiling on what it can spend, and the decisions that cost money wait for you.</p>
+      </div>
+      <div class="hero-foot">
+        <p class="hero-meta">Free and open source under the MIT license. Nothing to sign up for.</p>
+        <a class="hero-cue" href="#install">Install</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="hem" aria-hidden="true"></div>
+
+  <section id="problem" aria-labelledby="problem-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="problem-h"><span class="sec-n">01</span>&#8201;&mdash;&#8201;The problem</h2>
+        <span class="coord">Why it exists</span>
+      </div>
+      <div class="split">
+        <p class="statement reveal">An agent is only as capable as the things you are willing to give it a key to.</p>
+        <div class="split-body reveal">
+          <p class="prose">Paste a key into a prompt or a config file and a model is holding a credential you cannot take back. It can spend against your account. If the service needs a new account first, that means your email, your password and your card as well.</p>
+          <p class="prose">So the safe answer has been to hand over nothing, and let the work stop at the edge of what the agent can already reach.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="benefits" aria-labelledby="benefits-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="benefits-h"><span class="sec-n">02</span>&#8201;&mdash;&#8201;What you get</h2>
+        <span class="coord">Four things</span>
+      </div>
+      <ul class="points">
+        <li class="point reveal">
+          <span class="num" aria-hidden="true">01</span>
+          <div class="point-body">
+            <h3>Access it can get for itself</h3>
+            <p>Your agent asks for a capability &mdash; scraping, geocoding, transcription &mdash; and comes back with a working route to a provider. If the provider is new to it, it can take the whole signup from the first page to the first call.</p>
+          </div>
+        </li>
+        <li class="point reveal">
+          <span class="num" aria-hidden="true">02</span>
+          <div class="point-body">
+            <h3>Your keys never reach the model</h3>
+            <p>Passwords, API keys and card details stay where you keep them. They are never part of a prompt, a tool result or anything the agent can read back. It gets the door opened, not the key.</p>
+          </div>
+        </li>
+        <li class="point reveal">
+          <span class="num" aria-hidden="true">03</span>
+          <div class="point-body">
+            <h3>A ceiling you set</h3>
+            <p>Give it a spending cap and it works under that cap. Anything that costs real money &mdash; a paid plan, a card, a set of terms &mdash; stops and waits for you to agree to it yourself.</p>
+          </div>
+        </li>
+        <li class="point reveal">
+          <span class="num" aria-hidden="true">04</span>
+          <div class="point-body">
+            <h3>On your machine, not ours</h3>
+            <p>There is no account and no SkeletonKey service in the middle. Your keys stay on your own disk, and every call your agent makes is written down there for you to read.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="install" aria-labelledby="install-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="install-h"><span class="sec-n">03</span>&#8201;&mdash;&#8201;Install</h2>
+        <span class="coord">MIT license</span>
+      </div>
+      <div class="doors">
+
+        <article class="card door door-primary">
+          <div class="door-head">
+            <span class="tag">Open source</span>
+            <h3>Run it yourself, free</h3>
+          </div>
+          <p>One MIT licensed tool on your own machine, and one line to put it in front of your agent.</p>
+
+          <div class="tabs">
+            <div class="tablist" role="tablist" aria-label="Install command for your agent">
+              <button class="tab" type="button" role="tab" id="tab-claude" aria-controls="panel-claude" aria-selected="true">Claude&nbsp;Code</button>
+              <button class="tab" type="button" role="tab" id="tab-codex" aria-controls="panel-codex" aria-selected="false">Codex</button>
+            </div>
+
+            <div class="panel" role="tabpanel" id="panel-claude" aria-labelledby="tab-claude" tabindex="0">
+              <div class="code">
+                <pre><code><span class="prompt">$ </span>npx skeletonkey init &amp;&amp; claude mcp add skeletonkey <span class="nb">--</span> npx skeletonkey mcp</code></pre>
+                <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+              </div>
+            </div>
+
+            <div class="panel" role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" tabindex="0">
+              <div class="code">
+                <pre><code><span class="prompt">$ </span>npx skeletonkey init &amp;&amp; codex mcp add skeletonkey <span class="nb">--</span> npx skeletonkey mcp</code></pre>
+                <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="note">Not on npm yet. <a href="#faq-install">How to install it today</a>.</p>
+
+          <div class="spacer"></div>
+          <a class="btn btn-secondary" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">Read the code on GitHub</a>
+        </article>
+
+        <article class="card door door-soft">
+          <div class="door-head">
+            <span class="tag">Hosted</span>
+            <h3>Coming soon</h3>
+          </div>
+          <p>The same thing without running anything yourself, for agents that cannot. It is not built yet, so there is nothing to buy and no date to promise.</p>
+          <div class="spacer"></div>
+          <form class="form" id="waitlist" novalidate>
+            <label for="email">Email me when it opens</label>
+            <div class="row">
+              <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com" aria-describedby="wl-note">
+              <button class="btn btn-primary" type="submit" data-submit>Join the waitlist</button>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="company">Company</label>
+              <input id="company" name="company" type="text" tabindex="-1" autocomplete="off">
+            </div>
+            <p class="note" id="wl-note">One message when the hosted endpoint opens. Nothing else is stored, and nothing is shared.</p>
+            <p class="msg" id="wl-msg" role="status" aria-live="polite"></p>
+          </form>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline" aria-labelledby="tagline-h">
+    <div class="wrap">
+      <span class="tagline-rule" aria-hidden="true"></span>
+      <p id="tagline-h" data-words>Your agent gets the access. You keep the keys.</p>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="faq-h"><span class="sec-n">04</span>&#8201;&mdash;&#8201;The detail</h2>
+        <span class="coord">v0.1 notes</span>
+      </div>
+      <div class="faq">
+
+        <details class="qa reveal">
+          <summary>What is the security model?</summary>
+          <div class="answer">
+            <p>No tool SkeletonKey gives your agent returns a key. The agent calls a loopback proxy on 127.0.0.1, the proxy injects your key for that destination domain on the way out, and a SQLite ledger records one row per call. The key is never in the agent's context, so there is nothing for it to leak, log or reuse.</p>
+            <p>When an API needs a new account, the agent walks the signup with its own browser and its own email address, and stops at payment and terms. You confirm those yourself.</p>
+          </div>
+        </details>
+
+        <details class="qa reveal">
+          <summary>Where do the keys live, and how are they resolved?</summary>
+          <div class="answer">
+            <p>In a vault on your own machine: Bitwarden by default, or 1Password, your operating system keychain, or an encrypted file. There is no account and no SkeletonKey server, so nothing of yours is stored anywhere we can reach.</p>
+            <p>A secret is resolved by name out of the backend you configured, at the moment a call is made, and handed only to the local proxy &mdash; never to a tool result, a prompt or the ledger. A key leaves your machine only on the request you asked the proxy to make, addressed to the provider it belongs to.</p>
+          </div>
+        </details>
+
+        <details class="qa reveal">
+          <summary>What does my agent actually talk to?</summary>
+          <div class="answer">
+            <p>An MCP server and a skill that run locally, which is why Claude Code and Codex can use it with one line of configuration. The tools are deliberately narrow: find an API, request access to one, record a provider SkeletonKey does not know yet. None of them can hand back a credential.</p>
+          </div>
+        </details>
+
+        <details class="qa reveal">
+          <summary>How does it find an API it has never used?</summary>
+          <div class="answer">
+            <p><code>find_api("web scraping")</code> searches an index on your disk, seeded with 163 providers. On a miss, <code>discover_api</code> and <code>propose_entry</code> add the vendor to your own local index, so the next search finds it. Nothing about that is sent anywhere.</p>
+          </div>
+        </details>
+
+        <details class="qa reveal" id="faq-install" open>
+          <summary>How do I install it today?</summary>
+          <div class="answer">
+            <p>npm publishing is off for v0.1, so the two <code>npx</code> lines above are the target, not a working install yet. Build it from source instead. It needs Node 22 or newer.</p>
+            <p class="snippet-label" id="src-label">From source</p>
+            <div class="code">
+              <pre aria-labelledby="src-label"><code><span class="prompt">$ </span>git clone https://github.com/beizhangnina/skeletonkey.git
+<span class="prompt">$ </span>cd skeletonkey &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; npm link
+<span class="prompt">$ </span>skeletonkey init  <span class="hint"># alias: skk</span></code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="qa reveal">
+          <summary>How is this different from a key aggregator?</summary>
+          <div class="answer">
+            <p>An aggregator is a service you sign up for that fronts many APIs through its account and its billing. SkeletonKey fronts nothing and holds nothing: you keep your own provider accounts and your own keys, and calls go direct through a proxy on your machine.</p>
+            <p>The local index recommends an aggregator route only when going direct would mean taking out a subscription.</p>
+          </div>
+        </details>
+
+        <details class="qa reveal">
+          <summary>What does it cost?</summary>
+          <div class="answer">
+            <p>The open source path is free. v0.1 is MIT licensed and runs entirely on your own machine, so the only bills are the ones from the APIs you sign up for. The hosted endpoint is not built, so it has no price and no date.</p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <a class="foot-mark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <div class="foot-bar">
+      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <nav class="foot-nav" aria-label="Footer">
+        <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
+        <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- copy buttons, one per command block ---------- */
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    var pre = btn.parentNode.querySelector('pre');
+    if (!pre) { return; }
+    btn.addEventListener('click', function () {
+      var clone = pre.cloneNode(true);
+      clone.querySelectorAll('.prompt, .hint').forEach(function (n) { n.remove(); });
+      var text = clone.textContent.split('\n').map(function (l) { return l.trim(); }).join('\n').trim();
+      var done = function (ok) {
+        btn.textContent = ok ? 'copied' : 'press ctrl c';
+        btn.dataset.state = ok ? 'done' : '';
+        setTimeout(function () { btn.textContent = 'copy'; btn.dataset.state = ''; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else {
+        done(false);
+      }
+    });
+  });
+
+  /* ---------- tabs ----------
+     Without scripting the tablist is hidden by CSS and every panel is visible,
+     each under its own label, so nothing is lost. Here we take over: one panel
+     at a time, a roving tabindex, and arrow keys that select as they move. */
+  document.querySelectorAll('.tabs').forEach(function (group) {
+    var tabs = Array.prototype.slice.call(group.querySelectorAll('[role="tab"]'));
+    if (tabs.length < 2) { return; }
+    var panels = tabs.map(function (tab) {
+      return document.getElementById(tab.getAttribute('aria-controls'));
+    });
+
+    var select = function (i, focus) {
+      tabs.forEach(function (tab, j) {
+        var on = i === j;
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+        tab.tabIndex = on ? 0 : -1;
+        if (panels[j]) { panels[j].hidden = !on; }
+      });
+      if (focus) { tabs[i].focus(); }
+    };
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { select(i, false); });
+      tab.addEventListener('keydown', function (e) {
+        var next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+        if (next === undefined) { return; }
+        e.preventDefault();
+        select((next + tabs.length) % tabs.length, true);
+      });
+    });
+
+    var start = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+    select(start < 0 ? 0 : start, false);
+  });
+
+  /* ---------- waitlist: unchanged contract with /api/waitlist ---------- */
+  var form = document.getElementById('waitlist');
+  if (form) {
+    var msg = document.getElementById('wl-msg');
+    var input = document.getElementById('email');
+    var submit = form.querySelector('[data-submit]');
+    var re = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
+    var say = function (text, state) {
+      msg.textContent = text;
+      msg.dataset.state = state || '';
+    };
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = input.value.trim().toLowerCase();
+      if (!email || email.length > 254 || !re.test(email)) {
+        input.setAttribute('aria-invalid', 'true');
+        say('That address does not look like an email. Check it and try again.', 'error');
+        input.focus();
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+      submit.disabled = true;
+      var label = submit.textContent;
+      submit.textContent = 'Adding you';
+      say('');
+      fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ email: email, company: document.getElementById('company').value })
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return { status: res.status, data: data };
+        });
+      }).then(function (r) {
+        if (r.status === 200 && r.data.status === 'exists') {
+          say('That address is already on the list.', 'ok');
+          form.reset();
+        } else if (r.status === 200 && r.data.ok) {
+          say('You are on the list. We will email you when the hosted endpoint opens.', 'ok');
+          form.reset();
+        } else if (r.status === 400) {
+          input.setAttribute('aria-invalid', 'true');
+          say('That address does not look like an email. Check it and try again.', 'error');
+        } else if (r.status === 429) {
+          say('Too many sign ups from this network. Please try again in an hour.', 'error');
+        } else {
+          say('We could not save your address. Please try again in a moment.', 'error');
+        }
+      }).catch(function () {
+        say('Connection failed. Please try again.', 'error');
+      }).then(function () {
+        submit.disabled = false;
+        submit.textContent = label;
+      });
+    });
+  }
+
+  /* ---------- split the tagline into words, scripting or not ---------- */
+  var tagline = document.querySelector('[data-words]');
+  var words = [];
+  if (tagline) {
+    var parts = tagline.textContent.split(/\s+/);
+    tagline.textContent = '';
+    parts.forEach(function (word, i) {
+      var span = document.createElement('span');
+      span.className = 'w';
+      span.textContent = word;
+      tagline.appendChild(span);
+      words.push(span);
+      if (i < parts.length - 1) { tagline.appendChild(document.createTextNode(' ')); }
+    });
+  }
+
+  /* Reduced motion, or no observer: show everything at rest and stop here.
+     The hero keeps its photograph and nothing else moves. */
+  if (reduce || !('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach(function (n) { n.classList.add('in'); });
+    words.forEach(function (w) { w.style.opacity = '1'; });
+    return;
+  }
+
+  /* ---------- reveals ---------- */
+  var show = function (el) { el.classList.add('in'); io.unobserve(el); };
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      // Also reveal anything a fast scroll or an anchor jump carried past.
+      if (entry.isIntersecting || entry.boundingClientRect.top < 0) show(entry.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
+
+  if ('onscrollend' in window) {
+    window.addEventListener('scrollend', function () {
+      document.querySelectorAll('.reveal:not(.in)').forEach(function (el) {
+        if (el.getBoundingClientRect().top < window.innerHeight) show(el);
+      });
+    }, { passive: true });
+  }
+
+  document.querySelectorAll('.reveal').forEach(function (n, i) {
+    n.style.transitionDelay = (i % 3) * 80 + 'ms';
+    io.observe(n);
+  });
+
+  /* ---------- scroll driven work, all of it on one rAF ---------- */
+  var hero = document.querySelector('.hero');
+  var heroMedia = document.querySelector('.hero-media');
+  var heroCopy = document.querySelector('.hero-copy');
+  var heroFoot = document.querySelector('.hero-foot');
+  var heroP = 0;                       // 0 at the top of the hero, 1 once it is gone
+  var ticking = false;
+
+  function frame() {
+    ticking = false;
+    var vh = window.innerHeight;
+
+    /* The hero drifts out: the photograph lags behind the page and settles a
+       little deeper, the copy rises and fades ahead of it. Transforms only. */
+    if (hero) {
+      var h = hero.offsetHeight || vh;
+      var p = (window.pageYOffset || document.documentElement.scrollTop || 0) / h;
+      heroP = p < 0 ? 0 : p > 1 ? 1 : p;
+      if (heroMedia) {
+        heroMedia.style.transform =
+          'translate3d(0,' + (heroP * 4.5).toFixed(3) + '%,0) scale(' + (1 + heroP * 0.04).toFixed(4) + ')';
+      }
+      if (heroCopy) {
+        heroCopy.style.transform = 'translate3d(0,' + (-heroP * 76).toFixed(2) + 'px,0)';
+        heroCopy.style.opacity = Math.max(0, 1 - heroP * 1.5).toFixed(3);
+      }
+      if (heroFoot) {
+        heroFoot.style.transform = 'translate3d(0,' + (-heroP * 36).toFixed(2) + 'px,0)';
+        heroFoot.style.opacity = Math.max(0, 1 - heroP * 2).toFixed(3);
+      }
+    }
+
+    /* The tagline darkens word by word, scrubbed by how far the paragraph has
+       travelled through the viewport. Scrolling back up un-darkens it. */
+    if (words.length) {
+      var box = tagline.getBoundingClientRect();
+      // 0 when the paragraph's top reaches 85% of the viewport, 1 at 35%
+      var q = (vh * 0.85 - box.top) / (vh * 0.5);
+      q = q < 0 ? 0 : q > 1 ? 1 : q;
+      var lit = q * words.length;
+      for (var i = 0; i < words.length; i++) {
+        var o = lit - i;                       // how far this word is along
+        o = o < 0 ? 0 : o > 1 ? 1 : o;
+        words[i].style.opacity = (0.22 + 0.78 * o).toFixed(3);
+      }
+    }
+  }
+
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+
+  frame();
+
+  /* ---------- hero ambience: golden dust in the light from the door ----------
+     A 2D canvas between the photograph and the scrim. It is cleared every
+     frame and never filled, so it cannot render as a block of colour if
+     anything about it fails; if there is no 2D context we simply never build
+     it and the photograph stands alone. It is created after load, on an idle
+     callback, and it stops whenever the hero leaves the screen or the tab is
+     hidden. */
+  function ambience() {
+    if (!hero || !hero.appendChild) { return; }
+    var cv = document.createElement('canvas');
+    if (!cv.getContext) { return; }
+    var ctx = null;
+    try { ctx = cv.getContext('2d'); } catch (e) { ctx = null; }
+    if (!ctx) { return; }
+
+    cv.className = 'hero-dust';
+    cv.setAttribute('aria-hidden', 'true');
+    cv.style.background = 'transparent';
+
+    // one soft sprite, drawn once, then stamped per mote: no per-frame gradients
+    var S = 36;
+    var sprite = document.createElement('canvas');
+    sprite.width = sprite.height = S;
+    var sx = sprite.getContext('2d');
+    if (!sx) { return; }
+    var grad = sx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    grad.addColorStop(0, 'rgba(255,230,180,0.95)');
+    grad.addColorStop(0.25, 'rgba(248,205,135,0.42)');
+    grad.addColorStop(0.60, 'rgba(236,180,100,0.12)');
+    grad.addColorStop(1, 'rgba(230,170,90,0)');
+    sx.fillStyle = grad;
+    sx.fillRect(0, 0, S, S);
+
+    var w = 0, h = 0, dpr = 1, motes = [], shaft = 0.82, spread = 0.30;
+
+    function place(m, anywhere) {
+      // three uniforms averaged: a cheap bell curve, so the motes crowd the
+      // shaft of light rather than spreading evenly across the frame
+      var t = (Math.random() + Math.random() + Math.random()) / 3;
+      m.x = anywhere
+        ? w * (0.30 + Math.random() * 0.74)
+        : w * (shaft + (t - 0.5) * 2 * spread);
+      var d = Math.abs(m.x / w - shaft) / spread;
+      m.a = 0.20 + 0.62 * Math.max(0.08, 1 - d * d * 0.85);
+    }
+
+    function build() {
+      var narrow = w < 760;
+      shaft = narrow ? 0.80 : 0.82;
+      spread = narrow ? 0.26 : 0.30;
+      var n = narrow ? 44 : 96;             // never more than 120
+      motes.length = 0;
+      for (var i = 0; i < n; i++) {
+        var m = {};
+        place(m, i % 5 === 4);
+        m.y = h * (-0.05 + Math.random() * 1.1);
+        m.r = 0.45 + Math.random() * Math.random() * 1.7;
+        m.vy = -(0.055 + Math.random() * 0.17);   // a slow rise, px per 60fps frame
+        m.vx = (Math.random() - 0.5) * 0.05;
+        m.sw = 5 + Math.random() * 13;            // sway amplitude
+        m.ss = 0.00016 + Math.random() * 0.00030; // sway speed
+        m.sp = Math.random() * 6.2832;
+        m.tw = 0.0005 + Math.random() * 0.0013;   // twinkle speed
+        m.tp = Math.random() * 6.2832;
+        motes.push(m);
+      }
+    }
+
+    function size() {
+      var r = hero.getBoundingClientRect();
+      w = Math.max(1, Math.round(r.width));
+      h = Math.max(1, Math.round(r.height));
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    var raf = 0, running = false, onScreen = true, born = 0, last = 0;
+
+    function draw(ts) {
+      raf = 0;
+      if (!running) { return; }
+      if (!born) { born = ts; }
+      var k = last ? Math.min(3, (ts - last) / 16.667) : 1;
+      last = ts;
+
+      ctx.clearRect(0, 0, w, h);                       // never fillRect: stays transparent
+      var fade = Math.min(1, (ts - born) / 2000) * (1 - heroP);
+      if (fade > 0.004) {
+        ctx.globalCompositeOperation = 'lighter';
+        for (var i = 0; i < motes.length; i++) {
+          var m = motes[i];
+          m.y += m.vy * k;
+          m.x += m.vx * k;
+          if (m.y < -18) { m.y = h + 14; place(m, i % 5 === 4); }
+          if (m.x < -24) { m.x = w + 24; } else if (m.x > w + 24) { m.x = -24; }
+          var px = m.x + Math.sin(ts * m.ss + m.sp) * m.sw;
+          var tw = 0.40 + 0.60 * (0.5 + 0.5 * Math.sin(ts * m.tw + m.tp));
+          var s = m.r * 8;
+          ctx.globalAlpha = m.a * tw * fade;
+          ctx.drawImage(sprite, px - s / 2, m.y - s / 2, s, s);
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      raf = requestAnimationFrame(draw);
+    }
+
+    function sync() {
+      var want = onScreen && !document.hidden;
+      if (want === running) { return; }
+      running = want;
+      if (want) { last = 0; raf = requestAnimationFrame(draw); }
+      else if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    }
+
+    size();
+    build();
+    hero.appendChild(cv);
+
+    new IntersectionObserver(function (entries) {
+      onScreen = entries[0].isIntersecting;
+      sync();
+    }, { threshold: 0 }).observe(hero);
+
+    document.addEventListener('visibilitychange', sync);
+
+    var rt = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () { size(); build(); }, 180);
+    }, { passive: true });
+
+    sync();
+  }
+
+  function schedule() {
+    if ('requestIdleCallback' in window) { requestIdleCallback(ambience, { timeout: 2500 }); }
+    else { setTimeout(ambience, 1000); }
+  }
+  if (document.readyState === 'complete') { schedule(); }
+  else { window.addEventListener('load', schedule, { once: true }); }
+})();
+</script>
+</body>
+</html>
