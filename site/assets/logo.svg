@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 28" width="184" height="28" fill="none" role="img" aria-label="skeletonkey">
+  <g transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+    <circle cx="8" cy="12" r="4.5"/>
+    <path d="M12.5 12H21.5"/>
+    <path d="M16.75 12.5V16.75"/>
+    <path d="M20.5 12.5V16.75"/>
+  </g>
+  <text x="32" y="21" fill="currentColor"
+        font-family="ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace"
+        font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+</svg>

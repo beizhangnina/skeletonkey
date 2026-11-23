@@ -1,0 +1,9 @@
+name = "skeletonkey"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-10-01"
+
+# Create the namespace once, then paste its id here:
+#   npx wrangler kv namespace create WAITLIST
+[[kv_namespaces]]
+binding = "WAITLIST"
+id = "d636894d94894ece94277c62b4cc97c3"
