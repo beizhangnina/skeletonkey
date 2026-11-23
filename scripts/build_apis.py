@@ -287,6 +287,16 @@ def page(title, desc, path, body, extra_head=''):
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{SITE}{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{SITE}{path}">
+<meta property="og:site_name" content="SkeletonKey">
+<meta property="og:title" content="{E(title)}">
+<meta property="og:description" content="{E(desc)}">
+<meta property="og:image" content="{SITE}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -536,3 +546,8 @@ open(os.path.join(PUB, 'llms.txt'), 'w').write('\n'.join(L))
 print('pages', len(rows), cnt)
 print('aggregator pages', len(aggs), {a['slug']: a['vendor_count'] for a in aggs})
 print('routes total', nrt, '| verified', vrt, '| by source', dict(sorted(by_src.items(), key=lambda kv: -kv[1])))
+
+# The pages just written change the URL set, so refresh the sitemap with them.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_sitemap
+print(f'sitemap: {len(build_sitemap.write_sitemap())} urls -> public/sitemap.xml')

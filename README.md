@@ -12,3 +12,19 @@ Local: `npm install && npm run dev` (http://127.0.0.1:8788, local KV simulated).
 5. Cloudflare dashboard → Pages → skeletonkey → Custom domains → add `skeletonkey.run` (DNS zone must be on Cloudflare, or add the CNAME at the registrar).
 
 Read signups: `npx wrangler kv key list --binding WAITLIST --prefix email: --remote`
+
+## Sitemap
+
+`public/sitemap.xml` and `public/robots.txt` are generated from the pages in `public/`.
+
+Regenerate the sitemap (also backfills the OG/Twitter tags on any page that is missing them; the homepage is left alone):
+
+```
+npm run build:sitemap          # = python3 scripts/build_sitemap.py
+```
+
+`python3 scripts/build_apis.py` refreshes `public/sitemap.xml` at the end too, so rebuilding the API pages keeps the sitemap in step. The sitemap is written from the HTML already in `public/`, never from the API index yaml, so it is safe to run on its own.
+
+Every `<loc>` is a page's own canonical, so the URLs carry the trailing slashes the site already serves. `public/404.html` is not in the sitemap.
+
+**After the next deploy**, resubmit `https://skeletonkey.run/sitemap.xml` in Google Search Console (the domain resource on beizhangbill@gmail.com) so Google picks up the new sitemap and the pages that were missing OG tags.

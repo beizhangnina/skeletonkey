@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "wrangler pages dev",
     "deploy": "wrangler pages deploy",
+    "build:sitemap": "python3 scripts/build_sitemap.py",
     "check": "tsc --noEmit",
     "sync:assets": "cp assets/favicon.svg public/favicon.svg"
   },
