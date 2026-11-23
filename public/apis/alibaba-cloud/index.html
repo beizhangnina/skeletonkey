@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alibaba Cloud (Model Studio) API — SkeletonKey API index</title>
+<meta name="description" content="Alibaba Cloud Model Studio serves the Qwen and Wan model families over OpenAI-compatible and Anthropic-compatible REST endpoints: text generation, vision a">
+<link rel="canonical" href="https://skeletonkey.run/apis/alibaba-cloud/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
+<link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=4">
+<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="alternate" type="application/json" href="/apis.json">
+</head>
+<body class="apis-page">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="wordmark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <a class="head-link head-apis" href="/apis/">API index</a>
+    <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
+  </div>
+</header>
+<main id="main" class="apis-main"><div class="wrap">
+<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> llm-models</nav>
+<h1 class="ap-title">Alibaba Cloud (Model Studio)</h1>
+<p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
+<p class="ap-lede">Alibaba Cloud Model Studio serves the Qwen and Wan model families over OpenAI-compatible and Anthropic-compatible REST endpoints: text generation, vision and omni-modal understanding, image/video/3D generation, speech and music, embeddings and rerank, plus batch inference, fine-tuning and dedicated deployment.</p>
+<section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://dashscope-intl.aliyuncs.com/compatible-mode/v1</code></dd><dt>Auth</dt><dd>api_key · <code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://www.alibabacloud.com/help/en/model-studio/base-url" rel="noopener">https://www.alibabacloud.com/help/en/model-studio/base-url</a></dd></dl></section>
+<section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://account.alibabacloud.com/register/intl_register.htm" rel="noopener">https://account.alibabacloud.com/register/intl_register.htm</a></dd><dt>Card required</dt><dd>Yes</dd><dt>Phone required</dt><dd>—</dd><dt>Other checks</dt><dd>Free Tier terms require a payment method on file; Company Real Name Registration verification is required for the Enterprise Free Tier</dd></dl></section>
+<section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free_tier+payg</dd><dt>Unit</dt><dd>per 1 million tokens (input and output priced separately; some models tiered by input size). Token Plan subscriptions instead bill monthly in Credits.</dd><dt>Free tier</dt><dd>Yes · Model inference pricing tables show a per-model free quota of &#x27;1 million tokens&#x27;, &#x27;Valid for 90 days from the date of Model Studio activation, model release, or application approval, whichever is later&#x27;, and note &#x27;The following models offer a free quota only in Singapore. No free quota is available in other regions.&#x27; The Alibaba Cloud free-trial page separately advertises &#x27;USD 90 Free Credits (Valid for 3 Months)&#x27; and &#x27;Free Tokens - 400+ Models&#x27;.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl><div class="ap-scroll"><table class="ap-table"><thead><tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Per</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">Pay-as-you-go - qwen3.8-max</th><td data-label="Price">$2 input / $6 output</td><td data-label="Per">per 1 million tokens</td><td data-label="Notes">International deployment, 0&lt;Token&lt;=1M tier</td></tr><tr><th scope="row">Pay-as-you-go - qwen3.7-plus</th><td data-label="Price">$0.4 input / $1.6 output</td><td data-label="Per">per 1 million tokens</td><td data-label="Notes">0&lt;Token&lt;=256K tier; shown as &#x27;List price $0.4 (Limited-time 20% off)&#x27;. 256K&lt;Token&lt;=1M tier is $1.2 / $4.8.</td></tr><tr><th scope="row">Pay-as-you-go - qwen3.7-flash</th><td data-label="Price">$0.030 input / $0.130 output</td><td data-label="Per">per 1 million tokens</td><td data-label="Notes">0&lt;Token&lt;=32K tier; higher tiers $0.100/$0.400 and $0.200/$0.800. Batch inference is 50% of the real-time price.</td></tr><tr><th scope="row">Token Plan Personal - Lite</th><td data-label="Price">Original price $8/month Limited-time $6/month</td><td data-label="Per">per month</td><td data-label="Notes">11,500 Credits/month, 1-2 concurrent agents. Singapore region only; for interactive AI coding tools, not backend services.</td></tr><tr><th scope="row">Token Plan Personal - Essential</th><td data-label="Price">Original price $16/month Limited-time $10/month</td><td data-label="Per">per month</td><td data-label="Notes">25,500 Credits/month</td></tr><tr><th scope="row">Token Plan Personal - Standard</th><td data-label="Price">Original price $25/month Limited-time $18/month</td><td data-label="Per">per month</td><td data-label="Notes">45,000 Credits/month</td></tr><tr><th scope="row">Token Plan Personal - Pro</th><td data-label="Price">Original price $80/month Limited-time $68/month</td><td data-label="Per">per month</td><td data-label="Notes">180,000 Credits/month</td></tr><tr><th scope="row">Token Plan Personal - Extra Bundle</th><td data-label="Price">$15/bundle/month</td><td data-label="Per">per bundle per month</td><td data-label="Notes">20,000 Credits/bundle, up to 5 at a time; does not count toward plan quota</td></tr><tr><th scope="row">Token Plan Team - Standard seat</th><td data-label="Price">Original price $30/seat/month Limited-time $20/seat/month</td><td data-label="Per">per seat per month</td><td data-label="Notes">25,000 Credits/seat/month</td></tr><tr><th scope="row">Token Plan Team - Pro seat</th><td data-label="Price">Original price $100/seat/month Limited-time $75/seat/month</td><td data-label="Per">per seat per month</td><td data-label="Notes">100,000 Credits/seat/month</td></tr><tr><th scope="row">Token Plan Team - Max seat</th><td data-label="Price">$200/seat/month</td><td data-label="Per">per seat per month</td><td data-label="Notes">250,000 Credits/seat/month</td></tr><tr><th scope="row">Token Plan Team - Shared quota pack</th><td data-label="Price">$700/pack/month</td><td data-label="Per">per pack per month</td><td data-label="Notes">625,000 Credits/pack</td></tr></tbody></table></div><p class="ap-note">Prices as shown on the <a href="https://www.alibabacloud.com/help/en/model-studio/model-pricing" rel="noopener">vendor pricing page</a> on 2026-10-25. Check there before you buy.</p></section>
+<p class="ap-small">Listed in: Monid.</p>
+<section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://www.alibabacloud.com/en/product/modelstudio" rel="noopener nofollow">https://www.alibabacloud.com/en/product/modelstudio</a></li><li><a href="https://www.alibabacloud.com/help/en/model-studio/model-pricing" rel="noopener nofollow">https://www.alibabacloud.com/help/en/model-studio/model-pricing</a></li><li><a href="https://www.alibabacloud.com/help/en/model-studio/base-url" rel="noopener nofollow">https://www.alibabacloud.com/help/en/model-studio/base-url</a></li><li><a href="https://www.alibabacloud.com/help/en/model-studio/first-api-call-to-qwen" rel="noopener nofollow">https://www.alibabacloud.com/help/en/model-studio/first-api-call-to-qwen</a></li><li><a href="https://www.alibabacloud.com/help/en/model-studio/token-plan-overview" rel="noopener nofollow">https://www.alibabacloud.com/help/en/model-studio/token-plan-overview</a></li><li><a href="https://www.alibabacloud.com/free" rel="noopener nofollow">https://www.alibabacloud.com/free</a></li><li><a href="https://account.alibabacloud.com/register/intl_register.htm" rel="noopener nofollow">https://account.alibabacloud.com/register/intl_register.htm</a></li></ul></section>
+</div></main>
+<footer class="site-foot">
+  <div class="wrap">
+    <a class="foot-mark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <div class="foot-bar">
+      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <nav class="foot-nav" aria-label="Footer">
+        <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
+        <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
