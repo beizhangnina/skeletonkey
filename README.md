@@ -13,6 +13,8 @@ no account, and there is no server component.
 Status: **v0.3 — zero-knowledge foundation.** TypeScript, Node 22+, MIT licensed. Repo:
 [`beizhangnina/skeletonkey`](https://github.com/beizhangnina/skeletonkey) (public, MIT).
 
+The public website at [skeletonkey.run](https://skeletonkey.run) lives in [`site/`](site/).
+
 v0.3 adds the pieces that keep a secret away from the model entirely: a
 **trusted runner** process that holds the secrets, **async approvals** the human
 decides outside the agent's context, a **spend policy** that starts at $0, a

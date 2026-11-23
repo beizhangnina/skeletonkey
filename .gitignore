@@ -16,3 +16,7 @@ dev-vault.json
 *vault*.json
 data/apis/raw/
 data/discovered.yaml
+__pycache__/
+# Cloudflare Pages local state (site/)
+.wrangler/
+.dev.vars
