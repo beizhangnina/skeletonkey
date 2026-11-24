@@ -16,6 +16,13 @@ RAW = os.path.join(HERE, '..', 'raw')
 OUT = os.path.join(HERE, '..')
 CHECKED = '2026-10-24'
 
+# Catalog scope (Bei, 2026-11-24): llm-models rows are set aside -- hidden from
+# listings by default, not deleted -- same meaning as src/apis.ts
+# effectiveCollectionScope/effectiveVisibility and validate.py's mirror of it.
+LLM_VISIBILITY_NOTE = ('LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). '
+                       'Hidden from listings by default, not deleted; recoverable via --all or '
+                       'visibility: listed.')
+
 def r(p): return json.load(open(os.path.join(RAW, p)))
 
 # ---- slug normalisation across catalogs -------------------------------------
@@ -171,6 +178,8 @@ for pid in sorted(set(rec) & set(curated.P)):
         'tos_notes': tos,
         'source_url': source_url(pid, x),
         'checked_date': CHECKED,
+        **({'collection_scope': 'llm', 'visibility': 'hidden', 'visibility_note': LLM_VISIBILITY_NOTE}
+           if cat == 'llm-models' else {}),
     })
 
 # ---- emit one YAML shard per category --------------------------------------
@@ -178,6 +187,8 @@ ORDER = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
          'access_mode', 'signup', 'signup_automatable', 'min_topup',
          'billing_unit', 'free_tier', 'auth_type', 'seen_in', 'tos_notes',
          'source_url', 'checked_date']
+# Only emitted for rows that carry them (currently: every llm-models row).
+EXTRA_ORDER = ['collection_scope', 'visibility', 'visibility_note']
 
 def q(v):
     if v is None: return 'null'
@@ -193,7 +204,8 @@ for cat in sorted(by_cat):
              'apis:']
     for e in sorted(by_cat[cat], key=lambda x: x['id']):
         first = True
-        for k in ORDER:
+        keys = ORDER + (EXTRA_ORDER if 'collection_scope' in e else [])
+        for k in keys:
             v = e[k]
             lead = '  - ' if first else '    '
             first = False

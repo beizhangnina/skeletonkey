@@ -67,6 +67,93 @@ export const AGGREGATOR_NAMES = ["monid", "glasser", "flatkey"] as const;
 export type AggregatorName = (typeof AGGREGATOR_NAMES)[number];
 
 /**
+ * What a row counts as in the catalog (Bei, 2026-11-24): tool and data APIs
+ * plus the intermediaries ("aggregators") that resell them are collected.
+ * LLM APIs are set aside -- still in the index, just hidden by default.
+ *
+ *   tool         a tool API: an action or a generated-media capability
+ *                (image/video/audio/speech -- `generative-media` counts as a
+ *                tool, not an LLM, even though the models are generative)
+ *   data         a data/lookup API: the default for anything not a tool,
+ *                an aggregator, or an LLM
+ *   aggregator   a third-party intermediary that resells per-call access to
+ *                other vendors (treg, glasser, monid, flatkey, ...) -- a
+ *                catalog entry, never described as an access layer
+ *   llm          a first-party LLM/model API (chat, completions, inference) --
+ *                set aside, not deleted: `effectiveVisibility` hides it by
+ *                default but a direct lookup still finds it
+ */
+export const COLLECTION_SCOPES = ["tool", "data", "aggregator", "llm"] as const;
+export type CollectionScope = (typeof COLLECTION_SCOPES)[number];
+
+/** Whether a row appears on a listing/browsing surface by default. */
+export const VISIBILITIES = ["listed", "hidden"] as const;
+export type Visibility = (typeof VISIBILITIES)[number];
+
+/** A `visibility_note` is one line, so it reads in a list without wrecking it. */
+export const VISIBILITY_NOTE_MAX = 300;
+
+/**
+ * Shard/index categories that collect as `tool` rather than `data` when a row
+ * does not say its own `collection_scope`. Kept as the single source of truth
+ * for the mapping -- data/apis/scripts/validate.py and site/scripts/build_apis.py
+ * mirror this exact set.
+ */
+const TOOL_SCOPE_CATEGORIES: ReadonlySet<string> = new Set([
+  "generative-media",
+  "web-search",
+  "web-scraping",
+  "seo-marketing",
+  "developer-infra",
+  "communications",
+  "contact-verification",
+]);
+
+/** The fields `effectiveCollectionScope` needs: works for an ApiEntry or an IndexEntry. */
+export interface CollectionScopeInput {
+  collection_scope?: CollectionScope | null;
+  access_mode?: AccessMode | null;
+  /** Shard category (`llm-models`, `generative-media`, ...). Absent on a root apis.yaml row. */
+  category?: string;
+}
+
+/**
+ * The scope a row counts as, explicit or derived.
+ *
+ * Derivation, in order: an explicit `collection_scope` always wins. Otherwise,
+ * a shard row's `category` decides (`llm-models` -> llm; the tool categories
+ * above -> tool; any other category -> data). A root `apis.yaml` row carries no
+ * category at all, so it falls back to `access_mode`: `intermediary` ->
+ * aggregator, anything else -> data.
+ */
+export function effectiveCollectionScope(entry: CollectionScopeInput): CollectionScope {
+  if (entry.collection_scope != null) return entry.collection_scope;
+  const category = entry.category;
+  if (category !== undefined) {
+    if (category === "llm-models") return "llm";
+    if (TOOL_SCOPE_CATEGORIES.has(category)) return "tool";
+    return "data";
+  }
+  return entry.access_mode === "intermediary" ? "aggregator" : "data";
+}
+
+/** The fields `effectiveVisibility` needs, in addition to `effectiveCollectionScope`'s. */
+export interface VisibilityInput extends CollectionScopeInput {
+  visibility?: Visibility | null;
+}
+
+/**
+ * Whether a row appears on a listing/browsing surface by default: an explicit
+ * `visibility` always wins; otherwise a row is hidden only when its effective
+ * scope is `llm` (the 2026-11-24 LLM set-aside). Hidden is never deletion: a
+ * direct lookup by name still finds the row.
+ */
+export function effectiveVisibility(entry: VisibilityInput): Visibility {
+  if (entry.visibility != null) return entry.visibility;
+  return effectiveCollectionScope(entry) === "llm" ? "hidden" : "listed";
+}
+
+/**
  * What the vendor charges, and where that was read. `verified_url` plus
  * `verified_date` is the whole point of this block: a billing model with no
  * verified_url is a claim nobody checked, and the router says so out loud.
@@ -392,6 +479,16 @@ export interface ApiEntry {
   promoted_date?: string | null;
   /** What promoted it, e.g. "ledger: 200 from api.example.com at <ts>". */
   promoted_by?: string | null;
+
+  // --- catalog scope (Bei, 2026-11-24): tool/data APIs and aggregators are --
+  // --- collected; LLM APIs are set aside, hidden by default but not deleted -
+
+  /** Catalog scope: `null` means derive it (see `effectiveCollectionScope`). */
+  collection_scope?: CollectionScope | null;
+  /** Listing visibility: `null` means derive it (see `effectiveVisibility`). */
+  visibility?: Visibility | null;
+  /** Why visibility is hidden, one line, <= VISIBILITY_NOTE_MAX chars. */
+  visibility_note?: string | null;
 }
 
 export interface ApisDocument {
@@ -441,6 +538,9 @@ const OPTIONAL_FIELDS = [
   "discovered_date",
   "promoted_date",
   "promoted_by",
+  "collection_scope",
+  "visibility",
+  "visibility_note",
 ] as const;
 
 /** Optional auth URLs, all validated the same way: an http(s) URL or null. */
@@ -603,6 +703,7 @@ export function validateApis(input: unknown): ValidationResult {
     validateAggregators(errors, at, entry["aggregators"]);
     validateOffering(errors, at, entry["offering"]);
     validateDiscovery(errors, at, entry);
+    validateCollectionFields(errors, at, entry);
 
     const humanSteps = entry["human_steps"];
     if (humanSteps !== null && humanSteps !== undefined) {
@@ -630,6 +731,7 @@ export function validateApis(input: unknown): ValidationResult {
         ...(typeof domain === "string" ? { domain } : {}),
         ...optionalAuthFields(entry),
         ...optionalIndexFields(entry),
+        ...optionalCollectionFields(entry),
       });
     }
   });
@@ -1206,6 +1308,39 @@ function validateDiscovery(errors: string[], at: string, entry: Record<string, u
 }
 
 /**
+ * Validates the optional catalog-scope fields. `visibility: hidden` is
+ * deliberately NOT required to carry a `visibility_note` -- the note is
+ * encouraged (and every row this task sets hidden has one), but the schema
+ * does not enforce it.
+ */
+function validateCollectionFields(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const scope = entry["collection_scope"];
+  if (scope !== null && scope !== undefined) {
+    if (typeof scope !== "string" || !(COLLECTION_SCOPES as readonly string[]).includes(scope)) {
+      errors.push(`${at}.collection_scope: must be one of ${COLLECTION_SCOPES.join(", ")}`);
+    }
+  }
+  const visibility = entry["visibility"];
+  if (visibility !== null && visibility !== undefined) {
+    if (typeof visibility !== "string" || !(VISIBILITIES as readonly string[]).includes(visibility)) {
+      errors.push(`${at}.visibility: must be one of ${VISIBILITIES.join(", ")}`);
+    }
+  }
+  const note = entry["visibility_note"];
+  if (note !== null && note !== undefined) {
+    if (typeof note !== "string" || note.trim() === "") {
+      errors.push(`${at}.visibility_note: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(note)) {
+      errors.push(`${at}.visibility_note: expected a single line (no line breaks)`);
+    } else if (note.length > VISIBILITY_NOTE_MAX) {
+      errors.push(
+        `${at}.visibility_note: expected at most ${VISIBILITY_NOTE_MAX} characters, got ${note.length}`,
+      );
+    }
+  }
+}
+
+/**
  * Copies billing, aggregator carriage, and discovery provenance onto a
  * validated entry, normalising "absent" (undefined) and "unknown" (null) the
  * same way the auth fields do.
@@ -1240,6 +1375,21 @@ function optionalIndexFields(entry: Record<string, unknown>): Partial<ApiEntry> 
   }
   for (const field of ["discovered_date", "promoted_date", "promoted_by"] as const) {
     if (field in entry) out[field] = typeof entry[field] === "string" ? entry[field] : null;
+  }
+  return out as Partial<ApiEntry>;
+}
+
+/** Copies the optional catalog-scope fields, "absent" vs. "explicitly null" preserved. */
+function optionalCollectionFields(entry: Record<string, unknown>): Partial<ApiEntry> {
+  const out: Record<string, unknown> = {};
+  if ("collection_scope" in entry) {
+    out["collection_scope"] = typeof entry["collection_scope"] === "string" ? entry["collection_scope"] : null;
+  }
+  if ("visibility" in entry) {
+    out["visibility"] = typeof entry["visibility"] === "string" ? entry["visibility"] : null;
+  }
+  if ("visibility_note" in entry) {
+    out["visibility_note"] = typeof entry["visibility_note"] === "string" ? entry["visibility_note"] : null;
   }
   return out as Partial<ApiEntry>;
 }
@@ -1604,6 +1754,14 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       origin: "shard",
       origin_file: file,
       ...(category === "" ? {} : { category }),
+      ...(typeof row["collection_scope"] === "string" &&
+      (COLLECTION_SCOPES as readonly string[]).includes(row["collection_scope"])
+        ? { collection_scope: row["collection_scope"] as CollectionScope }
+        : {}),
+      ...(typeof row["visibility"] === "string" && (VISIBILITIES as readonly string[]).includes(row["visibility"])
+        ? { visibility: row["visibility"] as Visibility }
+        : {}),
+      ...(typeof row["visibility_note"] === "string" ? { visibility_note: row["visibility_note"] } : {}),
     },
   };
 }

@@ -458,6 +458,12 @@ entries:
       - https://x.com/MartinSzerment/status/2115455329815113988
       - https://mistral.ai/pricing
     discovered_date: 2026-10-28
+    collection_scope: llm
+    visibility: hidden
+    visibility_note: >-
+      LLM API; set aside from the tool/data/aggregator catalog 2026-11-24
+      (Bei). Hidden from listings by default, not deleted; recoverable via
+      --all or visibility: listed.
   - name: askroger-api
     url: https://askrogerai.readme.io/reference/getting-started-1
     access_mode: own-account

@@ -34,7 +34,38 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
 
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
 # adding one to a shard cannot invalidate the rows that do not have it.
-OPTIONAL = ['offering']
+OPTIONAL = ['offering', 'collection_scope', 'visibility', 'visibility_note']
+
+# ---- catalog scope (Bei, 2026-11-24) ----------------------------------------
+# Kept byte-identical in meaning to src/apis.ts (COLLECTION_SCOPES, VISIBILITIES,
+# VISIBILITY_NOTE_MAX, TOOL_SCOPE_CATEGORIES). test/collection-scope.test.ts
+# asserts the two lists have not drifted apart.
+COLLECTION_SCOPES = ['tool', 'data', 'aggregator', 'llm']
+VISIBILITIES = ['listed', 'hidden']
+VISIBILITY_NOTE_MAX = 300
+TOOL_SCOPE_CATEGORIES = {
+    'generative-media', 'web-search', 'web-scraping', 'seo-marketing',
+    'developer-infra', 'communications', 'contact-verification',
+}
+
+
+def effective_collection_scope(category, collection_scope=None):
+    """Mirrors src/apis.ts effectiveCollectionScope for a shard row (always has
+    a category, so the access_mode fallback there never applies here)."""
+    if collection_scope:
+        return collection_scope
+    if category == 'llm-models':
+        return 'llm'
+    if category in TOOL_SCOPE_CATEGORIES:
+        return 'tool'
+    return 'data'
+
+
+def effective_visibility(category, collection_scope=None, visibility=None):
+    """Mirrors src/apis.ts effectiveVisibility for a shard row."""
+    if visibility:
+        return visibility
+    return 'hidden' if effective_collection_scope(category, collection_scope) == 'llm' else 'listed'
 
 ENUMS = {
     # `keyless` = the vendor documents no credential at all; `wallet-x402` = the
@@ -433,6 +464,29 @@ def check_offering(errs, where, off):
             errs.append('%s.url: expected an http(s) URL or null' % rat)
 
 
+def check_collection(errs, where, e):
+    """The optional `collection_scope` / `visibility` / `visibility_note` fields.
+
+    `visibility: hidden` is deliberately NOT required to carry a note -- same
+    rule as the TS validator.
+    """
+    scope = e.get('collection_scope')
+    if scope is not None and scope not in COLLECTION_SCOPES:
+        errs.append('%s.collection_scope: must be one of %s' % (where, ', '.join(COLLECTION_SCOPES)))
+    visibility = e.get('visibility')
+    if visibility is not None and visibility not in VISIBILITIES:
+        errs.append('%s.visibility: must be one of %s' % (where, ', '.join(VISIBILITIES)))
+    note = e.get('visibility_note')
+    if note is not None:
+        if not isinstance(note, str) or not note.strip():
+            errs.append('%s.visibility_note: expected a non-empty string or null' % where)
+        elif '\n' in note or '\r' in note:
+            errs.append('%s.visibility_note: expected a single line (no line breaks)' % where)
+        elif len(note) > VISIBILITY_NOTE_MAX:
+            errs.append('%s.visibility_note: expected at most %d characters, got %d'
+                        % (where, VISIBILITY_NOTE_MAX, len(note)))
+
+
 def main(root):
     errs, seen_ids, total = [], {}, 0
     files = sorted(glob.glob(os.path.join(root, '*.yaml')))
@@ -514,6 +568,8 @@ def main(root):
 
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])
+
+            check_collection(errs, where, e)
 
             d = e.get('checked_date')
             d = d.isoformat() if isinstance(d, datetime.date) else d
