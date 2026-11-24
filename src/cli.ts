@@ -59,6 +59,14 @@ import {
 } from "./vault/entries.js";
 import { openEntryStore } from "./vault/entry-store.js";
 import {
+  accountRunCommand,
+  cmdAccountAdd,
+  cmdAccountShowData,
+  listAccountSummaries,
+  setAccountDisabled,
+  type AccountAddOptions,
+} from "./accounts/cli.js";
+import {
   DEFAULT_STALE_DAYS,
   httpFetcher,
   readStaleCache,
@@ -299,6 +307,76 @@ export function buildProgram(): Command {
     .action(async (name: string, options: { yes: boolean }) => {
       await withExitCodes("vault rm", async () => {
         await cmdVaultRm(name, options.yes);
+      });
+    });
+
+  const account = program
+    .command("account")
+    .description("register vendor accounts, with metadata kept apart from their secrets");
+
+  account
+    .command("add <name>")
+    .description("register a vendor account, optionally storing its key and/or login in the vault")
+    .requiredOption("--vendor <id>", "vendor id from the API index, e.g. apify")
+    .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .option("--email <address>", "account email (only a masked hint is ever stored)")
+    .option("--key-alias <alias>", "link to (or name, with --store-key) an api_key vault entry")
+    .option("--store-key", "store a new API key in the vault for this account", false)
+    .option("--domain <domain>", "destination domain for the stored key (with --store-key)")
+    .option("--platform <platform>", "platform label for the stored key (default: --vendor)")
+    .option("--header <name>", "header to inject for the stored key", DEFAULT_HEADER)
+    .option("--format <template>", "header value template for the stored key", DEFAULT_FORMAT)
+    .addOption(
+      new Option("--scheme <scheme>", "scheme the proxy uses for the stored key's domain").choices([
+        ...UPSTREAM_SCHEMES,
+      ]),
+    )
+    .option("--store-login", "store a login (the account email as username) in the vault", false)
+    .option("--url <url>", "where the stored login is used, e.g. https://apify.com/login")
+    .option("--stdin", "read the one secret this command stores from stdin", false)
+    .option("--yes", "overwrite an existing account with the same name without asking", false)
+    .action(async (name: string, options: AccountAddOptions) => {
+      await withExitCodes("account add", async () => {
+        await cmdAccountAdd(name, options);
+      });
+    });
+
+  account
+    .command("list")
+    .description("list every registered account (metadata only, never values)")
+    .option("--json", "machine-readable output", false)
+    .option("--active", "only accounts that are not disabled", false)
+    .action((options: { json: boolean; active: boolean }) => {
+      withExitCodes("account list", () => {
+        cmdAccountList(options.json, options.active);
+      });
+    });
+
+  account
+    .command("show <name>")
+    .description("show one account's metadata and the references an agent may use")
+    .option("--json", "machine-readable output", false)
+    .action((name: string, options: { json: boolean }) => {
+      withExitCodes("account show", () => {
+        cmdAccountShow(name, options.json);
+      });
+    });
+
+  account
+    .command("disable <name>")
+    .description("disable an account and the vault entries it points at")
+    .action((name: string) => {
+      withExitCodes("account disable", () => {
+        cmdAccountEnableDisable(name, true);
+      });
+    });
+
+  account
+    .command("enable <name>")
+    .description("re-enable an account and the vault entries it points at")
+    .action((name: string) => {
+      withExitCodes("account enable", () => {
+        cmdAccountEnableDisable(name, false);
       });
     });
 
@@ -1492,6 +1570,67 @@ async function cmdVaultRm(name: string, yes: boolean): Promise<void> {
   }
   await store.deleteEntry(name);
   console.log(`Removed "${name}" from ${store.location} and from the metadata index.`);
+}
+
+function cmdAccountList(json: boolean, activeOnly: boolean): void {
+  const home = skeletonKeyHome();
+  const accounts = listAccountSummaries(home, activeOnly);
+  if (json) {
+    console.log(JSON.stringify(accounts, null, 2));
+    return;
+  }
+  if (accounts.length === 0) {
+    console.log("No accounts yet. Add one with: skeletonkey account add <name> --vendor <id>");
+    return;
+  }
+  printTable(
+    ["NAME", "VENDOR", "REGISTERED", "EMAIL", "KEY ALIAS", "STATE"],
+    accounts.map((account) => [
+      account.name,
+      account.vendor,
+      account.registered || "-",
+      account.email_hint ?? "-",
+      account.key_alias ?? "-",
+      account.disabled ? "disabled" : "active",
+    ]),
+  );
+}
+
+function cmdAccountShow(name: string, json: boolean): void {
+  const home = skeletonKeyHome();
+  const account = cmdAccountShowData(name, home);
+  const runCommand = accountRunCommand(account);
+  if (json) {
+    console.log(
+      JSON.stringify(
+        { ...account, run_command: runCommand, note: "Metadata only. The values stay in the vault." },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  console.log(`Name:        ${account.name}`);
+  console.log(`Vendor:      ${account.vendor}`);
+  console.log(`Registered:  ${account.registered || "unknown"}`);
+  console.log(`Email:       ${account.email_hint ?? "-"} (masked; the value is in the vault, if stored)`);
+  console.log(`Key alias:   ${account.key_alias ?? "-"}`);
+  console.log(`Login entry: ${account.login_entry ?? "-"}`);
+  console.log(`State:       ${account.disabled ? "disabled" : "active"}`);
+  console.log(`References:  ${account.refs.join(", ") || "-"}`);
+  if (runCommand !== null) console.log(`Run:         ${runCommand}`);
+}
+
+function cmdAccountEnableDisable(name: string, disabled: boolean): void {
+  const home = skeletonKeyHome();
+  const account = setAccountDisabled(name, disabled, home);
+  console.log(`${disabled ? "Disabled" : "Enabled"} account "${account.name}".`);
+  if (account.key_alias !== null) {
+    console.log(`  key_alias:   ${account.key_alias} (${disabled ? "disabled" : "enabled"})`);
+  }
+  if (account.login_entry !== null) {
+    console.log(`  login_entry: ${account.login_entry} (${disabled ? "disabled" : "enabled"})`);
+  }
 }
 
 // --- the run command -------------------------------------------------------

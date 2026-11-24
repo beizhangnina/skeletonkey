@@ -23,6 +23,7 @@ const SHARD_DIR = path.join(REPO_ROOT, "data", "apis");
 const TOOL_ARGS: Record<string, Record<string, unknown>> = {
   find_api: { capability: "embeddings" },
   list_keys: {},
+  list_accounts: {},
   key_status: { alias: ALIAS },
   request_access: { platform: "Voyage AI", reason: "embed a corpus", est_budget: 5 },
   access_status: { request_id: "req_0000000000000000" },
@@ -72,6 +73,7 @@ describe("skeletonkey MCP server", () => {
     expect(SKELETONKEY_TOOL_NAMES).toEqual([
       "find_api",
       "list_keys",
+      "list_accounts",
       "key_status",
       "request_access",
       "access_status",

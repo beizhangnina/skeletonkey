@@ -117,6 +117,23 @@ export function removeEntry(name: string, home = skeletonKeyHome()): boolean {
   return true;
 }
 
+/**
+ * Flips `disabled` on one login entry, the login counterpart of
+ * `setDisabled` in `keys.ts`. Returns undefined when the entry does not exist.
+ */
+export function setEntryDisabled(
+  name: string,
+  disabled: boolean,
+  home = skeletonKeyHome(),
+): VaultEntryMeta | undefined {
+  const data = readEntries(home);
+  const entry = data.entries.find((candidate) => candidate.name === name);
+  if (!entry) return undefined;
+  entry.disabled = disabled;
+  writeEntries(data, home);
+  return entry;
+}
+
 // --- the merged view -------------------------------------------------------
 
 /**
