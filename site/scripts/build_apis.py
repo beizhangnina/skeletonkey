@@ -420,18 +420,69 @@ def routes_section(x):
             label = 'Direct' if rt['kind'] == 'direct' else rt['source_name']
             notes.append(f'<dt>{E(label)}</dt><dd>{E(" ".join(bits))}</dd>')
     pick = ''.join(f'<li>{E(b)}</li>' for b in x['when_to_pick'])
-    return ('<section class="ap-card" id="routes"><h2>Routes</h2>'
-            f'<p class="ap-note">Ways to reach this data: direct from the vendor, or through an <a href="/apis/aggregators/">aggregator gateway</a> that already holds the key. '
+    # ND-9: this table is a reference comparison, not the recommended path -- an
+    # aggregator route bills through its own key, not a key of yours, so it is
+    # no longer pitched as a substitute for registering your own account above.
+    return ('<section class="ap-card" id="routes"><h2>Other routes (reference only)</h2>'
+            f'<p class="ap-note">For comparison: besides registering your own account (see <a href="#register">Register locally</a> above), '
+            f'this data has also shown up through <a href="/apis/aggregators/">aggregator gateways</a>, each billed through that gateway\'s own key, not yours. '
+            f'SkeletonKey does not recommend routing your calls through a gateway key instead of your own account. '
             f'Every figure here is ours, read on the checked date; unverified routes carry no confirmed price.</p>'
             f'<div class="ap-scroll"><table class="ap-table ap-routes"><thead><tr>{hdr}</tr></thead><tbody>{body}</tbody></table></div>'
-            + (f'<h3>When to pick which</h3><ul class="ap-pick">{pick}</ul>' if pick else '')
+            + (f'<h3>What differs between them</h3><ul class="ap-pick">{pick}</ul>' if pick else '')
             + (f'<h3>Route notes</h3><dl class="ap-dl ap-rnotes">{"".join(notes)}</dl>' if notes else '')
             + '</section>')
+
+def endpoint_row(e):
+    docs = ext(e.get('docs_url'), 'Docs') if e.get('docs_url') else '—'
+    return (f'<tr><th scope="row"><code>{E(e.get("method"))} {E(e.get("path"))}</code></th>'
+            f'<td data-label="Does">{E(e.get("summary") or "—")}</td>'
+            f'<td data-label="Returns">{E(e.get("returns") or "—")}</td>'
+            f'<td data-label="Docs">{docs}</td></tr>')
+
+def endpoints_section(x):
+    """First-screen structured core fields (ND-9), straight from ND-8's schema:
+    the vendor's own official docs link, and its documented endpoints. `null`
+    means not yet verified; `[]` means verified that there is nothing to list,
+    with endpoints_note saying why -- never invented."""
+    docs = x.get('official_docs_url')
+    eps = x.get('endpoints')
+    head = ('<section class="ap-card" id="api-surface"><h2>API surface</h2>'
+             f'<dl class="ap-dl"><dt>Official docs</dt><dd>{ext(docs, docs) if docs else "Not yet verified"}</dd></dl>')
+    if eps is None:
+        body = '<p class="ap-note">Endpoints: not yet verified.</p>'
+    elif len(eps) == 0:
+        body = f'<p class="ap-note">Endpoints: {E(x.get("endpoints_note") or "no officially documented self-serve API.")}</p>'
+    else:
+        hdr = ''.join(f'<th scope="col">{c}</th>' for c in ('Endpoint', 'Does', 'Returns', 'Docs'))
+        rows_ = ''.join(endpoint_row(e) for e in eps)
+        body = f'<div class="ap-scroll"><table class="ap-table"><thead><tr>{hdr}</tr></thead><tbody>{rows_}</tbody></table></div>'
+    return head + body + '</section>'
+
+def register_section(x):
+    """Guidance (ND-9): registration happens on the person's own machine,
+    through their own SkeletonKey install -- this website never collects,
+    forwards or stores a key."""
+    setup = f'Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>)'
+    if x['status'] == 'no-public-api':
+        body = (f'{setup}. This vendor publishes no self-serve API of its own to register for, so there is no vendor '
+                 'key for SkeletonKey to hold here -- the aggregator listings below are the only programmatic path we found, '
+                 'each billed through that gateway\'s own key, not yours.')
+    else:
+        body = (f'This page does not collect your key. {setup}, then let your agent find and register {E(x["name"])} '
+                 'for you: it signs up on the vendor\'s own pages under your own account, verification codes and payment '
+                 'stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI '
+                 'assistant, and never sent to this site.')
+    return f'<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>{body}</p></section>'
 
 def vendor_body(x):
     b = [f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> {E(x["category"])}</nav>',
          f'<h1 class="ap-title">{E(x["name"])}</h1>', f'<p class="ap-meta">{badge(x["status"])} <span>Checked {E(x["checked_date"])}</span></p>']
     if x.get('summary'): b.append(f'<p class="ap-lede">{E(x["summary"])}</p>')
+    # ND-9: structured endpoint/docs data and the local-registration guidance
+    # go first, so they are visible without scrolling into Routes.
+    b.append(endpoints_section(x))
+    b.append(register_section(x))
     if x['status'] == 'no-public-api':
         cats = ' and '.join(f'<a href="{CATS[c][1]}" rel="noopener">{CATS[c][0]}</a>' for c in [k for k, v in CATS.items() if v[0] in x['listed_by']])
         b.append(f'<section class="ap-card"><h2>No public API</h2><p>We found no self-serve developer API from this vendor. Programmatic access is offered through {cats or "an aggregator catalog"}, which collects the data for you.</p></section>')
@@ -462,9 +513,11 @@ def vendor_body(x):
         else:
             why = 'This vendor sells through its sales team and publishes no prices.' if x['status'] == 'sales-only' else 'We could not confirm pricing on the vendor\'s own pages, so we show none.'
             b.append(f'<section class="ap-card"><h2>Pricing</h2><p>{why} Unverified rows never show a price.</p></section>')
-    b.append(routes_section(x))
     if x['listed_by']: b.append(f'<p class="ap-small">Listed in: {E(", ".join(x["listed_by"]))}.</p>')
     if x['sources']: b.append('<section class="ap-card"><h2>Sources</h2><ul class="ap-src">' + ''.join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(u)}</a></li>' for u in x['sources']) + '</ul></section>')
+    # ND-9: aggregator routes are reference material, not the main path -- kept
+    # last, after the vendor's own facts and sources.
+    b.append(routes_section(x))
     return '\n'.join(c for c in b if c)
 
 def agg_body(a):
@@ -472,6 +525,15 @@ def agg_body(a):
          f'<h1 class="ap-title">{E(a["name"])}</h1>',
          f'<p class="ap-meta">{vbadge(a["verified"])} <span>Checked {E(a["checked_date"])}</span></p>']
     if a['what_it_is']: b.append(f'<p class="ap-lede">{E(a["what_it_is"])}</p>')
+    # ND-9: a directory entry, not a recommended way to connect -- said up
+    # front on every aggregator page, not only the ones whose own `what_it_is`
+    # text happens to mention it.
+    b.append('<section class="ap-card ap-caution"><h2>Before you route through this</h2>'
+             '<p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. '
+             'A gateway holds one key that stands in for many vendors; keeping your own account and key with each '
+             'vendor keeps you in control of your own data, limits and billing. '
+             '<a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details '
+             'below are what we read on this gateway\'s own pages, for reference.</p></section>')
     if not a['verified']: b.append('<section class="ap-card"><h2>Unverified</h2><p>We could not read this gateway\'s own pages on the checked date, so nothing below is confirmed. Treat it as a lead.</p></section>')
     au = a['auth']
     hdr = au.get('header') or ''
@@ -521,6 +583,8 @@ def agg_index_body(aggs_list):
             f'<p class="ap-lede">{len(aggs_list)} gateways that resell or index other vendors\' APIs behind one account, one key and one balance. '
             f'{nv} verified on their own docs and pricing pages, {len(aggs_list)-nv} unverified. Each vendor page lists its routes side by side so you can see what a gateway gives up in coverage. '
             f'Machine-readable: <a href="/apis.json">/apis.json</a>.</p>'
+            f'<p class="ap-note">These are directory entries, not a recommended way to connect: a gateway key stands in for many vendors at once. '
+            f'<a href="/#install">Register locally with SkeletonKey</a> and keep your own account and key with each vendor where you can.</p>'
             f'<ul class="ap-list">{li}</ul>'
             f'<p class="ap-small">Payment model tokens come from our own reading of each gateway\'s billing pages: '
             f'<code>prepaid_credits</code>, <code>payg</code>, <code>subscription</code>, <code>x402</code>, <code>no_account</code>.</p>')
