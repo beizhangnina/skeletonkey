@@ -218,15 +218,14 @@ describe("real data: data/discovered-x.yaml", () => {
     expect(row["visibility_note"]).toBeTruthy();
   });
 
-  it("leaves sunra-api undeclared: it derives (no category on a root row -> data/listed)", () => {
+  it("lists sunra-api as a generative-media tool, with a visibility_note on its LLM surface", () => {
     const row = byName.get("sunra-api") as Record<string, unknown> | undefined;
     expect(row).toBeDefined();
-    expect(row?.["collection_scope"] ?? null).toBeNull();
-    expect(row?.["visibility"] ?? null).toBeNull();
-    // Open question (see final report): sunra-api mixes generative media and an
-    // LLM surface behind one key; the root-row derivation has no category to
-    // read, so it falls back to access_mode and comes out `data`/listed.
-    expect(effectiveCollectionScope(row as Record<string, unknown>)).toBe("data");
+    expect(row?.["collection_scope"]).toBe("tool");
+    expect(effectiveCollectionScope(row as Record<string, unknown>)).toBe("tool");
+    expect(row?.["visibility"]).toBe("listed");
+    expect(effectiveVisibility(row as Record<string, unknown>)).toBe("listed");
+    expect((row?.["visibility_note"] as string) ?? "").toMatch(/LLM/);
   });
 });
 

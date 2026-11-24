@@ -654,6 +654,11 @@ entries:
       promoted_by stays unset. ToS not reviewed."
     source: null
     checked_date: 2026-10-29
+    collection_scope: tool
+    visibility: listed
+    visibility_note: "Listed as a generative-media tool (image/video/speech/3D); the
+      same Sunra API key also calls its LLM completions API at api-llm.sunra.ai, per
+      https://docs.sunra.ai/platform/authentication.md."
     capabilities:
       - text to image
       - text to video
