@@ -244,6 +244,14 @@ def public(r):
     out['routes'] = rt
     out['when_to_pick'] = when_to_pick(r, st, rt)
     out['sources'] = [u for u in (r.get('source_urls') or []) if url_ok(u)]
+    # ND-8 structured core fields: pass through as-is when the source row has
+    # them, null when it doesn't. A structured `auth` dict is a superset of
+    # the legacy {type, header, format} shape (it adds docs_url), so it
+    # replaces the legacy object built above; otherwise keep that legacy
+    # object when present.
+    out['auth'] = r.get('auth') if isinstance(r.get('auth'), dict) else out.get('auth')
+    for k in ('official_docs_url', 'pricing', 'endpoints', 'endpoints_note'):
+        out[k] = r.get(k)
     return out
 
 rows = sorted((public(r) for r in doc['entries'] if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())

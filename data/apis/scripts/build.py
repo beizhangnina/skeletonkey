@@ -173,6 +173,19 @@ for pid in sorted(set(rec) & set(curated.P)):
         'checked_date': CHECKED,
     })
 
+# `offering` and the ND-8 structured fields (official_docs_url, auth, pricing,
+# endpoints, endpoints_note -- see ../README.md) are never emitted here, same
+# as `offering`: the three aggregator catalogs do not publish the vendor's own
+# docs URL, its auth/pricing specifics, or an endpoint catalog, and inventing
+# one from catalog metadata would describe the aggregator, not the vendor.
+# They stay curated by hand directly in the generated shard files or
+# apis.yaml. validate.py already accepts all five on every row (OPTIONAL), so
+# no schema change is needed to start carrying one -- but the scalar-only `q()`
+# + `ORDER` emission below only ever wrote flat key: value pairs (true even for
+# `official_docs_url`/`endpoints_note`), and has no mapping/list emitter for a
+# nested block, so `auth`/`pricing`/`endpoints` would need one added before
+# `entries.append({...})` above could carry them.
+
 # ---- emit one YAML shard per category --------------------------------------
 ORDER = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
          'access_mode', 'signup', 'signup_automatable', 'min_topup',

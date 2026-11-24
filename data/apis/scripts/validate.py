@@ -13,10 +13,14 @@ Checks, per entry:
   * the optional `offering` block: a one-line summary, service categories from a
     closed list, approximate counts, what is free, how to connect, the vendor's
     own catalog URL, and at most HIGHLIGHTS_MAX highlighted models/endpoints
+  * the optional structured core fields (ND-8): `official_docs_url`, `auth`,
+    `pricing`, `endpoints` and `endpoints_note` -- the vendor's own docs URL,
+    how its endpoint is credentialed, what it charges, and a capped list of
+    its documented endpoints
 
-`offering` is OPTIONAL on every row: a shard written before the block existed
-validates unchanged. It mirrors the `offering:` block src/apis.ts enforces for
-apis.yaml, field for field, so one schema covers both files.
+`offering` and the ND-8 fields are OPTIONAL on every row: a shard written
+before they existed validates unchanged. They mirror the blocks src/apis.ts
+enforces for apis.yaml, field for field, so one schema covers both files.
 
 Exit code 0 = pass, 1 = fail.  Usage: python3 validate.py [dir]
 """
@@ -34,7 +38,8 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
 
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
 # adding one to a shard cannot invalidate the rows that do not have it.
-OPTIONAL = ['offering']
+OPTIONAL = ['offering', 'official_docs_url', 'auth', 'pricing', 'endpoints',
+            'endpoints_note']
 
 ENUMS = {
     # `keyless` = the vendor documents no credential at all; `wallet-x402` = the
@@ -76,6 +81,25 @@ FREE_TIER_KEYS = ['available', 'what', 'limits', 'requires_key',
 CONNECT_KEYS = ['base_url', 'auth', 'auth_header', 'auth_format']
 HIGHLIGHT_ROW_KEYS = ['id', 'kind', 'free', 'note', 'url']
 HEADER_NAME = re.compile(r'^[^\s:]+$')
+
+# ---- the structured core fields (ND-8) --------------------------------------
+# Kept byte-identical in meaning to src/apis.ts (AUTH_TYPES, PRICING_MODELS,
+# HTTP_METHODS, ENDPOINTS_MAX, ENDPOINT_SUMMARY_MAX, ENDPOINT_RETURNS_MAX,
+# PRICING_NOTES_MAX, ENDPOINTS_NOTE_MAX). test/structured-fields.test.ts
+# asserts the lists have not drifted apart.
+AUTH_TYPES = ['api_key', 'bearer', 'oauth2', 'basic', 'none', 'other', 'unknown']
+PRICING_MODELS = ['free', 'freemium', 'pay_as_you_go', 'subscription',
+                  'prepaid_credits', 'contact_sales', 'unknown']
+HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
+ENDPOINTS_MAX = 50
+ENDPOINT_SUMMARY_MAX = 200
+ENDPOINT_RETURNS_MAX = 200
+PRICING_NOTES_MAX = 300
+ENDPOINTS_NOTE_MAX = 300
+AUTH_KEYS = ['type', 'header', 'format', 'docs_url']
+PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
+                'pricing_url', 'notes']
+ENDPOINT_ROW_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
 
 
 # ---- fallback reader (no PyYAML) --------------------------------------------
@@ -433,6 +457,172 @@ def check_offering(errs, where, off):
             errs.append('%s.url: expected an http(s) URL or null' % rat)
 
 
+def check_structured_fields(errs, where, e):
+    """The five structured core fields (ND-8): `official_docs_url`, `auth`,
+    `pricing`, `endpoints`, `endpoints_note`. All optional, all
+    null-when-unknown, mirroring src/apis.ts field for field."""
+    if e.get('official_docs_url') is not None and not is_url(e.get('official_docs_url')):
+        errs.append('%s.official_docs_url: expected an http(s) URL or null' % where)
+    check_auth(errs, where, e.get('auth'))
+    check_pricing(errs, where, e.get('pricing'))
+    check_endpoints(errs, where, e)
+
+
+def check_auth(errs, where, auth):
+    """`auth`: how the vendor's endpoint is credentialed. `type` is required
+    whenever the block exists; `header`/`format` must be null when `type` is
+    `none`, and `format` must carry a `<...>` placeholder, never a real key."""
+    at = '%s.auth' % where
+    if auth is None:
+        return
+    if not isinstance(auth, dict):
+        errs.append('%s: expected a mapping or null' % at)
+        return
+    for k in auth:
+        if k not in AUTH_KEYS:
+            errs.append('%s.%s: unknown field' % (at, k))
+    if 'type' not in auth:
+        errs.append('%s.type: missing (required when auth is set)' % at)
+    elif auth.get('type') not in AUTH_TYPES:
+        errs.append('%s.type: expected one of %s' % (at, ' | '.join(AUTH_TYPES)))
+    header = auth.get('header')
+    if header is not None:
+        if not isinstance(header, str) or not header.strip():
+            errs.append('%s.header: expected a non-empty header name or null' % at)
+        elif not HEADER_NAME.match(header):
+            errs.append('%s.header: expected a header name only, with no colon'
+                        ' or spaces' % at)
+    fmt = auth.get('format')
+    if fmt is not None:
+        if not isinstance(fmt, str) or not fmt.strip():
+            errs.append('%s.format: expected a non-empty template or null' % at)
+        elif not re.search(r'<[^<>]+>', fmt):
+            errs.append('%s.format: must contain a <...> placeholder' % at)
+    if auth.get('type') == 'none':
+        if isinstance(header, str):
+            errs.append('%s.header: must be null when type is none' % at)
+        if isinstance(fmt, str):
+            errs.append('%s.format: must be null when type is none' % at)
+    if auth.get('docs_url') is not None and not is_url(auth.get('docs_url')):
+        errs.append('%s.docs_url: expected an http(s) URL or null' % at)
+
+
+def check_pricing(errs, where, pricing):
+    """`pricing`: what the vendor charges. `starting_price_usd` is never
+    guessed, the same rule `min_topup` and `billing` follow elsewhere."""
+    at = '%s.pricing' % where
+    if pricing is None:
+        return
+    if not isinstance(pricing, dict):
+        errs.append('%s: expected a mapping or null' % at)
+        return
+    for k in pricing:
+        if k not in PRICING_KEYS:
+            errs.append('%s.%s: unknown field' % (at, k))
+    model = pricing.get('model')
+    if model is not None and model not in PRICING_MODELS:
+        errs.append('%s.model: expected one of %s or null'
+                    % (at, ' | '.join(PRICING_MODELS)))
+    flag(errs, at, 'free_tier', pricing.get('free_tier'))
+    price = pricing.get('starting_price_usd')
+    if price is not None:
+        if isinstance(price, bool) or not isinstance(price, (int, float)) or price < 0:
+            errs.append('%s.starting_price_usd: expected a non-negative number'
+                        ' or null' % at)
+    text(errs, at, 'unit', pricing.get('unit'))
+    if pricing.get('pricing_url') is not None and not is_url(pricing.get('pricing_url')):
+        errs.append('%s.pricing_url: expected an http(s) URL or null' % at)
+    notes = pricing.get('notes')
+    if notes is not None:
+        if not isinstance(notes, str) or not notes.strip():
+            errs.append('%s.notes: expected a non-empty string or null' % at)
+        elif '\n' in notes or '\r' in notes:
+            errs.append('%s.notes: expected a single line (no line breaks)' % at)
+        elif len(notes) > PRICING_NOTES_MAX:
+            errs.append('%s.notes: expected at most %d characters, got %d'
+                        % (at, PRICING_NOTES_MAX, len(notes)))
+
+
+def check_endpoints(errs, where, e):
+    """`endpoints` + `endpoints_note`: `null` means not verified yet, `[]`
+    means verified that there is no official self-serve API surface to list
+    -- and an empty list REQUIRES `endpoints_note` to say why."""
+    note = e.get('endpoints_note')
+    if note is not None:
+        if not isinstance(note, str) or not note.strip():
+            errs.append('%s.endpoints_note: expected a non-empty string or null' % where)
+        elif '\n' in note or '\r' in note:
+            errs.append('%s.endpoints_note: expected a single line (no line'
+                        ' breaks)' % where)
+        elif len(note) > ENDPOINTS_NOTE_MAX:
+            errs.append('%s.endpoints_note: expected at most %d characters, got %d'
+                        % (where, ENDPOINTS_NOTE_MAX, len(note)))
+
+    eps = e.get('endpoints')
+    if eps is None:
+        return
+    at = '%s.endpoints' % where
+    if not isinstance(eps, list):
+        errs.append('%s: expected a list or null' % at)
+        return
+    if not eps:
+        if not isinstance(note, str) or not note.strip():
+            errs.append('%s: expected a non-empty endpoints_note when endpoints'
+                        ' is [] -- say why there is no API surface to list' % at)
+        return
+    if len(eps) > ENDPOINTS_MAX:
+        errs.append('%s: expected at most %d entries, got %d'
+                    % (at, ENDPOINTS_MAX, len(eps)))
+    seen = set()
+    for n, row in enumerate(eps):
+        rat = '%s[%d]' % (at, n)
+        if not isinstance(row, dict):
+            errs.append('%s: expected a mapping' % rat)
+            continue
+        for k in row:
+            if k not in ENDPOINT_ROW_KEYS:
+                errs.append('%s.%s: unknown field' % (rat, k))
+        method = row.get('method')
+        if method not in HTTP_METHODS:
+            errs.append('%s.method: must be one of %s' % (rat, ', '.join(HTTP_METHODS)))
+        p = row.get('path')
+        path_key = ''
+        if not isinstance(p, str) or not p.strip():
+            errs.append('%s.path: expected a non-empty string starting with "/"' % rat)
+        elif not p.startswith('/'):
+            errs.append('%s.path: expected a path starting with "/"' % rat)
+        elif re.search(r'\s', p):
+            errs.append('%s.path: expected no whitespace' % rat)
+        else:
+            path_key = p
+        if isinstance(method, str) and path_key:
+            key = '%s %s' % (method, path_key)
+            if key in seen:
+                errs.append('%s: duplicate method+path %r' % (rat, key))
+            else:
+                seen.add(key)
+        summary = row.get('summary')
+        if summary is not None:
+            if not isinstance(summary, str) or not summary.strip():
+                errs.append('%s.summary: expected a non-empty string or null' % rat)
+            elif '\n' in summary or '\r' in summary:
+                errs.append('%s.summary: expected a single line (no line breaks)' % rat)
+            elif len(summary) > ENDPOINT_SUMMARY_MAX:
+                errs.append('%s.summary: expected at most %d characters, got %d'
+                            % (rat, ENDPOINT_SUMMARY_MAX, len(summary)))
+        returns = row.get('returns')
+        if returns is not None:
+            if not isinstance(returns, str) or not returns.strip():
+                errs.append('%s.returns: expected a non-empty string or null' % rat)
+            elif '\n' in returns or '\r' in returns:
+                errs.append('%s.returns: expected a single line (no line breaks)' % rat)
+            elif len(returns) > ENDPOINT_RETURNS_MAX:
+                errs.append('%s.returns: expected at most %d characters, got %d'
+                            % (rat, ENDPOINT_RETURNS_MAX, len(returns)))
+        if row.get('docs_url') is not None and not is_url(row.get('docs_url')):
+            errs.append('%s.docs_url: expected an http(s) URL or null' % rat)
+
+
 def main(root):
     errs, seen_ids, total = [], {}, 0
     files = sorted(glob.glob(os.path.join(root, '*.yaml')))
@@ -514,6 +704,7 @@ def main(root):
 
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])
+            check_structured_fields(errs, where, e)
 
             d = e.get('checked_date')
             d = d.isoformat() if isinstance(d, datetime.date) else d

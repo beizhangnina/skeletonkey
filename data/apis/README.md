@@ -87,6 +87,37 @@ underlying vendor, and copying their descriptions would describe the aggregator
 in root `apis.yaml`; the schema exists here so a future, vendor-sourced shard
 can carry one without a schema change.
 
+## The structured core fields (ND-8)
+
+Five more optional fields, independent of `offering` above and validated the
+same way by both `validate.py` and `src/apis.ts` (and checked for drift by
+`test/structured-fields.test.ts`):
+
+- **`official_docs_url`** -- http(s) URL or null. The vendor's **own** official
+  API documentation, never an aggregator's page. `null` = not verified.
+- **`auth`** -- null, or `{type, header, format, docs_url}`. `type` is one of
+  `api_key | bearer | oauth2 | basic | none | other | unknown` and is required
+  whenever the block exists. `header`/`format` must be null when `type` is
+  `none` (nothing to name), and `format` is a placeholder TEMPLATE such as
+  `"Bearer <API_KEY>"` that must contain a `<...>` placeholder -- never a real
+  secret.
+- **`pricing`** -- null, or `{model, free_tier, starting_price_usd, unit,
+  pricing_url, notes}`. `model` is one of `free | freemium | pay_as_you_go |
+  subscription | prepaid_credits | contact_sales | unknown`, or null.
+  `starting_price_usd` is never guessed.
+- **`endpoints`** -- null, or a list of at most 50 `{method, path, summary,
+  returns, docs_url}` rows. `null` means not verified yet; `[]` means verified
+  that there is **no** official self-serve API surface to list, which requires
+  a non-empty `endpoints_note`. `method` is uppercase HTTP; `path` starts with
+  `/`; duplicate `(method, path)` pairs in one row are an error.
+- **`endpoints_note`** -- string or null, one line, at most 300 characters:
+  why `endpoints` is empty or partial.
+
+Like `offering`, no shard row carries any of these yet and `build.py` does not
+emit them -- the aggregator catalogs do not publish a vendor's own docs URL,
+auth/pricing specifics or endpoint catalog. They stay curated by hand in
+`apis.yaml` or a hand-edited shard.
+
 ## Counts
 
 ### Deduped total
