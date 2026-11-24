@@ -1432,6 +1432,19 @@ function wrapped(label: string, value: string, width = 96): string[] {
   return lines.map((text, index) => (index === 0 ? head + text : indent + text));
 }
 
+/** Prints the one-line `usage_api` summary. Nothing when the field is absent. */
+function printUsageApi(entry: IndexEntry): void {
+  if (!("usage_api" in entry)) return;
+  const usage = entry.usage_api ?? null;
+  if (usage === null || usage.available === null) {
+    console.log("  usage API: not verified");
+  } else if (usage.available === true) {
+    console.log(`  usage API: ${usage.method ?? "?"} ${usage.path ?? "?"} (docs: ${usage.docs_url ?? "unknown"})`);
+  } else {
+    console.log(`  usage API: none per docs (docs: ${usage.docs_url ?? "unknown"})`);
+  }
+}
+
 /** One entry as a labelled block. Keeps nested offering fields readable. */
 function printOffering(entry: IndexEntry): void {
   const line = (label: string, value: string): void => {
@@ -1440,6 +1453,7 @@ function printOffering(entry: IndexEntry): void {
   const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
   console.log("");
   console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+  printUsageApi(entry);
 
   const offering = entry.offering ?? null;
   if (offering === null) {

@@ -87,6 +87,27 @@ underlying vendor, and copying their descriptions would describe the aggregator
 in root `apis.yaml`; the schema exists here so a future, vendor-sourced shard
 can carry one without a schema change.
 
+## The optional `usage_api` block
+
+Every row may carry one `usage_api:` mapping recording whether the vendor
+documents an API to check your **own** usage, spend or quota -- separate from
+the product API the rest of the row describes. It is optional, so a row
+without one validates exactly as it did before the field existed.
+
+Fields: `available` (`true` / `false` / `null` for "not verified in official
+docs" -- never guessed), `method` (`GET` / `POST` / `PUT` / `PATCH` / `DELETE`,
+required and non-null when `available` is `true`), `path` (the endpoint URL or
+path, required and non-null when `available` is `true`), `docs_url` (the
+official docs page actually consulted, required and non-null whenever
+`available` is `true` or `false`), `limits` (auth/plan/rate restrictions, in
+the vendor's own words), `notes`, and `checked_date` (required on every block
+that exists).
+
+The rules are enforced identically here and by `skeletonkey apis validate`
+(see `src/apis.ts`): unknown keys are rejected, `method`/`path` cannot be null
+when `available` is `true`, and `docs_url` cannot be null when `available` is
+`true` or `false` -- a verified fact needs the page it was verified on.
+
 ## Counts
 
 ### Deduped total

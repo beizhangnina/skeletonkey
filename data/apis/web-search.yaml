@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/exa"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://admin-api.exa.ai/team-management/credits"
+      docs_url: "https://exa.ai/docs/reference/team-management/get-team-credits"
+      limits: "Team Management API 按团队开通（联系 support@exa.ai），需 service account key（x-api-key）；普通 API key 不能假定可用"
+      notes: "另有 GET https://admin-api.exa.ai/team-management/api-keys/{id}/usage（https://exa.ai/docs/reference/team-management/get-api-key-usage），start_date 最多回溯 180 天"
+      checked_date: 2026-11-24
   - id: "justoneapi"
     name: "JustOneAPI"
     capability: "Single search surface across Chinese news and social platforms."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/justoneapi"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "keenable"
     name: "Keenable"
     capability: "Agent-oriented web search and page fetch over an own index, returning extracted page text."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/keenable"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/v1/billing"
+      docs_url: "https://docs.keenable.ai/api-reference/billing.md"
+      limits: "Free, read-only, key optional; keyless calls limited to 60 requests per minute per IP; billing is in beta and fields may change without notice."
+      notes: null
+      checked_date: 2026-11-24
   - id: "litescrape"
     name: "Litescrape"
     capability: "Live search-engine and marketplace result pages as JSON, including maps, shopping and AI answer blocks."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/litescrape"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/api/keys/status"
+      docs_url: "https://litescrape.com/docs/key-status"
+      limits: null
+      notes: null
+      checked_date: 2026-11-24
   - id: "octen"
     name: "Octen"
     capability: "Minute-fresh web search with query decomposition, page extraction and text/multimodal embeddings."
@@ -86,6 +118,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/octen"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "search1api"
     name: "Search1API"
     capability: "One schema over several search engines, the Chinese web, code hosts and news, plus page extraction."
@@ -103,6 +143,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/search1api"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.search1api.com/usage"
+      docs_url: "https://s1.dev/docs/essentials/credits-and-limits"
+      limits: null
+      notes: "剩余账户余额（文档：免费端点）"
+      checked_date: 2026-11-24
   - id: "serpapi"
     name: "SerpApi"
     capability: "Parsed result pages from 100+ search engines and marketplaces, returned as structured JSON."
@@ -120,6 +168,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpapi"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://serpapi.com/account.json"
+      docs_url: "https://serpapi.com/account-api"
+      limits: "需 api_key 参数；官方称免费且不计入月度额度"
+      notes: "响应含 api_key 与 account_email，入库/日志前必须脱敏"
+      checked_date: 2026-11-24
   - id: "serper"
     name: "Serper"
     capability: "Low-latency Google result pages as JSON across web, images, news, video and autocomplete."
@@ -137,3 +193,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serper"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://serper.dev"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

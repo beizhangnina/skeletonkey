@@ -13,10 +13,12 @@ Checks, per entry:
   * the optional `offering` block: a one-line summary, service categories from a
     closed list, approximate counts, what is free, how to connect, the vendor's
     own catalog URL, and at most HIGHLIGHTS_MAX highlighted models/endpoints
+  * the optional `usage_api` block: whether the vendor documents an API to
+    check your own usage/spend/quota, and the method/path/docs_url for it
 
-`offering` is OPTIONAL on every row: a shard written before the block existed
-validates unchanged. It mirrors the `offering:` block src/apis.ts enforces for
-apis.yaml, field for field, so one schema covers both files.
+`offering` and `usage_api` are OPTIONAL on every row: a shard written before
+either block existed validates unchanged. Both mirror the blocks src/apis.ts
+enforces for apis.yaml, field for field, so one schema covers both files.
 
 Exit code 0 = pass, 1 = fail.  Usage: python3 validate.py [dir]
 """
@@ -34,7 +36,7 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
 
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
 # adding one to a shard cannot invalidate the rows that do not have it.
-OPTIONAL = ['offering']
+OPTIONAL = ['offering', 'usage_api']
 
 ENUMS = {
     # `keyless` = the vendor documents no credential at all; `wallet-x402` = the
@@ -76,6 +78,14 @@ FREE_TIER_KEYS = ['available', 'what', 'limits', 'requires_key',
 CONNECT_KEYS = ['base_url', 'auth', 'auth_header', 'auth_format']
 HIGHLIGHT_ROW_KEYS = ['id', 'kind', 'free', 'note', 'url']
 HEADER_NAME = re.compile(r'^[^\s:]+$')
+
+# ---- the optional `usage_api` block -----------------------------------------
+# Whether the vendor documents an API to check your OWN usage/spend/quota,
+# separate from the product API the rest of the row describes. Kept
+# byte-identical in meaning to src/apis.ts's `validateUsageApi`.
+USAGE_API_KEYS = ['available', 'method', 'path', 'docs_url', 'limits', 'notes',
+                  'checked_date']
+USAGE_API_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
 
 # ---- fallback reader (no PyYAML) --------------------------------------------
@@ -433,6 +443,62 @@ def check_offering(errs, where, off):
             errs.append('%s.url: expected an http(s) URL or null' % rat)
 
 
+def check_usage_api(errs, where, ua):
+    """The optional `usage_api` block: does the vendor expose an API to check
+    your OWN usage/spend/quota, separate from the product API the rest of the
+    row describes. Mirrors src/apis.ts's `validateUsageApi`, field for field:
+      * `available` and `checked_date` are required keys.
+      * `method`/`path` are required, non-null, when available is true.
+      * `docs_url` is required, non-null, whenever available is true or false.
+    """
+    at = '%s.usage_api' % where
+    if ua is None:
+        return
+    if not isinstance(ua, dict):
+        errs.append('%s: expected a mapping or null' % at)
+        return
+    for k in ua:
+        if k not in USAGE_API_KEYS:
+            errs.append('%s.%s: unknown field' % (at, k))
+
+    if 'available' not in ua:
+        errs.append('%s.available: missing (use null if unknown)' % at)
+    available = ua.get('available')
+    flag(errs, at, 'available', available)
+
+    method = ua.get('method')
+    if method is not None and method not in USAGE_API_METHODS:
+        errs.append('%s.method: expected one of %s or null'
+                    % (at, ' | '.join(USAGE_API_METHODS)))
+    text(errs, at, 'path', ua.get('path'))
+    text(errs, at, 'limits', ua.get('limits'))
+    text(errs, at, 'notes', ua.get('notes'))
+
+    docs_url = ua.get('docs_url')
+    if docs_url is not None and not is_url(docs_url):
+        errs.append('%s.docs_url: expected an http(s) URL or null' % at)
+
+    if available is True:
+        if not isinstance(method, str) or not method.strip():
+            errs.append('%s.method: required when available is true'
+                        ' (how is it called?)' % at)
+        path = ua.get('path')
+        if not isinstance(path, str) or not path.strip():
+            errs.append('%s.path: required when available is true'
+                        ' (what is the endpoint?)' % at)
+    if available is True or available is False:
+        if not isinstance(docs_url, str) or not docs_url.strip():
+            errs.append('%s.docs_url: required when available is true or false'
+                        ' (where was this verified?)' % at)
+
+    if 'checked_date' not in ua:
+        errs.append('%s.checked_date: missing (when was this checked?)' % at)
+    else:
+        checked = ua.get('checked_date')
+        if not iso_date(checked):
+            errs.append('%s.checked_date: expected an ISO date (YYYY-MM-DD)' % at)
+
+
 def main(root):
     errs, seen_ids, total = [], {}, 0
     files = sorted(glob.glob(os.path.join(root, '*.yaml')))
@@ -514,6 +580,9 @@ def main(root):
 
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])
+
+            if 'usage_api' in e:
+                check_usage_api(errs, where, e['usage_api'])
 
             d = e.get('checked_date')
             d = d.isoformat() if isinstance(d, datetime.date) else d

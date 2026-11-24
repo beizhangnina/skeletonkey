@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/openalex"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://help.openalex.org/api/authentication/#getting-a-key-for-your-user"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "valyu"
     name: "Valyu"
     capability: "Structured search across financial, pharmaceutical and clinical-trial reference datasets."
@@ -35,3 +43,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/valyu"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
