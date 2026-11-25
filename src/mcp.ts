@@ -1881,7 +1881,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
     title: "Last weekly monitor status (metadata only)",
     description:
       "The last-known status for every account from `skeletonkey monitor run`'s state file: " +
-      "status (ok/invalid_key/usage_anomaly/no_usage_api/error), when it last ran, and the last " +
+      "status (ok/invalid_key/usage_anomaly/no_usage_api/parse_error/error), when it last ran, and the last " +
       "normalized usage numbers. Read-only: it never runs a new check and never returns a secret.",
     readOnly: true,
     inputSchema: {},
@@ -1982,8 +1982,8 @@ email hint, disabled or not) and gives you vault:// references only -- never an 
 password, or a key.
 
 monitor_status() reports the last-known status (ok/invalid_key/usage_anomaly/no_usage_api/
-error) from \`skeletonkey monitor run\`'s weekly check of each account's official usage API.
-It never runs a new check and never contacts a vendor -- a human runs \`skeletonkey monitor
+parse_error/error) from \`skeletonkey monitor run\`'s weekly check of each account's official
+usage API. It never runs a new check and never contacts a vendor -- a human runs \`skeletonkey monitor
 run\` (or schedules it themselves; this tool never installs a schedule).`;
 
 export interface McpServerHandle {

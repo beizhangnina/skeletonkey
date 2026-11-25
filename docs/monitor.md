@@ -40,26 +40,42 @@ For each active account:
 2. **Call it, if a checker exists.** The first-wave checkers
    (`src/monitor/checkers.ts`) cover Apify, SerpApi, Firecrawl, Apollo, Exa,
    and GitHub. Every checker sends the account's key to **exactly one**
-   hardcoded host; the host in the index row's `usage_api.path` is checked
-   against it before anything is sent, so an edited index can never redirect
-   a key elsewhere. Exa's usage endpoint needs a distinct Team Management
+   hardcoded host, over **https only**; the host *and* protocol of the index
+   row's `usage_api.path` are checked against it before anything is sent, so
+   an edited index can never redirect a key elsewhere or downgrade it to
+   plain HTTP. If the official host itself answers with a cross-origin
+   redirect, the default transport follows it (so a legitimate same-host
+   redirect still works) but never forwards any header — `Authorization`,
+   `x-api-key`, or otherwise — to a different origin; a key never leaves the
+   official host. Exa's usage endpoint needs a distinct Team Management
    service credential — stored as a second vault entry named
    `<key_alias>-service` — and is skipped with a clear note when that entry
    does not exist.
 3. **Classify the result:**
-   - `ok` — a 2xx response, nothing anomalous.
+   - `ok` — a 2xx response that parsed to at least one usable field, nothing
+     anomalous.
    - `invalid_key` — 401/403. If the previous run was `ok`, the report calls
      this out as a **sudden** 401.
    - `usage_anomaly` — see thresholds below.
    - `no_usage_api` — no verified usage API, or no checker for this vendor,
      or (Exa) no service key on file.
-   - `error` — a network failure, a non-2xx/4xx status, or a host mismatch.
+   - `parse_error` — a 2xx response whose body could not be turned into any
+     usable field (not valid JSON, or valid JSON missing every field the
+     checker looks for). Reported explicitly rather than as a silent `ok`, so
+     a vendor changing its response shape does not look like "nothing to
+     report".
+   - `error` — a network failure, a non-2xx/3xx status, too many redirects,
+     a non-https `usage_api.path`, or a host mismatch.
    - `skipped` — the account is disabled.
-   `invalid_key`, `usage_anomaly`, and `error` are **alerts**.
+   `invalid_key`, `usage_anomaly`, `parse_error`, and `error` are **alerts**.
 4. **Compare against the local ledger.** The official usage delta since the
    last run is compared against the ledger's call count (or reported spend,
    when the vendor bills in USD) for that key over the same window. A
-   `remaining` that dropped by too much in a week is flagged too.
+   `remaining` that dropped by too much in a week is flagged too. A counter
+   whose own `period` resets faster than the check interval (github's
+   `/rate_limit`, `period: "hour"`) is excluded from both comparisons — its
+   numbers are still reported, but a week-over-week delta on an hourly
+   counter says nothing about weekly usage.
 5. **Login/billing anomalies.** None of the first-wave checkers expose
    anything beyond usage, so every account's report section says so plainly:
    `login/billing anomaly check: not available via official API`. Nothing is
@@ -82,6 +98,16 @@ so a vendor with near-zero ledger traffic still needs a real jump (the
 absolute threshold) rather than tripping on `2 * 0`. A `remaining` drop fires
 when it falls by more than `remaining_drop_pct_threshold`% since the last run.
 
+Each threshold has a floor below which it would make almost any usage look
+anomalous: `anomaly_multiplier` must be `>= 1` (a multiplier of `0` makes the
+bound `0`, so any positive delta would alert), and
+`anomaly_absolute_threshold` / `remaining_drop_pct_threshold` must be `> 0`.
+A configured value of `0`, a negative value, a value below its floor, or
+anything that is not a finite number **falls back to
+the default rather than being rejected** — a typo in `config.yaml` should not
+stop the whole monitor from running — but the report's header gets a one-line
+`Warning:` naming which setting was ignored and why.
+
 ## Files
 
 - `~/.skeletonkey/monitor/state.json` (mode `0600`) — per-account last
@@ -90,12 +116,22 @@ when it falls by more than `remaining_drop_pct_threshold`% since the last run.
 - `~/.skeletonkey/monitor/reports/weekly-YYYY-MM-DD.md` (mode `0600`, or
   under `--report-dir`) — the redacted report for one run.
 
-Every line written to either file (and the notification body, and `--json`
-output) passes through a `Redactor` seeded with every vault value this run
-actually touched, plus the shape-based rules in `src/redact.ts` — including a
-generic rule for a key carried as a bare URL path segment
-(`.../usage/<key>`, `.../limits/key/<key>`, the shape DefiLlama and Semrush
-use), even though no checker ships for either of those vendors yet.
+Every line written to either file (and the notification body, the `--json`
+output, and the MCP `monitor_status` tool) passes through a `Redactor` seeded
+with every vault value this run actually touched, plus the shape-based rules
+in `src/redact.ts` — including a generic rule for a key carried as a bare URL
+path segment (`.../usage/<key>`, `.../limits/key/<key>`, the shape DefiLlama
+and Semrush use), even though no checker ships for either of those vendors
+yet. This covers more than the rendered report: a vendor that echoes the
+account's own key back into a string field a checker keeps (seen in
+practice: apify's `usageCycle.startAt` folding into `usage.period`) is
+redacted before it is put in a result, `state.json`, or any JSON output —
+not only when the Markdown report is rendered. `state.json` is additionally
+re-sanitized (shape rules only) on every read, as a second layer against a
+file written before this redaction was in place, or hand-edited.
+`email_hint` is re-masked with the same `maskUsername` ND-1 uses if it does
+not already look masked, so a hand-edited `accounts.yaml` cannot put a
+plaintext email in a report either.
 
 ## Exit codes
 
@@ -107,7 +143,7 @@ use), even though no checker ships for either of those vendors yet.
 | 64   | `usage`         | a bad flag                                            |
 | 65   | `no_home`       | `skeletonkey init` has not run                        |
 | 68   | `vault_locked`  | the vault backend could not be opened                 |
-| 78   | `monitor_alert` | at least one account is invalid_key/usage_anomaly/error |
+| 78   | `monitor_alert` | at least one account is invalid_key/usage_anomaly/parse_error/error |
 
 ## What this does NOT check
 

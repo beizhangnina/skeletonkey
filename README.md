@@ -1381,8 +1381,8 @@ skeletonkey monitor install-help
   API is unverified, or verified but uncovered by a checker, is reported as
   `cannot auto-compare usage: ...` rather than guessed at.
 - `monitor run` exits `78` (`monitor_alert`, see `src/exit-codes.ts`) when
-  any account comes back `invalid_key`, `usage_anomaly`, or `error`; `0`
-  otherwise.
+  any account comes back `invalid_key`, `usage_anomaly`, `parse_error`, or
+  `error`; `0` otherwise.
 - **SkeletonKey never installs a schedule.** `monitor install-help` prints
   crontab / systemd-timer / launchd snippets to copy in yourself.
 - MCP: a read-only `monitor_status` tool reports the last-known status from

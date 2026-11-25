@@ -13,6 +13,8 @@ export interface MonitorReportInput {
   accounts: AccountCheckResult[];
   /** What happened to the one notification this run might send, in one line. */
   notificationLine: string;
+  /** One line per threshold that fell back to its default; see `resolveMonitorThresholds`. */
+  thresholdWarnings?: string[];
 }
 
 function usageLine(usage: NormalizedUsage | null): string {
@@ -50,6 +52,7 @@ export function renderMonitorReport(input: MonitorReportInput, redactor: Redacto
     "",
     `Accounts checked: ${input.accounts.length}. Alerts: ${alertCount}.`,
     `Notification: ${input.notificationLine}`,
+    ...(input.thresholdWarnings ?? []).map((warning) => `Warning: ${warning}`),
     "",
   ].join("\n");
   const body = input.accounts.map(accountSection).join("\n\n");

@@ -19,6 +19,7 @@ import { openLedger, type Ledger } from "../ledger.js";
 import { OsNotifier, type Notifier } from "../notify.js";
 import { monitorDir, monitorReportPath, monitorReportsDir, skeletonKeyHome } from "../paths.js";
 import { Redactor } from "../redact.js";
+import { maskUsername } from "../vault/entries.js";
 import { openEntryStore, type VaultEntryStore } from "../vault/entry-store.js";
 import type { Config } from "../types.js";
 import { detectAnomaly, type LedgerWindowStats } from "./anomaly.js";
@@ -32,6 +33,7 @@ import type {
   CheckerOutcome,
   HttpTransport,
   MonitorStateFile,
+  NormalizedUsage,
 } from "./types.js";
 import { findVendorEntry } from "./vendor-entry.js";
 
@@ -74,6 +76,18 @@ function localDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+const ALERTING_STATUSES: readonly AccountStatus[] = ["invalid_key", "usage_anomaly", "error", "parse_error"];
+
+/**
+ * `email_hint` is documented as already masked (ND-1's `maskUsername`), but a
+ * hand-edited `accounts.yaml` can defeat that. Re-mask anything that does not
+ * already look masked, rather than trusting the file blindly.
+ */
+function safeEmailHint(hint: string | null): string | null {
+  if (hint === null || hint === "") return hint;
+  return hint.includes("*") ? hint : maskUsername(hint);
+}
+
 function result(
   account: AccountMeta,
   status: AccountStatus,
@@ -84,15 +98,15 @@ function result(
     isAlert?: boolean;
   } = {},
 ): AccountCheckResult {
-  // invalid_key/usage_anomaly/error always alert unless a caller overrides it
-  // (the --offline carry-forward path does, computing it from the carried
-  // status instead of the placeholder status this run used).
-  const alertsByDefault = status === "invalid_key" || status === "usage_anomaly" || status === "error";
+  // invalid_key/usage_anomaly/error/parse_error always alert unless a caller
+  // overrides it (the --offline carry-forward path does, computing it from
+  // the carried status instead of the placeholder status this run used).
+  const alertsByDefault = ALERTING_STATUSES.includes(status);
   return {
     name: account.name,
     vendor: account.vendor,
     status,
-    emailHint: account.email_hint,
+    emailHint: safeEmailHint(account.email_hint),
     usage: options.usage ?? null,
     httpStatus: options.httpStatus ?? null,
     reasons: options.reasons ?? [],
@@ -123,6 +137,15 @@ function resolveSinceIso(since: string | undefined, previousRunAt: string | unde
   }
   if (previousRunAt !== undefined && previousRunAt !== "") return previousRunAt;
   return new Date(now.getTime() - WEEK_MS).toISOString();
+}
+
+/**
+ * A 200 that parsed to nothing usable (a non-JSON body, or a JSON body with
+ * none of the fields a checker looks for) must never be reported as a bare,
+ * unexplained `ok` -- see `isUnparsedUsage`'s callers in `runMonitor`.
+ */
+function isUnparsedUsage(usage: NormalizedUsage): boolean {
+  return usage.used === null && usage.limit === null && usage.remaining === null && usage.period === null;
 }
 
 function readConfigOrNull(home: string): Config | null {
@@ -213,18 +236,25 @@ export async function runMonitor(options: MonitorRunOptions = {}): Promise<Monit
       );
       continue;
     }
+    if (url.protocol !== "https:") {
+      results.push(
+        result(account, "error", {
+          reasons: [
+            `error: refused -- usage_api.path "${url.protocol}//${url.host}" is not https; a key is ` +
+              `never sent over plain HTTP`,
+          ],
+        }),
+      );
+      continue;
+    }
 
     if (options.offline === true) {
       const carried = previous;
       results.push(
         result(account, carried?.last_status ?? "no_usage_api", {
-          usage: carried?.last_usage ?? null,
+          usage: carried?.last_usage == null ? null : redactor.redactDeep(carried.last_usage),
           httpStatus: carried?.last_http_status ?? null,
-          isAlert:
-            carried !== null &&
-            (carried.last_status === "invalid_key" ||
-              carried.last_status === "usage_anomaly" ||
-              carried.last_status === "error"),
+          isAlert: carried !== null && ALERTING_STATUSES.includes(carried.last_status),
           reasons: [
             carried === null
               ? "offline: not checked this run, and no previous run to carry forward"
@@ -317,14 +347,41 @@ export async function runMonitor(options: MonitorRunOptions = {}): Promise<Monit
       continue;
     }
 
+    // A vendor response is never trusted as-is before it reaches a result or
+    // state.json: a value a vendor echoes back verbatim (seen in practice:
+    // apify folding the account's own key into usageCycle.startAt -> period)
+    // must go through the same run-scoped Redactor as the report.
+    const usage = outcome.usage === null ? null : redactor.redactDeep(outcome.usage);
+
+    if (usage === null || isUnparsedUsage(usage)) {
+      results.push(
+        result(account, "parse_error", {
+          usage,
+          httpStatus: outcome.httpStatus,
+          isAlert: true,
+          reasons: [
+            "parse_error: usage could not be parsed from the response (HTTP 200, but no usable fields)",
+          ],
+        }),
+      );
+      nextState.accounts[account.name] = {
+        vendor: account.vendor,
+        last_status: "parse_error",
+        last_run_at: now.toISOString(),
+        last_usage: previous?.last_usage ?? null,
+        last_http_status: outcome.httpStatus,
+      };
+      continue;
+    }
+
     const sinceIso = resolveSinceIso(options.since, previous?.last_run_at, now);
     const ledgerStats = windowedLedgerStats(ledger, account.key_alias, sinceIso);
-    const verdict = detectAnomaly(outcome.usage, previous?.last_usage ?? null, ledgerStats, thresholds);
+    const verdict = detectAnomaly(usage, previous?.last_usage ?? null, ledgerStats, thresholds);
     const status: AccountStatus = verdict.isAnomaly ? "usage_anomaly" : "ok";
 
     results.push(
       result(account, status, {
-        usage: outcome.usage,
+        usage,
         httpStatus: outcome.httpStatus,
         isAlert: verdict.isAnomaly,
         reasons: verdict.reasons,
@@ -334,7 +391,7 @@ export async function runMonitor(options: MonitorRunOptions = {}): Promise<Monit
       vendor: account.vendor,
       last_status: status,
       last_run_at: now.toISOString(),
-      last_usage: outcome.usage,
+      last_usage: usage,
       last_http_status: outcome.httpStatus,
     };
   }
@@ -373,7 +430,12 @@ export async function runMonitor(options: MonitorRunOptions = {}): Promise<Monit
   }
 
   const reportText = renderMonitorReport(
-    { generatedAt: now.toISOString(), accounts: results, notificationLine },
+    {
+      generatedAt: now.toISOString(),
+      accounts: results,
+      notificationLine,
+      ...(thresholds.warnings === undefined ? {} : { thresholdWarnings: thresholds.warnings }),
+    },
     redactor,
   );
 

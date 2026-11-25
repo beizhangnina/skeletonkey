@@ -27,6 +27,14 @@ function ledgerImplied(usage: NormalizedUsage, ledger: LedgerWindowStats): numbe
   return ledger.calls;
 }
 
+/**
+ * A counter whose own reset window is shorter than the time between two
+ * `monitor run`s makes a week-over-week delta meaningless: github's
+ * `/rate_limit` (`period: "hour"`) resets dozens of times between weekly
+ * runs, so a 0 -> 30 delta says nothing about weekly usage.
+ */
+const SHORT_RESET_PERIODS = new Set(["hour", "minute"]);
+
 export function detectAnomaly(
   current: NormalizedUsage | null,
   previous: NormalizedUsage | null,
@@ -35,6 +43,9 @@ export function detectAnomaly(
 ): AnomalyVerdict {
   const reasons: string[] = [];
   if (current === null) return { isAnomaly: false, reasons };
+  if (current.period !== null && SHORT_RESET_PERIODS.has(current.period)) {
+    return { isAnomaly: false, reasons };
+  }
 
   if (previous !== null && current.used !== null && previous.used !== null) {
     const officialDelta = current.used - previous.used;
