@@ -85,3 +85,12 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/prospeo"
     checked_date: 2026-10-24
+    official_docs_url: "https://prospeo.io/api-docs/authentication"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/enrich-person"
+        summary: "Enrich a person from supplied data such as name and company website, optionally requesting a verified email or mobile."
+        returns: "JSON with an error flag and person/company objects, including job history, email, mobile and location details."
+        docs_url: "https://prospeo.io/api-docs/authentication"

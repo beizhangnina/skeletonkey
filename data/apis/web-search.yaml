@@ -231,6 +231,41 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/search1api"
     checked_date: 2026-10-24
+    official_docs_url: "https://s1.dev/docs"
+    auth: null
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per request"
+      pricing_url: "https://s1.dev/docs/basic/screenshot"
+      notes: "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20)."
+    endpoints:
+      - method: "POST"
+        path: "/search"
+        summary: "Web search that returns ranked pages for a topic or question; can also crawl top results when crawl_results is set."
+        returns: "Ranked web pages (links, snippets), optionally with full page text via crawl_results."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/crawl"
+        summary: "Fetches a single known public URL and returns the page as clean, readable content instead of links."
+        returns: "Readable page content for agents, summarization, and retrieval workflows."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/screenshot"
+        summary: "Renders a public webpage in a managed browser as a PNG, JPEG, or WebP image with viewport, readiness, and capture-area controls."
+        returns: "Image binary data (image/png shown in the response body), not JSON; costs 2 credits on success."
+        docs_url: "https://s1.dev/docs/basic/screenshot"
+      - method: "POST"
+        path: "/extract"
+        summary: "Extracts typed fields from a URL using an extraction prompt and a JSON Schema so the output follows a predictable shape."
+        returns: "Data that follows the JSON Schema you supply as response_format."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/deepcrawl"
+        summary: "Asynchronously crawls many pages of one site, scoped with include_paths/exclude_paths and capped with max_pages."
+        returns: "202 Accepted with a taskId; poll GET /deepcrawl/status/{taskId} until finished (JSON or ZIP output)."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
   - id: "serpapi"
     name: "SerpApi"
     capability: "Parsed result pages from 100+ search engines and marketplaces, returned as structured JSON."
@@ -248,6 +283,26 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpapi"
     checked_date: 2026-10-24
+    official_docs_url: "https://serpapi.com/search-api"
+    auth: null
+    pricing:
+      model: "subscription"
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://serpapi.com/llms.txt"
+      notes: "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages."
+    endpoints:
+      - method: "GET"
+        path: "/search"
+        summary: "Main search endpoint; scrapes Google search results when called with engine=google plus query parameters such as q and location."
+        returns: "Google search page results as structured data (JSON by default; Markdown if requested via output=md)."
+        docs_url: "https://serpapi.com/search-api"
+      - method: "GET"
+        path: "/search.md"
+        summary: "Markdown variant of the search request used to get token-efficient Markdown output instead of JSON."
+        returns: "Search results rendered as clean Markdown for LLMs and AI agents."
+        docs_url: "https://serpapi.com/llms.txt"
   - id: "serper"
     name: "Serper"
     capability: "Low-latency Google result pages as JSON across web, images, news, video and autocomplete."
@@ -265,3 +320,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serper"
     checked_date: 2026-10-24
+    official_docs_url: "https://serper.dev"
+    auth: null
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: "queries"
+      pricing_url: "https://serper.dev"
+      notes: "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

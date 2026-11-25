@@ -186,6 +186,31 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/quicknode"
     checked_date: 2026-10-24
+    official_docs_url: "https://www.quicknode.com/docs/welcome"
+    auth: null
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 49
+      unit: "per month"
+      pricing_url: "https://www.quicknode.com/llms-full.txt"
+      notes: "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing."
+    endpoints:
+      - method: "POST"
+        path: "/{your-token}/"
+        summary: "JSON-RPC call to your Quicknode endpoint URL (https://{your-endpoint-name}.quiknode.pro/{your-token}/), e.g. sending eth_blockNumber with Content-Type: application/json."
+        returns: "A JSON-RPC response; for the docs demo call it returns the latest Ethereum block number."
+        docs_url: "https://www.quicknode.com/docs/welcome"
+      - method: "POST"
+        path: "/api/v1/agent/subscriptions"
+        summary: "Autonomous agents can create a subscription without human signup, paying via x402 or MPP from a funded EVM wallet."
+        returns: "A `QN_*` API key; POSTing with no body returns a 402 listing plans and accepted payment methods."
+        docs_url: "https://www.quicknode.com/llms.txt"
+      - method: "POST"
+        path: "/v0/endpoints"
+        summary: "Admin API call that creates an RPC endpoint on any chain using the QN_* key returned by the agent subscription call."
+        returns: "An RPC endpoint (creation result) on any supported chain."
+        docs_url: "https://www.quicknode.com/llms.txt"
   - id: "surf"
     name: "Surf"
     capability: "Crypto market, derivatives, on-chain, wallet, prediction-market and VC research data."
@@ -203,3 +228,38 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/surf"
     checked_date: 2026-10-24
+    official_docs_url: "https://surf-api.com/docs"
+    auth: null
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: "searches per month"
+      pricing_url: "https://surf-api.com/docs"
+      notes: "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
+    endpoints:
+      - method: "GET"
+        path: "/search.json"
+        summary: "Run a search for a given engine and query; returns a single JSON envelope with metadata blocks and parsed result arrays."
+        returns: "JSON object containing search_metadata, search_parameters, and engine-specific result arrays (e.g. organic_results, news_results)."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/search"
+        summary: "Alias of the /search.json endpoint; behaves identically when running a search."
+        returns: "Same JSON search response as /search.json."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/account"
+        summary: "Check live quota: returns your plan name, monthly allowance, total searches left, and this month's usage."
+        returns: "Plan name, searches per month, total searches left, and this month usage as JSON."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/searches/:t/:id.json"
+        summary: "Retrieve a previously archived search result by its type and id, as JSON."
+        returns: "Archived search result as JSON."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/engines"
+        summary: "List the search engines that are available on the API."
+        returns: "List of available engines."
+        docs_url: "https://surf-api.com/docs"

@@ -81,6 +81,25 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/scrapecreators"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.scrapecreators.com/"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/v1/spotify/podcast/episodes"
+        summary: "Get Spotify podcast episodes."
+        returns: "Returns podcast metadata and a list of episodes with audio, cover art, and description."
+        docs_url: "https://docs.scrapecreators.com/v1/spotify/podcast/episodes"
+      - method: "GET"
+        path: "/v1/instagram/post/comment/replies"
+        summary: "Get replies to an Instagram comment."
+        returns: "Returns a list of replies to a specific Instagram comment, including user details."
+        docs_url: "https://docs.scrapecreators.com/v1/instagram/post/comment/replies"
+      - method: "GET"
+        path: "/v1/threads/user/posts"
+        summary: "Get a user's public Threads posts, limited to roughly the latest 20–30 posts."
+        returns: "Returns a user's public Threads posts."
+        docs_url: "https://docs.scrapecreators.com/v1/threads/user/posts"
   - id: "tikhub"
     name: "TikHub"
     capability: "Unified REST access to TikTok, Douyin, Xiaohongshu, Weibo, WeChat and other global and Chinese platforms."

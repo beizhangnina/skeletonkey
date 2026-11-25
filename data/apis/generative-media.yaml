@@ -222,6 +222,41 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    official_docs_url: "https://platform.sonilo.com/docs"
+    auth: null
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://platform.sonilo.com/docs"
+      notes: "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
+    endpoints:
+      - method: "POST"
+        path: "/v1/text-to-music"
+        summary: "Generate music from a text prompt and a duration; streaming or async modes."
+        returns: "application/x-ndjson stream of title, audio_chunk, complete, error events (default), or 202 JSON with task_id in async mode."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "POST"
+        path: "/v1/video-to-music"
+        summary: "Generate music scored to a video file or URL, with optional prompt, segments, and output format."
+        returns: "NDJSON stream of audio events in stream mode, or 202 JSON with task_id to poll in async mode."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "POST"
+        path: "/v1/video-to-sfx"
+        summary: "Generate sound effects synchronized to a video, accepting a video file or video_url with optional prompt or segments."
+        returns: "202 Accepted JSON with task_id and status processing; poll GET /v1/tasks/:task_id for the audio result."
+        docs_url: "https://platform.sonilo.com/docs/api/video-to-sfx"
+      - method: "GET"
+        path: "/v1/tasks/{task_id}"
+        summary: "Retrieve the status and results of an async generation task such as SFX, combined sound, or audio ducking."
+        returns: "Task status and result URLs, including audio.url, content_type and file_size on success."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "GET"
+        path: "/v1/account/usage"
+        summary: "Retrieve credit usage for the account, with a summary plus daily breakdown over a lookback window."
+        returns: "JSON with summary totals (requests, duration, cost, period) and a per-day daily breakdown."
+        docs_url: "https://platform.sonilo.com/docs/api/get-usage"
   - id: "suzanne"
     name: "Suzanne"
     capability: "Text-to-3D and photo-to-3D mesh generation with game-ready GLB/OBJ/STL output."

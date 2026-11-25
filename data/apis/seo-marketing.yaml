@@ -174,6 +174,35 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/semrush"
     checked_date: 2026-10-24
+    official_docs_url: "https://developer.semrush.com/api/basics/get-started/"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/analytics/ta/api/v3/summary"
+        summary: "Traffic Summary: estimated traffic metrics (visits, users, pages per visit, bounce rate, rank) for up to 200 domains, subdomains or subfolders."
+        returns: "CSV with requested columns; defaults are target, rank, visits, desktop_visits, mobile_visits, users, desktop_users, mobile_users."
+        docs_url: "https://developer.semrush.com/api/v3/trends/api-reference#traffic-destinations"
+      - method: "GET"
+        path: "/analytics/ta/api/v3/summary_by_day"
+        summary: "Daily Traffic: day-by-day breakdown of traffic to a selected domain, subdomain or subfolder."
+        returns: "Daily traffic data for the requested target (day-by-day breakdown of traffic)."
+        docs_url: "https://developer.semrush.com/api/v3/trends/api-reference#traffic-destinations"
+      - method: "GET"
+        path: "/apis/v4/traffic-market/v1/traffic/trend/monthly"
+        summary: "v4 equivalent of the Traffic Summary report; one request per target using url and scope, with date_from/date_to as YYYY-MM."
+        returns: "Monthly traffic trend data for a single target (per the v3 Traffic Summary migration note)."
+        docs_url: "https://developer.semrush.com/api/v3/trends/api-reference#traffic-destinations"
+      - method: "GET"
+        path: "/apis/v4/traffic-market/v1/traffic/trend/daily"
+        summary: "v4 equivalent of the Daily Traffic report; pass the target in url and scope with date_from/date_to as YYYY-MM values."
+        returns: "Daily traffic trend data for the target (v4 counterpart of Daily Traffic)."
+        docs_url: "https://developer.semrush.com/api/v3/trends/api-reference#traffic-destinations"
+      - method: "GET"
+        path: "/reports/v1/projects/{campaignID}/tracking/"
+        summary: "Base URL for Position Tracking report requests (organic/adwords overview, positions, competitors, visibility index, landing pages)."
+        returns: "Report data about rankings, visibility and competitor performance for the campaign (v3, deprecated)."
+        docs_url: "https://developer.semrush.com/api/v3/projects/position-tracking#organic-landing-pages-report"
   - id: "serpstat"
     name: "Serpstat"
     capability: "Keyword and domain analytics with regional search volume and competitor data."
@@ -191,6 +220,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpstat"
     checked_date: 2026-10-24
+    official_docs_url: "https://api-docs.serpstat.com/docs/serpstat-public-api/jenasqbwtxdlr-introduction-to-serpstat-api"
+    auth: null
+    pricing: null
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "similarweb"
     name: "Similarweb"
     capability: "Website traffic intelligence: visits, referral mix, audience demographics and category ranks."
