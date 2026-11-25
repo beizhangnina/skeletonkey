@@ -724,12 +724,20 @@ describe("the verified billing facts shipped in apis.yaml", () => {
     }
   });
 
-  it("still claims no min_topup anywhere, and no checked_date on an example row", () => {
+  it("prices only what a vendor page states, and no checked_date on an example row", () => {
     for (const row of entries) {
-      // A price is the one fact nothing in this file is allowed to assert: no
-      // vendor page read so far publishes a minimum top-up for these APIs.
-      expect(row.min_topup, row.name).toBeNull();
-      if (row.example === true) expect(row.checked_date, row.name).toBeNull();
+      // This used to read "no min_topup anywhere", because no vendor page read
+      // for this file published one. Two now do -- DataForSEO ("The minimum
+      // account top-up is $50") and TikHub ("The minimum top-up is $5") -- so
+      // the rule is the general one: a price needs the source, the date and
+      // the unit it is charged in behind it.
+      expectVerifiedFactsOrNothing(row);
+      if (row.example === true) {
+        // An example row is nobody's verified offer, so it still claims no
+        // price and no date.
+        expect(row.min_topup, row.name).toBeNull();
+        expect(row.checked_date, row.name).toBeNull();
+      }
     }
   });
 
