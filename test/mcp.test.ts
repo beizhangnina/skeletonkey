@@ -32,6 +32,7 @@ const TOOL_ARGS: Record<string, Record<string, unknown>> = {
   register_key: { alias: "new-key", platform: "Apify", domain: "api.apify.com" },
   ledger: { alias: ALIAS, limit: 50 },
   disable: { alias: ALIAS, reason: "test" },
+  monitor_status: {},
   discover_api: { capability: "CVE lookup", vendor: "NVD" },
   propose_entry: {
     name: "probe-vendor",
@@ -84,6 +85,7 @@ describe("skeletonkey MCP server", () => {
       "register_key",
       "ledger",
       "disable",
+      "monitor_status",
     ]);
   });
 

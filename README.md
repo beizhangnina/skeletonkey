@@ -1354,6 +1354,40 @@ password, or a key — an agent gets a `vault://` reference and runs
 `skeletonkey run --env NAME=<ref> -- <command>` itself, or hands that exact
 command to a human.
 
+## Weekly monitor (ND-5)
+
+`skeletonkey monitor run` checks every active [account](#accounts-nd-1)
+against its vendor's **own** usage API (Apify, SerpApi, Firecrawl, Apollo,
+Exa, and GitHub ship first), flags a usage anomaly against the local ledger
+or a sudden 401, and writes a redacted weekly Markdown report. Full detail —
+thresholds, file formats, exit codes, and what it deliberately does not
+check (login/billing anomalies, since no first-wave vendor's official API
+exposes them) — lives in [`docs/monitor.md`](docs/monitor.md).
+
+```
+skeletonkey monitor run [--account <name>] [--json] [--no-notify]
+  [--report-dir <dir>] [--since <YYYY-MM-DD>] [--offline]
+skeletonkey monitor report [--latest] [--json]
+skeletonkey monitor install-help
+```
+
+- Writes `~/.skeletonkey/monitor/state.json` (mode `0600`, no secrets) and
+  `~/.skeletonkey/monitor/reports/weekly-YYYY-MM-DD.md` (mode `0600`), and
+  sends **one** OS notification (via the same `Notifier` the runner uses)
+  when anything needs a human — `--no-notify` skips it.
+- A key is sent only to the one official host its checker hardcodes, read
+  from the vault inside this process and never printed, logged, or put in
+  the report, the notification, or an error message. A vendor whose usage
+  API is unverified, or verified but uncovered by a checker, is reported as
+  `cannot auto-compare usage: ...` rather than guessed at.
+- `monitor run` exits `78` (`monitor_alert`, see `src/exit-codes.ts`) when
+  any account comes back `invalid_key`, `usage_anomaly`, or `error`; `0`
+  otherwise.
+- **SkeletonKey never installs a schedule.** `monitor install-help` prints
+  crontab / systemd-timer / launchd snippets to copy in yourself.
+- MCP: a read-only `monitor_status` tool reports the last-known status from
+  `state.json` without ever running a new check.
+
 ## Roadmap
 
 Phases, following the PRD:

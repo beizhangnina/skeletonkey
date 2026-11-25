@@ -45,6 +45,8 @@ export const EXIT = {
   name_taken: 75,
   /** the backend refuses to be used here (e.g. the plaintext test backend) */
   backend_refused: 77,
+  /** `skeletonkey monitor run` found at least one invalid_key/usage_anomaly/error account */
+  monitor_alert: 78,
   /** `--timeout` fired */
   timeout: 124,
   /** the command could not be executed (EACCES) */

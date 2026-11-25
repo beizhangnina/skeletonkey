@@ -229,6 +229,7 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
       register_key: { alias: "new-key", platform: "Apify", domain: "api.apify.com" },
       ledger: { alias: ALIAS, limit: 50 },
       disable: { alias: ALIAS, reason: "sweep" },
+      monitor_status: {},
     };
     expect(Object.keys(toolArgs).sort()).toEqual(
       SKELETONKEY_TOOLS.map((tool) => tool.name).sort(),

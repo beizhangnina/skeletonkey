@@ -75,6 +75,9 @@ import {
   writeStaleCache,
   type StaleFinding,
 } from "./stale.js";
+import { monitorInstallHelpText } from "./monitor/install-help.js";
+import { findLatestReport } from "./monitor/latest.js";
+import { runMonitor } from "./monitor/run.js";
 import { silenceSqliteExperimentalWarning } from "./quiet.js";
 import { tailscaleIPv4 } from "./tailscale.js";
 import {
@@ -387,6 +390,43 @@ export function buildProgram(): Command {
       });
     });
 
+  const monitor = program
+    .command("monitor")
+    .description("weekly local check of ND-1 accounts against their vendor's own usage API");
+
+  monitor
+    .command("run")
+    .description("check every active account's official usage, vs the local ledger, and report")
+    .option("--account <name>", "limit the run to one account")
+    .option("--json", "machine-readable output", false)
+    .option("--no-notify", "do not send an OS notification even if an alert was raised")
+    .option("--report-dir <dir>", "write the report here instead of ~/.skeletonkey/monitor/reports")
+    .option("--since <date>", "compare official usage against this YYYY-MM-DD instead of the last run")
+    .option("--offline", "make no network calls; classify every account with what is already known", false)
+    .action(async (options: MonitorRunCliOptions) => {
+      await withExitCodes("monitor run", async () => {
+        await cmdMonitorRun(options);
+      });
+    });
+
+  monitor
+    .command("report")
+    .description("print the latest weekly report's path and content (already redacted)")
+    .option("--latest", "print the most recent report (the default, and currently the only mode)", true)
+    .option("--json", "machine-readable output", false)
+    .action((options: { latest: boolean; json: boolean }) => {
+      withExitCodes("monitor report", () => {
+        cmdMonitorReport(options.json);
+      });
+    });
+
+  monitor
+    .command("install-help")
+    .description("print (never install) example crontab/launchd/systemd-timer snippets for a weekly run")
+    .action(() => {
+      console.log(monitorInstallHelpText());
+    });
+
   program
     .command("run")
     .description(
@@ -518,6 +558,16 @@ interface StaleCliOptions {
   only?: string;
   fetch: boolean;
   json: boolean;
+}
+
+interface MonitorRunCliOptions {
+  account?: string;
+  json: boolean;
+  /** `--no-notify` becomes `notify: false`. */
+  notify: boolean;
+  reportDir?: string;
+  since?: string;
+  offline: boolean;
 }
 
 interface InitOptions {
@@ -2213,6 +2263,72 @@ function printOffering(entry: IndexEntry): void {
       ? "nowhere -- treat the fields above as unverified"
       : `${offering.verified_url} on ${offering.verified_date ?? "an unrecorded date"}`,
   );
+}
+
+async function cmdMonitorRun(options: MonitorRunCliOptions): Promise<void> {
+  const result = await runMonitor({
+    home: skeletonKeyHome(),
+    ...(options.account === undefined ? {} : { account: options.account }),
+    notify: options.notify,
+    ...(options.reportDir === undefined ? {} : { reportDir: options.reportDir }),
+    ...(options.since === undefined ? {} : { since: options.since }),
+    offline: options.offline,
+  });
+
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          generated_at: result.generatedAt,
+          report_path: result.reportPath,
+          alert_count: result.alertCount,
+          notified: result.notified,
+          accounts: result.accounts,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    printTable(
+      ["ACCOUNT", "VENDOR", "STATUS", "ALERT"],
+      result.accounts.map((account) => [
+        account.name,
+        account.vendor,
+        account.status,
+        account.isAlert ? "yes" : "no",
+      ]),
+    );
+    console.log("");
+    for (const account of result.accounts) {
+      for (const reason of account.reasons) console.log(`${account.name}: ${reason}`);
+    }
+    console.log("");
+    console.log(`Report written to ${result.reportPath}`);
+    console.log(
+      `${result.alertCount} alert(s). ${result.notified ? "An OS notification was sent." : "No OS notification was sent."}`,
+    );
+  }
+  process.exitCode = result.exitCode;
+}
+
+function cmdMonitorReport(json: boolean): void {
+  const home = skeletonKeyHome();
+  const latest = findLatestReport(home);
+  if (latest === null) {
+    if (json) {
+      console.log(JSON.stringify({ found: false }, null, 2));
+    } else {
+      console.log("No weekly report yet. Run `skeletonkey monitor run` first.");
+    }
+    return;
+  }
+  if (json) {
+    console.log(JSON.stringify({ found: true, path: latest.path, content: latest.content }, null, 2));
+  } else {
+    console.log(`Latest report: ${latest.path}\n`);
+    console.log(latest.content);
+  }
 }
 
 function printTable(headers: string[], rows: string[][]): void {
