@@ -219,7 +219,38 @@ def collect_known_vendor_ids(root):
             for e in (doc.get('entries') or []):
                 if isinstance(e, dict) and isinstance(e.get('name'), str):
                     ids.add(e['name'])
+        else:
+            ids |= scan_apis_yaml_entry_names(REPO_APIS_YAML)
     return ids
+
+
+ENTRY_NAME_LINE = re.compile(r'^  - name:\s*(.+?)\s*$')
+
+
+def scan_apis_yaml_entry_names(path):
+    """Entry names from the repo's apis.yaml by a plain line scan, for when
+    `load()` can't turn the whole file into a dict (the fallback reader only
+    covers the shard subset of YAML, not apis.yaml's full structure). Looks
+    for the top-level entries list's `  - name: <value>` lines, quotes
+    stripped, appearing after the top-level `entries:` line."""
+    names = set()
+    in_entries = False
+    with open(path) as fh:
+        for line in fh:
+            line = line.rstrip('\n')
+            if line == 'entries:':
+                in_entries = True
+                continue
+            if not in_entries:
+                continue
+            match = ENTRY_NAME_LINE.match(line)
+            if match is None:
+                continue
+            value = match.group(1)
+            if len(value) > 1 and value[0] == value[-1] and value[0] in '"\'':
+                value = value[1:-1]
+            names.add(value)
+    return names
 
 
 # ---- fallback reader (no PyYAML) --------------------------------------------

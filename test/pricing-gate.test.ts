@@ -682,6 +682,12 @@ ${extra}`;
       /cost_badge: derived field; expected green from pricing\.api_access_gate, got red \(do not hand-edit; run build\)/,
     );
   });
+
+  it("passes on the shipped shards with PyYAML unavailable (apis.yaml vendor_id names still resolve)", () => {
+    const result = run(SHARD_DIR, noYaml());
+    expect(result.out).toMatch(/OK: all entries valid/);
+    expect(result.code).toBe(0);
+  });
 });
 
 describe("the two validators agree (ND-12 drift check)", () => {
