@@ -6,6 +6,7 @@
 <title>OpenRouter — aggregator gateway — SkeletonKey</title>
 <meta name="description" content="An LLM router that fronts hundreds of models from many inference providers behind one OpenAI-compatible endpoint and key, adding fallbacks, routing and cos">
 <link rel="canonical" href="https://skeletonkey.run/apis/aggregators/openrouter/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/aggregators/openrouter/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,15 +17,15 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
+<meta name="robots" content="noindex">
 </head>
 <body class="apis-page">
 <a class="skip" href="#main">Skip to content</a>
@@ -42,6 +43,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -49,12 +53,14 @@
 <main id="main" class="apis-main"><div class="wrap">
 <nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> <a href="/apis/aggregators/">Aggregators</a></nav>
 <h1 class="ap-title">OpenRouter</h1>
-<p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
+<p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span class="ap-badge ap-shelved-badge">Shelved</span> <span>Checked 2026-10-25</span></p>
+<section class="ap-card ap-shelved" id="shelved"><h2>Shelved</h2><p>LLM router aggregator; set aside with LLM APIs 2026-11-24, restorable. The page stays up and the data is kept here -- it is just left out of the API index, search, llms.txt and sitemap by default.</p></section>
 <p class="ap-lede">An LLM router that fronts hundreds of models from many inference providers behind one OpenAI-compatible endpoint and key, adding fallbacks, routing and cost tracking. Models only, no third-party data APIs.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://openrouter.ai" rel="noopener">https://openrouter.ai</a></dd><dt>API base URL</dt><dd><code>https://openrouter.ai/api/v1</code></dd><dt>Auth</dt><dd><code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://openrouter.ai/docs/quickstart" rel="noopener">https://openrouter.ai/docs/quickstart</a></dd><dt>Catalog size claimed</dt><dd>&quot;hundreds of AI models through a single API endpoint&quot; — no numeric count given on the pages read</dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://openrouter.ai/sign-up" rel="noopener">https://openrouter.ai/sign-up</a></dd><dt>Card required</dt><dd>No</dd><dt>Free credit or trial</dt><dd>None stated</dd></dl></section>
 <section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>prepaid_credits, payg</dd><dt>How it bills</dt><dd>Pay-as-you-go per token from prepaid credits. Models with the :free variant cost nothing but are rate limited per day, and buying credits raises the limit. Bring-your-own-key usage above the free allowance is charged a percentage of the equivalent OpenRouter cost.</dd><dt>Payment methods</dt><dd>card, AliPay, crypto (USDC)</dd><dt>Fees stated</dt><dd>We pass through the pricing of the underlying providers without any markup</dd><dt>Rate limits</dt><dd>Models with the :free variant cost nothing but are rate limited per day</dd><dt>Pricing page</dt><dd><a href="https://openrouter.ai/models" rel="noopener">https://openrouter.ai/models</a></dd></dl></section>
-<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 162 vendors in our index were checked against this gateway.</p></section>
+<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 149 vendors in our index were checked against this gateway.</p></section>
 <section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://openrouter.ai/" rel="noopener nofollow">https://openrouter.ai/</a></li><li><a href="https://openrouter.ai/docs/quickstart" rel="noopener nofollow">https://openrouter.ai/docs/quickstart</a></li><li><a href="https://openrouter.ai/docs/faq" rel="noopener nofollow">https://openrouter.ai/docs/faq</a></li><li><a href="https://openrouter.ai/sign-up" rel="noopener nofollow">https://openrouter.ai/sign-up</a></li></ul></section>
 </div></main>
 <footer class="site-foot">
@@ -71,7 +77,7 @@
       </svg>
     </a>
     <div class="foot-bar">
-      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
       <nav class="foot-nav" aria-label="Footer">
         <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
         <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
