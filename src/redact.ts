@@ -25,7 +25,7 @@ const MIN_SECRET_LENGTH = 4;
 const JSON_LITERALS = new Set(["null", "true", "false", "undefined", "none", "unknown"]);
 
 /** Luhn check, so a long order number is not reported as a card. */
-function luhnValid(digits: string): boolean {
+export function luhnValid(digits: string): boolean {
   if (digits.length < 13 || digits.length > 19) return false;
   let sum = 0;
   let double = false;

@@ -69,6 +69,24 @@ export function readConfigOrFail(home = skeletonKeyHome()): ReturnType<typeof re
   }
 }
 
+/**
+ * Runs one vault operation (`get`/`set`/`delete`), mapping a backend failure
+ * -- a wrong passphrase, a tampered file, an unreachable keychain -- onto
+ * `vault_locked`, the same code `checkBackend()` and `run` already use. Most
+ * callers reach the backend through `checkBackend()` first and never see
+ * this path; the ones that do not (the write/read paths below) still need a
+ * decrypt failure to come out as `vault_locked`, not a bare `Error`.
+ */
+async function callVault<T>(action: () => Promise<T>): Promise<T> {
+  try {
+    return await action();
+  } catch (error) {
+    if (error instanceof SkeletonKeyError) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    throw new SkeletonKeyError("vault_locked", message);
+  }
+}
+
 export class VaultEntryStore {
   constructor(
     readonly vault: Vault,
@@ -139,8 +157,8 @@ export class VaultEntryStore {
    */
   async putLogin(name: string, values: { username: string; password: string }): Promise<string> {
     const envelope = encodeLogin(values.username, values.password);
-    await this.vault.set(storageAlias({ name, type: "login" }), envelope);
-    const readBack = await this.vault.get(storageAlias({ name, type: "login" }));
+    await callVault(() => this.vault.set(storageAlias({ name, type: "login" }), envelope));
+    const readBack = await callVault(() => this.vault.get(storageAlias({ name, type: "login" })));
     if (readBack !== envelope) {
       throw new SkeletonKeyError(
         "internal",
@@ -153,8 +171,8 @@ export class VaultEntryStore {
 
   /** Stores an api_key under its plain alias, exactly as v0.3 did. */
   async putApiKey(name: string, secret: string): Promise<void> {
-    await this.vault.set(name, secret);
-    const readBack = await this.vault.get(name);
+    await callVault(() => this.vault.set(name, secret));
+    const readBack = await callVault(() => this.vault.get(name));
     if (readBack !== secret) {
       throw new SkeletonKeyError(
         "internal",
@@ -172,9 +190,9 @@ export class VaultEntryStore {
    */
   async getField(entry: ResolvedEntry, field: string): Promise<string | null> {
     if (entry.type === "api_key") {
-      return this.vault.get(storageAlias(entry));
+      return callVault(() => this.vault.get(storageAlias(entry)));
     }
-    const raw = await this.vault.get(storageAlias({ name: entry.name, type: "login" }));
+    const raw = await callVault(() => this.vault.get(storageAlias({ name: entry.name, type: "login" })));
     if (raw === null) return null;
     const envelope = decodeLogin(raw, entry.name);
     if (field === "username") return envelope.username;
@@ -187,11 +205,11 @@ export class VaultEntryStore {
     const entry = this.resolve(name);
     if (entry === null) return false;
     if (entry.type === "login") {
-      await this.vault.delete(storageAlias({ name, type: "login" }));
+      await callVault(() => this.vault.delete(storageAlias({ name, type: "login" })));
       removeEntry(name, this.home);
       return true;
     }
-    await this.vault.delete(name);
+    await callVault(() => this.vault.delete(name));
     removeKey(name, this.home);
     return true;
   }
