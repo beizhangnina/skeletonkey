@@ -56,10 +56,10 @@ apis:
         why: "Resells Ahrefs' own endpoints per call, no subscription. https://glasser.ai/data-sources/ahrefs"
         access_gate: "none"
       - vendor_id: "treg"
-        why: "Per-call prepaid gateway; lists SEO and backlinks (category-level match, Ahrefs-equivalent data not verified)."
+        why: "Per-call backlinks, referring domains and authority metrics (same class, not Ahrefs itself). https://treg.to/catalog/web"
         access_gate: "none"
       - vendor_id: "dataforseo"
-        why: "Keyword and backlink data billed per task; no subscription, $50 minimum top-up."
+        why: "Keyword and backlink data billed per task; no subscription, $50 minimum top-up. https://dataforseo.com/pricing"
         access_gate: "prepaid_min"
     cost_badge: "red"
     usage_api:
@@ -223,7 +223,7 @@ apis:
         why: "Resells Foreplay's own ad-library endpoints per call, no subscription. https://glasser.ai/data-sources/foreplay"
         access_gate: "none"
       - vendor_id: "treg"
-        why: "Per-call prepaid gateway; lists ad libraries (category-level match, Foreplay-equivalent coverage not verified)."
+        why: "Per-call Meta Ad Library access (same class; Meta only, not Foreplay's cross-network library). https://treg.to/catalog/meta-ads"
         access_gate: "none"
     cost_badge: "red"
     usage_api:

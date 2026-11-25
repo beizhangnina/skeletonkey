@@ -63,7 +63,7 @@ apis:
         docs_url: "https://docs.agentline.cloud/api-reference/billing/get-number-expenditure.md"
     alternatives:
       - vendor_id: "saperly"
-        why: "US phone numbers for agents with calling and SMS; prepaid pay-as-you-go, no seats or platform fee. Hosted AI voice not verified."
+        why: "US phone numbers for agents with calling and SMS, prepaid pay-as-you-go; hosted AI voice not verified. https://saperly.com/#pricing"
         access_gate: "none"
     cost_badge: "red"
     usage_api:
