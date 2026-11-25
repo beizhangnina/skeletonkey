@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentline"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.agentline.cloud/v1/billing/balance"
+      docs_url: "https://docs.agentline.cloud/api-reference/billing/get-balance.md"
+      limits: "Authorization: Bearer al_live_... (legacy sk_live_...) required"
+      notes: null
+      checked_date: 2026-11-24
   - id: "agentmail"
     name: "AgentMail"
     capability: "Programmatic email inboxes and domains for agents: send, receive, thread, draft and attach."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentmail"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.agentmail.to/v0/metrics/usage"
+      docs_url: "https://docs.agentmail.to/api-reference/metrics/query-usage.md"
+      limits: "Authentication required (Bearer API key); `period` 1–86400 seconds; `limit` max 1000 buckets; defaults to last 24 hours; `start` must be within recent window"
+      notes: null
+      checked_date: 2026-11-24
   - id: "recall"
     name: "Recall.ai"
     capability: "Meeting bots that join video calls as a participant and return recordings and transcripts."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/recall"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://us-east-1.recall.ai/api/v1/billing/usage/"
+      docs_url: "https://docs.recall.ai/reference/billing_usage_retrieve"
+      limits: "5 requests per min per workspace"
+      notes: null
+      checked_date: 2026-11-24
   - id: "saperly"
     name: "Saperly"
     capability: "Provisions compliant US phone numbers for agents, with calling and SMS."
@@ -69,3 +93,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/saperly"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/anyapi"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.getanyapi.com/v1/balance"
+      docs_url: "https://getanyapi.com/llms.txt"
+      limits: null
+      notes: "钱包余额（USD）；docs 导航另有 get /v1/balance 参考页"
+      checked_date: 2026-11-24
   - id: "apify"
     name: "Apify"
     capability: "Marketplace of hosted scraper programs ('actors') that turn public sites into structured JSON on demand."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apify"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.apify.com/v2/users/me/usage/monthly"
+      docs_url: "https://docs.apify.com/api/v2/users-me-usage-monthly-get"
+      limits: null
+      notes: "返回当月用量周期、分项与美元合计、按日拆分"
+      checked_date: 2026-11-24
   - id: "brightdata"
     name: "Bright Data"
     capability: "Large-scale structured datasets and scraping infrastructure covering commerce, social and property sites."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/brightdata"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.brightdata.com/trials/free_tier"
+      docs_url: "https://docs.brightdata.com/api-reference/account-management-api/Get_free_tier_credits"
+      limits: "600 requests per minute per IP; requires billing.read permission (Admin or Finance API key level; Ops/Limit/User keys cannot call it)"
+      notes: "仅核实到免费额度端点（free tier credits）；账户余额类端点本次未核实"
+      checked_date: 2026-11-24
   - id: "context-dev"
     name: "Context.dev"
     capability: "Unified web-context API: URL to clean Markdown or HTML, whole-site crawls, and brand/page extraction."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/context-dev"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.context.dev/v1/org/usage"
+      docs_url: "https://docs.context.dev/api-reference/usage/retrieve.md"
+      limits: "Requires `logs:read` permission; 429 at 60 requests per minute per organization"
+      notes: null
+      checked_date: 2026-11-24
   - id: "firecrawl"
     name: "Firecrawl"
     capability: "Page and whole-site capture into Markdown, HTML or schema-shaped JSON, with crawl jobs and caching."
@@ -86,6 +118,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/firecrawl"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.firecrawl.dev/v2/team/credit-usage"
+      docs_url: "https://docs.firecrawl.dev/api-reference/endpoint/credit-usage"
+      limits: "Authorization: Bearer"
+      notes: "剩余 credits、套餐 credits、账期；另有 Historical Credit Usage 端点"
+      checked_date: 2026-11-24
   - id: "mrscraper"
     name: "MrScraper"
     capability: "Fetches any URL as HTML, Markdown, screenshot or AI-extracted JSON, including paginated listings."
@@ -103,6 +143,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/mrscraper"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.mrscraper.com/llms.txt"
+      limits: null
+      notes: "文档有 GET /api/v1/subscription-accounts（token 校验/账户状态），未明确为用量接口，故 null；另提到 Analytics API"
+      checked_date: 2026-11-24
   - id: "tinyfish"
     name: "TinyFish"
     capability: "Browser-rendered search and multi-URL extraction plus an AI browser agent that navigates from instructions."
@@ -120,3 +168,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/tinyfish"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.fetch.tinyfish.ai/usage"
+      docs_url: "https://docs.tinyfish.ai/api-reference/list-fetch-usage"
+      limits: "X-API-Key header required; pagination limit 1-1000 (default 100), page>=1; owner=me|team (workflow key only team)"
+      notes: null
+      checked_date: 2026-11-24

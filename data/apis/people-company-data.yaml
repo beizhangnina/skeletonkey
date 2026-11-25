@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/akta"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.akta.pro/docs/developer-tools/cli/credits"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "apollo"
     name: "Apollo"
     capability: "B2B sales intelligence: people and company search, bulk enrichment, job postings and company news."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apollo"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "POST"
+      path: "https://api.apollo.io/api/v1/usage_stats/credit_usage_stats"
+      docs_url: "https://docs.apollo.io/reference/view-credit-usage-stats"
+      limits: "需 API key 或 Master API key，OAuth scope credit_usage_stats_read；文档标注 0 credits"
+      notes: null
+      checked_date: 2026-11-24
   - id: "aviato"
     name: "Aviato"
     capability: "Private-company and founder database used for startup research."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/aviato"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "builtwith"
     name: "BuiltWith"
     capability: "Technographics: the analytics, hosting and framework stack detected behind a website."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/builtwith"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "clay"
     name: "Clay"
     capability: "GTM data platform: cross-entity people and company search plus managed enrichment waterfalls."
@@ -86,6 +118,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/clay"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://university.clay.com/docs/credit-usage"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "contactout"
     name: "ContactOut"
     capability: "Resolves LinkedIn profiles into verified work and personal email addresses and phone numbers."
@@ -103,6 +143,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/contactout"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://contactout.com/enterprise-users"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "crunchbase"
     name: "Crunchbase"
     capability: "Company, investor and funding-round records including key people and investor portfolios."
@@ -120,6 +168,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/crunchbase"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "crustdata"
     name: "Crustdata"
     capability: "Live company and people data with hiring, headcount and growth time series."
@@ -137,6 +193,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/crustdata"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.crustdata.com/account/credits"
+      docs_url: "https://docs.crustdata.com/api-reference/account-apis/get-account-credit-balance.md"
+      limits: "Free, consumes no credits; rate limited to 300 requests per minute; requires x-api-version: 2025-11-01 header (returns 400 without it); Bearer API key identifies the account."
+      notes: null
+      checked_date: 2026-11-24
   - id: "datalegion"
     name: "Data Legion"
     capability: "Person and company enrichment from an identifier such as an email or domain."
@@ -154,6 +218,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/datalegion"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.datalegion.ai/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "fundable"
     name: "Fundable"
     capability: "Near-real-time startup funding rounds, funded-company detail and investor/angel profiles."
@@ -171,6 +243,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/fundable"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/credits"
+      docs_url: "https://docs.tryfundable.ai/api-reference/credits/balance.md"
+      limits: "Free; consumes no credits; does not accept a user ID; rate limit 200 requests per minute"
+      notes: null
+      checked_date: 2026-11-24
   - id: "leadmagic"
     name: "LeadMagic"
     capability: "B2B email, mobile and company enrichment with per-record validation."
@@ -188,6 +268,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/leadmagic"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://leadmagic.io/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "lusha"
     name: "Lusha"
     capability: "B2B contact and company enrichment including direct dials and firmographics."
@@ -205,6 +293,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/lusha"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.lusha.com/v3/account/usage"
+      docs_url: "https://docs.lusha.com/api-reference/account/get-account-usage"
+      limits: "Rate limit: This endpoint is limited to 5 requests per minute. (api_key header required)"
+      notes: null
+      checked_date: 2026-11-24
   - id: "metixai"
     name: "Metix AI"
     capability: "People, job and company search over a large profile index with email and phone unlock."
@@ -222,6 +318,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/metixai"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "orbit"
     name: "Orbit"
     capability: "Builds a source-backed person profile from a name, email, phone, address or social handle."
@@ -239,6 +343,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/orbit"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "pdl"
     name: "People Data Labs"
     capability: "Person and company datasets for identity resolution, work history and firmographic enrichment."
@@ -256,6 +368,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/pdl"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.peopledatalabs.com/support/billing/check-credit-usage.md"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "ploid"
     name: "Ploid"
     capability: "Plain-language search over a refreshed professional-profile index, with person enrichment."
@@ -273,6 +393,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/ploid"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "predictleads"
     name: "PredictLeads"
     capability: "Company event signals: funding, hiring, product launches, partnerships and job postings."
@@ -290,6 +418,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/predictleads"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://predictleads.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "producthunt"
     name: "Product Hunt"
     capability: "Product launch pages and launch history from a startup launch community."
@@ -307,6 +443,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/producthunt"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.producthunt.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "sumble"
     name: "Sumble"
     capability: "Team-level org structure and hiring activity mined from job postings."
@@ -324,6 +468,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/sumble"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.sumble.com/get-started/credits.md"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "the-companies-api"
     name: "The Companies API"
     capability: "Firmographic company data: domain enrichment, company search, industries and email patterns."
@@ -341,6 +493,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/the-companies-api"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.thecompaniesapi.com/v2/team/:teamId"
+      docs_url: "https://www.thecompaniesapi.com/api/fetch-team"
+      limits: "Free"
+      notes: null
+      checked_date: 2026-11-24
   - id: "ycombinator"
     name: "Y Combinator"
     capability: "Public accelerator directory: companies by batch, founders, partners and startup jobs."
@@ -358,6 +518,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/ycombinator"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.ycombinator.com"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "zoominfo"
     name: "ZoomInfo"
     capability: "B2B contact and company intelligence over a large professional directory."
@@ -375,3 +543,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/zoominfo"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.zoominfo.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

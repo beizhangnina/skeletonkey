@@ -639,6 +639,14 @@ entries:
       off treg's own pages on 2026-10-28, with no sign-up.
     source: https://treg.to/llms.txt
     checked_date: "2026-10-28"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/billing"
+      docs_url: "https://treg.to/docs"
+      limits: "需 x-treg-org 头（org 级 token）"
+      notes: "中转站；文档另列 GET /billing/history；本页未写明 base URL"
+      checked_date: 2026-11-24
     collection_scope: aggregator
     visibility: listed
 

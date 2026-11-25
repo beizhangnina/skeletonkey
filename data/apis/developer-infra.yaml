@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/browserbase"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.browserbase.com/v1/projects/{id}/usage"
+      docs_url: "https://docs.browserbase.com/reference/api/get-project-usage"
+      limits: "Requires X-BB-API-Key header (Browserbase API key)"
+      notes: null
+      checked_date: 2026-11-24
   - id: "github"
     name: "GitHub"
     capability: "Issue and pull-request search plus issue comments over public repositories."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/github"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.github.com/rate_limit"
+      docs_url: "https://docs.github.com/en/rest/rate-limit/rate-limit"
+      limits: "仅速率配额；调用不计入 REST 速率限制"
+      notes: "部分能：账单用量 GET /users/{username}/settings/billing/usage 等（https://docs.github.com/en/rest/billing/usage）仅适用于 enhanced billing platform 账户，组织级需管理员权限"
+      checked_date: 2026-11-24
   - id: "kadec0"
     name: "kadec0"
     capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "sfs"
     name: "Simple FS"
     capability: "Remote per-workspace file system for agents with unix-style verbs and signed share URLs."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site. Operated by the Monid aggregator itself rather than an independent vendor."
     source_url: "https://monid.ai/tools/sfs"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "smolmachine"
     name: "Smol Machines"
     capability: "Persistent Linux microVM sandboxes for agents, created from a container image."
@@ -86,3 +118,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/smolmachine"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/v1/account"
+      docs_url: "https://smolmachines.com/docs/guides/skills/cloud-usage"
+      limits: "A machine:* key reaches GET /v1/account (200); GET /v1/usage needs admin or usage:read; GET /v1/billing/meters needs admin"
+      notes: null
+      checked_date: 2026-11-24

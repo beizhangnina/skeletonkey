@@ -18,6 +18,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/aaa-gas-prices"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://gasprices.aaa.com/"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "bid-cars"
     name: "bid.cars"
     capability: "Salvage and insurance vehicle auction lots: VIN lookup, photos and historical sale prices."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/bid-cars"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "carfax"
     name: "CARFAX"
     capability: "Used and new vehicle listings with history summaries, valuations and dealer detail."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/carfax"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "cars-com"
     name: "Cars.com"
     capability: "Vehicle listing search, listing specifications and dealer inventory."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/cars-com"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "edmunds"
     name: "Edmunds"
     capability: "Car inventory search by make/model/year or VIN, with specifications and pricing."
@@ -86,6 +118,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/edmunds"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "kbb"
     name: "Kelley Blue Book"
     capability: "Vehicle reference data, expert ratings, lease deals and OBD-II diagnostic codes."
@@ -103,3 +143,11 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/kbb"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.kbb.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
