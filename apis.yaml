@@ -213,6 +213,47 @@
 # within a week, and an agent that needs the whole list should fetch
 # `catalog_url` live. The 15-row cap is what enforces that.
 #
+# STRUCTURED CORE FIELDS (optional, null-when-unknown)
+# ------------------------------------------------------
+# Five more fields, independent of `offering` above. All optional on every
+# row, so adding them cannot invalidate a row that lacks them.
+#
+#   official_docs_url    http(s) URL or null. The vendor's OWN official API
+#                        documentation -- never an aggregator's page. null =
+#                        not verified.
+#   auth                 null, or a mapping:
+#     type                api_key | bearer | oauth2 | basic | none | other |
+#                        unknown. REQUIRED when the mapping exists.
+#     header              header name or null, e.g. "Authorization",
+#                        "x-api-key". Must be null when type is `none`.
+#     format              placeholder template or null, e.g.
+#                        "Bearer <API_KEY>" -- MUST contain a <...> placeholder
+#                        (never a real secret) and must be null when type is
+#                        `none`.
+#     docs_url            http(s) URL or null.
+#   pricing               null, or a mapping:
+#     model               free | freemium | pay_as_you_go | subscription |
+#                        prepaid_credits | contact_sales | unknown, or null.
+#     free_tier           true | false | null.
+#     starting_price_usd  number >= 0 or null. Never guessed.
+#     unit                string or null, e.g. "per 1,000 requests".
+#     pricing_url          http(s) URL or null.
+#     notes               string or null, one line, at most 300 characters.
+#   endpoints             null, or a list of at most 50:
+#     method               required. GET | POST | PUT | PATCH | DELETE | HEAD |
+#                        OPTIONS, uppercase.
+#     path                required. Non-empty, starts with "/", no whitespace
+#                        (may contain "{param}").
+#     summary              string or null, one line, at most 200 characters.
+#     returns              string or null, one line, at most 200 characters.
+#     docs_url             http(s) URL or null.
+#                        null = not verified yet. `[]` = verified that there is
+#                        no official self-serve API surface to list -- an empty
+#                        list REQUIRES a non-empty `endpoints_note`. Duplicate
+#                        (method, path) pairs within one row are an error.
+#   endpoints_note        string or null, one line, at most 300 characters.
+#                        Why `endpoints` is empty or partial.
+#
 # DISCOVERED ROWS (written by the agent, not by hand)
 # ---------------------------------------------------
 # `source_urls`, `discovered_date`, `promoted_date` and `promoted_by` belong to
@@ -450,6 +491,12 @@ entries:
       SOURCE CAVEAT there.
     source: https://build.nvidia.com/llms.txt
     checked_date: "2026-10-28"
+    collection_scope: llm
+    visibility: hidden
+    visibility_note: >-
+      LLM API; set aside from the tool/data/aggregator catalog 2026-11-24
+      (Bei). Hidden from listings by default, not deleted; recoverable via
+      --all or visibility: listed.
 
   - name: treg
     url: https://treg.to/
@@ -487,8 +534,8 @@ entries:
         once the one-off $1.00 credit is used.
     offering:
       summary: >-
-        OpenRouter but for agent tools instead of models: one token and one base
-        URL reach 4,000+ third-party tool endpoints, billed per call.
+        Third-party intermediary catalog/gateway: one token resells metered,
+        per-call access to 4,000+ third-party tool endpoints it does not own.
       categories:
         - search
         - web-scraping
@@ -600,6 +647,8 @@ entries:
       limits: "需 x-treg-org 头（org 级 token）"
       notes: "中转站；文档另列 GET /billing/history；本页未写明 base URL"
       checked_date: 2026-11-24
+    collection_scope: aggregator
+    visibility: listed
 
   # --- The 12 vendors the treg `rea-growth` skill calls ---------------------
   # Read off each VENDOR's own docs on 2026-10-30, with no sign-up and no API

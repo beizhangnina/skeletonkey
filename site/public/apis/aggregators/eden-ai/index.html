@@ -6,6 +6,7 @@
 <title>Eden AI — aggregator gateway — SkeletonKey</title>
 <meta name="description" content="An AI gateway that routes to many LLM and specialist-model vendors (OCR, speech, vision, translation) through one OpenAI-compatible endpoint, key and credi">
 <link rel="canonical" href="https://skeletonkey.run/apis/aggregators/eden-ai/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/aggregators/eden-ai/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,7 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,10 +54,11 @@
 <h1 class="ap-title">Eden AI</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">An AI gateway that routes to many LLM and specialist-model vendors (OCR, speech, vision, translation) through one OpenAI-compatible endpoint, key and credit balance. Scope is AI models rather than general data APIs.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://www.edenai.co" rel="noopener">https://www.edenai.co</a></dd><dt>API base URL</dt><dd><code>https://api.edenai.run/v3</code></dd><dt>Auth</dt><dd><code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://docs.edenai.co/" rel="noopener">https://docs.edenai.co/</a></dd><dt>Catalog size claimed</dt><dd>500+ AI models from 50+ providers (docs index); the homepage states &quot;around 1,000 LLMs and expert models across 50+ providers&quot;</dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://app.edenai.run/" rel="noopener">https://app.edenai.run/</a></dd><dt>Card required</dt><dd>—</dd><dt>Free credit or trial</dt><dd>A sandbox token allows free testing.</dd></dl></section>
 <section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>prepaid_credits, payg</dd><dt>How it bills</dt><dd>Pay-as-you-go from prepaid credits with no subscription, 7 requests/second by default (upgradable to 15 on request) and auto-refill available; every API response returns the exact USD cost. A sandbox token allows free testing. An Advanced AI Platform tier with custom pricing and bulk discounts is sold by sales.</dd><dt>Payment methods</dt><dd>card (Stripe), bank transfer, credits (prepaid)</dd><dt>Fees stated</dt><dd>Eden AI charges no markup on provider pricing. You pay exactly what the underlying provider charges, plus a 5.5% platform fee applied at checkout.</dd><dt>Rate limits</dt><dd>7 requests/second by default</dd><dt>Pricing page</dt><dd><a href="https://www.edenai.co/pricing" rel="noopener">https://www.edenai.co/pricing</a></dd></dl></section>
-<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 162 vendors in our index were checked against this gateway.</p></section>
+<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 149 vendors in our index were checked against this gateway.</p></section>
 <section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://www.edenai.co" rel="noopener nofollow">https://www.edenai.co</a></li><li><a href="https://www.edenai.co/pricing" rel="noopener nofollow">https://www.edenai.co/pricing</a></li><li><a href="https://docs.edenai.co/llms.txt" rel="noopener nofollow">https://docs.edenai.co/llms.txt</a></li><li><a href="https://www.edenai.co/docs/v3/quickstart/first-llm-call.md" rel="noopener nofollow">https://www.edenai.co/docs/v3/quickstart/first-llm-call.md</a></li><li><a href="https://www.edenai.co/docs/v3/overview/plans-prices.md" rel="noopener nofollow">https://www.edenai.co/docs/v3/overview/plans-prices.md</a></li><li><a href="https://app.edenai.run/" rel="noopener nofollow">https://app.edenai.run/</a></li></ul></section>
 </div></main>
 <footer class="site-foot">

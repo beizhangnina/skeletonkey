@@ -84,6 +84,93 @@ export const SHARD_SEEN_IN_SOURCES = [...AGGREGATOR_NAMES, VENDOR_DIRECT_SOURCE]
 export type ShardSeenIn = (typeof SHARD_SEEN_IN_SOURCES)[number];
 
 /**
+ * What a row counts as in the catalog (Bei, 2026-11-24): tool and data APIs
+ * plus the intermediaries ("aggregators") that resell them are collected.
+ * LLM APIs are set aside -- still in the index, just hidden by default.
+ *
+ *   tool         a tool API: an action or a generated-media capability
+ *                (image/video/audio/speech -- `generative-media` counts as a
+ *                tool, not an LLM, even though the models are generative)
+ *   data         a data/lookup API: the default for anything not a tool,
+ *                an aggregator, or an LLM
+ *   aggregator   a third-party intermediary that resells per-call access to
+ *                other vendors (treg, glasser, monid, flatkey, ...) -- a
+ *                catalog entry, never described as an access layer
+ *   llm          a first-party LLM/model API (chat, completions, inference) --
+ *                set aside, not deleted: `effectiveVisibility` hides it by
+ *                default but a direct lookup still finds it
+ */
+export const COLLECTION_SCOPES = ["tool", "data", "aggregator", "llm"] as const;
+export type CollectionScope = (typeof COLLECTION_SCOPES)[number];
+
+/** Whether a row appears on a listing/browsing surface by default. */
+export const VISIBILITIES = ["listed", "hidden"] as const;
+export type Visibility = (typeof VISIBILITIES)[number];
+
+/** A `visibility_note` is one line, so it reads in a list without wrecking it. */
+export const VISIBILITY_NOTE_MAX = 300;
+
+/**
+ * Shard/index categories that collect as `tool` rather than `data` when a row
+ * does not say its own `collection_scope`. Kept as the single source of truth
+ * for the mapping -- data/apis/scripts/validate.py and site/scripts/build_apis.py
+ * mirror this exact set.
+ */
+const TOOL_SCOPE_CATEGORIES: ReadonlySet<string> = new Set([
+  "generative-media",
+  "web-search",
+  "web-scraping",
+  "seo-marketing",
+  "developer-infra",
+  "communications",
+  "contact-verification",
+]);
+
+/** The fields `effectiveCollectionScope` needs: works for an ApiEntry or an IndexEntry. */
+export interface CollectionScopeInput {
+  collection_scope?: CollectionScope | null;
+  access_mode?: AccessMode | null;
+  /** Shard category (`llm-models`, `generative-media`, ...). Absent on a root apis.yaml row. */
+  category?: string;
+}
+
+/**
+ * The scope a row counts as, explicit or derived.
+ *
+ * Derivation, in order: an explicit `collection_scope` always wins. Otherwise,
+ * a shard row's `category` decides (`llm-models` -> llm; the tool categories
+ * above -> tool; any other category -> data). A root `apis.yaml` row carries no
+ * category at all, so it falls back to `access_mode`: `intermediary` ->
+ * aggregator, anything else -> data.
+ */
+export function effectiveCollectionScope(entry: CollectionScopeInput): CollectionScope {
+  if (entry.collection_scope != null) return entry.collection_scope;
+  const category = entry.category;
+  if (category !== undefined) {
+    if (category === "llm-models") return "llm";
+    if (TOOL_SCOPE_CATEGORIES.has(category)) return "tool";
+    return "data";
+  }
+  return entry.access_mode === "intermediary" ? "aggregator" : "data";
+}
+
+/** The fields `effectiveVisibility` needs, in addition to `effectiveCollectionScope`'s. */
+export interface VisibilityInput extends CollectionScopeInput {
+  visibility?: Visibility | null;
+}
+
+/**
+ * Whether a row appears on a listing/browsing surface by default: an explicit
+ * `visibility` always wins; otherwise a row is hidden only when its effective
+ * scope is `llm` (the 2026-11-24 LLM set-aside). Hidden is never deletion: a
+ * direct lookup by name still finds the row.
+ */
+export function effectiveVisibility(entry: VisibilityInput): Visibility {
+  if (entry.visibility != null) return entry.visibility;
+  return effectiveCollectionScope(entry) === "llm" ? "hidden" : "listed";
+}
+
+/**
  * What the vendor charges, and where that was read. `verified_url` plus
  * `verified_date` is the whole point of this block: a billing model with no
  * verified_url is a claim nobody checked, and the router says so out loud.
@@ -351,6 +438,76 @@ export interface UsageApiFacts {
   checked_date: string;
 }
 
+/**
+ * How `auth` says a vendor's endpoint is credentialed. Unlike `auth_required`
+ * (a tri-state on the entry itself), this lives inside the `auth:` block and
+ * is REQUIRED whenever that block exists -- there is no "unknown" by omission,
+ * only the explicit `unknown` member.
+ */
+export const AUTH_TYPES = ["api_key", "bearer", "oauth2", "basic", "none", "other", "unknown"] as const;
+export type AuthType = (typeof AUTH_TYPES)[number];
+
+/** How `pricing.model` says a vendor charges, or null for "nobody checked". */
+export const PRICING_MODELS = [
+  "free",
+  "freemium",
+  "pay_as_you_go",
+  "subscription",
+  "prepaid_credits",
+  "contact_sales",
+  "unknown",
+] as const;
+export type PricingModel = (typeof PRICING_MODELS)[number];
+
+/** HTTP methods an `endpoints[]` row may name. Always uppercase. */
+export const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] as const;
+export type HttpMethod = (typeof HTTP_METHODS)[number];
+
+/** `endpoints` is a capped list, same reasoning as `offering.highlights`. */
+export const ENDPOINTS_MAX = 50;
+
+/** One-line length caps, so a printed row never wraps into a wall of text. */
+export const ENDPOINT_SUMMARY_MAX = 200;
+export const ENDPOINT_RETURNS_MAX = 200;
+export const PRICING_NOTES_MAX = 300;
+export const ENDPOINTS_NOTE_MAX = 300;
+
+/**
+ * How a vendor's endpoint is credentialed. `type` is required whenever this
+ * block exists; `header`/`format` are null-when-unknown, and both must be null
+ * when `type` is `none` -- a vendor with no credential has nothing to name.
+ * `format` is a placeholder TEMPLATE ("Bearer <API_KEY>"), never a real key.
+ */
+export interface ApiAuth {
+  type: AuthType;
+  header: string | null;
+  format: string | null;
+  docs_url: string | null;
+}
+
+/**
+ * What the vendor charges. Every field is null-when-unknown, following the
+ * same rule `billing` does: a null is "nobody checked", never "free".
+ * `starting_price_usd` is never guessed.
+ */
+export interface ApiPricing {
+  model: PricingModel | null;
+  free_tier: boolean | null;
+  starting_price_usd: number | null;
+  unit: string | null;
+  pricing_url: string | null;
+  notes: string | null;
+}
+
+/** One documented endpoint: a method, a path, and what it is for. */
+export interface ApiEndpoint {
+  method: HttpMethod;
+  path: string;
+  summary: string | null;
+  returns: string | null;
+  docs_url: string | null;
+}
+
 /** True unless the row explicitly says this header carries no secret. */
 export function isSecretAuthHeader(spec: { secret?: boolean | null }): boolean {
   return spec.secret !== false;
@@ -456,6 +613,24 @@ export interface ApiEntry {
 
   /** Whether the vendor documents an API to check your own usage/spend/quota. */
   usage_api?: UsageApiFacts | null;
+  // --- structured core fields (ND-8) ----------------------------------------
+  // All optional, all null-when-unknown. `official_docs_url` is the vendor's
+  // OWN documentation -- never an aggregator's page.
+
+  /** The vendor's own official API documentation. null = not verified. */
+  official_docs_url?: string | null;
+  /** How the endpoint is credentialed, or null if nobody checked. */
+  auth?: ApiAuth | null;
+  /** What the vendor charges, or null if nobody checked. */
+  pricing?: ApiPricing | null;
+  /**
+   * The vendor's documented endpoints. null = not verified yet. `[]` =
+   * verified that there is no official self-serve API surface to list, which
+   * requires a non-empty `endpoints_note` saying why.
+   */
+  endpoints?: ApiEndpoint[] | null;
+  /** Why `endpoints` is empty or partial, when it is. */
+  endpoints_note?: string | null;
 
   // --- discover-on-miss provenance -----------------------------------------
 
@@ -473,6 +648,16 @@ export interface ApiEntry {
   promoted_date?: string | null;
   /** What promoted it, e.g. "ledger: 200 from api.example.com at <ts>". */
   promoted_by?: string | null;
+
+  // --- catalog scope (Bei, 2026-11-24): tool/data APIs and aggregators are --
+  // --- collected; LLM APIs are set aside, hidden by default but not deleted -
+
+  /** Catalog scope: `null` means derive it (see `effectiveCollectionScope`). */
+  collection_scope?: CollectionScope | null;
+  /** Listing visibility: `null` means derive it (see `effectiveVisibility`). */
+  visibility?: Visibility | null;
+  /** Why visibility is hidden, one line, <= VISIBILITY_NOTE_MAX chars. */
+  visibility_note?: string | null;
 }
 
 export interface ApisDocument {
@@ -519,11 +704,19 @@ const OPTIONAL_FIELDS = [
   "aggregators",
   "offering",
   "usage_api",
+  "official_docs_url",
+  "auth",
+  "pricing",
+  "endpoints",
+  "endpoints_note",
   "status",
   "source_urls",
   "discovered_date",
   "promoted_date",
   "promoted_by",
+  "collection_scope",
+  "visibility",
+  "visibility_note",
 ] as const;
 
 /** Optional auth URLs, all validated the same way: an http(s) URL or null. */
@@ -687,7 +880,9 @@ export function validateApis(input: unknown): ValidationResult {
     validateAggregators(errors, at, entry["aggregators"]);
     validateOffering(errors, at, entry["offering"]);
     validateUsageApi(errors, at, entry["usage_api"]);
+    validateStructuredFields(errors, at, entry);
     validateDiscovery(errors, at, entry);
+    validateCollectionFields(errors, at, entry);
 
     const humanSteps = entry["human_steps"];
     if (humanSteps !== null && humanSteps !== undefined) {
@@ -722,6 +917,8 @@ export function validateApis(input: unknown): ValidationResult {
         ...(typeof domain === "string" ? { domain } : {}),
         ...optionalAuthFields(entry),
         ...optionalIndexFields(entry),
+        ...optionalCollectionFields(entry),
+        ...optionalStructuredFields(entry),
       });
     }
   });
@@ -1287,6 +1484,233 @@ function validateHighlights(errors: string[], at: string, value: unknown): void 
 }
 
 /**
+ * Validates the five structured core fields added by ND-8: `official_docs_url`,
+ * `auth`, `pricing`, `endpoints` and `endpoints_note`. All optional, all
+ * null-when-unknown, so every existing row stays valid.
+ */
+function validateStructuredFields(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const officialDocsUrl = entry["official_docs_url"];
+  if (
+    officialDocsUrl !== null &&
+    officialDocsUrl !== undefined &&
+    !(typeof officialDocsUrl === "string" && isHttpUrl(officialDocsUrl))
+  ) {
+    errors.push(`${at}.official_docs_url: expected an http(s) URL or null`);
+  }
+  validateAuth(errors, at, entry["auth"]);
+  validatePricing(errors, at, entry["pricing"]);
+  validateEndpoints(errors, at, entry);
+}
+
+/**
+ * Validates an `auth:` block: how the vendor's endpoint is credentialed.
+ * `type` is required whenever the block exists -- there is no bare `{}`.
+ * `header`/`format` must both be null when `type` is `none`: a vendor that
+ * documents no credential has no header to put one in, the same rule
+ * `connect.auth: none` follows in `offering`. `format` must contain a
+ * `<...>` placeholder so a real secret is never committed by mistake.
+ */
+function validateAuth(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.auth`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set(["type", "header", "format", "docs_url"]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+  const type = raw["type"];
+  if (!("type" in raw)) {
+    errors.push(`${field}.type: missing (required when auth is set)`);
+  } else if (typeof type !== "string" || !(AUTH_TYPES as readonly string[]).includes(type)) {
+    errors.push(`${field}.type: expected one of ${AUTH_TYPES.join(" | ")}`);
+  }
+  const header = raw["header"];
+  if (header !== null && header !== undefined) {
+    if (typeof header !== "string" || header.trim() === "") {
+      errors.push(`${field}.header: expected a non-empty header name or null`);
+    } else if (/[\s:]/.test(header)) {
+      errors.push(`${field}.header: expected a header name only, with no colon or spaces`);
+    }
+  }
+  const format = raw["format"];
+  if (format !== null && format !== undefined) {
+    if (typeof format !== "string" || format.trim() === "") {
+      errors.push(`${field}.format: expected a non-empty template or null`);
+    } else if (!/<[^<>]+>/.test(format)) {
+      errors.push(`${field}.format: must contain a <...> placeholder`);
+    }
+  }
+  if (type === "none") {
+    if (typeof header === "string") {
+      errors.push(`${field}.header: must be null when type is none`);
+    }
+    if (typeof format === "string") {
+      errors.push(`${field}.format: must be null when type is none`);
+    }
+  }
+  const docsUrl = raw["docs_url"];
+  if (docsUrl !== null && docsUrl !== undefined && !(typeof docsUrl === "string" && isHttpUrl(docsUrl))) {
+    errors.push(`${field}.docs_url: expected an http(s) URL or null`);
+  }
+}
+
+/**
+ * Validates a `pricing:` block. `starting_price_usd` is never guessed, the
+ * same rule `min_topup` and `billing` follow: a null means nobody checked.
+ */
+function validatePricing(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.pricing`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set(["model", "free_tier", "starting_price_usd", "unit", "pricing_url", "notes"]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+  const model = raw["model"];
+  if (model !== null && model !== undefined) {
+    if (typeof model !== "string" || !(PRICING_MODELS as readonly string[]).includes(model)) {
+      errors.push(`${field}.model: expected one of ${PRICING_MODELS.join(" | ")} or null`);
+    }
+  }
+  const freeTier = raw["free_tier"];
+  if (freeTier !== null && freeTier !== undefined && typeof freeTier !== "boolean") {
+    errors.push(`${field}.free_tier: expected a boolean or null`);
+  }
+  const price = raw["starting_price_usd"];
+  if (price !== null && price !== undefined) {
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+      errors.push(`${field}.starting_price_usd: expected a non-negative number or null`);
+    }
+  }
+  requireStringOrNull(errors, field, "unit", raw["unit"]);
+  const pricingUrl = raw["pricing_url"];
+  if (
+    pricingUrl !== null &&
+    pricingUrl !== undefined &&
+    !(typeof pricingUrl === "string" && isHttpUrl(pricingUrl))
+  ) {
+    errors.push(`${field}.pricing_url: expected an http(s) URL or null`);
+  }
+  const notes = raw["notes"];
+  if (notes !== null && notes !== undefined) {
+    if (typeof notes !== "string" || notes.trim() === "") {
+      errors.push(`${field}.notes: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(notes)) {
+      errors.push(`${field}.notes: expected a single line (no line breaks)`);
+    } else if (notes.length > PRICING_NOTES_MAX) {
+      errors.push(`${field}.notes: expected at most ${PRICING_NOTES_MAX} characters, got ${notes.length}`);
+    }
+  }
+}
+
+/**
+ * Validates `endpoints` and `endpoints_note` together: `null` means not
+ * verified yet, `[]` means verified that there is no official self-serve API
+ * surface to list -- and an empty list REQUIRES `endpoints_note` to say why,
+ * so the distinction between the two nulls is never lost.
+ */
+function validateEndpoints(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const note = entry["endpoints_note"];
+  if (note !== null && note !== undefined) {
+    if (typeof note !== "string" || note.trim() === "") {
+      errors.push(`${at}.endpoints_note: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(note)) {
+      errors.push(`${at}.endpoints_note: expected a single line (no line breaks)`);
+    } else if (note.length > ENDPOINTS_NOTE_MAX) {
+      errors.push(`${at}.endpoints_note: expected at most ${ENDPOINTS_NOTE_MAX} characters, got ${note.length}`);
+    }
+  }
+
+  const value = entry["endpoints"];
+  if (value === null || value === undefined) return;
+  const field = `${at}.endpoints`;
+  if (!Array.isArray(value)) {
+    errors.push(`${field}: expected a list or null`);
+    return;
+  }
+  if (value.length === 0) {
+    if (typeof note !== "string" || note.trim() === "") {
+      errors.push(
+        `${field}: expected a non-empty endpoints_note when endpoints is [] -- ` +
+          "say why there is no API surface to list",
+      );
+    }
+    return;
+  }
+  if (value.length > ENDPOINTS_MAX) {
+    errors.push(`${field}: expected at most ${ENDPOINTS_MAX} entries, got ${value.length}`);
+  }
+  const seen = new Set<string>();
+  value.forEach((raw, index) => {
+    const row = `${field}[${index}]`;
+    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+      errors.push(`${row}: expected a mapping`);
+      return;
+    }
+    const item = raw as Record<string, unknown>;
+    const known = new Set(["method", "path", "summary", "returns", "docs_url"]);
+    for (const key of Object.keys(item)) {
+      if (!known.has(key)) errors.push(`${row}.${key}: unknown field`);
+    }
+    const method = item["method"];
+    if (typeof method !== "string" || !(HTTP_METHODS as readonly string[]).includes(method)) {
+      errors.push(`${row}.method: must be one of ${HTTP_METHODS.join(", ")}`);
+    }
+    const p = item["path"];
+    let pathKey = "";
+    if (typeof p !== "string" || p.trim() === "") {
+      errors.push(`${row}.path: expected a non-empty string starting with "/"`);
+    } else if (!p.startsWith("/")) {
+      errors.push(`${row}.path: expected a path starting with "/"`);
+    } else if (/\s/.test(p)) {
+      errors.push(`${row}.path: expected no whitespace`);
+    } else {
+      pathKey = p;
+    }
+    if (typeof method === "string" && pathKey !== "") {
+      const key = `${method} ${pathKey}`;
+      if (seen.has(key)) {
+        errors.push(`${row}: duplicate method+path ${JSON.stringify(key)}`);
+      } else {
+        seen.add(key);
+      }
+    }
+    const summary = item["summary"];
+    if (summary !== null && summary !== undefined) {
+      if (typeof summary !== "string" || summary.trim() === "") {
+        errors.push(`${row}.summary: expected a non-empty string or null`);
+      } else if (/[\r\n]/.test(summary)) {
+        errors.push(`${row}.summary: expected a single line (no line breaks)`);
+      } else if (summary.length > ENDPOINT_SUMMARY_MAX) {
+        errors.push(`${row}.summary: expected at most ${ENDPOINT_SUMMARY_MAX} characters, got ${summary.length}`);
+      }
+    }
+    const returns = item["returns"];
+    if (returns !== null && returns !== undefined) {
+      if (typeof returns !== "string" || returns.trim() === "") {
+        errors.push(`${row}.returns: expected a non-empty string or null`);
+      } else if (/[\r\n]/.test(returns)) {
+        errors.push(`${row}.returns: expected a single line (no line breaks)`);
+      } else if (returns.length > ENDPOINT_RETURNS_MAX) {
+        errors.push(`${row}.returns: expected at most ${ENDPOINT_RETURNS_MAX} characters, got ${returns.length}`);
+      }
+    }
+    const docsUrl = item["docs_url"];
+    if (docsUrl !== null && docsUrl !== undefined && !(typeof docsUrl === "string" && isHttpUrl(docsUrl))) {
+      errors.push(`${row}.docs_url: expected an http(s) URL or null`);
+    }
+  });
+}
+
+/**
  * Validates a `billing:` block. The rules all exist to stop an unverified
  * claim from reading like a verified one:
  *   - `model` must be one of BILLING_MODELS, or null for "nobody checked".
@@ -1444,6 +1868,39 @@ function validateDiscovery(errors: string[], at: string, entry: Record<string, u
 }
 
 /**
+ * Validates the optional catalog-scope fields. `visibility: hidden` is
+ * deliberately NOT required to carry a `visibility_note` -- the note is
+ * encouraged (and every row this task sets hidden has one), but the schema
+ * does not enforce it.
+ */
+function validateCollectionFields(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const scope = entry["collection_scope"];
+  if (scope !== null && scope !== undefined) {
+    if (typeof scope !== "string" || !(COLLECTION_SCOPES as readonly string[]).includes(scope)) {
+      errors.push(`${at}.collection_scope: must be one of ${COLLECTION_SCOPES.join(", ")}`);
+    }
+  }
+  const visibility = entry["visibility"];
+  if (visibility !== null && visibility !== undefined) {
+    if (typeof visibility !== "string" || !(VISIBILITIES as readonly string[]).includes(visibility)) {
+      errors.push(`${at}.visibility: must be one of ${VISIBILITIES.join(", ")}`);
+    }
+  }
+  const note = entry["visibility_note"];
+  if (note !== null && note !== undefined) {
+    if (typeof note !== "string" || note.trim() === "") {
+      errors.push(`${at}.visibility_note: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(note)) {
+      errors.push(`${at}.visibility_note: expected a single line (no line breaks)`);
+    } else if (note.length > VISIBILITY_NOTE_MAX) {
+      errors.push(
+        `${at}.visibility_note: expected at most ${VISIBILITY_NOTE_MAX} characters, got ${note.length}`,
+      );
+    }
+  }
+}
+
+/**
  * Copies billing, aggregator carriage, and discovery provenance onto a
  * validated entry, normalising "absent" (undefined) and "unknown" (null) the
  * same way the auth fields do.
@@ -1485,6 +1942,21 @@ function optionalIndexFields(entry: Record<string, unknown>): Partial<ApiEntry> 
   }
   for (const field of ["discovered_date", "promoted_date", "promoted_by"] as const) {
     if (field in entry) out[field] = typeof entry[field] === "string" ? entry[field] : null;
+  }
+  return out as Partial<ApiEntry>;
+}
+
+/** Copies the optional catalog-scope fields, "absent" vs. "explicitly null" preserved. */
+function optionalCollectionFields(entry: Record<string, unknown>): Partial<ApiEntry> {
+  const out: Record<string, unknown> = {};
+  if ("collection_scope" in entry) {
+    out["collection_scope"] = typeof entry["collection_scope"] === "string" ? entry["collection_scope"] : null;
+  }
+  if ("visibility" in entry) {
+    out["visibility"] = typeof entry["visibility"] === "string" ? entry["visibility"] : null;
+  }
+  if ("visibility_note" in entry) {
+    out["visibility_note"] = typeof entry["visibility_note"] === "string" ? entry["visibility_note"] : null;
   }
   return out as Partial<ApiEntry>;
 }
@@ -1601,6 +2073,73 @@ function carriage(raw: Record<string, unknown>): AggregatorCarriage {
     price_verified_url:
       typeof raw["price_verified_url"] === "string" ? (raw["price_verified_url"] as string) : null,
     price_note: typeof raw["price_note"] === "string" ? (raw["price_note"] as string) : null,
+  };
+}
+
+/**
+ * Copies the five structured core fields (ND-8) onto a validated entry,
+ * omitting the ones the row never mentioned -- same "absent vs. unknown" rule
+ * `optionalIndexFields` follows. Only reached for a row the validator (or
+ * `shardEntry`) already accepted.
+ */
+function optionalStructuredFields(entry: Record<string, unknown>): Partial<ApiEntry> {
+  const out: Record<string, unknown> = {};
+  if ("official_docs_url" in entry) {
+    out["official_docs_url"] = typeof entry["official_docs_url"] === "string" ? entry["official_docs_url"] : null;
+  }
+  if ("auth" in entry) {
+    const raw = entry["auth"];
+    out["auth"] =
+      raw === null || typeof raw !== "object" || Array.isArray(raw)
+        ? null
+        : apiAuth(raw as Record<string, unknown>);
+  }
+  if ("pricing" in entry) {
+    const raw = entry["pricing"];
+    out["pricing"] =
+      raw === null || typeof raw !== "object" || Array.isArray(raw)
+        ? null
+        : apiPricing(raw as Record<string, unknown>);
+  }
+  if ("endpoints" in entry) {
+    const raw = entry["endpoints"];
+    out["endpoints"] = Array.isArray(raw)
+      ? raw.map((item) => apiEndpoint(item as Record<string, unknown>))
+      : null;
+  }
+  if ("endpoints_note" in entry) {
+    out["endpoints_note"] = typeof entry["endpoints_note"] === "string" ? entry["endpoints_note"] : null;
+  }
+  return out as Partial<ApiEntry>;
+}
+
+function apiAuth(raw: Record<string, unknown>): ApiAuth {
+  return {
+    type: raw["type"] as AuthType,
+    header: typeof raw["header"] === "string" ? (raw["header"] as string) : null,
+    format: typeof raw["format"] === "string" ? (raw["format"] as string) : null,
+    docs_url: typeof raw["docs_url"] === "string" ? (raw["docs_url"] as string) : null,
+  };
+}
+
+function apiPricing(raw: Record<string, unknown>): ApiPricing {
+  return {
+    model: typeof raw["model"] === "string" ? (raw["model"] as PricingModel) : null,
+    free_tier: typeof raw["free_tier"] === "boolean" ? (raw["free_tier"] as boolean) : null,
+    starting_price_usd: typeof raw["starting_price_usd"] === "number" ? (raw["starting_price_usd"] as number) : null,
+    unit: typeof raw["unit"] === "string" ? (raw["unit"] as string) : null,
+    pricing_url: typeof raw["pricing_url"] === "string" ? (raw["pricing_url"] as string) : null,
+    notes: typeof raw["notes"] === "string" ? (raw["notes"] as string) : null,
+  };
+}
+
+function apiEndpoint(raw: Record<string, unknown>): ApiEndpoint {
+  return {
+    method: raw["method"] as HttpMethod,
+    path: String(raw["path"]),
+    summary: typeof raw["summary"] === "string" ? (raw["summary"] as string) : null,
+    returns: typeof raw["returns"] === "string" ? (raw["returns"] as string) : null,
+    docs_url: typeof raw["docs_url"] === "string" ? (raw["docs_url"] as string) : null,
   };
 }
 
@@ -1848,7 +2387,13 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
     !Array.isArray(usageApiRaw)
       ? usageApiFacts(usageApiRaw as Record<string, unknown>)
       : null;
-  const nestedErrors = [...offeringErrors, ...usageApiErrors];
+  // The five ND-8 structured fields are, like `offering`, optional on a shard
+  // row. A malformed one is reported and dropped, never thrown -- same
+  // contract as `offering` above.
+  const structuredErrors: string[] = [];
+  validateStructuredFields(structuredErrors, `${file}(${id})`, row);
+  const structured = structuredErrors.length === 0 ? optionalStructuredFields(row) : {};
+  const allErrors = [...offeringErrors, ...usageApiErrors, ...structuredErrors];
 
   const humanSteps =
     authType === "oauth"
@@ -1860,7 +2405,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       : [];
 
   return {
-    ...(nestedErrors.length === 0 ? {} : { error: nestedErrors.join("; ") }),
+    ...(allErrors.length === 0 ? {} : { error: allErrors.join("; ") }),
     entry: {
       name: id,
       url: shardUrl(row["docs_url"]) ?? shardUrl(row["provider_url"]),
@@ -1897,10 +2442,19 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       aggregators,
       offering,
       usage_api: usageApi,
+      ...structured,
       vendor_url: shardUrl(row["provider_url"]),
       origin: "shard",
       origin_file: file,
       ...(category === "" ? {} : { category }),
+      ...(typeof row["collection_scope"] === "string" &&
+      (COLLECTION_SCOPES as readonly string[]).includes(row["collection_scope"])
+        ? { collection_scope: row["collection_scope"] as CollectionScope }
+        : {}),
+      ...(typeof row["visibility"] === "string" && (VISIBILITIES as readonly string[]).includes(row["visibility"])
+        ? { visibility: row["visibility"] as Visibility }
+        : {}),
+      ...(typeof row["visibility_note"] === "string" ? { visibility_note: row["visibility_note"] } : {}),
     },
   };
 }

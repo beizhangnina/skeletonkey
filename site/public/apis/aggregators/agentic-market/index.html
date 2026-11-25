@@ -6,6 +6,7 @@
 <title>Agentic Market (Coinbase x402 Bazaar) — aggregator gateway — SkeletonKey</title>
 <meta name="description" content="Coinbase&#x27;s public catalog of x402-enabled services, readable by agents over a plain REST endpoint and by humans in a browser. It is a discovery index rathe">
 <link rel="canonical" href="https://skeletonkey.run/apis/aggregators/agentic-market/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/aggregators/agentic-market/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,7 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,10 +54,11 @@
 <h1 class="ap-title">Agentic Market (Coinbase x402 Bazaar)</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">Coinbase&#x27;s public catalog of x402-enabled services, readable by agents over a plain REST endpoint and by humans in a browser. It is a discovery index rather than a reseller: there is no account or key, and the agent pays each service directly per request in USDC over the x402 protocol.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://agentic.market" rel="noopener">https://agentic.market</a></dd><dt>API base URL</dt><dd><code>https://agentic.market/v1</code></dd><dt>Auth</dt><dd>No key (open endpoint)</dd><dt>Docs</dt><dd><a href="https://docs.cdp.coinbase.com/x402/welcome" rel="noopener">https://docs.cdp.coinbase.com/x402/welcome</a></dd><dt>Catalog size claimed</dt><dd>Services (3619)</dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>No account needed</dd><dt>Signup page</dt><dd>—</dd><dt>Card required</dt><dd>No</dd><dt>Free credit or trial</dt><dd>None stated</dd></dl></section>
 <section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>payg, x402, no_account</dd><dt>How it bills</dt><dd>No platform account or subscription. Discovery via GET /v1/services and GET /v1/services/search?q={query} is open; each listed service sets its own per-request price, settled on-chain in USDC when the client answers an HTTP 402 challenge.</dd><dt>Payment methods</dt><dd>crypto/x402 (USDC, observed settling on Base and Solana)</dd><dt>Fees stated</dt><dd>None stated</dd><dt>Rate limits</dt><dd>None published</dd><dt>Pricing page</dt><dd>—</dd></dl></section>
-<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 162 vendors in our index were checked against this gateway.</p></section>
+<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 149 vendors in our index were checked against this gateway.</p></section>
 <section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://agentic.market/" rel="noopener nofollow">https://agentic.market/</a></li><li><a href="https://agentic.market/about" rel="noopener nofollow">https://agentic.market/about</a></li><li><a href="https://docs.cdp.coinbase.com/x402/bazaar" rel="noopener nofollow">https://docs.cdp.coinbase.com/x402/bazaar</a></li><li><a href="https://x402.org" rel="noopener nofollow">https://x402.org</a></li></ul></section>
 </div></main>
 <footer class="site-foot">

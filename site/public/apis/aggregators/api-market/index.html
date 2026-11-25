@@ -6,6 +6,7 @@
 <title>API.market — aggregator gateway — SkeletonKey</title>
 <meta name="description" content="A marketplace that proxies third-party APIs and AI models through its own gateway, handling auth, billing, rate limiting and analytics so one account key r">
 <link rel="canonical" href="https://skeletonkey.run/apis/aggregators/api-market/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/aggregators/api-market/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,7 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,10 +54,11 @@
 <h1 class="ap-title">API.market</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">A marketplace that proxies third-party APIs and AI models through its own gateway, handling auth, billing, rate limiting and analytics so one account key reaches every subscribed product. Each listed API is also exposed as an MCP server for agents.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://api.market" rel="noopener">https://api.market</a></dd><dt>API base URL</dt><dd><code>https://api.market/api/mcp/{workspace}/{api-slug}</code></dd><dt>Auth</dt><dd><code>x-api-market-key: {key}</code></dd><dt>Docs</dt><dd><a href="https://docs.api.market/" rel="noopener">https://docs.api.market/</a></dd><dt>Catalog size claimed</dt><dd>1,330+ APIs &amp; AI Models, 5,970+ API Tools</dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>google, email</dd><dt>Signup page</dt><dd><a href="https://api.market/" rel="noopener">https://api.market/</a></dd><dt>Card required</dt><dd>No</dd><dt>Free credit or trial</dt><dd>Most APIs offer a free trial with no credit card required.</dd></dl></section>
 <section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>prepaid_credits, payg, subscription</dd><dt>How it bills</dt><dd>Per-product plans in two shapes: monthly prepaid subscriptions with an included call quota plus per-call overage (hard or soft limit), or pay-as-you-go with no monthly fee billed cumulatively every 10 minutes. Most APIs offer a free trial with no credit card required.</dd><dt>Payment methods</dt><dd>card (Stripe), wallet (pre-loaded funds)</dd><dt>Fees stated</dt><dd>API.market only charges for successful API calls.</dd><dt>Rate limits</dt><dd>None published</dd><dt>Pricing page</dt><dd><a href="https://docs.api.market/how-does-api.market-charges-me" rel="noopener">https://docs.api.market/how-does-api.market-charges-me</a></dd></dl></section>
-<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 162 vendors in our index were checked against this gateway.</p></section>
+<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 149 vendors in our index were checked against this gateway.</p></section>
 <section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://api.market" rel="noopener nofollow">https://api.market</a></li><li><a href="https://docs.api.market/" rel="noopener nofollow">https://docs.api.market/</a></li><li><a href="https://docs.api.market/llms.txt" rel="noopener nofollow">https://docs.api.market/llms.txt</a></li><li><a href="https://docs.api.market/getting-started.md" rel="noopener nofollow">https://docs.api.market/getting-started.md</a></li><li><a href="https://docs.api.market/how-does-api.market-charges-me.md" rel="noopener nofollow">https://docs.api.market/how-does-api.market-charges-me.md</a></li><li><a href="https://docs.api.market/api.market-mcp-server-guide.md" rel="noopener nofollow">https://docs.api.market/api.market-mcp-server-guide.md</a></li></ul></section>
 </div></main>
 <footer class="site-foot">
