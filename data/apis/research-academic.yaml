@@ -18,6 +18,25 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/openalex"
     checked_date: 2026-10-24
+    official_docs_url: "https://help.openalex.org/api/"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/works"
+        summary: "List, filter, search, sort, group, or page through works; returns JSON entity results."
+        returns: "JSON envelope with meta and results array."
+        docs_url: "https://help.openalex.org/api/"
+      - method: "POST"
+        path: "/"
+        summary: "Send a long query as OQL in a JSON body to avoid GET URL length limits."
+        returns: "The same results as the equivalent GET request."
+        docs_url: "https://help.openalex.org/api/searching/"
+      - method: "POST"
+        path: "/api-keys"
+        summary: "Request a free API key for a user by email; the key activates after the emailed link is clicked."
+        returns: "JSON with api_key, pending activation status, email, and daily budget details."
+        docs_url: "https://help.openalex.org/api/authentication/"
   - id: "valyu"
     name: "Valyu"
     capability: "Structured search across financial, pharmaceutical and clinical-trial reference datasets."

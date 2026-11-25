@@ -112,6 +112,15 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/keepa"
     checked_date: 2026-10-24
+    official_docs_url: "https://keepa.com/api-docs/"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/product"
+        summary: "Retrieve product data and price history by ASIN or product code."
+        returns: "Products, including price history, for the requested ASINs or product codes."
+        docs_url: "https://keepa.com/api-docs/"
   - id: "kroger"
     name: "Kroger"
     capability: "Grocery product pages with ZIP-level local pricing."
@@ -129,6 +138,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/kroger"
     checked_date: 2026-10-24
+    official_docs_url: "https://developer.kroger.com/documentation/public/getting-started/quick-start"
+    auth: null
+    pricing: null
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "meijer"
     name: "Meijer"
     capability: "Grocery and general-merchandise product pages with UPC, category and delivery flags."
