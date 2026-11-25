@@ -35,6 +35,7 @@ apis:
       min_monthly_usd: 20
       min_prepay_usd: null
       gate_source_url: "https://agentline.cloud/pricing"
+      cost_label: "SUBS"
     endpoints:
       - method: "POST"
         path: "/v1/agents"
@@ -108,6 +109,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.agentmail.to/welcome"
+      free_usage_source_url: "https://www.agentmail.to/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v0/agent/sign-up"
@@ -172,6 +175,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.recall.ai/docs/billing-faq"
+      free_usage_source_url: "https://www.recall.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/api/v1/calendar/user/disconnect/"
@@ -231,6 +236,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://saperly.com/#pricing"
+      free_usage_source_url: "https://saperly.com/#pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/connections"

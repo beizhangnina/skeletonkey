@@ -14,6 +14,11 @@
   "red": 6,
   "gray": 94
  },
+ "cost_label_counts": {
+  "FREE": 40,
+  "PAYG": 9,
+  "SUBS": 5
+ },
  "hidden_count": 13,
  "route_counts": {
   "total": 428,
@@ -26,7 +31,7 @@
    "rapidapi": 19
   }
  },
- "note": "Verified rows were read on the vendor's own pages on checked_date. Unverified rows carry no prices. hidden_count rows (collection_scope \"llm\", set aside 2026-11-24) are excluded from count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.",
+ "note": "Rows with `verified` true carry prices read on the vendor's own pages; checked_date is the last updated date. Other rows carry none. hidden_count rows (collection_scope \"llm\", set aside 2026-11-24) are excluded from count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.",
  "schema": "https://skeletonkey.run/llms.txt",
  "apis": [
   {
@@ -178,7 +183,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Monid routes are self-serve.",
-    "Glasser exposes 13 endpoints, Monid exposes 13 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 13 endpoints, Monid exposes 13 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.0100 per call.",
     "The Monid route can be paid per call in USDC over x402."
    ],
@@ -195,6 +200,7 @@
    "endpoints": [],
    "endpoints_note": "No public API; the site publishes consumer fuel-price averages and news, not API documentation or signup.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -358,7 +364,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "The Monid route starts new accounts with free credit."
    ],
@@ -390,6 +396,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -558,7 +565,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "The Monid route starts new accounts with free credit."
    ],
@@ -585,7 +592,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 20,
     "min_prepay_usd": null,
-    "gate_source_url": "https://agentline.cloud/pricing"
+    "gate_source_url": "https://agentline.cloud/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -626,6 +634,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "red",
+   "cost_label": "SUBS",
    "alternatives": [
     {
      "vendor_id": "saperly",
@@ -814,7 +823,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.agentmail.to/welcome"
+    "gate_source_url": "https://docs.agentmail.to/welcome",
+    "free_usage_source_url": "https://www.agentmail.to/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -855,6 +866,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -1008,7 +1020,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0451 per call; Apify Store from $3.00 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -1036,6 +1048,7 @@
    "endpoints": [],
    "endpoints_note": "Agoda's developer hub documents partner-only supply and demand APIs; access requires becoming an approved partner, with no self-serve signup.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -1329,7 +1342,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.ahrefs.com/en/api/docs/introduction"
+    "gate_source_url": "https://docs.ahrefs.com/en/api/docs/introduction",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -1363,6 +1377,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "red",
+   "cost_label": "SUBS",
    "alternatives": [
     {
      "vendor_id": "glasser",
@@ -1608,7 +1623,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://akta.pro/pricing"
+    "gate_source_url": "https://akta.pro/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -1649,6 +1665,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -1818,6 +1835,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -2012,6 +2030,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -2159,6 +2178,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -2388,6 +2408,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -2516,7 +2537,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: New dashboard accounts start with about 100 free requests. An agent can also mint its own key with no account…"
    ],
@@ -2543,7 +2564,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://getanyapi.com/docs"
+    "gate_source_url": "https://getanyapi.com/docs",
+    "free_usage_source_url": "https://getanyapi.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -2584,6 +2607,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -2818,7 +2842,7 @@
    "when_to_pick": [
     "Neither the direct signup nor the Glasser and Monid routes ask for a card.",
     "Only the direct route exposes all endpoints; Glasser exposes 83 endpoints.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402."
    ],
    "sources": [
@@ -2842,11 +2866,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.apify.com/api/v2"
+    "gate_source_url": "https://docs.apify.com/api/v2",
+    "free_usage_source_url": "https://apify.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -3116,6 +3143,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -3308,6 +3336,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -3512,7 +3541,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $0.50 / 1,000 record scrapeds.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -3532,6 +3561,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -3786,6 +3816,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -3941,7 +3972,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0132 per call; Apify Store from $0.80 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -3959,6 +3990,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the only account logins found are internal driver and supplier portals, not public access.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -4098,6 +4130,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -4301,7 +4334,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 10 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 10 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $6.80 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -4318,6 +4351,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; signup is for a consumer vehicle-auction account, not developer access.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -4593,7 +4627,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://blockrun.ai/pricing"
+    "gate_source_url": "https://blockrun.ai/pricing",
+    "free_usage_source_url": "https://blockrun.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -4634,6 +4670,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -4787,7 +4824,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0396 per call; Apify Store from $2.00 / 1,000 scraped place results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -4808,6 +4845,7 @@
    "endpoints": [],
    "endpoints_note": "Booking.com's developer APIs are partner-only, requiring Managed Affiliate Partner status through Partner Centre; no public pricing is documented.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -5029,7 +5067,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
+    "gate_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier",
+    "free_usage_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -5042,6 +5082,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -5220,7 +5261,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.browserbase.com/account/billing/plans"
+    "gate_source_url": "https://docs.browserbase.com/account/billing/plans",
+    "free_usage_source_url": "https://docs.browserbase.com/account/billing/plans",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -5254,6 +5297,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -5458,7 +5502,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 2 endpoints, Monid exposes 3 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints, Monid exposes 3 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.0100 per call; Apify Store from $0.80 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -5477,6 +5521,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; Built In offers only sales-led employer-brand visibility services, not data access.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -5776,6 +5821,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -6064,6 +6110,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -6148,6 +6195,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -6351,7 +6399,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $3.50 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -6367,6 +6415,7 @@
    "endpoints": [],
    "endpoints_note": "No public self-serve API is documented by the vendor.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -6616,9 +6665,9 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid, Apify Store and RapidAPI (Nokia API Hub) routes are self-serve.",
-    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $6.85 / 1,000 results; RapidAPI (Nokia API Hub) Basic $0.00 /mo - Requests 500,000 / Month.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://developer.carfax.com/docs/connect",
@@ -6633,6 +6682,7 @@
    "endpoints": [],
    "endpoints_note": "A partner-only GraphQL API (CARFAX Connect) exists using OAuth 2.0, but it is not self-serve and requires an existing partnership.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -6787,7 +6837,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $0.70 / 1,000 vehicle listings.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -6806,6 +6856,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the former developer portal now leads only to a sales contact page.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -7051,6 +7102,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "red",
+   "cost_label": null,
    "alternatives": [
     {
      "vendor_id": "glasser",
@@ -7354,7 +7406,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://cloro.dev/docs/guides/billing"
+    "gate_source_url": "https://cloro.dev/docs/guides/billing",
+    "free_usage_source_url": "https://cloro.dev/pricing/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -7395,6 +7449,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -7666,7 +7721,7 @@
     "Neither the direct signup nor the Glasser, Monid and Apify Store routes ask for a card.",
     "Only the direct route exposes all endpoints; Glasser exposes 6 endpoints.",
     "Listed prices: direct $0 per call; Glasser $0.011 per call; Apify Store from $2.00 / 1,000 companies; RapidAPI (Nokia API Hub) Basic $0.00 /mo - Requests 50 / Month.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://clutch.co/",
@@ -7692,6 +7747,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -7798,7 +7854,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Monid route is self-serve.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-26.",
+    "The Monid route is listed with no price readable there on 2026-10-26.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: Free plan gives 5 emails / day, 5 phones / day and 5 exports / day ('Create a Free Account - Get 5 free…"
    ],
@@ -7818,6 +7874,7 @@
    "endpoints": [],
    "endpoints_note": "API keys are issued only after booking a sales meeting; no per-call API price is published.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8022,7 +8079,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.context.dev/pricing"
+    "gate_source_url": "https://www.context.dev/pricing",
+    "free_usage_source_url": "https://www.context.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -8056,6 +8115,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8305,7 +8365,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid, Apify Store and RapidAPI (Nokia API Hub) routes are self-serve.",
-    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.02; Apify Store from $8.00 / 1,000 results; RapidAPI (Nokia API Hub) Basic $0.00 /mo — Requests 20 / Month.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -8324,6 +8384,7 @@
    "endpoints": [],
    "endpoints_note": "API access is available only through the Crunchbase sales team; no price is published.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8462,6 +8523,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8684,7 +8746,7 @@
    "when_to_pick": [
     "Neither the direct signup nor the Monid and Apify Store routes ask for a card.",
     "Listed prices: direct $0.01 per call; Apify Store from $10.00 / 1,000 person base matches.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
    "sources": [
@@ -8710,7 +8772,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://www.datalegion.ai/pricing"
+    "gate_source_url": "https://www.datalegion.ai/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -8751,6 +8814,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9057,7 +9121,7 @@
     "Neither the direct signup nor the Glasser, Monid and Apify Store routes ask for a card.",
     "Only the direct route exposes all endpoints; Glasser exposes 210 endpoints.",
     "Listed prices: direct $0.00015 per call; Glasser $0.00 per call; Apify Store from $2.40 / 1,000 keyword results; RapidAPI (Nokia API Hub) Basic $0.00 /mo (500,000 requests per month).",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://dataforseo.com/pricing",
@@ -9080,7 +9144,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 50,
-    "gate_source_url": "https://dataforseo.com/pricing"
+    "gate_source_url": "https://dataforseo.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -9100,6 +9165,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9276,6 +9342,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9500,7 +9567,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://api-docs.defillama.com/"
+    "gate_source_url": "https://api-docs.defillama.com/",
+    "free_usage_source_url": "https://api-docs.defillama.com/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -9534,6 +9603,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9789,6 +9859,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9997,6 +10068,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10198,7 +10270,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $1.00 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -10218,6 +10290,7 @@
    "endpoints": [],
    "endpoints_note": "The former public API program was retired; access is now limited to select partners, dealers and advertisers through an account executive.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10463,7 +10536,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://elevenlabs.io/pricing/api"
+    "gate_source_url": "https://elevenlabs.io/pricing/api",
+    "free_usage_source_url": "https://elevenlabs.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -10483,6 +10558,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10695,6 +10771,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10966,11 +11043,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://exa.ai/docs/admin/pricing"
+    "gate_source_url": "https://exa.ai/docs/admin/pricing",
+    "free_usage_source_url": "https://exa.ai/docs/admin/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -11146,7 +11226,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 20,
-    "gate_source_url": "https://www.financialdatasets.ai/pricing"
+    "gate_source_url": "https://www.financialdatasets.ai/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -11187,6 +11268,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -11391,7 +11473,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $20.00 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -11411,6 +11493,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the vendor's 'APIs' link leads only to its Elite consumer subscription page.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -11700,7 +11783,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.firecrawl.dev/introduction"
+    "gate_source_url": "https://docs.firecrawl.dev/introduction",
+    "free_usage_source_url": "https://www.firecrawl.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -11720,6 +11805,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -11919,7 +12005,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: Free plan \"$0 mo\" with \"No credit card needed\"; API model s2.1-pro-free at \"$0.00 / M UTF-8 bytes\""
    ],
@@ -11947,7 +12033,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+    "gate_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits",
+    "free_usage_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -11988,6 +12076,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -12160,11 +12249,13 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 175,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.foreplay.co/pricing"
+    "gate_source_url": "https://www.foreplay.co/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "red",
+   "cost_label": "SUBS",
    "alternatives": [
     {
      "vendor_id": "glasser",
@@ -12282,7 +12373,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Monid route is self-serve.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: The platform, including quoting, is free to use; you only pay when you ship. Premium (which is what unlocks…"
    ],
@@ -12303,6 +12394,7 @@
    "endpoints": [],
    "endpoints_note": "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -12525,7 +12617,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.tryfundable.ai/usage"
+    "gate_source_url": "https://docs.tryfundable.ai/usage",
+    "free_usage_source_url": "https://www.tryfundable.ai/home#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -12566,6 +12660,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -12865,6 +12960,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -13103,6 +13199,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -13306,7 +13403,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 11 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $2.90 / 1,000 software listings.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -13324,6 +13421,7 @@
    "endpoints": [],
    "endpoints_note": "No public self-serve API is documented by the vendor.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -13550,7 +13648,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.github.com/en/rest"
+    "gate_source_url": "https://docs.github.com/en/rest",
+    "free_usage_source_url": "https://github.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -13577,6 +13677,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -13789,6 +13890,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -14054,11 +14156,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://developers.google.com/maps/billing-and-pricing"
+    "gate_source_url": "https://developers.google.com/maps/billing-and-pricing",
+    "free_usage_source_url": "https://developers.google.com/maps/billing-and-pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -14214,7 +14319,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: direct $0 per call; Glasser $0.0005 per call; Apify Store from $0.10 / 1,000 reviews.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -14239,6 +14344,7 @@
    "endpoints": [],
    "endpoints_note": "Google publishes no API for third-party app metadata, ratings or reviews; its only APIs are publisher-scoped, for managing one's own app.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -14488,6 +14594,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -14734,6 +14841,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -14906,6 +15014,7 @@
    "endpoints": [],
    "endpoints_note": "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -15140,7 +15249,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://hunter.io/api-documentation/v2"
+    "gate_source_url": "https://hunter.io/api-documentation/v2",
+    "free_usage_source_url": "https://hunter.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -15160,6 +15271,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -15334,6 +15446,7 @@
    "endpoints": [],
    "endpoints_note": "A Job Posting API exists but is gated to approved US organizations with purchased job credits; production keys are issued only on request.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -15487,7 +15600,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 9 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 9 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.008118 per call; Apify Store from $3.20 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -15509,6 +15622,7 @@
    "endpoints": [],
    "endpoints_note": "Data is offered only through a sales-approved subscription on AWS Data Exchange, covering a GraphQL API and bulk metadata packages; no price is published.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -15760,9 +15874,9 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid, Apify Store and RapidAPI (Nokia API Hub) routes are self-serve.",
-    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $0.07 / 1,000 results; RapidAPI (Nokia API Hub) Basic $0.00 /mo - Requests 20 / Month.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-26."
+    "The Monid route is listed with no price readable there on 2026-10-26."
    ],
    "sources": [
     "https://docs.indeed.com/sitemap.xml",
@@ -15778,6 +15892,7 @@
    "endpoints": [],
    "endpoints_note": "A partner-gated developer platform exists for ATS and job-board partners, but there is no self-serve signup or published API pricing.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16001,6 +16116,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16128,7 +16244,7 @@
     }
    ],
    "when_to_pick": [
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: Community API plan is explicitly free; Startup and Enterprise are subscription plans. No numeric quotas or…",
     "The Monid route starts new accounts with free credit."
@@ -16158,6 +16274,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16347,6 +16464,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16486,6 +16604,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16623,6 +16742,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -16779,7 +16899,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: 100,000 requests a month, free, per organization; the allowance resets every month rather than being a…"
    ],
@@ -16806,7 +16926,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://keenable.ai/pricing"
+    "gate_source_url": "https://keenable.ai/pricing",
+    "free_usage_source_url": "https://keenable.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -16847,6 +16969,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -17094,6 +17217,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -17244,7 +17368,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Monid routes are self-serve.",
-    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01.",
     "The Monid route can be paid per call in USDC over x402."
    ],
@@ -17264,6 +17388,7 @@
    "endpoints": [],
    "endpoints_note": "A developer portal lists several valuation and VIN APIs, but access runs through a sales contact form, not self-serve signup.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -17543,6 +17668,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -17748,6 +17874,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -17924,7 +18051,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 99,
     "min_prepay_usd": null,
-    "gate_source_url": "https://leadmagic.io/pricing"
+    "gate_source_url": "https://leadmagic.io/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -17965,6 +18093,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "red",
+   "cost_label": "SUBS",
    "alternatives": [
     {
      "vendor_id": "glasser",
@@ -18176,7 +18305,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 8 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 8 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $11.99 / 1,000 result items.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -18194,6 +18323,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -18384,6 +18514,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -18595,7 +18726,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://litescrape.com/pricing"
+    "gate_source_url": "https://litescrape.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -18636,6 +18768,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -18839,7 +18972,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.033 per call; Monid $0.01; Apify Store $1.50 per 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -18855,6 +18988,7 @@
    "endpoints": [],
    "endpoints_note": "No public self-serve API is documented by the vendor.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19081,6 +19215,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19152,6 +19287,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19377,7 +19513,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.magichour.ai/billing/overview"
+    "gate_source_url": "https://docs.magichour.ai/billing/overview",
+    "free_usage_source_url": "https://docs.magichour.ai/billing/overview",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -19411,6 +19549,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19563,7 +19702,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Monid routes are self-serve.",
-    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01.",
     "The Monid route can be paid per call in USDC over x402."
    ],
@@ -19580,6 +19719,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the vendor offers consumer research subscriptions and CSV exports instead.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19763,7 +19903,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://marketstack.com/pricing"
+    "gate_source_url": "https://marketstack.com/pricing",
+    "free_usage_source_url": "https://marketstack.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -19776,6 +19918,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -19931,7 +20074,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $0.01 / result.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -19950,6 +20093,7 @@
    "endpoints": [],
    "endpoints_note": "Meijer runs API portals, but they are restricted to internal Meijer accounts and are not open to outside developers.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -20132,7 +20276,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://platform.metix.ai/docs/credits"
+    "gate_source_url": "https://platform.metix.ai/docs/credits",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -20173,6 +20318,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -20312,6 +20458,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -20623,7 +20770,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://platform.minimax.io/docs/pricing/overview"
+    "gate_source_url": "https://platform.minimax.io/docs/pricing/overview",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -20636,6 +20784,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -20837,6 +20986,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -21075,6 +21225,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -21309,6 +21460,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -21572,7 +21724,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://octen.ai/pricing"
+    "gate_source_url": "https://octen.ai/pricing",
+    "free_usage_source_url": "https://octen.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -21613,6 +21767,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -21824,6 +21979,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -22092,6 +22248,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -22228,6 +22385,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -22423,7 +22581,7 @@
     }
    ],
    "when_to_pick": [
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "The Monid route starts new accounts with free credit.",
     "The direct route needs your own vendor key; the Monid route uses the aggregator's key."
@@ -22485,6 +22643,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -22701,7 +22860,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.peopledatalabs.com/docs/intro"
+    "gate_source_url": "https://docs.peopledatalabs.com/docs/intro",
+    "free_usage_source_url": "https://www.peopledatalabs.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -22721,6 +22882,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -22893,7 +23055,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 200,
     "min_prepay_usd": null,
-    "gate_source_url": "https://ploid.com/pricing"
+    "gate_source_url": "https://ploid.com/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -22934,6 +23097,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "red",
+   "cost_label": "SUBS",
    "alternatives": [
     {
      "vendor_id": "glasser",
@@ -23155,11 +23319,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://predictleads.com/pricing"
+    "gate_source_url": "https://predictleads.com/pricing",
+    "free_usage_source_url": "https://predictleads.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -23391,6 +23558,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -23576,7 +23744,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://prospeo.io/api-docs"
+    "gate_source_url": "https://prospeo.io/api-docs",
+    "free_usage_source_url": "https://prospeo.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -23589,6 +23759,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -23821,6 +23992,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -24010,7 +24182,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.recall.ai/docs/billing-faq"
+    "gate_source_url": "https://docs.recall.ai/docs/billing-faq",
+    "free_usage_source_url": "https://www.recall.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24044,6 +24218,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -24219,7 +24394,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://developers.rentcast.io/reference/billing-and-pricing"
+    "gate_source_url": "https://developers.rentcast.io/reference/billing-and-pricing",
+    "free_usage_source_url": "https://developers.rentcast.io/reference/billing-and-pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24260,6 +24437,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -24447,7 +24625,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://saperly.com/#pricing"
+    "gate_source_url": "https://saperly.com/#pricing",
+    "free_usage_source_url": "https://saperly.com/#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24488,6 +24668,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -24717,7 +24898,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://scrapecreators.com/"
+    "gate_source_url": "https://scrapecreators.com/",
+    "free_usage_source_url": "https://scrapecreators.com/#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24744,6 +24927,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -24989,7 +25173,7 @@
     "Neither the direct signup nor the Glasser and Monid routes ask for a card.",
     "Only the direct route exposes all endpoints; Glasser exposes 1 endpoint.",
     "Listed prices: direct $0.00042 per call; Glasser $0.0011 per call.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://s1.dev",
@@ -25056,6 +25240,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -25295,6 +25480,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -25447,7 +25633,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Monid routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01.",
     "The Monid route can be paid per call in USDC over x402."
    ],
@@ -25464,6 +25650,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the vendor offers a web-based filings screener and CSV export instead.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -25568,7 +25755,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser route is self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "The Glasser route starts new accounts with free credit.",
     "The direct route needs your own vendor key; the Glasser route uses the aggregator's key."
    ],
@@ -25585,6 +25772,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; no partner or affiliate program is published either.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -25939,6 +26127,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -26186,7 +26375,7 @@
     "Neither the direct signup nor the Glasser and Monid routes ask for a card.",
     "Only the direct route exposes all endpoints; Glasser exposes 58 endpoints.",
     "Listed prices: direct $0.0019638889 per call; Glasser $0.011 per call.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://serpapi.com/pricing",
@@ -26227,6 +26416,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -26452,11 +26642,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://serper.dev/"
+    "gate_source_url": "https://serper.dev/",
+    "free_usage_source_url": "https://serper.dev/",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -26643,6 +26836,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -26811,7 +27005,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 7 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 7 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0825 per result, max $4.95 per run; Apify Store from $13.00 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -26830,6 +27024,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -27017,7 +27212,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "The Monid route starts new accounts with free credit."
    ],
@@ -27048,7 +27243,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://smolmachines.com/pricing"
+    "gate_source_url": "https://smolmachines.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -27089,6 +27285,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -27244,7 +27441,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://platform.sonilo.com/pricing"
+    "gate_source_url": "https://platform.sonilo.com/pricing",
+    "free_usage_source_url": "https://platform.sonilo.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -27285,6 +27484,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -27439,6 +27639,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -27644,6 +27845,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -27895,9 +28097,9 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid, Apify Store and RapidAPI (Nokia API Hub) routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Apify Store from $15.00 / 1,000 results; RapidAPI (Nokia API Hub) Basic $0.00 /mo - Requests 100 / Month.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25."
+    "The Monid route is listed with no price readable there on 2026-10-25."
    ],
    "sources": [
     "https://stockanalysis.com/",
@@ -27913,6 +28115,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the vendor sells consumer website subscriptions instead.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -28089,7 +28292,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://strale.io/"
+    "gate_source_url": "https://strale.io/",
+    "free_usage_source_url": "https://strale.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28130,6 +28335,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -28302,7 +28508,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.sumble.com/get-started/plans-and-billing"
+    "gate_source_url": "https://docs.sumble.com/get-started/plans-and-billing",
+    "free_usage_source_url": "https://docs.sumble.com/get-started/plans-and-billing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28343,6 +28551,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -28500,7 +28709,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: Free plan: $0/mo, 250 searches/month, 100 requests/hour, no card required."
    ],
@@ -28524,7 +28733,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://surf-api.com/pricing"
+    "gate_source_url": "https://surf-api.com/pricing",
+    "free_usage_source_url": "https://surf-api.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28565,6 +28776,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -28706,6 +28918,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -28946,6 +29159,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -29096,8 +29310,8 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Monid routes are self-serve.",
-    "Glasser exposes 16 endpoints; the vendor publishes no self-serve API we could verify.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "Glasser exposes 16 endpoints; the vendor publishes no self-serve API we could confirm.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402."
    ],
    "sources": [
@@ -29115,6 +29329,7 @@
    "endpoints": [],
    "endpoints_note": "Access is sales-only; pricing is negotiated per customer, with inquiries handled through a WhatsApp contact number.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -29341,6 +29556,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -29629,7 +29845,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://theirstack.com/en/pricing"
+    "gate_source_url": "https://theirstack.com/en/pricing",
+    "free_usage_source_url": "https://theirstack.com/en/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -29670,6 +29888,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -29924,11 +30143,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://tikhub.io/pricing"
+    "gate_source_url": "https://tikhub.io/pricing",
+    "free_usage_source_url": "https://tikhub.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -30189,6 +30411,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -30386,7 +30609,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.tinyfish.ai/"
+    "gate_source_url": "https://docs.tinyfish.ai/",
+    "free_usage_source_url": "https://tinyfish.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -30427,6 +30652,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -30580,7 +30806,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: API page advertises trying the API for free with no credit card; trial credit quantity is not stated. Starter…"
    ],
@@ -30620,6 +30846,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -30838,7 +31065,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 3 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.03; Apify Store from $0.50 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -30858,6 +31085,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -31073,6 +31301,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -31230,11 +31459,14 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.census.gov/data/developers.html"
+    "gate_source_url": "https://www.census.gov/data/developers.html",
+    "free_usage_source_url": "https://www.census.gov/data/developers/guidance/api-user-guide.html",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -31428,6 +31660,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -31555,7 +31788,7 @@
    ],
    "when_to_pick": [
     "Neither the direct signup nor the Monid route asks for a card.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid route can be paid per call in USDC over x402.",
     "Direct free tier: Sign in with Google to get a key free. The free tier includes a daily query allowance; each response returns…"
    ],
@@ -31577,7 +31810,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://censusdata.xyz/"
+    "gate_source_url": "https://censusdata.xyz/",
+    "free_usage_source_url": "https://censusdata.xyz/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -31604,6 +31839,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -31787,7 +32023,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.valyu.ai/pricing"
+    "gate_source_url": "https://docs.valyu.ai/pricing",
+    "free_usage_source_url": "https://docs.valyu.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -31828,6 +32066,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -32150,6 +32389,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -32303,7 +32543,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0231 per call; Apify Store from $2.00 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -32320,6 +32560,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; an API host exists but only supports the storefront, not public access.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -32508,6 +32749,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -32686,7 +32928,7 @@
    "when_to_pick": [
     "Neither the direct signup nor the Monid and Apify Store routes ask for a card.",
     "Listed prices: direct $0 per call; Apify Store from $3.00 / 1,000 job results.",
-    "The Monid route is listed unverified: no price was readable there on 2026-10-25.",
+    "The Monid route is listed with no price readable there on 2026-10-25.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
    "sources": [
@@ -32711,7 +32953,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://web3.career/web3-jobs-api"
+    "gate_source_url": "https://web3.career/web3-jobs-api",
+    "free_usage_source_url": "https://web3.career/web3-jobs-api",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -32724,6 +32968,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -32965,6 +33210,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -33169,7 +33415,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 5 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.02; Apify Store from $3.50 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -33187,6 +33433,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API is published; an AI-assistant feature is advertised with no public endpoint or key.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -33619,7 +33866,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.x.com/x-api/getting-started/pricing"
+    "gate_source_url": "https://docs.x.com/x-api/getting-started/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -33653,6 +33901,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
+   "cost_label": "PAYG",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -33904,7 +34153,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (no public API on the vendor pages); the Glasser, Monid, Apify Store and RapidAPI (Nokia API Hub) routes are self-serve.",
-    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $10.00 / 1,000 results; RapidAPI (Nokia API Hub) Basic $0.00 /mo (24 requests per day).",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -33925,6 +34174,7 @@
    "endpoints": [],
    "endpoints_note": "Y Combinator publishes no API, developer documentation or pricing; its public company directory is not an open data product.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -34147,6 +34397,7 @@
    "endpoints": [],
    "endpoints_note": "No public finance API; Yahoo's developer site lists only a Fantasy Sports API and sign-in APIs.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -34307,6 +34558,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -34495,6 +34747,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -34711,7 +34964,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser, Monid and Apify Store routes are self-serve.",
-    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.011 per call; Monid $0.01; Apify Store from $1.30 / 1,000 results.",
     "The Monid and Apify Store routes can be paid per call in USDC over x402."
    ],
@@ -34727,6 +34980,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -34882,7 +35136,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 4 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.0005 per call; Apify Store from $15.00 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -34910,6 +35164,7 @@
    "endpoints": [],
    "endpoints_note": "API access requires an existing ZoomInfo subscription through a login-gated developer portal; no self-serve signup or public pricing exists.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -35078,7 +35333,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 1 endpoint; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.08118 per call; Apify Store from $4.00 / 1,000 results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -35096,6 +35351,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -35249,7 +35505,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.016236 per call; Apify Store from $2.50 / 1,000 video search results.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -35271,6 +35527,7 @@
    "endpoints": [],
    "endpoints_note": "No public developer API; the related open platform is a partner-application portal for content and device partnerships, not self-serve access.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -35552,6 +35809,7 @@
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -35712,6 +35970,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -35865,7 +36124,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 6 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.016236 per call; Apify Store from $30.00 / 1,000 review scrapeds.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -35884,6 +36143,7 @@
    "endpoints": [],
    "endpoints_note": "The public developer portal has been retired; API keys are only issued through business-development contact.",
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   },
@@ -36052,7 +36312,7 @@
    ],
    "when_to_pick": [
     "No self-serve direct route (sales only); the Glasser and Apify Store routes are self-serve.",
-    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could verify.",
+    "Glasser exposes 2 endpoints; the vendor publishes no self-serve API we could confirm.",
     "Listed prices: Glasser $0.032472 per call; Apify Store from $5.99 / 1,000 listings.",
     "The Apify Store route can be paid per call in USDC over x402."
    ],
@@ -36070,6 +36330,7 @@
    "endpoints": null,
    "endpoints_note": null,
    "cost_badge": "gray",
+   "cost_label": null,
    "alternatives": null,
    "alternatives_note": null
   }

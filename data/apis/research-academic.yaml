@@ -89,6 +89,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.valyu.ai/pricing"
+      free_usage_source_url: "https://docs.valyu.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/search"

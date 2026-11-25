@@ -21,6 +21,9 @@ Checks, per entry:
     `pricing`, `endpoints` and `endpoints_note` -- the vendor's own docs URL,
     how its endpoint is credentialed, what it charges, and a capped list of
     its documented endpoints
+  * the optional `pricing.cost_label` (ND-18b): FREE | PAYG | SUBS, derived
+    from `pricing.api_access_gate` and `pricing.model`, plus the hand-filled
+    `pricing.free_usage_source_url` FREE requires -- see derive_cost_label()
 
 `offering`, `usage_api` and the ND-8 fields are OPTIONAL on every row: a shard
 written before they existed validates unchanged. They mirror the blocks
@@ -152,7 +155,8 @@ ENDPOINTS_NOTE_MAX = 300
 AUTH_KEYS = ['type', 'header', 'format', 'docs_url']
 PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
                 'pricing_url', 'notes', 'api_access_gate', 'min_monthly_usd',
-                'min_prepay_usd', 'gate_source_url']
+                'min_prepay_usd', 'gate_source_url', 'free_usage_source_url',
+                'cost_label']
 ENDPOINT_ROW_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
 
 # ---- the pricing gate (ND-12) ------------------------------------------------
@@ -171,6 +175,12 @@ COST_BADGES = ['green', 'red', 'gray']
 ALTERNATIVES_WHY_MAX = 200
 ALTERNATIVES_NOTE_MAX = 300
 ALTERNATIVE_ROW_KEYS = ['vendor_id', 'why', 'access_gate']
+
+# ---- the cost label (ND-18b) -------------------------------------------------
+# Kept byte-identical in meaning to src/apis.ts (COST_LABELS, deriveCostLabel).
+# test/pricing-gate.test.ts (or a sibling cost-label test) asserts the two
+# lists and the derivation have not drifted apart.
+COST_LABELS = ['FREE', 'PAYG', 'SUBS']
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # The repo's own apis.yaml, fixed relative to this script -- NOT relative to
@@ -191,6 +201,39 @@ def derive_cost_badge(pricing):
     if gate in ('subscription_required', 'contact_sales'):
         return 'red'
     return 'gray'
+
+
+def derive_cost_label(pricing):
+    """`pricing` -> `pricing.cost_label` (ND-18b/d): 'FREE' | 'PAYG' | 'SUBS' |
+    None. The one place this mapping is computed, so this validator (which
+    only checks a value already on the row agrees) and build.py (which
+    writes the computed value) can never drift apart. See ../README.md
+    "ND-18b cost_label" for the full rule table.
+
+    SUBS only when `api_access_gate` is itself `subscription_required`.
+    `pricing.model` is never consulted -- a vendor billing itself as a
+    subscription says nothing about whether the API *access* requires one;
+    only a verified gate does. FREE requires BOTH a verified `none` gate AND
+    a sourced http(s) `free_usage_source_url` -- `prepaid_min` is never FREE
+    even when a trial/signup credit exists.
+    """
+    if not isinstance(pricing, dict):
+        return None
+    gate = pricing.get('api_access_gate')
+
+    if gate == 'subscription_required':
+        return 'SUBS'
+
+    if gate == 'none':
+        url = pricing.get('free_usage_source_url')
+        if isinstance(url, str) and url.startswith('http'):
+            return 'FREE'
+        return 'PAYG'
+
+    if gate == 'prepaid_min':
+        return 'PAYG'
+
+    return None  # unknown, contact_sales, missing, or any other gate
 
 
 def collect_known_vendor_ids(root):
@@ -839,6 +882,31 @@ def check_pricing(errs, where, pricing):
     if gate is not None and gate != 'unknown' and gate_source_url is None:
         errs.append('%s.gate_source_url: required when pricing.api_access_gate is set'
                     ' and not unknown (what proves the gate?)' % at)
+
+    # ---- the cost label (ND-18b) ----------------------------------------------
+    expected_label = derive_cost_label(pricing)
+    if 'cost_label' in pricing:
+        got_label = pricing.get('cost_label')
+        # Presence is only ever valid when expected_label is NOT None -- a
+        # key present (any value, explicit null included) while the derived
+        # value is None is rejected just like a mismatch, not silently
+        # accepted because None == None.
+        if expected_label is None or got_label != expected_label:
+            errs.append('%s.cost_label: derived field; expected %s from pricing,'
+                        ' got %s (do not hand-edit; run build)'
+                        % (at, expected_label, got_label))
+
+    free_url = pricing.get('free_usage_source_url')
+    has_free_url = 'free_usage_source_url' in pricing
+    if has_free_url and free_url is not None and not is_url(free_url):
+        errs.append('%s.free_usage_source_url: expected an http(s) URL or null' % at)
+    if expected_label == 'FREE':
+        if not (isinstance(free_url, str) and free_url.startswith('http')):
+            errs.append('%s.free_usage_source_url: required when the derived'
+                        ' cost_label is FREE (what proves the free allowance?)' % at)
+    elif has_free_url:
+        errs.append('%s.free_usage_source_url: only allowed when the derived'
+                    ' cost_label is FREE' % at)
 
 
 def check_alternatives(errs, where, e, known_vendor_ids):

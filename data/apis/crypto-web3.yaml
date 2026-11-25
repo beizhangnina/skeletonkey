@@ -30,6 +30,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://blockrun.ai/pricing"
+      free_usage_source_url: "https://blockrun.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/chat/completions"
@@ -119,6 +121,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://api-docs.defillama.com/"
+      free_usage_source_url: "https://api-docs.defillama.com/"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/protocols"
@@ -296,6 +300,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://surf-api.com/pricing"
+      free_usage_source_url: "https://surf-api.com/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/search.json"

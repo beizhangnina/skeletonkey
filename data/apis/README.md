@@ -332,6 +332,86 @@ ND-8 fields, emitting `alternatives` then `alternatives_note` right after
 them -- see "Preserving hand-filled fields" below, which already covers
 these generically.
 
+## ND-18b cost_label
+
+Two more fields, both nested in `pricing` (independent of everything above):
+one hand-filled, one derived from it plus the ND-12 gate -- validated
+identically by `validate.py` and `src/apis.ts`, and checked for drift by
+`test/pricing-gate.test.ts` / `test/cost-label.test.ts`. The point: give a
+human or an agent a single short answer -- FREE, PAYG, or SUBS -- to "can I
+reach this API without a recurring commitment," one step more decisive than
+`cost_badge`'s green/red/gray.
+
+### `pricing.free_usage_source_url` (hand-filled)
+
+The vendor's own page documenting a USABLE free allowance -- not a one-time
+signup/trial credit, a marketing claim with no numbers, or a page that only
+exists because someone BELIEVES the API is free. An http(s) URL, or absent.
+Only allowed -- and, once allowed, required -- when the derived `cost_label`
+(below) is `FREE`. Never hand-fill `cost_label` itself to force this: the
+URL has to earn `FREE` through the gate first (see the derivation table).
+
+### `pricing.cost_label` (derived -- never hand-fill this)
+
+| condition | `cost_label` |
+|---|---|
+| `api_access_gate` is `subscription_required` | `SUBS` |
+| `api_access_gate` is `none`, AND a sourced http(s) `free_usage_source_url` is present | `FREE` |
+| `api_access_gate` is `none` (no sourced free URL), or `prepaid_min` | `PAYG` |
+| `api_access_gate` is `unknown`, `contact_sales`, missing, or no `pricing` block at all | no `cost_label` key (null) |
+
+Read top to bottom, first match wins. `pricing.model` is never consulted --
+only the gate is. Two things fall out of that order that are easy to miss:
+
+- `SUBS` requires a verified `subscription_required` gate. `model:
+  subscription` alone never produces `SUBS` -- a vendor billing itself as a
+  subscription says nothing about whether the API *access* itself requires
+  one; a row with `api_access_gate: none` (or `prepaid_min`) and `model:
+  subscription` is `FREE`/`PAYG` like any other `none`/`prepaid_min` row, not
+  `SUBS`.
+- `prepaid_min` is **never** `FREE`, even alongside a one-time trial or
+  signup credit -- the same split `cost_badge` already draws (`prepaid_min`
+  is `green`, not free). A vendor that requires a prepaid balance before the
+  API answers is pay-as-you-go, not free, no matter how the first dollars
+  arrived.
+
+`cost_label` is **never hand-filled**: `build.py` computes it (via
+`derive_cost_label` / `deriveCostLabel`) from the merged row's own `pricing`
+-- AFTER `merge_preserved` has already restored any hand-filled
+`free_usage_source_url` from the old shard, same timing `cost_badge` follows
+for `api_access_gate`. A row whose derivation is null gets no `cost_label`
+key at all and rebuilds byte-identical to before ND-18b. The validators only
+ever check that a `cost_label` present on a row still agrees with what
+`pricing` derives -- a row with no `cost_label` at all is always valid, the
+same split `cost_badge` draws between "derivable and present" and "not yet
+regenerated." A mismatch, OR a `cost_label` key present (any value,
+including an explicit null) when the derived value is null, is rejected:
+
+```
+<row>.pricing.cost_label: derived field; expected <x> from pricing, got <y> (do not hand-edit; run build)
+<row>.pricing.free_usage_source_url: expected an http(s) URL or null
+<row>.pricing.free_usage_source_url: required when the derived cost_label is FREE (what proves the free allowance?)
+<row>.pricing.free_usage_source_url: only allowed when the derived cost_label is FREE
+```
+
+`src/apis.ts` exports the mapping as `deriveCostLabel(pricing)` (constant
+`COST_LABELS`); `validate.py` exports the same mapping as
+`derive_cost_label(pricing)` (constant `COST_LABELS`).
+`data/apis/scripts/derive_cost_badge.py` (despite the name -- see below) also
+keeps the nested `pricing.cost_label` line in sync in a clean clone, the same
+way it already does for the top-level `cost_badge`:
+
+```
+python3 data/apis/scripts/derive_cost_badge.py [--check] [dir]
+```
+
+`--check` reports drift in EITHER field (and exits 1 if either is out of
+sync); running it for real writes both. It places a new `cost_label` line as
+the LAST key inside the row's `pricing:` block (after `free_usage_source_url`
+when present), never touches `free_usage_source_url` itself (that one is
+hand-filled, read from the shard, never written by this script), and is
+idempotent -- a second run changes nothing.
+
 ## Preserving hand-filled fields
 
 `build.py` only ever computes a fixed set of base fields for a row -- `id`,

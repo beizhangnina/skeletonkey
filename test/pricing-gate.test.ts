@@ -833,6 +833,147 @@ print("recomputed-ok")
     expect(result.out, result.out).toMatch(/recomputed-ok/);
     expect(result.code).toBe(0);
   });
+
+  it("emits pricing.free_usage_source_url then pricing.cost_label, after the gate keys, only when present", () => {
+    const result = runPy(`
+import build
+
+row = {
+    "id": "p", "name": "P", "capability": "c", "category": "llm-models",
+    "provider_url": None, "docs_url": None, "access_mode": "own-account",
+    "signup": "self-serve", "signup_automatable": "unknown", "min_topup": None,
+    "billing_unit": None, "free_tier": None, "auth_type": "api_key",
+    "seen_in": ["monid"], "tos_notes": "x", "source_url": "https://monid.ai/tools/p",
+    "checked_date": "2026-11-24",
+    "pricing": {
+        "model": None, "free_tier": None, "starting_price_usd": None, "unit": None,
+        "pricing_url": None, "notes": None,
+        "api_access_gate": "none", "min_monthly_usd": None, "min_prepay_usd": None,
+        "gate_source_url": "https://vendor.test/pricing",
+        "free_usage_source_url": "https://vendor.test/free",
+        "cost_label": "FREE",
+    },
+}
+text = build.emit_row(row)
+i_gate = text.index("api_access_gate:")
+i_free_url = text.index("free_usage_source_url:")
+i_label = text.index("cost_label:")
+assert i_gate < i_free_url < i_label, text
+print("order-ok")
+`);
+    expect(result.out, result.out).toMatch(/order-ok/);
+    expect(result.code).toBe(0);
+  });
+
+  it("omits pricing.free_usage_source_url and pricing.cost_label entirely when absent -- never emits them as null", () => {
+    const result = runPy(`
+import build
+
+row = {
+    "id": "p", "name": "P", "capability": "c", "category": "llm-models",
+    "provider_url": None, "docs_url": None, "access_mode": "own-account",
+    "signup": "self-serve", "signup_automatable": "unknown", "min_topup": None,
+    "billing_unit": None, "free_tier": None, "auth_type": "api_key",
+    "seen_in": ["monid"], "tos_notes": "x", "source_url": "https://monid.ai/tools/p",
+    "checked_date": "2026-11-24",
+    "pricing": {
+        "model": None, "free_tier": None, "starting_price_usd": None, "unit": None,
+        "pricing_url": None, "notes": None,
+        "api_access_gate": "contact_sales", "min_monthly_usd": None, "min_prepay_usd": None,
+        "gate_source_url": "https://vendor.test/pricing",
+    },
+}
+text = build.emit_row(row)
+assert "free_usage_source_url" not in text, text
+assert "cost_label" not in text, text
+print("omitted-ok")
+`);
+    expect(result.out, result.out).toMatch(/omitted-ok/);
+    expect(result.code).toBe(0);
+  });
+
+  it("merge_preserved keeps pricing (including free_usage_source_url) wholesale from the old shard", () => {
+    const result = runPy(`
+import build
+
+new_row = {"id": "p"}
+old_row = {
+    "pricing": {
+        "api_access_gate": "none",
+        "free_usage_source_url": "https://vendor.test/free",
+        "cost_label": "FREE",
+    },
+}
+merged = build.merge_preserved(new_row, old_row)
+assert merged["pricing"] == old_row["pricing"], merged
+print("preserved-ok")
+`);
+    expect(result.out, result.out).toMatch(/preserved-ok/);
+    expect(result.code).toBe(0);
+  });
+
+  it("main()'s pattern -- derive_cost_label after merge_preserved, on a COPY of pricing -- always wins over a stale old value, without mutating the old row", () => {
+    const result = runPy(`
+import build, validate
+
+new_row = {"id": "p"}
+old_row = {
+    "pricing": {
+        "api_access_gate": "none",
+        "free_usage_source_url": "https://vendor.test/free",
+        "cost_label": "PAYG",
+    },
+}
+merged = build.merge_preserved(new_row, old_row)
+pricing = merged.get("pricing")
+assert isinstance(pricing, dict)
+pricing = dict(pricing)
+merged["pricing"] = pricing
+cost_label = validate.derive_cost_label(pricing)
+if cost_label is not None:
+    pricing["cost_label"] = cost_label
+else:
+    pricing.pop("cost_label", None)
+assert merged["pricing"]["cost_label"] == "FREE", merged
+assert old_row["pricing"]["cost_label"] == "PAYG", old_row  # the old dict is untouched
+print("recomputed-ok")
+`);
+    expect(result.out, result.out).toMatch(/recomputed-ok/);
+    expect(result.code).toBe(0);
+  });
+
+  it("a rebuild never invents an explicit null for free_usage_source_url or cost_label", () => {
+    const result = runPy(`
+import build, validate
+
+new_row = {
+    "id": "p", "name": "P", "capability": "c", "category": "llm-models",
+    "provider_url": None, "docs_url": None, "access_mode": "own-account",
+    "signup": "self-serve", "signup_automatable": "unknown", "min_topup": None,
+    "billing_unit": None, "free_tier": None, "auth_type": "api_key",
+    "seen_in": ["monid"], "tos_notes": "x", "source_url": "https://monid.ai/tools/p",
+    "checked_date": "2026-11-24",
+}
+old_row = {"pricing": {"api_access_gate": "contact_sales"}}
+merged = build.merge_preserved(new_row, old_row)
+pricing = merged.get("pricing")
+pricing = dict(pricing)
+merged["pricing"] = pricing
+cost_label = validate.derive_cost_label(pricing)
+if cost_label is not None:
+    pricing["cost_label"] = cost_label
+else:
+    pricing.pop("cost_label", None)
+assert "cost_label" not in pricing, pricing
+assert "free_usage_source_url" not in pricing, pricing
+text = build.emit_row(merged)
+assert "cost_label" not in text, text
+assert "free_usage_source_url" not in text, text
+print("no-explicit-nulls-ok")
+`);
+    expect(result.out, result.out).toMatch(/no-explicit-nulls-ok/);
+    expect(result.code).toBe(0);
+  });
 });
 
 describe.skipIf(!python)("data/apis/scripts/derive_cost_badge.py", () => {
@@ -991,6 +1132,7 @@ row = {
         "pricing_url": "https://vendor.test/pricing", "notes": None,
         "api_access_gate": "subscription_required", "min_monthly_usd": 10,
         "min_prepay_usd": None, "gate_source_url": "https://vendor.test/pricing",
+        "cost_label": "SUBS",
     },
     "alternatives": [{"vendor_id": "treg", "why": "Pay-as-you-go gateway.", "access_gate": "none"}],
     "alternatives_note": None,

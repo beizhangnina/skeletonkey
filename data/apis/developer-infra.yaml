@@ -35,6 +35,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.browserbase.com/account/billing/plans"
+      free_usage_source_url: "https://docs.browserbase.com/account/billing/plans"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/agents"
@@ -99,6 +101,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.github.com/en/rest"
+      free_usage_source_url: "https://github.com/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/user/migrations"
@@ -219,6 +223,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://smolmachines.com/pricing"
+      cost_label: "PAYG"
     endpoints:
       - method: "POST"
         path: "/v1/machines"

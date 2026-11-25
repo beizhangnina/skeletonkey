@@ -506,6 +506,49 @@ export function deriveCostBadge(pricing: unknown): CostBadge {
   return "gray";
 }
 
+/**
+ * Derived `pricing.cost_label` (ND-18b/d), never hand-filled -- build.py
+ * computes it from `pricing.api_access_gate` and the hand-filled
+ * `pricing.free_usage_source_url`. `pricing.model` is never consulted:
+ *
+ *   FREE   gate is `none` AND a sourced http(s) free_usage_source_url is present
+ *   PAYG   gate is `none` (no sourced free URL) or `prepaid_min`
+ *   SUBS   gate is `subscription_required`
+ *   null   unknown, contact_sales, missing, or no pricing block at all
+ *
+ * A vendor billing itself as a subscription (`model: subscription`) says
+ * nothing about whether the API *access* requires one -- only a verified
+ * `subscription_required` gate does. `prepaid_min` is never FREE, even
+ * alongside a one-time trial/signup credit -- the same rule `cost_badge`
+ * follows (`prepaid_min` is `green`, not free).
+ */
+export const COST_LABELS = ["FREE", "PAYG", "SUBS"] as const;
+export type CostLabel = (typeof COST_LABELS)[number];
+
+/** `pricing` -> `pricing.cost_label`. The one place this mapping is
+ * computed, so the validator (which only checks a value already on the row
+ * agrees) and build.py (which writes the computed value) can never drift
+ * apart. */
+export function deriveCostLabel(pricing: unknown): CostLabel | null {
+  if (pricing === null || pricing === undefined || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return null;
+  }
+  const raw = pricing as Record<string, unknown>;
+  const gate = raw["api_access_gate"];
+
+  if (gate === "subscription_required") return "SUBS";
+
+  if (gate === "none") {
+    const url = raw["free_usage_source_url"];
+    if (typeof url === "string" && url.startsWith("http")) return "FREE";
+    return "PAYG";
+  }
+
+  if (gate === "prepaid_min") return "PAYG";
+
+  return null; // unknown, contact_sales, missing, or any other gate
+}
+
 /** HTTP methods an `endpoints[]` row may name. Always uppercase. */
 export const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] as const;
 export type HttpMethod = (typeof HTTP_METHODS)[number];
@@ -560,6 +603,18 @@ export interface ApiPricing {
   min_prepay_usd: number | null;
   /** The vendor's own pricing page the gate above was read from. */
   gate_source_url: string | null;
+
+  // --- the cost label (ND-18b) -----------------------------------------------
+  // `free_usage_source_url` is hand-filled; `cost_label` is derived -- see
+  // deriveCostLabel and ../data/apis/README.md "ND-18b cost_label".
+
+  /**
+   * The vendor's own page proving a usable free allowance. Hand-filled; only
+   * allowed (and required) when the derived cost_label is FREE.
+   */
+  free_usage_source_url: string | null;
+  /** `deriveCostLabel(pricing)`, computed by build.py. Never hand-edit. */
+  cost_label: CostLabel | null;
 }
 
 /** One documented endpoint: a method, a path, and what it is for. */
@@ -1714,6 +1769,8 @@ function validatePricing(errors: string[], at: string, value: unknown): void {
     "min_monthly_usd",
     "min_prepay_usd",
     "gate_source_url",
+    "free_usage_source_url",
+    "cost_label",
   ]);
   for (const key of Object.keys(raw)) {
     if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
@@ -1796,6 +1853,36 @@ function validatePricing(errors: string[], at: string, value: unknown): void {
     errors.push(
       `${field}.gate_source_url: required when pricing.api_access_gate is set and not unknown (what proves the gate?)`,
     );
+  }
+
+  // ---- the cost label (ND-18b) ----------------------------------------------
+  const expectedLabel = deriveCostLabel(raw);
+  if ("cost_label" in raw) {
+    const gotLabel = raw["cost_label"];
+    // Presence is only ever valid when expectedLabel is NOT null -- a key
+    // present (any value, explicit null included) while the derived value
+    // is null is rejected just like a mismatch, not silently accepted
+    // because null === null.
+    if (expectedLabel === null || gotLabel !== expectedLabel) {
+      errors.push(
+        `${field}.cost_label: derived field; expected ${String(expectedLabel)} from pricing, got ${String(gotLabel)}` +
+          " (do not hand-edit; run build)",
+      );
+    }
+  }
+  const freeUsageUrl = raw["free_usage_source_url"];
+  const hasFreeUsageUrl = "free_usage_source_url" in raw;
+  if (hasFreeUsageUrl && freeUsageUrl !== null && !(typeof freeUsageUrl === "string" && isHttpUrl(freeUsageUrl))) {
+    errors.push(`${field}.free_usage_source_url: expected an http(s) URL or null`);
+  }
+  if (expectedLabel === "FREE") {
+    if (!(typeof freeUsageUrl === "string" && isHttpUrl(freeUsageUrl))) {
+      errors.push(
+        `${field}.free_usage_source_url: required when the derived cost_label is FREE (what proves the free allowance?)`,
+      );
+    }
+  } else if (hasFreeUsageUrl) {
+    errors.push(`${field}.free_usage_source_url: only allowed when the derived cost_label is FREE`);
   }
 }
 
@@ -2454,6 +2541,12 @@ function apiPricing(raw: Record<string, unknown>): ApiPricing {
     min_monthly_usd: typeof raw["min_monthly_usd"] === "number" ? (raw["min_monthly_usd"] as number) : null,
     min_prepay_usd: typeof raw["min_prepay_usd"] === "number" ? (raw["min_prepay_usd"] as number) : null,
     gate_source_url: typeof raw["gate_source_url"] === "string" ? (raw["gate_source_url"] as string) : null,
+    free_usage_source_url:
+      typeof raw["free_usage_source_url"] === "string" ? (raw["free_usage_source_url"] as string) : null,
+    cost_label:
+      typeof raw["cost_label"] === "string" && (COST_LABELS as readonly string[]).includes(raw["cost_label"])
+        ? (raw["cost_label"] as CostLabel)
+        : null,
   };
 }
 

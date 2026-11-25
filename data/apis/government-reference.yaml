@@ -35,6 +35,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://censusdata.xyz/"
+      free_usage_source_url: "https://censusdata.xyz/"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/health"
@@ -116,6 +118,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://www.census.gov/data/developers.html"
+      free_usage_source_url: "https://www.census.gov/data/developers/guidance/api-user-guide.html"
+      cost_label: "FREE"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     cost_badge: "green"
     usage_api:
