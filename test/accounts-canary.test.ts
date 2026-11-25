@@ -236,6 +236,7 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
       find_api: { capability: "web scraping" },
       list_keys: {},
       list_accounts: {},
+      signup_status: {},
       key_status: { alias: ACCOUNT },
       request_access: { platform: "Apify", reason: "canary sweep", est_budget: 1 },
       access_status: { request_id: "req_0000000000000000" },

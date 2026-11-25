@@ -67,6 +67,15 @@ import {
   type AccountAddOptions,
 } from "./accounts/cli.js";
 import {
+  cmdSignupAbandon,
+  cmdSignupComplete,
+  cmdSignupStart,
+  listSignupVendors,
+  signupStatusRows,
+  type SignupCompleteOptions,
+  type SignupStartOptions,
+} from "./signup/cli.js";
+import {
   DEFAULT_STALE_DAYS,
   httpFetcher,
   readStaleCache,
@@ -384,6 +393,77 @@ export function buildProgram(): Command {
     .action((name: string) => {
       withExitCodes("account enable", () => {
         cmdAccountEnableDisable(name, false);
+      });
+    });
+
+  const signup = program
+    .command("signup")
+    .description(
+      "on-demand vendor signup: a guided human handoff for the first-wave vendors, then bind the key",
+    );
+
+  signup
+    .command("list")
+    .description("list the first-wave vendors and their official signup/key-page URLs")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      withExitCodes("signup list", () => {
+        cmdSignupListPrint(options.json);
+      });
+    });
+
+  signup
+    .command("start <vendor>")
+    .description("start (or re-check) a vendor signup; stops for a human unless a driver is injected")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .option("--no-open", "do not open the signup page in a browser")
+    .option("--json", "machine-readable output", false)
+    .action(async (vendor: string, options: { account?: string; open: boolean; json: boolean }) => {
+      await withExitCodes("signup start", async () => {
+        const startOptions: SignupStartOptions = {
+          noOpen: options.open === false,
+          json: options.json,
+          openUrl: systemOpener(),
+          ...(options.account === undefined ? {} : { account: options.account }),
+        };
+        await cmdSignupStart(vendor, startOptions);
+      });
+    });
+
+  signup
+    .command("status [vendor]")
+    .description("show signup sessions and their states")
+    .option("--json", "machine-readable output", false)
+    .action((vendor: string | undefined, options: { json: boolean }) => {
+      withExitCodes("signup status", () => {
+        cmdSignupStatusPrint(vendor, options.json);
+      });
+    });
+
+  signup
+    .command("complete <vendor>")
+    .description("bind the key a human just created into the vault (never prints the key)")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .option(
+      "--email-stdin",
+      "read the account email from stdin (one line; two lines, email then key, with --stdin)",
+      false,
+    )
+    .option("--stdin", "read the key (or key+email, with --email-stdin) from stdin", false)
+    .option("--yes", "overwrite an existing account/session with the same name without asking", false)
+    .action(async (vendor: string, options: SignupCompleteOptions) => {
+      await withExitCodes("signup complete", async () => {
+        await cmdSignupComplete(vendor, options);
+      });
+    });
+
+  signup
+    .command("abandon <vendor>")
+    .description("mark a vendor's signup session abandoned")
+    .action((vendor: string) => {
+      withExitCodes("signup abandon", () => {
+        cmdSignupAbandon(vendor);
       });
     });
 
@@ -1626,6 +1706,39 @@ function cmdAccountShow(name: string, json: boolean): void {
   console.log(`State:       ${account.disabled ? "disabled" : "active"}`);
   console.log(`References:  ${account.refs.join(", ") || "-"}`);
   if (runCommand !== null) console.log(`Run:         ${runCommand}`);
+}
+
+function cmdSignupListPrint(json: boolean): void {
+  const vendors = listSignupVendors();
+  if (json) {
+    console.log(JSON.stringify(vendors, null, 2));
+    return;
+  }
+  printTable(
+    ["VENDOR", "SIGNUP URL", "KEY PAGE URL", "AUTOMATION"],
+    vendors.map((v) => [v.vendor, v.signup_url ?? "-", v.key_page_url ?? "-", v.automation]),
+  );
+}
+
+function cmdSignupStatusPrint(vendor: string | undefined, json: boolean): void {
+  const home = skeletonKeyHome();
+  const rows = signupStatusRows(vendor, home);
+  if (json) {
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
+  if (rows.length === 0) {
+    console.log(
+      vendor === undefined
+        ? "No signup sessions yet. Start one with: skeletonkey signup start <vendor>"
+        : `No signup sessions for "${vendor}". Start one with: skeletonkey signup start ${vendor}`,
+    );
+    return;
+  }
+  printTable(
+    ["ID", "VENDOR", "ACCOUNT", "STATE", "REASON", "UPDATED"],
+    rows.map((row) => [row.id, row.vendor, row.account, row.state, row.reason ?? "-", row.updated]),
+  );
 }
 
 function cmdAccountEnableDisable(name: string, disabled: boolean): void {
