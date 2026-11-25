@@ -116,6 +116,20 @@ export class Redactor {
     return this;
   }
 
+  /**
+   * Registers one value exactly as given: no trimming, no minimum length.
+   *
+   * This is what the injection path uses. A secret that is about to be put in
+   * a child's environment must be caught byte for byte, even when it is three
+   * characters long or has a trailing space.
+   */
+  addExact(secret: string | null | undefined): this {
+    if (typeof secret !== "string") return this;
+    if (secret.length === 0) return this;
+    this.secrets.add(secret);
+    return this;
+  }
+
   addAll(secrets: Iterable<string>): this {
     for (const secret of secrets) this.add(secret);
     return this;
@@ -124,6 +138,17 @@ export class Redactor {
   /** How many values are registered. Never the values themselves. */
   get size(): number {
     return this.secrets.size;
+  }
+
+  /**
+   * The registered values, longest first.
+   *
+   * The streaming redactor needs the values themselves to decide where a
+   * chunk boundary may fall, so it asks for them here. Nothing else should:
+   * this list is a secret.
+   */
+  knownValues(): string[] {
+    return [...this.secrets].sort((a, b) => b.length - a.length);
   }
 
   forget(): void {

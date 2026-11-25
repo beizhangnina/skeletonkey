@@ -37,12 +37,36 @@ import {
   writeKeys,
 } from "./keys.js";
 import { openLedger } from "./ledger.js";
-import { configPath, skeletonKeyHome, keysPath, ledgerPath } from "./paths.js";
-import { promptLine, readSecret } from "./prompt.js";
+import { configPath, skeletonKeyHome, keysPath, ledgerPath, entriesPath } from "./paths.js";
+import { promptHidden, promptLine, readSecret, readStdin } from "./prompt.js";
 import { BITWARDEN_FALLBACK_BACKEND, runInitWizard, wizardDeps } from "./init-wizard.js";
 import { systemOpener } from "./open-url.js";
 import { startMcpServer } from "./mcp.js";
 import { startProxy, upstreamSchemeFor } from "./proxy.js";
+import { EXIT, SkeletonKeyError, printCliError } from "./exit-codes.js";
+import { runWithInjectedEnv } from "./run/run.js";
+import {
+  assertUsableEntryName,
+  envNameFor,
+  formatVaultUri,
+  isVaultUri,
+} from "./vault/uri.js";
+import {
+  fieldsFor,
+  listVaultEntries,
+  maskUsername,
+  upsertEntry,
+  type VaultEntryMeta,
+} from "./vault/entries.js";
+import { openEntryStore } from "./vault/entry-store.js";
+import {
+  accountRunCommand,
+  cmdAccountAdd,
+  cmdAccountShowData,
+  listAccountSummaries,
+  setAccountDisabled,
+  type AccountAddOptions,
+} from "./accounts/cli.js";
 import {
   DEFAULT_STALE_DAYS,
   httpFetcher,
@@ -218,6 +242,177 @@ export function buildProgram(): Command {
     .option("--json", "machine-readable output", false)
     .action((options: { json: boolean }) => {
       cmdList(options.json);
+    });
+
+  const vault = program
+    .command("vault")
+    .description("store and manage local vault entries (api keys and logins)");
+
+  vault
+    .command("add <name>")
+    .description("store a new entry in the vault (the value never reaches the agent)")
+    .addOption(
+      new Option("--type <type>", "what kind of entry this is").choices([
+        "api_key",
+        "login",
+      ]),
+    )
+    .option("--label <text>", "human label for the entry")
+    .option("--yes", "overwrite an entry with the same name without asking", false)
+    // api_key options (same flags as `skeletonkey add`).
+    .option("--platform <platform>", "platform or vendor name (api_key entries)")
+    .option("--domain <domain>", "destination domain the key is for (api_key entries)")
+    .option("--header <name>", "header to inject", DEFAULT_HEADER)
+    .option("--format <template>", "header value template containing {key}", DEFAULT_FORMAT)
+    .addOption(
+      new Option(
+        "--scheme <scheme>",
+        "scheme the proxy uses for this domain (default: https, or http for a loopback host)",
+      ).choices([...UPSTREAM_SCHEMES]),
+    )
+    // login options.
+    .option("--username <username>", "login username (asked for on the terminal when omitted)")
+    .option("--url <url>", "where this login is used, e.g. https://github.com/login")
+    .option("--no-hint", "do not record a masked username hint in the metadata")
+    .option("--stdin", "always read the secret from stdin", false)
+    .action(async (name: string, options: VaultAddOptions) => {
+      await withExitCodes("vault add", async () => {
+        await cmdVaultAdd(name, options);
+      });
+    });
+
+  vault
+    .command("list")
+    .description("list every vault entry (metadata only, never values)")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      withExitCodes("vault list", () => {
+        cmdVaultList(options.json);
+      });
+    });
+
+  vault
+    .command("show <name>")
+    .description("show one entry's metadata and the references an agent may use")
+    .option("--json", "machine-readable output", false)
+    .action((name: string, options: { json: boolean }) => {
+      withExitCodes("vault show", () => {
+        cmdVaultShow(name, options.json);
+      });
+    });
+
+  vault
+    .command("rm <name>")
+    .description("delete an entry from the vault and from the metadata index")
+    .option("--yes", "do not ask for confirmation", false)
+    .action(async (name: string, options: { yes: boolean }) => {
+      await withExitCodes("vault rm", async () => {
+        await cmdVaultRm(name, options.yes);
+      });
+    });
+
+  const account = program
+    .command("account")
+    .description("register vendor accounts, with metadata kept apart from their secrets");
+
+  account
+    .command("add <name>")
+    .description("register a vendor account, optionally storing its key and/or login in the vault")
+    .requiredOption("--vendor <id>", "vendor id from the API index, e.g. apify")
+    .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option(
+      "--email-stdin",
+      "read the account email from stdin (one line; two lines, email then secret, with --stdin)",
+      false,
+    )
+    .option("--key-alias <alias>", "link to (or name, with --store-key) an api_key vault entry")
+    .option("--store-key", "store a new API key in the vault for this account", false)
+    .option("--domain <domain>", "destination domain for the stored key (with --store-key)")
+    .option("--platform <platform>", "platform label for the stored key (default: --vendor)")
+    .option("--header <name>", "header to inject for the stored key", DEFAULT_HEADER)
+    .option("--format <template>", "header value template for the stored key", DEFAULT_FORMAT)
+    .addOption(
+      new Option("--scheme <scheme>", "scheme the proxy uses for the stored key's domain").choices([
+        ...UPSTREAM_SCHEMES,
+      ]),
+    )
+    .option("--store-login", "store a login (the account email as username) in the vault", false)
+    .option("--url <url>", "where the stored login is used, e.g. https://apify.com/login")
+    .option("--stdin", "read the one secret this command stores from stdin", false)
+    .option("--yes", "overwrite an existing account with the same name without asking", false)
+    .action(async (name: string, options: AccountAddOptions) => {
+      await withExitCodes("account add", async () => {
+        await cmdAccountAdd(name, options);
+      });
+    });
+
+  account
+    .command("list")
+    .description("list every registered account (metadata only, never values)")
+    .option("--json", "machine-readable output", false)
+    .option("--active", "only accounts that are not disabled", false)
+    .action((options: { json: boolean; active: boolean }) => {
+      withExitCodes("account list", () => {
+        cmdAccountList(options.json, options.active);
+      });
+    });
+
+  account
+    .command("show <name>")
+    .description("show one account's metadata and the references an agent may use")
+    .option("--json", "machine-readable output", false)
+    .action((name: string, options: { json: boolean }) => {
+      withExitCodes("account show", () => {
+        cmdAccountShow(name, options.json);
+      });
+    });
+
+  account
+    .command("disable <name>")
+    .description("disable an account and the vault entries it points at")
+    .action((name: string) => {
+      withExitCodes("account disable", () => {
+        cmdAccountEnableDisable(name, true);
+      });
+    });
+
+  account
+    .command("enable <name>")
+    .description("re-enable an account and the vault entries it points at")
+    .action((name: string) => {
+      withExitCodes("account enable", () => {
+        cmdAccountEnableDisable(name, false);
+      });
+    });
+
+  program
+    .command("run")
+    .description(
+      "run a command with vault values injected into its environment (the child's output is redacted)",
+    )
+    .option(
+      "--env <name=vault://entry[.field]>",
+      "inject a vault value into the child's environment (repeatable)",
+      (value: string, previous: string[] = []) => [...previous, value],
+      [] as string[],
+    )
+    .option("--cwd <dir>", "working directory for the child process")
+    .option("--timeout <seconds>", "terminate the child after this many seconds", (value: string) =>
+      Number(value),
+    )
+    .option(
+      "--dry-run",
+      "run every precheck and print the plan, without reading a value or starting anything",
+      false,
+    )
+    .argument("[command...]")
+    .action(async (command: string[], options: RunCliOptions, self: Command) => {
+      await withExitCodes("run", async () => {
+        await cmdRun(command, options, runSeparatorPresent(rawArgsOf(self.parent)));
+      });
     });
 
   program
@@ -993,9 +1188,17 @@ async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
   if (!/^[a-z0-9][a-z0-9._-]*$/i.test(alias)) {
     throw new Error("Alias must start with a letter or digit and contain only [A-Za-z0-9._-].");
   }
+  await storeApiKey(alias, options);
+}
+
+/**
+ * Stores an api_key. Shared by `skeletonkey add` and `vault add --type api_key`,
+ * so both print exactly the same thing.
+ */
+async function storeApiKey(alias: string, options: AddOptions): Promise<void> {
   const home = skeletonKeyHome();
-  const config = readConfig(home);
-  const vault = createVault(config, home);
+  const store = openEntryStore(home);
+  const vault = store.vault;
   await vault.check();
 
   if (!options.format.includes("{key}")) {
@@ -1007,11 +1210,7 @@ async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
   const secret = (await readSecret(options.stdin)).trim();
   if (!secret) throw new Error("Empty secret; nothing stored.");
 
-  await vault.set(alias, secret);
-  const stored = await vault.get(alias);
-  if (stored !== secret) {
-    throw new Error("Vault read-back did not match what was written; metadata not recorded.");
-  }
+  await store.putApiKey(alias, secret);
 
   const existing = findKey(alias, home);
   const scheme = options.scheme ?? existing?.scheme;
@@ -1038,6 +1237,500 @@ async function cmdAdd(alias: string, options: AddOptions): Promise<void> {
         : `${meta.scheme} (recorded on this key)`
     }`,
   );
+}
+
+// --- the vault commands ----------------------------------------------------
+
+interface VaultAddOptions {
+  type: "api_key" | "login";
+  label?: string;
+  yes: boolean;
+  platform?: string;
+  domain?: string;
+  header: string;
+  format: string;
+  scheme?: UpstreamScheme;
+  stdin: boolean;
+  username?: string;
+  url?: string;
+  /** False when --no-hint was passed. */
+  hint: boolean;
+}
+
+interface RunCliOptions {
+  env: string[];
+  cwd?: string;
+  timeout?: number;
+  dryRun: boolean;
+}
+
+/**
+ * Runs a command body that reports failures with the exit-code table.
+ *
+ * Errors that are not SkeletonKeyError keep the old behaviour: they bubble up
+ * to `main`, which prints them the way the rest of the CLI always has.
+ */
+async function withExitCodes(
+  command: string,
+  body: () => void | Promise<void>,
+): Promise<void> {
+  try {
+    await body();
+  } catch (error) {
+    if (error instanceof SkeletonKeyError) {
+      printCliError(command, error);
+      process.exitCode = error.exitCode;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function cmdVaultAdd(name: string, options: VaultAddOptions): Promise<void> {
+  assertUsableEntryName(name);
+  const home = skeletonKeyHome();
+  const store = openEntryStore(home);
+  const type = options.type ?? "api_key";
+
+  const existing = store.resolve(name);
+  if (existing !== null && existing.type !== type) {
+    // One name, one kind of entry: a login and an api_key cannot share it.
+    // Overwriting across kinds would leave one of the two unreachable.
+    throw new SkeletonKeyError(
+      "name_taken",
+      `"${name}" already exists (${existing.type}), and it cannot become a ${type}.`,
+      "Pick another name, or remove the existing entry first.",
+    );
+  }
+  if (existing !== null && options.yes !== true) {
+    throw new SkeletonKeyError(
+      "name_taken",
+      `"${name}" already exists (${existing.type}).`,
+      "Pass --yes to overwrite, or pick another name.",
+    );
+  }
+
+  if (type === "api_key") {
+    if (options.platform === undefined || options.platform.trim() === "") {
+      throw new SkeletonKeyError(
+        "usage",
+        "--platform is required for an api_key entry.",
+        "Example: skeletonkey vault add <name> --type api_key --platform <p> --domain <d>",
+      );
+    }
+    if (options.domain === undefined || options.domain.trim() === "") {
+      throw new SkeletonKeyError(
+        "usage",
+        "--domain is required for an api_key entry.",
+        "Example: skeletonkey vault add <name> --type api_key --platform <p> --domain <d>",
+      );
+    }
+    await storeApiKey(name, {
+      platform: options.platform,
+      domain: options.domain,
+      header: options.header,
+      format: options.format,
+      ...(options.scheme === undefined ? {} : { scheme: options.scheme }),
+      stdin: options.stdin,
+    });
+    return;
+  }
+
+  // Everything that can be refused is refused before a single value is read or
+  // written: a rejected --url must not leave a secret behind in the vault.
+  const url = options.url?.trim();
+  if (url !== undefined && url !== "" && !/^https?:\/\//i.test(url)) {
+    throw new SkeletonKeyError(
+      "usage",
+      "--url must be an http(s) URL.",
+      "Example: --url https://github.com/login",
+    );
+  }
+
+  const { username, password } = await readLoginValues(options);
+  await store.putLogin(name, { username, password });
+
+  const domain = url === undefined || url === "" ? null : normalizeDomain(url);
+  const entry: VaultEntryMeta = {
+    name,
+    type: "login",
+    fields: fieldsFor("login"),
+    created: new Date().toISOString(),
+    last_used: null,
+    disabled: false,
+    ...(options.label === undefined ? {} : { label: options.label }),
+    ...(url === undefined || url === "" ? {} : { url }),
+    domain,
+    ...(options.hint === false ? {} : { username_hint: maskUsername(username) }),
+  };
+  upsertEntry(entry, home);
+
+  const reference = formatVaultUri(name, "password");
+  console.log(`Stored login "${name}" in ${store.location}.`);
+  console.log(
+    `Fields stored: username, password (${username.length} and ${password.length} chars, ` +
+      "NOT written to entries.yaml).",
+  );
+  console.log(`Metadata recorded in ${entriesPath(home)}.`);
+  console.log(`Give an agent only this reference: ${reference}`);
+  console.log(
+    `Use it with: skeletonkey run --env ${envNameFor(name, "password")}=${reference} -- <your command>`,
+  );
+}
+
+/**
+ * Reads a username and a password without ever showing the password.
+ *
+ * Three ways in: `--username` plus `--stdin`, `--stdin` alone (username on the
+ * first line), or the terminal (typed, then typed again to confirm).
+ */
+async function readLoginValues(options: VaultAddOptions): Promise<{
+  username: string;
+  password: string;
+}> {
+  if (options.stdin) {
+    const data = await readStdin();
+    if (options.username !== undefined) {
+      return { username: options.username, password: requirePassword(data) };
+    }
+    const newline = data.indexOf("\n");
+    if (newline === -1) {
+      throw new SkeletonKeyError(
+        "usage",
+        "--stdin without --username expects the username on the first line and the password after it.",
+        "Put both on stdin, or pass --username and put only the password there.",
+      );
+    }
+    const username = data.slice(0, newline).trim();
+    const password = data.slice(newline + 1);
+    if (username === "") {
+      throw new SkeletonKeyError(
+        "usage",
+        "An empty username is not an entry.",
+        "Put the username on the first line of stdin, or pass --username.",
+      );
+    }
+    if (password.includes("\n")) {
+      throw new SkeletonKeyError(
+        "usage",
+        "A password read from stdin has to be a single line.",
+        "Pass --username and put only the password on stdin.",
+      );
+    }
+    return { username, password: requirePassword(password) };
+  }
+
+  const username = options.username ?? (await promptUsername());
+  let password: string;
+  let repeat: string;
+  try {
+    password = await promptHidden("Password (not echoed): ");
+    repeat = await promptHidden("Repeat password: ");
+  } catch (error) {
+    throw new SkeletonKeyError(
+      "usage",
+      "A login password can only be typed on a terminal or piped on stdin.",
+      "Use --stdin, or run this in your own terminal.",
+    );
+  }
+  if (password !== repeat) {
+    throw new SkeletonKeyError(
+      "usage",
+      "The two passwords did not match; nothing was stored.",
+      "Try again.",
+    );
+  }
+  return { username, password: requirePassword(password) };
+}
+
+/**
+ * An empty password is a mistake, not a login.
+ *
+ * Injecting an empty value would put an empty variable in the child's
+ * environment, which looks like a working secret and is not one.
+ */
+function requirePassword(password: string): string {
+  if (password.trim() === "") {
+    throw new SkeletonKeyError(
+      "usage",
+      "An empty password is not an entry; nothing was stored.",
+      "Type the password, or pipe it on stdin.",
+    );
+  }
+  return password;
+}
+
+async function promptUsername(): Promise<string> {
+  if (process.stdin.isTTY !== true) {
+    throw new SkeletonKeyError(
+      "usage",
+      "--username is required when stdin is not a terminal.",
+      "Pass --username, or use --stdin and put the username on the first line.",
+    );
+  }
+  const answer = (await promptLine("Username: ")).trim();
+  if (answer === "") {
+    throw new SkeletonKeyError(
+      "usage",
+      "An empty username is not an entry.",
+      "Type a username, or pass --username.",
+    );
+  }
+  return answer;
+}
+
+function cmdVaultList(json: boolean): void {
+  const entries = listVaultEntries(skeletonKeyHome());
+  if (json) {
+    console.log(JSON.stringify(entries, null, 2));
+    return;
+  }
+  if (entries.length === 0) {
+    console.log("No vault entries yet. Add one with: skeletonkey vault add <name> --type login");
+    return;
+  }
+  printTable(
+    ["NAME", "TYPE", "TARGET", "FIELDS", "STATE", "LAST USED"],
+    entries.map((entry) => [
+      entry.name,
+      entry.type,
+      entry.target ?? "-",
+      entry.fields.join(","),
+      entry.disabled ? "disabled" : "enabled",
+      entry.last_used ?? "never",
+    ]),
+  );
+}
+
+function cmdVaultShow(name: string, json: boolean): void {
+  const home = skeletonKeyHome();
+  const store = openEntryStore(home);
+  const entry = store.resolve(name);
+  if (entry === null) {
+    throw new SkeletonKeyError(
+      "entry_not_found",
+      `No vault entry named "${name}".`,
+      "List them with `skeletonkey vault list`.",
+    );
+  }
+  const summary = store.list().find((candidate) => candidate.name === name);
+  const refs = entry.fields.map((field) => formatVaultUri(name, field));
+  // The example command points at the field a caller usually wants: the secret
+  // of an api_key, the password of a login (never the username, which is PII).
+  const primary = entry.type === "login" ? "password" : "api_key";
+  const envName = envNameFor(name, primary);
+  const runCommand = `skeletonkey run --env ${envName}=${formatVaultUri(name, primary)} -- <your command>`;
+
+  if (json) {
+    console.log(
+      JSON.stringify(
+        {
+          ...(summary ?? { name, type: entry.type }),
+          refs,
+          run_command: runCommand,
+          note: "Metadata only. The values stay in the vault.",
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  console.log(`Name:        ${name}`);
+  console.log(`Type:        ${entry.type}`);
+  console.log(`Target:      ${entry.target ?? "-"}`);
+  console.log(`Fields:      ${entry.fields.join(", ")}`);
+  console.log(`State:       ${entry.disabled ? "disabled" : "enabled"}`);
+  console.log(`Created:     ${entry.created || "unknown"}`);
+  console.log(`Last used:   ${entry.last_used ?? "never"}`);
+  if (summary?.label !== undefined) console.log(`Label:       ${summary.label}`);
+  if (summary?.username_hint !== undefined) {
+    console.log(`Username:    ${summary.username_hint} (masked; the value is in the vault)`);
+  }
+  console.log(`References:  ${refs.join(", ")}`);
+  console.log(`Run:         ${runCommand}`);
+}
+
+async function cmdVaultRm(name: string, yes: boolean): Promise<void> {
+  const home = skeletonKeyHome();
+  const store = openEntryStore(home);
+  const entry = store.resolve(name);
+  if (entry === null) {
+    throw new SkeletonKeyError(
+      "entry_not_found",
+      `No vault entry named "${name}".`,
+      "List them with `skeletonkey vault list`.",
+    );
+  }
+  if (!yes) {
+    if (process.stdin.isTTY !== true) {
+      throw new SkeletonKeyError(
+        "usage",
+        "Refusing to delete without confirmation when stdin is not a terminal.",
+        "Pass --yes.",
+      );
+    }
+    const answer = (await promptLine(`Delete "${name}" (${entry.type}) from the vault? [y/N] `)).trim();
+    if (answer.toLowerCase() !== "y" && answer.toLowerCase() !== "yes") {
+      console.log("Nothing was deleted.");
+      return;
+    }
+  }
+  await store.deleteEntry(name);
+  console.log(`Removed "${name}" from ${store.location} and from the metadata index.`);
+}
+
+function cmdAccountList(json: boolean, activeOnly: boolean): void {
+  const home = skeletonKeyHome();
+  const accounts = listAccountSummaries(home, activeOnly);
+  if (json) {
+    console.log(JSON.stringify(accounts, null, 2));
+    return;
+  }
+  if (accounts.length === 0) {
+    console.log("No accounts yet. Add one with: skeletonkey account add <name> --vendor <id>");
+    return;
+  }
+  printTable(
+    ["NAME", "VENDOR", "REGISTERED", "EMAIL", "KEY ALIAS", "STATE"],
+    accounts.map((account) => [
+      account.name,
+      account.vendor,
+      account.registered || "-",
+      account.email_hint ?? "-",
+      account.key_alias ?? "-",
+      account.disabled ? "disabled" : "active",
+    ]),
+  );
+}
+
+function cmdAccountShow(name: string, json: boolean): void {
+  const home = skeletonKeyHome();
+  const account = cmdAccountShowData(name, home);
+  const runCommand = accountRunCommand(account);
+  if (json) {
+    console.log(
+      JSON.stringify(
+        { ...account, run_command: runCommand, note: "Metadata only. The values stay in the vault." },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  console.log(`Name:        ${account.name}`);
+  console.log(`Vendor:      ${account.vendor}`);
+  console.log(`Registered:  ${account.registered || "unknown"}`);
+  console.log(`Email:       ${account.email_hint ?? "-"} (masked; the value is in the vault, if stored)`);
+  console.log(`Key alias:   ${account.key_alias ?? "-"}`);
+  console.log(`Login entry: ${account.login_entry ?? "-"}`);
+  console.log(`State:       ${account.disabled ? "disabled" : "active"}`);
+  console.log(`References:  ${account.refs.join(", ") || "-"}`);
+  if (runCommand !== null) console.log(`Run:         ${runCommand}`);
+}
+
+function cmdAccountEnableDisable(name: string, disabled: boolean): void {
+  const home = skeletonKeyHome();
+  const account = setAccountDisabled(name, disabled, home);
+  console.log(`${disabled ? "Disabled" : "Enabled"} account "${account.name}".`);
+  if (account.key_alias !== null) {
+    console.log(`  key_alias:   ${account.key_alias} (${disabled ? "disabled" : "enabled"})`);
+  }
+  if (account.login_entry !== null) {
+    console.log(`  login_entry: ${account.login_entry} (${disabled ? "disabled" : "enabled"})`);
+  }
+}
+
+// --- the run command -------------------------------------------------------
+
+/**
+ * Splits one `--env` flag into a name and a reference.
+ *
+ * A literal value is refused here, before anything is read: `run` must not
+ * become a way to put a plaintext secret on a command line.
+ *
+ * The flag is never echoed back. A user who pastes a secret into `--env` by
+ * mistake would otherwise see that secret in the error message, and the error
+ * message is exactly what reaches the agent.
+ */
+function parseEnvSpec(spec: string): { name: string; value: string } {
+  const equals = spec.indexOf("=");
+  if (equals <= 0) {
+    throw new SkeletonKeyError(
+      "usage",
+      `--env expects NAME=vault://<entry>.<field> (got "[redacted]").`,
+      "Example: --env GITHUB_PASSWORD=vault://github-login.password",
+    );
+  }
+  const name = spec.slice(0, equals);
+  const value = spec.slice(equals + 1);
+  if (!isVaultUri(value)) {
+    // The name is echoed only when it could be a variable name at all; a flag
+    // like `--env my-secret` is treated as a secret and not repeated.
+    const shown = /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? `${name}=[redacted]` : "[redacted]";
+    throw new SkeletonKeyError(
+      "usage",
+      `--env expects NAME=vault://<entry>.<field> (got "${shown}").`,
+      "Example: --env GITHUB_PASSWORD=vault://github-login.password",
+    );
+  }
+  return { name, value };
+}
+
+/**
+ * True when the user typed the `--` that separates SkeletonKey's flags from
+ * the child's own arguments.
+ *
+ * Without it, `run` would have to guess where the child's options start, and
+ * a flag meant for the child would be read as SkeletonKey's. The check runs
+ * before commander parses anything, so the error is ours and not commander's.
+ */
+function runSeparatorPresent(rawArgs: string[]): boolean {
+  if (rawArgs.length === 0) return true;
+  const index = rawArgs.indexOf("run");
+  if (index === -1) return true;
+  return rawArgs.slice(index + 1).includes("--");
+}
+
+/** The arguments commander was given, as it saw them. */
+function rawArgsOf(command: Command | null | undefined): string[] {
+  const raw = (command as unknown as { rawArgs?: unknown } | undefined)?.rawArgs;
+  return Array.isArray(raw) ? (raw as string[]) : [];
+}
+
+async function cmdRun(
+  command: string[],
+  options: RunCliOptions,
+  separatorPresent = true,
+): Promise<void> {
+  if (!separatorPresent || command.length === 0) {
+    throw new SkeletonKeyError(
+      "usage",
+      "run needs a command after --.",
+      "skeletonkey run --env X=vault://a.password -- curl https://example.com",
+    );
+  }
+  const specs = options.env.map(parseEnvSpec);
+  const result = await runWithInjectedEnv({
+    env: specs,
+    command,
+    ...(options.cwd === undefined ? {} : { cwd: options.cwd }),
+    ...(options.timeout === undefined ? {} : { timeoutSeconds: options.timeout }),
+    dryRun: options.dryRun === true,
+  });
+
+  if (result.dryRun) {
+    console.log("Dry run: no value was read and nothing was started.");
+    for (const injection of result.injections) {
+      console.log(`  ${injection.name} -> ${injection.ref}`);
+    }
+    if (result.scrubbed.length > 0) {
+      console.log(`  scrubbed from the child environment: ${result.scrubbed.join(", ")}`);
+    }
+    return;
+  }
+  process.exitCode = result.exitCode;
 }
 
 function cmdList(json: boolean): void {
@@ -1573,9 +2266,34 @@ function printTable(headers: string[], rows: string[][]): void {
 
 export async function main(argv: string[] = process.argv): Promise<void> {
   silenceSqliteExperimentalWarning();
+  const args = argv.slice(2);
+  // `run` needs the `--` separator. This is checked before commander parses,
+  // because a child's own flags would otherwise be read as SkeletonKey's.
+  if (
+    args[0] === "run" &&
+    !args.includes("--help") &&
+    !args.includes("-h") &&
+    !runSeparatorPresent(argv)
+  ) {
+    printCliError(
+      "run",
+      new SkeletonKeyError(
+        "usage",
+        "run needs a command after --.",
+        "skeletonkey run --env X=vault://a.password -- curl https://example.com",
+      ),
+    );
+    process.exitCode = EXIT.usage;
+    return;
+  }
   try {
     await buildProgram().parseAsync(argv);
   } catch (error) {
+    if (error instanceof SkeletonKeyError) {
+      printCliError("skeletonkey", error);
+      process.exitCode = error.exitCode;
+      return;
+    }
     const message = error instanceof Error ? error.message : String(error);
     console.error(`skeletonkey: ${message}`);
     process.exitCode = 1;

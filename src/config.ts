@@ -90,3 +90,4 @@ function coerceGateway(value: unknown): GatewayConfig | null {
   if (typeof raw["fallback_bind"] === "string") out.fallback_bind = raw["fallback_bind"];
   return Object.keys(out).length > 0 ? out : null;
 }
+
