@@ -281,6 +281,14 @@ def public(r):
     out['when_to_pick'] = when_to_pick(r, st, rt)
     out['sources'] = [u for u in (r.get('source_urls') or []) if url_ok(u)]
     out['collection_scope'], out['visibility'], out['visibility_note'] = vendor_collection(r)
+    # ND-8 structured core fields: pass through as-is when the source row has
+    # them, null when it doesn't. A structured `auth` dict is a superset of
+    # the legacy {type, header, format} shape (it adds docs_url), so it
+    # replaces the legacy object built above; otherwise keep that legacy
+    # object when present.
+    out['auth'] = r.get('auth') if isinstance(r.get('auth'), dict) else out.get('auth')
+    for k in ('official_docs_url', 'pricing', 'endpoints', 'endpoints_note'):
+        out[k] = r.get(k)
     return out
 
 # ALL_ROWS keeps every vendor (hidden ones get their page generated too, so a
