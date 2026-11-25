@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/douban"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "The developer portal no longer exists; a legacy API endpoint still responds but needs a key issued through business-development contact."
+    endpoints_note: "The public developer portal has been retired; API keys are only issued through business-development contact."
     usage_api:
       available: null
       method: null
