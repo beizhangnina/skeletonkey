@@ -15,9 +15,9 @@
   "gray": 94
  },
  "cost_label_counts": {
-  "FREE": 40,
+  "FREE": 36,
   "PAYG": 9,
-  "SUBS": 5
+  "SUBS": 9
  },
  "hidden_count": 13,
  "route_counts": {
@@ -31,7 +31,7 @@
    "rapidapi": 19
   }
  },
- "note": "Rows checked against the vendor's own pages on checked_date carry prices; rows we could not check there carry none. hidden_count rows (collection_scope \"llm\", set aside 2026-11-24) are excluded from count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.",
+ "note": "Rows with `verified` true carry prices read on the vendor's own pages; checked_date is the last updated date. Other rows carry none. hidden_count rows (collection_scope \"llm\", set aside 2026-11-24) are excluded from count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.",
  "schema": "https://skeletonkey.run/llms.txt",
  "apis": [
   {
@@ -592,7 +592,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 20,
     "min_prepay_usd": null,
-    "gate_source_url": "https://agentline.cloud/pricing"
+    "gate_source_url": "https://agentline.cloud/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -822,7 +823,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.agentmail.to/welcome"
+    "gate_source_url": "https://docs.agentmail.to/welcome",
+    "free_usage_source_url": "https://www.agentmail.to/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -1339,7 +1342,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.ahrefs.com/en/api/docs/introduction"
+    "gate_source_url": "https://docs.ahrefs.com/en/api/docs/introduction",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -1619,7 +1623,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://akta.pro/pricing"
+    "gate_source_url": "https://akta.pro/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -2559,7 +2564,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://getanyapi.com/docs"
+    "gate_source_url": "https://getanyapi.com/docs",
+    "free_usage_source_url": "https://getanyapi.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -2859,7 +2866,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.apify.com/api/v2"
+    "gate_source_url": "https://docs.apify.com/api/v2",
+    "free_usage_source_url": "https://apify.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -4618,7 +4627,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://blockrun.ai/pricing"
+    "gate_source_url": "https://blockrun.ai/pricing",
+    "free_usage_source_url": "https://blockrun.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -5056,7 +5067,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
+    "gate_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier",
+    "free_usage_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -5248,7 +5261,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.browserbase.com/account/billing/plans"
+    "gate_source_url": "https://docs.browserbase.com/account/billing/plans",
+    "free_usage_source_url": "https://docs.browserbase.com/account/billing/plans",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -7391,7 +7406,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://cloro.dev/docs/guides/billing"
+    "gate_source_url": "https://cloro.dev/docs/guides/billing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -7432,7 +7448,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "FREE",
+   "cost_label": "SUBS",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8062,7 +8078,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.context.dev/pricing"
+    "gate_source_url": "https://www.context.dev/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -8096,7 +8113,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "FREE",
+   "cost_label": "SUBS",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8753,7 +8770,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://www.datalegion.ai/pricing"
+    "gate_source_url": "https://www.datalegion.ai/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -9124,7 +9142,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 50,
-    "gate_source_url": "https://dataforseo.com/pricing"
+    "gate_source_url": "https://dataforseo.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -9546,7 +9565,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://api-docs.defillama.com/"
+    "gate_source_url": "https://api-docs.defillama.com/",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -9580,7 +9600,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "FREE",
+   "cost_label": "SUBS",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10513,7 +10533,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://elevenlabs.io/pricing/api"
+    "gate_source_url": "https://elevenlabs.io/pricing/api",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -10533,7 +10554,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "FREE",
+   "cost_label": "SUBS",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -11018,7 +11039,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://exa.ai/docs/admin/pricing"
+    "gate_source_url": "https://exa.ai/docs/admin/pricing",
+    "free_usage_source_url": "https://exa.ai/docs/admin/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -11199,7 +11222,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 20,
-    "gate_source_url": "https://www.financialdatasets.ai/pricing"
+    "gate_source_url": "https://www.financialdatasets.ai/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -11755,7 +11779,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.firecrawl.dev/introduction"
+    "gate_source_url": "https://docs.firecrawl.dev/introduction",
+    "free_usage_source_url": "https://www.firecrawl.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -12003,7 +12029,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+    "gate_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits",
+    "free_usage_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -12217,7 +12245,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 175,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.foreplay.co/pricing"
+    "gate_source_url": "https://www.foreplay.co/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -12584,7 +12613,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.tryfundable.ai/usage"
+    "gate_source_url": "https://docs.tryfundable.ai/usage",
+    "free_usage_source_url": "https://www.tryfundable.ai/home#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -13613,7 +13644,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.github.com/en/rest"
+    "gate_source_url": "https://docs.github.com/en/rest",
+    "free_usage_source_url": "https://github.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -14119,7 +14152,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://developers.google.com/maps/billing-and-pricing"
+    "gate_source_url": "https://developers.google.com/maps/billing-and-pricing",
+    "free_usage_source_url": "https://developers.google.com/maps/billing-and-pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -15210,7 +15245,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://hunter.io/api-documentation/v2"
+    "gate_source_url": "https://hunter.io/api-documentation/v2",
+    "free_usage_source_url": "https://hunter.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -16885,7 +16922,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://keenable.ai/pricing"
+    "gate_source_url": "https://keenable.ai/pricing",
+    "free_usage_source_url": "https://keenable.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -18008,7 +18047,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 99,
     "min_prepay_usd": null,
-    "gate_source_url": "https://leadmagic.io/pricing"
+    "gate_source_url": "https://leadmagic.io/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -18682,7 +18722,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://litescrape.com/pricing"
+    "gate_source_url": "https://litescrape.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -19468,7 +19509,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.magichour.ai/billing/overview"
+    "gate_source_url": "https://docs.magichour.ai/billing/overview",
+    "free_usage_source_url": "https://docs.magichour.ai/billing/overview",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -19856,7 +19899,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://marketstack.com/pricing"
+    "gate_source_url": "https://marketstack.com/pricing",
+    "free_usage_source_url": "https://marketstack.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -20227,7 +20272,8 @@
     "api_access_gate": "prepaid_min",
     "min_monthly_usd": null,
     "min_prepay_usd": 10,
-    "gate_source_url": "https://platform.metix.ai/docs/credits"
+    "gate_source_url": "https://platform.metix.ai/docs/credits",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -20720,7 +20766,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://platform.minimax.io/docs/pricing/overview"
+    "gate_source_url": "https://platform.minimax.io/docs/pricing/overview",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -21673,7 +21720,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://octen.ai/pricing"
+    "gate_source_url": "https://octen.ai/pricing",
+    "free_usage_source_url": "https://octen.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -22807,7 +22856,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.peopledatalabs.com/docs/intro"
+    "gate_source_url": "https://docs.peopledatalabs.com/docs/intro",
+    "free_usage_source_url": "https://www.peopledatalabs.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -23000,7 +23051,8 @@
     "api_access_gate": "subscription_required",
     "min_monthly_usd": 200,
     "min_prepay_usd": null,
-    "gate_source_url": "https://ploid.com/pricing"
+    "gate_source_url": "https://ploid.com/pricing",
+    "cost_label": "SUBS"
    },
    "endpoints": [
     {
@@ -23263,7 +23315,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://predictleads.com/pricing"
+    "gate_source_url": "https://predictleads.com/pricing",
+    "free_usage_source_url": "https://predictleads.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -23686,7 +23740,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://prospeo.io/api-docs"
+    "gate_source_url": "https://prospeo.io/api-docs",
+    "free_usage_source_url": "https://prospeo.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24122,7 +24178,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.recall.ai/docs/billing-faq"
+    "gate_source_url": "https://docs.recall.ai/docs/billing-faq",
+    "free_usage_source_url": "https://www.recall.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24332,7 +24390,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://developers.rentcast.io/reference/billing-and-pricing"
+    "gate_source_url": "https://developers.rentcast.io/reference/billing-and-pricing",
+    "free_usage_source_url": "https://developers.rentcast.io/reference/billing-and-pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24561,7 +24621,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://saperly.com/#pricing"
+    "gate_source_url": "https://saperly.com/#pricing",
+    "free_usage_source_url": "https://saperly.com/#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -24832,7 +24894,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://scrapecreators.com/"
+    "gate_source_url": "https://scrapecreators.com/",
+    "free_usage_source_url": "https://scrapecreators.com/#pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -26574,7 +26638,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://serper.dev/"
+    "gate_source_url": "https://serper.dev/",
+    "free_usage_source_url": "https://serper.dev/",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -27173,7 +27239,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://smolmachines.com/pricing"
+    "gate_source_url": "https://smolmachines.com/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {
@@ -27370,7 +27437,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://platform.sonilo.com/pricing"
+    "gate_source_url": "https://platform.sonilo.com/pricing",
+    "free_usage_source_url": "https://platform.sonilo.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28219,7 +28288,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://strale.io/"
+    "gate_source_url": "https://strale.io/",
+    "free_usage_source_url": "https://strale.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28433,7 +28504,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.sumble.com/get-started/plans-and-billing"
+    "gate_source_url": "https://docs.sumble.com/get-started/plans-and-billing",
+    "free_usage_source_url": "https://docs.sumble.com/get-started/plans-and-billing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -28656,7 +28729,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://surf-api.com/pricing"
+    "gate_source_url": "https://surf-api.com/pricing",
+    "free_usage_source_url": "https://surf-api.com/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -29766,7 +29841,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://theirstack.com/en/pricing"
+    "gate_source_url": "https://theirstack.com/en/pricing",
+    "free_usage_source_url": "https://theirstack.com/en/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -30062,7 +30139,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://tikhub.io/pricing"
+    "gate_source_url": "https://tikhub.io/pricing",
+    "free_usage_source_url": "https://tikhub.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -30526,7 +30605,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.tinyfish.ai/"
+    "gate_source_url": "https://docs.tinyfish.ai/",
+    "free_usage_source_url": "https://tinyfish.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -31374,7 +31455,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://www.census.gov/data/developers.html"
+    "gate_source_url": "https://www.census.gov/data/developers.html",
+    "free_usage_source_url": "https://www.census.gov/data/developers/guidance/api-user-guide.html",
+    "cost_label": "FREE"
    },
    "endpoints": null,
    "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
@@ -31723,7 +31806,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://censusdata.xyz/"
+    "gate_source_url": "https://censusdata.xyz/",
+    "free_usage_source_url": "https://censusdata.xyz/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -31934,7 +32019,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.valyu.ai/pricing"
+    "gate_source_url": "https://docs.valyu.ai/pricing",
+    "free_usage_source_url": "https://docs.valyu.ai/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -32862,7 +32949,9 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://web3.career/web3-jobs-api"
+    "gate_source_url": "https://web3.career/web3-jobs-api",
+    "free_usage_source_url": "https://web3.career/web3-jobs-api",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -33773,7 +33862,8 @@
     "api_access_gate": "none",
     "min_monthly_usd": null,
     "min_prepay_usd": null,
-    "gate_source_url": "https://docs.x.com/x-api/getting-started/pricing"
+    "gate_source_url": "https://docs.x.com/x-api/getting-started/pricing",
+    "cost_label": "PAYG"
    },
    "endpoints": [
     {

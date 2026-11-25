@@ -128,7 +128,7 @@ STATUSES = ('verified', 'unverified', 'sales-only', 'no-public-api')
 LABEL = {'sales-only': 'Sales only', 'no-public-api': 'No public API'}
 # ND-18: no checked/unchecked filter options -- they read as a verification claim.
 STATUS_FILTER_LABEL = {'sales-only': 'Sales only', 'no-public-api': 'No public API'}
-STATUS_PROSE = {'verified': 'checked', 'unverified': 'not checked', 'sales-only': 'sales only', 'no-public-api': 'no public API'}
+STATUS_PROSE = {'verified': 'pricing listed', 'unverified': 'no price listed', 'sales-only': 'sales only', 'no-public-api': 'no public API'}
 
 def catalogs(r):
     """Shard `seen_in` is a list (subset of glasser/monid/flatkey/vendor-direct);
@@ -175,17 +175,9 @@ ALT_GATE_LABEL = {'none': 'Pay as you go / free', 'prepaid_min': 'Prepaid credit
 COST_LABEL_RANK = {'FREE': 0, 'PAYG': 1, 'SUBS': 2}
 
 def cost_label(r):
-    cb = r.get('cost_badge') or 'gray'
-    p = r.get('pricing') or {}
-    gate = p.get('api_access_gate')
-    if cb == 'red':
-        return 'SUBS' if gate == 'subscription_required' else None
-    if cb == 'green':
-        if gate == 'none' and (p.get('model') in ('free', 'freemium') or p.get('free_tier') is True or r.get('free_tier') is True):
-            return 'FREE'
-        if gate in ('none', 'prepaid_min'):
-            return 'PAYG'
-    return None
+    """ND-18c: read the pipeline's pricing.cost_label (ND-18b); never derive it here."""
+    v = (r.get('pricing') or {}).get('cost_label')
+    return v if v in COST_LABEL_RANK else None
 
 def llms_cost_bit(x):
     """Compact 'cost: ...' clause for one llms.txt vendor line; '' when the row has no cost label."""
@@ -389,7 +381,7 @@ def when_to_pick(r, st, routes):
     if uk:
         B.append(f"We did not confirm whether the {nm(uk)} {rw(uk)[0]} {vb(uk, 'need')} your own vendor key.")
     if len(B) < 2:
-        B.append(f"{len(routes)} routes checked on {date}: direct and {nm(A)}.")
+        B.append(f"{len(routes)} routes, last updated {date}: direct and {nm(A)}.")
     return B[:4]
 
 # ---------- json rows ----------
@@ -542,6 +534,8 @@ def cost_pill(x):
         if mm is not None: text = f'{cl} · {money(mm)}/mo'
     cls = 'ap-cost-green' if cl in ('FREE', 'PAYG') else 'ap-cost-red'
     title = COST_LABEL_TITLE[cl]
+    if cl == 'SUBS' and (x.get('pricing') or {}).get('api_access_gate') != 'subscription_required':
+        title = 'Priced mainly through subscription plans'
     return f'<span class="ap-badge {cls}" title="{E(title)}" aria-label="{E(cl + ": " + title)}">{E(text)}</span>'
 def ext(u, t): return f'<a href="{E(u)}" rel="noopener nofollow">{E(t)}</a>' if u else E(t)
 
@@ -582,6 +576,14 @@ def cost_section(x):
     if cl in ('FREE', 'PAYG'):
         return f'<p class="ap-cost">{pill}</p>'
     # SUBS
+    if gate != 'subscription_required':
+        # ND-18c: SUBS because the vendor's pricing model is a subscription
+        # (ND-18b rule), but the access gate itself is none/prepaid_min -- so do
+        # not claim a paid plan is required for API access.
+        src = p.get('gate_source_url') or p.get('pricing_url')
+        return (f'<p class="ap-cost">{pill}</p>'
+                f'<section class="ap-card ap-cost-red" id="cost"><h2>Subscription pricing</h2>'
+                f'<p>This vendor prices its API mainly through subscription plans.{" " + ext(src, "Source") if src else ""}</p></section>')
     if p.get('min_monthly_usd') is not None:
         heading, text = 'Subscription required for API access', f'API access needs a paid plan from {money(p["min_monthly_usd"])}/month.'
     else:
@@ -721,7 +723,7 @@ def register_section(x):
 def vendor_body(x):
     meta = badge(x['status']) + (' <span class="ap-badge ap-shelved-badge">Shelved</span>' if x['visibility'] == 'hidden' else '')
     b = [f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> {E(x["category"])}</nav>',
-         f'<h1 class="ap-title">{E(x["name"])}</h1>', f'<p class="ap-meta">{meta} <span>Checked {E(x["checked_date"])}</span></p>']
+         f'<h1 class="ap-title">{E(x["name"])}</h1>', f'<p class="ap-meta">{meta} <span>Updated {E(x["checked_date"])}</span></p>']
     b.append(cost_section(x))
     if x['visibility'] == 'hidden': b.append(shelved_notice(x.get('collection_scope'), x.get('visibility_note')))
     if x.get('summary'): b.append(f'<p class="ap-lede">{E(x["summary"])}</p>')
@@ -771,7 +773,7 @@ def agg_body(a):
     meta = ('<span class="ap-badge ap-shelved-badge">Shelved</span>' if a['visibility'] == 'hidden' else '')
     b = [f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> <a href="/apis/aggregators/">Aggregators</a></nav>',
          f'<h1 class="ap-title">{E(a["name"])}</h1>',
-         f'<p class="ap-meta">{meta} <span>Checked {E(a["checked_date"])}</span></p>']
+         f'<p class="ap-meta">{meta} <span>Updated {E(a["checked_date"])}</span></p>']
     if a['visibility'] == 'hidden': b.append(shelved_notice(a.get('collection_scope'), a.get('visibility_note')))
     if a['what_it_is']: b.append(f'<p class="ap-lede">{E(a["what_it_is"])}</p>')
     # ND-9: a directory entry, not a recommended way to connect -- said up
@@ -826,7 +828,7 @@ def agg_body(a):
         else:
             b.append(f'<section class="ap-card"><h2>Vendors routed through it</h2><p>{hidden_n} vendor{"" if hidden_n == 1 else "s"} routed here are hidden LLM entries, not shown by default.</p></section>')
     else:
-        b.append(f'<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the {len(rows)} vendors in our index were checked against this gateway.</p></section>')
+        b.append(f'<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the {len(rows)} vendors in our index are listed for this gateway yet.</p></section>')
     if a['sources']: b.append('<section class="ap-card"><h2>Sources</h2><ul class="ap-src">' + ''.join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(u)}</a></li>' for u in a['sources']) + '</ul></section>')
     return '\n'.join(b)
 
@@ -839,7 +841,7 @@ def agg_index_body(aggs_list):
     return (f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> Aggregators</nav>'
             f'<h1 class="ap-title">Aggregator gateways</h1>'
             f'<p class="ap-lede">{len(aggs_list)} gateways that resell or index other vendors\' APIs behind one account, one key and one balance. '
-            f'{nv} checked on their own docs and pricing pages, {len(aggs_list)-nv} not checked. Each vendor page lists its routes side by side so you can see what a gateway gives up in coverage. '
+            f'Each vendor page lists its routes side by side so you can see what a gateway gives up in coverage. '
             f'Machine-readable: <a href="/apis.json">/apis.json</a>.</p>'
             f'<p class="ap-note">These are directory entries, not a recommended way to connect: a gateway key stands in for many vendors at once. '
             f'<a href="/#install">Register locally with SkeletonKey</a> and keep your own account and key with each vendor where you can.</p>'
@@ -901,14 +903,14 @@ json.dump({'name': 'SkeletonKey API index', 'url': f'{SITE}/apis/', 'generated':
            'cost_label_counts': label_counts,
            'hidden_count': len(hidden_rows),
            'route_counts': {'total': nrt, 'verified': vrt, 'by_source': dict(sorted(by_src.items(), key=lambda kv: -kv[1]))},
-           'note': 'Rows checked against the vendor\'s own pages on checked_date carry prices; rows we could not check '
-                   'there carry none. hidden_count rows (collection_scope "llm", set aside 2026-11-24) are excluded from '
+           'note': 'Rows with `verified` true carry prices read on the vendor\'s own pages; checked_date is the last updated date. Other rows '
+                   'carry none. hidden_count rows (collection_scope "llm", set aside 2026-11-24) are excluded from '
                    'count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.',
            'schema': f'{SITE}/llms.txt', 'apis': ALL_ROWS, 'aggregators': aggs},
           open(os.path.join(OUT_ROOT, 'apis.json'), 'w'), indent=1, ensure_ascii=False, default=str)
 
-L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor\'s own pages, plus {nrt} routes ({vrt} checked) to reach them: direct from the vendor or through one of {len(VISIBLE_AGGS)} aggregator gateways. Full data: {SITE}/apis.json', '',
-     'Status: `verified` = pricing and auth read on the vendor\'s own site; `unverified` = not checked, no prices shown; `sales-only` = no public prices; `no-public-api` = reachable only through an aggregator catalog.', '',
+L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts taken from each vendor\'s own pages (each row carries its last updated date), plus {nrt} routes ({vrt} with a listed price or listing) to reach them: direct from the vendor or through one of {len(VISIBLE_AGGS)} aggregator gateways. Full data: {SITE}/apis.json', '',
+     'Status: `verified` = pricing and auth read on the vendor\'s own site; `unverified` = no prices shown; `sales-only` = no public prices; `no-public-api` = reachable only through an aggregator catalog.', '',
      '## Quick start', '',
      '1. Install: `npx -y @dormy/skeletonkey init`. No SkeletonKey account and no server; this sets a local passphrase and registers the MCP server and skill for Claude Code and Codex.',
      f'2. Find an API: browse {SITE}/directory/ yourself, or let your agent search the same local index with `find_api("web scraping")`.',
@@ -917,8 +919,8 @@ L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for ag
      '5. Weekly monitoring (coming in v0.4): `skeletonkey monitor run` sends a system notification on anomalies and writes a redacted report, read back with `skeletonkey monitor report --latest`.', '',
      '## /apis.json schema', '',
      'Top level: `name`, `url`, `generated`, `count`, `counts` (per status), `cost_badge_counts`, `cost_label_counts`, `route_counts` {`total`, `verified`, `by_source`}, `note`, `apis` (array of vendors), `aggregators` (array of gateway profiles).', '',
-     'Vendor object: `slug`, `name`, `category`, `status`, `summary`, `checked_date`, `listed_by`, `docs_url`, `page`, `sources`. When status is not no-public-api it also has `base_url`, `auth` {`type`,`header`,`format`} and `signup` {`methods`,`url`,`requires_card`,`requires_phone`,`notes`}. Checked vendors (`status` `verified`) add `billing_model`, `billing_unit`, `free_tier`, `free_tier_note`, `min_topup_usd`, `plans[]` {`name`,`price`,`period_or_unit`,`note`} and `pricing_url`. Every vendor has `routes[]`, `when_to_pick[]`, `pricing` (ND-8 block, or null), a `cost_badge` and a `cost_label`.', '',
-     '`cost_badge` (`green`|`red`|`gray`) tells you at a glance whether the API is reachable free or pay-as-you-go (`green`), forces a recurring subscription or sales call (`red`), or was never gate-checked (`gray`, the default when absent). It is derived from `pricing.api_access_gate` (`none`|`prepaid_min` -> green; `subscription_required`|`contact_sales` -> red; `unknown`|null -> gray) and is never hand-filled. `cost_label` (`FREE`|`PAYG`|`SUBS`|null) is the short cost pill shown on list and detail pages, derived from `cost_badge` plus `pricing`: `FREE` and `PAYG` need no subscription (`PAYG` may carry a prepaid minimum top-up); `SUBS` needs a recurring subscription for API access, in which case `alternatives[]`/`alternatives_note` point to a no-subscription route; `null` means the row has no confirmed-enough signal to label (a `gray` `cost_badge`, or access sold only through a sales call). `pricing` also carries `min_monthly_usd` (the subscription floor, only set when the gate is `subscription_required`), `min_prepay_usd` (the prepaid floor, only set when the gate is `prepaid_min`), and `gate_source_url` (the vendor pricing page the gate was read from). On a `SUBS` vendor, `alternatives[]` lists cheaper routes to the same capability -- each `{vendor_id, name, page, why, access_gate}` (`name`/`page` resolved to a vendor or aggregator page) -- or `alternatives_note` explains why there is nowhere else to go.', '',
+     'Vendor object: `slug`, `name`, `category`, `status`, `summary`, `checked_date`, `listed_by`, `docs_url`, `page`, `sources`. When status is not no-public-api it also has `base_url`, `auth` {`type`,`header`,`format`} and `signup` {`methods`,`url`,`requires_card`,`requires_phone`,`notes`}. Vendors with `status` `verified` add `billing_model`, `billing_unit`, `free_tier`, `free_tier_note`, `min_topup_usd`, `plans[]` {`name`,`price`,`period_or_unit`,`note`} and `pricing_url`. Every vendor has `routes[]`, `when_to_pick[]`, `pricing` (ND-8 block, or null), a `cost_badge` and a `cost_label`.', '',
+     '`cost_badge` (`green`|`red`|`gray`) tells you at a glance whether the API is reachable free or pay-as-you-go (`green`), forces a recurring subscription or sales call (`red`), or has no access gate on record (`gray`, the default when absent). It is derived from `pricing.api_access_gate` (`none`|`prepaid_min` -> green; `subscription_required`|`contact_sales` -> red; `unknown`|null -> gray) and is never hand-filled. `cost_label` (`FREE`|`PAYG`|`SUBS`|null) is the short cost pill shown on list and detail pages, read from `pricing.cost_label`, which the data pipeline derives (FREE needs `pricing.free_usage_source_url`; a subscription model is never FREE): `FREE` and `PAYG` need no subscription (`PAYG` may carry a prepaid minimum top-up); `SUBS` needs a recurring subscription for API access, in which case `alternatives[]`/`alternatives_note` point to a no-subscription route; `null` means no label (no access gate on record, or access sold only through a sales call). `pricing` also carries `min_monthly_usd` (the subscription floor, only set when the gate is `subscription_required`), `min_prepay_usd` (the prepaid floor, only set when the gate is `prepaid_min`), and `gate_source_url` (the vendor pricing page the gate was read from). On a `SUBS` vendor, `alternatives[]` lists cheaper routes to the same capability -- each `{vendor_id, name, page, why, access_gate}` (`name`/`page` resolved to a vendor or aggregator page) -- or `alternatives_note` explains why there is nowhere else to go.', '',
      'Route object (`routes[]`, first element is always the direct vendor route, then one per aggregator listing):', '',
      '- `kind`: `direct` or `aggregator`.',
      '- `source_slug`, `source_name`: `direct` for the vendor itself, otherwise the aggregator slug (see below) and its name.',
@@ -937,14 +939,14 @@ L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for ag
      '## Aggregator gateways', '',
      f'- [All gateways]({SITE}/apis/aggregators/): compare signup, payment model, vendor key and coverage.']
 for a in VISIBLE_AGGS:
-    L.append(f'- [{a["name"]}]({a["page"]}): {"checked" if a["verified"] else "not checked"}, {a["vendor_count"]} vendors routed. {brief(a["what_it_is"], 160)}')
+    L.append(f'- [{a["name"]}]({a["page"]}): last updated {a["checked_date"]}, {a["vendor_count"]} vendors routed. {brief(a["what_it_is"], 160)}')
 L.append('')
 for c in cats:
     L.append(f'## {c}')
     for x in rows:
         if x['category'] == c:
             bit = llms_cost_bit(x)
-            L.append(f'- [{x["name"]}]({x["page"]}): {STATUS_PROSE[x["status"]]}. {(x.get("summary") or "").strip()}' + (f' ({bit})' if bit else ''))
+            L.append(f'- [{x["name"]}]({x["page"]}): {(STATUS_PROSE[x["status"]] + ", ") if x["status"] in ("sales-only", "no-public-api") else ""}last updated {x["checked_date"]}. {(x.get("summary") or "").strip()}' + (f' ({bit})' if bit else ''))
     L.append('')
 open(os.path.join(OUT_ROOT, 'llms.txt'), 'w').write('\n'.join(L))
 print('pages', len(rows), cnt)
