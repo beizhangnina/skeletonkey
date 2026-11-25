@@ -45,6 +45,15 @@ export function accountsPath(home = skeletonKeyHome()): string {
   return path.join(home, "accounts.yaml");
 }
 
+/**
+ * ND-2 signup session metadata: one row per `skeletonkey signup start`, tracking
+ * state through to `complete` or `abandon`. Like `accounts.yaml` it holds no
+ * secret values -- no email, no key, nothing but ids, vendor, state, and dates.
+ */
+export function signupsPath(home = skeletonKeyHome()): string {
+  return path.join(home, "signups.yaml");
+}
+
 /** Plaintext vault used by the test-only `file` backend. */
 export function devVaultPath(home = skeletonKeyHome()): string {
   return path.join(home, "dev-vault.json");

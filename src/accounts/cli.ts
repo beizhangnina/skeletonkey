@@ -11,7 +11,8 @@ import { SkeletonKeyError } from "../exit-codes.js";
 import { findKey, normalizeDomain, setDisabled, upsertKey } from "../keys.js";
 import { accountsPath, skeletonKeyHome } from "../paths.js";
 import { promptHidden, readSecret, readStdin } from "../prompt.js";
-import type { KeyMeta, UpstreamScheme } from "../types.js";
+import { rejectIfPaymentCard } from "../secret-intake.js";
+import type { KeyInjection, KeyMeta, UpstreamScheme } from "../types.js";
 import { fieldsFor, findEntry, maskUsername, setEntryDisabled, upsertEntry } from "../vault/entries.js";
 import { openEntryStore } from "../vault/entry-store.js";
 import { envNameFor, formatVaultUri } from "../vault/uri.js";
@@ -46,6 +47,12 @@ export interface AccountAddOptions {
   header: string;
   format: string;
   scheme?: UpstreamScheme;
+  /**
+   * Not a CLI flag: set only by callers in this process (e.g. `skeletonkey
+   * signup complete`) that already know a vendor authenticates some other
+   * way (a query parameter, not a header). `account add` never sets this.
+   */
+  injection?: KeyInjection;
   storeLogin: boolean;
   url?: string;
   stdin: boolean;
@@ -111,8 +118,13 @@ async function readAccountPassword(stdin: boolean): Promise<string> {
   return requirePassword(password);
 }
 
-function rejectPlaintextEmailFlag(options: AccountAddOptions): void {
-  if (options.email === undefined) return;
+/**
+ * Rejects the removed plaintext `--email <value>` flag, shared by `account
+ * add` and anything else that could plausibly be handed it (`signup
+ * start`/`signup complete`; see `src/signup/cli.ts`).
+ */
+export function rejectPlaintextEmailFlag(email: string | boolean | undefined): void {
+  if (email === undefined) return;
   throw new SkeletonKeyError(
     "usage",
     "--email <value> is no longer accepted: it would stay in shell history and the process list.",
@@ -174,12 +186,18 @@ async function resolveEmailAndStdinSecret(
   return { email: answer === "" ? null : answer, stdinSecret: null };
 }
 
-export async function cmdAccountAdd(
+/**
+ * Does the validation, storage, and metadata work for `account add` (and for
+ * `skeletonkey signup complete`, which calls this directly with the vendor
+ * playbook's domain/header/format so it can print its own, narrower output
+ * instead of `account add`'s). Never prints anything itself.
+ */
+export async function addAccount(
   name: string,
   options: AccountAddOptions,
   home = skeletonKeyHome(),
-): Promise<void> {
-  rejectPlaintextEmailFlag(options);
+): Promise<AccountMeta> {
+  rejectPlaintextEmailFlag(options.email);
   assertUsableAccountName(name);
   if (!isValidVendorId(options.vendor)) {
     throw new SkeletonKeyError(
@@ -253,6 +271,7 @@ export async function cmdAccountAdd(
       if (secret === "") {
         throw new SkeletonKeyError("usage", "An empty API key is not an entry; nothing was stored.");
       }
+      rejectIfPaymentCard(secret);
       await store.putApiKey(alias, secret);
       createdKeyAlias = alias;
       const keyExisting = findKey(alias, home);
@@ -266,6 +285,7 @@ export async function cmdAccountAdd(
         last_used: keyExisting?.last_used ?? null,
         disabled: keyExisting?.disabled ?? false,
         ...(options.scheme === undefined ? {} : { scheme: options.scheme }),
+        ...(options.injection === undefined ? {} : { injection: options.injection }),
       };
       upsertKey(meta, home);
       keyAlias = alias;
@@ -321,20 +341,7 @@ export async function cmdAccountAdd(
       disabled_at: existing?.disabled_at ?? null,
     };
     upsertAccount(meta, home);
-
-    console.log(`Registered account "${name}" (vendor: ${options.vendor}).`);
-    console.log(`Metadata recorded in ${accountsPath(home)} (never contains secret values).`);
-    const refs: string[] = [];
-    if (meta.key_alias !== null) refs.push(`${formatVaultUri(meta.key_alias)} (api key)`);
-    if (meta.login_entry !== null) refs.push(formatVaultUri(meta.login_entry, "password"));
-    if (refs.length > 0) {
-      console.log(`Give an agent only these references: ${refs.join(", ")}`);
-      console.log(`Use them with: skeletonkey run --env NAME=<ref> -- <your command>`);
-    } else {
-      console.log(
-        "No secret is linked yet. Add one with --store-key, --store-login, or --key-alias <existing entry>.",
-      );
-    }
+    return meta;
   } catch (error) {
     if (createdKeyAlias !== null) {
       try {
@@ -351,6 +358,28 @@ export async function cmdAccountAdd(
       }
     }
     throw error;
+  }
+}
+
+export async function cmdAccountAdd(
+  name: string,
+  options: AccountAddOptions,
+  home = skeletonKeyHome(),
+): Promise<void> {
+  const meta = await addAccount(name, options, home);
+
+  console.log(`Registered account "${name}" (vendor: ${options.vendor}).`);
+  console.log(`Metadata recorded in ${accountsPath(home)} (never contains secret values).`);
+  const refs: string[] = [];
+  if (meta.key_alias !== null) refs.push(`${formatVaultUri(meta.key_alias)} (api key)`);
+  if (meta.login_entry !== null) refs.push(formatVaultUri(meta.login_entry, "password"));
+  if (refs.length > 0) {
+    console.log(`Give an agent only these references: ${refs.join(", ")}`);
+    console.log(`Use them with: skeletonkey run --env NAME=<ref> -- <your command>`);
+  } else {
+    console.log(
+      "No secret is linked yet. Add one with --store-key, --store-login, or --key-alias <existing entry>.",
+    );
   }
 }
 

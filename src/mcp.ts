@@ -55,6 +55,7 @@ import {
   upsertKey,
 } from "./keys.js";
 import { accountSummary, readAccounts } from "./accounts/store.js";
+import { listSignupVendors, signupStatusRows } from "./signup/cli.js";
 import { openLedger, type LedgerSummary } from "./ledger.js";
 import { accountsPath, keysPath } from "./paths.js";
 import { promptHiddenOnTty } from "./prompt.js";
@@ -993,6 +994,41 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         note:
           "Metadata only. There is no tool that returns a username, a password, or a key. Use the " +
           "refs with `skeletonkey run --env NAME=<ref> -- <cmd>`.",
+      };
+    },
+  },
+
+  {
+    name: "signup_status",
+    title: "Signup sessions and vendor handoff info (read-only)",
+    description:
+      "List ND-2 signup sessions (id, vendor, account, state, reason, timestamps -- never a " +
+      "secret), optionally filtered to one vendor, plus that vendor's official URLs and the " +
+      "human_steps it still needs. This tool cannot submit a key, start a browser, or complete a " +
+      "signup -- there is no such tool. A human runs `skeletonkey signup start <vendor>` and " +
+      "`skeletonkey signup complete <vendor>` themselves; this tool only reports what already " +
+      "happened.",
+    readOnly: true,
+    inputSchema: {
+      vendor: z.string().optional().describe("Filter to one first-wave vendor id, e.g. apify."),
+    },
+    async handler(args, ctx) {
+      const vendor = str(args, "vendor");
+      const vendors = listSignupVendors();
+      const playbook = vendor === undefined ? null : vendors.find((v) => v.vendor === vendor.toLowerCase()) ?? null;
+      if (vendor !== undefined && playbook === null) {
+        return {
+          vendor,
+          found: false,
+          hint: `Unknown vendor. First-wave vendors: ${vendors.map((v) => v.vendor).join(", ")}.`,
+        };
+      }
+      return {
+        sessions: signupStatusRows(vendor, ctx.home),
+        vendor_info: playbook,
+        note:
+          "Read-only. No tool here can submit a key or complete a signup; a human runs " +
+          "`skeletonkey signup complete <vendor>` after creating the key themselves.",
       };
     },
   },

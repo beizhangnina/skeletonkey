@@ -68,6 +68,15 @@ import {
   type AccountAddOptions,
 } from "./accounts/cli.js";
 import {
+  cmdSignupAbandon,
+  cmdSignupComplete,
+  cmdSignupStart,
+  listSignupVendors,
+  signupStatusRows,
+  type SignupCompleteOptions,
+  type SignupStartOptions,
+} from "./signup/cli.js";
+import {
   DEFAULT_STALE_DAYS,
   httpFetcher,
   readStaleCache,
@@ -100,9 +109,31 @@ import {
   sameMailbox,
   type BwAccount,
 } from "./vault/bw-account.js";
+import { rejectIfPaymentCard } from "./secret-intake.js";
 
 const DEFAULT_HEADER = "Authorization";
 const DEFAULT_FORMAT = "Bearer {key}";
+
+/**
+ * Commander's default "unknown option" error echoes the raw token it was
+ * given, including anything after `=` -- so a typo like `--key=sk-...` would
+ * otherwise land that value in stderr. Patched once, process-wide, so every
+ * command (present and future) gets this for free.
+ */
+type UnknownOptionCommand = { unknownOption(flag: string): void };
+const originalUnknownOption = (Command.prototype as unknown as UnknownOptionCommand).unknownOption;
+(Command.prototype as unknown as UnknownOptionCommand).unknownOption = function (
+  this: Command,
+  flag: string,
+): void {
+  const eq = flag.indexOf("=");
+  let sanitized = eq === -1 ? flag : `${flag.slice(0, eq)}=<redacted>`;
+  // A short flag glued to its value (`-kVALUE`) would echo the value too.
+  if (!sanitized.startsWith("--") && sanitized.length > 2 && eq === -1) {
+    sanitized = `${sanitized.slice(0, 2)}<redacted>`;
+  }
+  originalUnknownOption.call(this, sanitized);
+};
 
 export function buildProgram(): Command {
   const program = new Command();
@@ -385,6 +416,89 @@ export function buildProgram(): Command {
     .action((name: string) => {
       withExitCodes("account enable", () => {
         cmdAccountEnableDisable(name, false);
+      });
+    });
+
+  const signup = program
+    .command("signup")
+    .description(
+      "on-demand vendor signup: a guided human handoff for the first-wave vendors, then bind the key",
+    );
+
+  signup
+    .command("list")
+    .description("list the first-wave vendors and their official signup/key-page URLs")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      withExitCodes("signup list", () => {
+        cmdSignupListPrint(options.json);
+      });
+    });
+
+  signup
+    .command("start <vendor>")
+    .description("start (or re-check) a vendor signup; stops for a human unless a driver is injected")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option("--no-open", "do not open the signup page in a browser")
+    .option("--json", "machine-readable output", false)
+    .action(
+      async (
+        vendor: string,
+        options: { account?: string; open: boolean; json: boolean; email?: string | boolean },
+      ) => {
+        await withExitCodes("signup start", async () => {
+          const startOptions: SignupStartOptions = {
+            noOpen: options.open === false,
+            json: options.json,
+            openUrl: systemOpener(),
+            ...(options.account === undefined ? {} : { account: options.account }),
+            ...(options.email === undefined ? {} : { email: options.email }),
+          };
+          await cmdSignupStart(vendor, startOptions);
+        });
+      },
+    );
+
+  signup
+    .command("status [vendor]")
+    .description("show signup sessions and their states")
+    .option("--json", "machine-readable output", false)
+    .action((vendor: string | undefined, options: { json: boolean }) => {
+      withExitCodes("signup status", () => {
+        cmdSignupStatusPrint(vendor, options.json);
+      });
+    });
+
+  signup
+    .command("complete <vendor>")
+    .description("bind the key a human just created into the vault (never prints the key)")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option(
+      "--email-stdin",
+      "read the account email from stdin (one line; two lines, email then key, with --stdin)",
+      false,
+    )
+    .option("--stdin", "read the key (or key+email, with --email-stdin) from stdin", false)
+    .option("--yes", "overwrite an existing account/session with the same name without asking", false)
+    .action(async (vendor: string, options: SignupCompleteOptions) => {
+      await withExitCodes("signup complete", async () => {
+        await cmdSignupComplete(vendor, options);
+      });
+    });
+
+  signup
+    .command("abandon <vendor>")
+    .description("mark a vendor's signup session abandoned")
+    .action((vendor: string) => {
+      withExitCodes("signup abandon", () => {
+        cmdSignupAbandon(vendor);
       });
     });
 
@@ -1209,6 +1323,7 @@ async function storeApiKey(alias: string, options: AddOptions): Promise<void> {
 
   const secret = (await readSecret(options.stdin)).trim();
   if (!secret) throw new Error("Empty secret; nothing stored.");
+  rejectIfPaymentCard(secret);
 
   await store.putApiKey(alias, secret);
 
@@ -1628,6 +1743,39 @@ function cmdAccountShow(name: string, json: boolean): void {
   console.log(`State:       ${account.disabled ? "disabled" : "active"}`);
   console.log(`References:  ${account.refs.join(", ") || "-"}`);
   if (runCommand !== null) console.log(`Run:         ${runCommand}`);
+}
+
+function cmdSignupListPrint(json: boolean): void {
+  const vendors = listSignupVendors();
+  if (json) {
+    console.log(JSON.stringify(vendors, null, 2));
+    return;
+  }
+  printTable(
+    ["VENDOR", "SIGNUP URL", "KEY PAGE URL", "AUTOMATION"],
+    vendors.map((v) => [v.vendor, v.signup_url ?? "-", v.key_page_url ?? "-", v.automation]),
+  );
+}
+
+function cmdSignupStatusPrint(vendor: string | undefined, json: boolean): void {
+  const home = skeletonKeyHome();
+  const rows = signupStatusRows(vendor, home);
+  if (json) {
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
+  if (rows.length === 0) {
+    console.log(
+      vendor === undefined
+        ? "No signup sessions yet. Start one with: skeletonkey signup start <vendor>"
+        : `No signup sessions for "${vendor}". Start one with: skeletonkey signup start ${vendor}`,
+    );
+    return;
+  }
+  printTable(
+    ["ID", "VENDOR", "ACCOUNT", "STATE", "REASON", "UPDATED"],
+    rows.map((row) => [row.id, row.vendor, row.account, row.state, row.reason ?? "-", row.updated]),
+  );
 }
 
 function cmdAccountEnableDisable(name: string, disabled: boolean): void {
