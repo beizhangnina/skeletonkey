@@ -1068,3 +1068,1902 @@ entries:
       - https://parestocks.com/llms.txt
       - https://parestocks.com/openapi.json
     discovered_date: 2026-10-29
+  - name: assemblyai-tts-1
+    url: https://www.assemblyai.com/docs/tts/api-reference/http-api/overview
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per 1M input characters"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-30 from X. AssemblyAI-TTS-1 is the vendor's first
+      text-to-speech model, sold as a Text-to-Speech API beside its speech-to-text
+      products, and reachable over both an HTTP API and a streaming WebSocket API.
+      Verified 2026-10-30 against the vendor's own docs at
+      https://www.assemblyai.com/docs/tts/api-reference/http-api/overview, which give
+      two hosts -- `https://tts.us.assemblyai.com` (us-east-1) and
+      `https://tts.eu.assemblyai.com` (eu-north-1), with \"the routes, fields and
+      limits are the same on both hosts\" -- and the routes POST /v1/speech, POST
+      /v1/speech/events, POST /v1/openai/audio/speech, GET /v1/openai/models and GET
+      /v1/openrouter/models. Under Authentication: \"Send your API key in the
+      `Authorization` header. The raw key works, and so does `Bearer <key>`, which is
+      what OpenAI SDKs send\", and \"the credential is read from the `Authorization`
+      header only; send exactly one\". auth_format records the raw-key form the vendor
+      names first; `Bearer {key}` is documented as equally valid. The two model-list
+      routes \"take no credential\". The vendor also documents a temporary token minted
+      with `product=tts` that \"works wherever an API key does, in the same header\",
+      and a WebSocket endpoint at `wss://tts.us.assemblyai.com/v1/ws` taking the key in
+      the same header. Keys are copied from the dashboard
+      (https://www.assemblyai.com/docs/tts/getting-started/quickstart: \"Copy it from
+      API Keys\" at https://www.assemblyai.com/dashboard/home). Two documented limits
+      an agent should carry: text is \"1 to 5,000 characters\" per request, and the
+      per-minute request limit is \"50 requests a minute on a free plan and 1,000 or
+      more on a paid plan\". Pricing read off the vendor's own pricing page the same
+      day. Verified from the vendor's docs only -- no call was made through the
+      SkeletonKey proxy, so this is NOT a ledger promotion and promoted_by stays unset.
+      ToS not reviewed."
+    source: null
+    checked_date: 2026-10-30
+    capabilities:
+      - text to speech
+      - streaming tts
+      - voice cloning
+      - voice agent audio
+    domain: tts.us.assemblyai.com
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "{key}"
+    base_url: https://tts.us.assemblyai.com/v1
+    signup_url: https://www.assemblyai.com/dashboard/signup
+    requires_card: false
+    human_steps: []
+    billing:
+      model: payg
+      free_tier_note: "Vendor pricing page read 2026-10-30: AssemblyAI-TTS-1 is
+        \"$15 /1M chars\", with \"Billed on input characters. Cloned voices and EU
+        processing cost the same\", and the FAQ repeats \"billed on the input
+        characters you send, at $15 per 1M characters ... and there is no spend
+        commitment to unlock concurrency\". The free tier the same page publishes is
+        transcription only -- \"up to 185 hours of pre-recorded transcription and up to
+        333 hours of streaming transcription\", with \"no credit card required\" -- and
+        no free character allowance is published for text-to-speech, so
+        free_tier_covers_api is false. The TTS docs do describe a free plan for rate
+        limits (50 requests a minute), which is a quota, not free characters."
+      verified_url: https://www.assemblyai.com/pricing
+      verified_date: 2026-10-30
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://www.assemblyai.com/docs/tts/api-reference/http-api/overview
+      - https://x.com/toolverdict_ai/status/2116177313876320735
+      - https://www.assemblyai.com/pricing
+      - https://www.assemblyai.com/docs/tts/getting-started/quickstart
+    discovered_date: 2026-10-30
+  - name: justlend-open-api
+    url: https://docs.justlend.org/developers/apis/
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-30 from X. JustLend DAO is a lending protocol on
+      TRON (Compound V2 architecture) with four sub-protocols -- supply/borrow markets,
+      sTRX liquid staking, TRON Energy rental and governance -- and this row records
+      its public read API only. A crypto/DeFi protocol. Verified 2026-10-30 against the
+      vendor's own API reference at https://docs.justlend.org/developers/apis/, whose
+      header block states \"Base URL: https://openapi.just.network\", \"Method: All
+      endpoints are GET. No authentication.\" and \"Content-Type: application/json\",
+      and whose quick start is `curl -sS https://openapi.just.network/lend/jtoken`.
+      auth_required is false and auth_header/auth_format stay null: the vendor
+      documents no credential, which is a fact about the vendor rather than an
+      unchecked field, and access_mode is keyless for the same reason -- there is no
+      account to hold. Endpoints are grouped as V1 (/lend/..., /mining/...,
+      /justlend/...) and V2 (/v2/...), and the page publishes a machine-readable
+      OpenAPI 3.1 document (`justlend_apis.yaml`). Three caveats an agent should carry:
+      business and validation errors come back as \"HTTP 200 and the same {code,
+      message, data} envelope\", so branch on the body `code` (0 on V1, 200 on V2) and
+      not the HTTP status; malformed query parameters are \"commonly silently ignored\"
+      and must be validated client-side; and there is \"No published numeric rate
+      limit\" -- the docs say the service \"silently throttles abusive clients with
+      429\", ask for pageSize <= 1000 and cached metadata, and tell high-volume users
+      to contact the team first, since \"the public service is unauthenticated and has
+      no per-key tier\". The docs also advertise an MCP server and a CLI, not recorded
+      here. Verified from the vendor's docs only -- no call was made through the
+      SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed; the vendor
+      publishes its own Terms of Service and Risk Warning pages."
+    source: null
+    checked_date: 2026-10-30
+    capabilities:
+      - tron lending market data
+      - jtoken supply borrow rates
+      - defi account positions
+      - tron energy rental data
+    domain: openapi.just.network
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://openapi.just.network
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor API reference read 2026-10-30: every documented endpoint
+        is a GET on https://openapi.just.network with \"No authentication\", so there
+        is no account, no key and no paid tier -- the page calls it \"the public
+        service\" and says it \"is unauthenticated and has no per-key tier\". No price
+        is published anywhere on the docs site. The only stated usage conditions are
+        operational: keep pageSize <= 1000, cache stable metadata such as jToken
+        lists, retry 429/5xx with exponential backoff, and contact the team before a
+        sustained high-volume launch. The service is \"designed for read-only
+        integrations and AI agents. It is not a bulk export interface.\""
+      verified_url: https://docs.justlend.org/developers/apis/
+      verified_date: 2026-10-30
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.justlend.org/developers/apis/
+      - https://x.com/ChibuezeNwekpa/status/2116162922275537324
+      - https://docs.justlend.org/
+    discovered_date: 2026-10-30
+  - name: wafermap-x402
+    url: https://wafermap.xyz/docs
+    access_mode: wallet-x402
+    access_modes:
+      - wallet-x402
+      - keyless
+    min_topup: null
+    billing_unit: "per call, settled on-chain in USDG or USDC"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-30 from X, posted by the vendor (@wafermap, the
+      handle named in the site's own twitter:site tag). Wafermap sells pay-per-call
+      agent tools -- LLM, image, audio, vision, web, on-chain, tokenized-stock,
+      prediction-market and content resources -- and is paid per call over x402 rather
+      than by subscription. Verified 2026-10-30 against the vendor's own docs at
+      https://wafermap.xyz/docs, which state \"Base URL: https://wafermap.xyz\",
+      \"Catalog: GET /v1/resources (free, JSON)\", \"Call: POST /v1/<resource-id> with
+      a JSON body\" and, plainly, \"There are no accounts and no API keys: the payment
+      is the authentication.\" auth_required is false and auth_header/auth_format stay
+      null because the vendor documents no registrable credential at all: a paid route
+      answers `402 Payment Required` with a quote until the request carries a
+      base64 EIP-3009 authorization in the `PAYMENT-SIGNATURE` header (the legacy
+      `X-PAYMENT` header is also accepted), which is a per-call signature rather than a
+      key SkeletonKey could hold. access_modes records `keyless` beside the primary
+      `wallet-x402` because the vendor documents several routes that need nothing at
+      all: GET /v1/resources, GET /v1/resources/:id and GET /v1/payments?payer=0x... .
+      Payment is \"USDG on Robinhood Chain (eip155:4663), or USDC on Solana, Base
+      (eip155:8453), Arbitrum (eip155:42161) or Polygon (eip155:137)\", gasless for the
+      caller, with Robinhood Chain assumed when no network is named. SkeletonKey pays
+      in fiat only, so the wallet rail is recorded as a fact about the vendor and is
+      never routed to. The vendor also documents a remote MCP server at
+      https://wafermap.xyz/mcp (Streamable HTTP), a CLI and an SDK, and a discovery
+      route that searches the third-party x402 Bazaar index -- those third-party
+      services are explicitly \"run by their owners, not by Wafermap\" and are not
+      indexed here. Two caveats: the vendor settles a payment only after a resource
+      succeeds (\"there is nothing to refund\"), and https://wafermap.xyz/robots.txt
+      sets `Disallow: /api/`, which was honoured -- the /api/* routes the docs list
+      were not fetched. Verified from the vendor's docs only -- no call was made
+      through the SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-30
+    capabilities:
+      - x402 pay per call agent tools
+      - llm inference
+      - image generation
+      - onchain and tokenized stock data
+    domain: wafermap.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://wafermap.xyz/v1
+    signup_url: null
+    requires_card: false
+    human_steps:
+      - "Fund a crypto wallet with USDG on Robinhood Chain, or USDC on Solana, Base,
+        Arbitrum or Polygon: the vendor documents no other way to pay. SkeletonKey pays
+        in fiat only, so no SkeletonKey route can reach the paid resources."
+    billing:
+      model: payg
+      free_tier_note: "Vendor docs read 2026-10-30: there is no free tier and no
+        subscription, because there is no account -- each paid call is quoted in its
+        402 response and settled on-chain, and the Resource catalog on
+        https://wafermap.xyz/docs prices every resource per call, from $0.001 to $0.08
+        at the time of reading (prices are per resource and the catalog moves; fetch
+        GET /v1/resources for the live list). The catalog, per-resource, payments,
+        discovery, token and stats routes are documented as free. Wafermap \"takes no
+        fee on swaps\". free_tier_covers_api is false: nothing in the paid catalog is
+        free, and the free routes are metadata rather than the tools themselves."
+      verified_url: https://wafermap.xyz/docs
+      verified_date: 2026-10-30
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://wafermap.xyz/docs
+      - https://x.com/wafermap/status/2116174375590502453
+      - https://wafermap.xyz/robots.txt
+    discovered_date: 2026-10-30
+  - name: xona-agent-api
+    url: https://xona-agent.com/docs
+    access_mode: wallet-x402
+    access_modes:
+      - wallet-x402
+      - keyless
+    min_topup: null
+    billing_unit: "per call, settled on-chain in USDC or USDT0"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-30 from X. Xona (\"Xona Resources\" on its own
+      navigation) is a creative AI agent selling image generation, video generation,
+      audio, LLM inference, token intelligence and social-AI resources per call over
+      x402. A crypto/x402 vendor. Verified 2026-10-30 against the vendor's own API docs
+      at https://xona-agent.com/docs, which give \"Base URL:
+      https://api.xona-agent.com\", \"Payment: USDC on Solana\", \"Protocol: x402 v2\"
+      and state that \"All resources are pay-per-use via the x402 protocol, with no API
+      keys and no subscriptions.\" auth_required is false and auth_header/auth_format
+      stay null because the vendor documents no registrable credential: a resource
+      route (for example POST /image/designer) answers `402 Payment Required` with the
+      amount, asset and payTo address until the request is resent carrying a signed
+      `Payment-Signature` header. access_modes records `keyless` beside the primary
+      `wallet-x402` because the vendor documents two public routes that need no payment
+      at all -- `GET /x402-resources` (\"public, no payment required\") and `GET
+      /.well-known/x402`. The docs also give an MCP server at
+      https://api.xona-agent.com/mcp (Streamable HTTP) and an ERC-8004 Trustless Agents
+      registration on Base Mainnet, with the agent registration file at
+      /agent-registration.json. SkeletonKey pays in fiat only, so the wallet rail is a
+      fact about the vendor and is never routed to. One correction worth recording: the
+      X post that surfaced this vendor credited a Kling v4.0 video endpoint, and the
+      vendor's own catalog does not support that -- its single video resource,
+      `video/short-generation`, is described as \"AI short video generation using Grok
+      Imagine Video model ... using xAI's Grok Video API\", and no resource in the
+      catalog names Kling. Only the vendor's own description is recorded here. Verified
+      from the vendor's docs and its own public catalog, not by a paid call through the
+      SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed; the vendor
+      publishes its own Terms and Privacy pages."
+    source: null
+    checked_date: 2026-10-30
+    capabilities:
+      - x402 pay per call agent tools
+      - ai image generation
+      - ai video generation
+      - crypto token intelligence
+    domain: api.xona-agent.com
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.xona-agent.com
+    signup_url: null
+    requires_card: false
+    human_steps:
+      - "Fund a crypto wallet with USDC (the docs name Solana; the vendor's own catalog
+        also quotes base-mainnet, stable and arc networks, and USDT0 on some of them).
+        The vendor documents no other way to pay, and SkeletonKey pays in fiat only, so
+        no SkeletonKey route can reach the paid resources."
+    billing:
+      model: payg
+      free_tier_note: "Vendor's own public catalog (GET
+        https://api.xona-agent.com/x402-resources, documented as \"public, no payment
+        required\") read 2026-10-30: 190 resource rows, each carrying its own
+        `price` and a `pricing` block of {amount, asset, network}. Priced rows run from
+        $0.0014 to $1.50 per call; the docs' own examples are $0.10 for
+        /token/pumpfun-trending and $0.20 for /token/starter-kit. Assets are USDC and
+        USDT0; networks are solana-mainnet, base-mainnet, stable and arc. There is no
+        free tier and no subscription -- \"no API keys and no subscriptions\" -- so
+        free_tier_covers_api is false; only the catalog and the x402 discovery document
+        are free. Prices are per resource and move, so fetch the catalog for the live
+        list rather than relying on this range."
+      verified_url: https://api.xona-agent.com/x402-resources
+      verified_date: 2026-10-30
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://xona-agent.com/docs
+      - https://x.com/xona_agent/status/2116144335263773095
+      - https://api.xona-agent.com/x402-resources
+    discovered_date: 2026-10-30
+  - name: nstdata-cloud-browser
+    url: https://docs.nstdata.io/docs/cloud-browser
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per browser hour, with proxy traffic and solved CAPTCHAs billed
+      separately"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-10-30 from X. Nstdata (NST LABS TECH LTD) sells a proxy
+      network, a Crawl product and a Proxy Manager, and Cloud Browser is its managed
+      remote-browser service: \"Browse and interact with websites directly from the
+      dashboard, or connect Playwright or Puppeteer to automate sign-in, navigation,
+      form entry, and data extraction without deploying your own browser
+      environment\", with proxy exit selection, automatic CAPTCHA handling, live
+      DevTools and session recording. Verified 2026-10-30 against the vendor's own
+      docs. The host comes from the same docs site's Crawl page
+      (https://docs.nstdata.io/docs/crawl), whose example is `curl -X POST
+      \"https://api.nstdata.io/api/v1/crawl/scrape/submit-sync\" -H \"x-api-key:
+      <API-KEY>\"` and which states \"Every endpoint requires an API token for
+      authentication. Header example: x-api-key: YOUR_API_KEY\". The Cloud Browser
+      paths come from the vendor's own API reference at https://apidocs.nstdata.io,
+      which lists /api/v1/cloud-browser/sessions, /sessions/{sessionId},
+      /sessions/{sessionId}/configuration, /automation-credentials,
+      /live-view-credentials, /costs, /options, /estimate and /statistics, and
+      describes the x-api-key header as a \"Personal or team-member API key, at most
+      1024 characters. Do not send a JWT, service credentials, session CAPTCHA
+      credentials or extra token headers/query parameters.\" That API reference
+      publishes its paths relative to a default server and no absolute host of its own,
+      so base_url is the host the Crawl page states plus the cloud-browser prefix, not
+      a string copied from one page. The material caveat an agent must carry is in the
+      Cloud Browser guide: \"For HTTP integrations, session creation, listing,
+      configuration, and stopping currently require login JWT authentication. The
+      business x-api-key route POST
+      /api/v1/cloud-browser/sessions/{sessionId}/automation-credentials exchanges an
+      existing ready session for CDP credentials; it does not create or stop a
+      session.\" So an API key alone cannot start a session today -- the dashboard
+      does, and the key then buys CDP credentials for it. Concurrency is plan-bound:
+      \"currently 2 for Free, 20 for Starter, 60 for Growth, and 100 for Scale\".
+      Pricing read off the vendor's own Cloud Browser pricing page the same day.
+      One access note: https://docs.nstdata.io/robots.txt allows `User-agent: *` and
+      sets `Content-Signal: search=yes,ai-train=no,use=reference`, while disallowing a
+      named list of training crawlers; these pages were read as reference, which that
+      signal grants, and nothing here was used for training. Verified from the vendor's
+      docs only -- no call was made through the SkeletonKey proxy, so promoted_by stays
+      unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-10-30
+    capabilities:
+      - cloud browser sessions
+      - browser automation cdp
+      - captcha handling
+      - proxy backed scraping
+    domain: api.nstdata.io
+    auth_required: true
+    auth_header: x-api-key
+    auth_format: "{key}"
+    base_url: https://api.nstdata.io/api/v1/cloud-browser
+    signup_url: https://app.nstdata.io
+    requires_card: null
+    human_steps:
+      - "Create an account and copy an API key from the dashboard: the vendor's API
+        Interface page says \"Please go to Profile to get your token\" at
+        https://app.nstdata.io/profile."
+      - "Start Cloud Browser sessions from the dashboard (Cloud Browser -> Playground).
+        The vendor documents session creation, listing, configuration and stopping as
+        requiring login JWT authentication, so an API key alone cannot open a session."
+    billing:
+      model: payg
+      free_tier_note: "Vendor Cloud Browser pricing page read 2026-10-30:
+        \"Pay-as-you-go browser time costs $0.02 per browser hour\" with \"no
+        additional browser network surcharge\", and \"Available subscription rates go
+        as low as $0.01 per browser hour\". Proxy traffic is billed separately at
+        $1.00/GB on Free, $0.90 on Starter, $0.80 on Growth and $0.70 on Scale;
+        \"CAPTCHA handling is charged only for solved challenges\". Monthly fees are
+        $0 Free, $79 Starter, $249 Growth, $699 Scale, with included credits equal to
+        the fee and $0 on Free. The Free plan therefore shows no included credit and no
+        browser-time rate, only 2 concurrent sessions, while the site separately
+        advertises a \"Free trial\" whose trial credit is described on the Crawl page
+        and not on this one -- so free_tier_covers_api stays null rather than being
+        asserted either way."
+      verified_url: https://www.nstdata.io/pricing/cloud-browser
+      verified_date: 2026-10-30
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://docs.nstdata.io/docs/cloud-browser
+      - https://x.com/nstdata/status/2115993925924086239
+      - https://apidocs.nstdata.io/
+      - https://docs.nstdata.io/docs/crawl
+      - https://www.nstdata.io/pricing/cloud-browser
+      - https://docs.nstdata.io/docs/api-interface
+    discovered_date: 2026-10-30
+  - name: longcat-api-platform
+    url: https://longcat.chat/platform/docs
+    access_mode: own-account
+    min_topup: null
+    billing_unit: "per token, priced per 1M tokens and split into uncached input,
+      cached input and output"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X. The LongCat API Platform is Meituan's
+      hosted LLM API; the vendor's own pages are served from s3.meituan.net and its
+      gateway errors name `com.sankuai.apigw`, Meituan's own infrastructure, which is
+      what ties longcat.chat to Meituan here rather than any third-party claim. The X
+      post's own link resolves to https://longcat.ai/platform/docs/change-log, a
+      second vendor domain serving the same docs. Verified 2026-11-02 against the
+      vendor's own docs at https://longcat.chat/platform/docs, which give \"OpenAI
+      Format: https://api.longcat.chat/openai\" and \"Anthropic Format:
+      https://api.longcat.chat/anthropic\", and against the per-endpoint page
+      https://longcat.chat/platform/docs/api/chat, which documents \"POST
+      https://api.longcat.chat/openai/v1/chat/completions\" and, under
+      Authorizations, \"Authorization string header required -- Authentication key,
+      passed in the request header as Bearer YOUR_API_KEY\". The docs also list POST
+      /v1/responses, POST /v1/messages (Anthropic-compatible), GET /v1/models and GET
+      /v1/models/{model}. One model is served, LongCat-2.5, documented with a 1M-token
+      context window and up to 128K output tokens; over-limit requests return HTTP
+      429 with `rate_limit_exceeded`. Pay-as-you-go is prepaid: \"Create and copy your
+      API Key on the API Keys page\" then \"Top up your balance at Billing ->
+      Recharge\", with charges \"deducted in real time upon a successful response
+      (HTTP 200)\" and failed requests (401/403/429/500) not billed. Top-up takes
+      Alipay, WeChat Pay, credit/debit card and Google Pay, so requires_card is false:
+      a card is one of four routes, and creating the key itself needs no payment. No
+      minimum top-up is documented -- the page offers preset amounts or a custom one
+      -- so min_topup stays null. A separate Token Pack product sells a fixed token
+      quota valid 30 days. Verified from the vendor's docs only -- no call was made
+      through the SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - llm chat completions
+      - openai compatible api
+      - anthropic messages compatible api
+      - long context agentic model
+    domain: api.longcat.chat
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://api.longcat.chat/openai
+    signup_url: https://longcat.chat/platform
+    key_page_url: https://longcat.chat/platform/api_keys
+    requires_card: false
+    human_steps:
+      - "Register on the LongCat API Platform and create a key: the vendor's Quick
+        Start says to go to the API Keys page and click \"Create API Key\", and that
+        the key \"is only shown once upon creation\"."
+      - "Top up a prepaid balance before calling: the vendor's Pay-As-You-Go page says
+        to go to Billing -> Recharge and complete payment, after which funds are
+        \"available immediately\"."
+    billing:
+      model: payg
+      free_tier_note: "Vendor pricing page read 2026-11-02
+        (https://longcat.chat/platform/docs/pricing/longcat-2.5, the same table as the
+        Pay-As-You-Go page): for LongCat-2.5, \"Discounted Price $/1M Tokens
+        (limited-time)\" of $0.30 uncached input, $0.006 cached input and $1.20
+        output, or Y2 / Y0.04 / Y8 per 1M tokens in CNY. The vendor adds that
+        \"Prices are subject to change. The prices shown on the LongCat API Platform
+        and your billing records are authoritative.\" Billing is \"based on actual
+        token usage -- no fixed plans, no minimum commitments\", the balance never
+        expires, and unused prepaid balance is refundable down to $0.01. No free tier
+        is documented: the page mentions only that \"promotional credits\" are
+        consumed before paid balance, without saying who gets them or how much, so
+        free_tier_covers_api stays null rather than being asserted either way."
+      verified_url: https://longcat.chat/platform/docs/pricing/longcat-2.5
+      verified_date: 2026-11-02
+      free_tier_covers_api: null
+    status: docs-verified
+    source_urls:
+      - https://longcat.chat/platform/docs
+      - https://longcat.chat/platform/docs/api/chat
+      - https://longcat.chat/platform/docs/api-pay-as-you-go
+      - https://longcat.chat/platform/docs/pricing/longcat-2.5
+      - https://longcat.chat/platform/docs/token-pack
+      - https://x.com/XIANGYANG246601/status/2117097617775526110
+    discovered_date: 2026-11-02
+  - name: usdd-public-api
+    url: https://docs.usdd.io/developers/usdd-public-api
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X. USDD is a crypto-collateralised
+      stablecoin protocol that publishes read-only REST APIs for its own protocol
+      data. Verified 2026-11-02 against the vendor's own docs at
+      https://docs.usdd.io/developers/usdd-public-api, whose Network & Auth table
+      gives Base URL `https://openapi.usdd.io`, \"Method: GET only\" and
+      \"Authentication: None -- all endpoints are public, no API key\", with CORS
+      \"Enabled -- callable directly from browsers\". auth_required is false and
+      auth_header/auth_format stay null because the vendor documents no credential at
+      all, and access_mode is keyless for the same reason: there is no account to
+      hold. The 14 documented endpoints, which matches the count in the source post,
+      are GET /totalSupply and GET /circulatingSupply (both returning a bare number
+      with no envelope), GET /api/v1/external/earn-apy, /external/total-supply/usdd,
+      /external/total-supply/susdd, /market-site/overview, /market-site/overview/apy,
+      /data-platform/overview/info, /data-platform/overview/supply-value-history,
+      /data-platform/overview/collateral-value-history,
+      /data-platform/latest-collateral, /data-platform/collateral-history,
+      /vault/collaterals and /smart-allocator/detail-overview. Every other response
+      uses a `{code, message, data}` envelope with `code: 0` for success. The vendor
+      notes \"No documented per-key limit; treat as best-effort and cache where
+      possible\", so nothing here claims a rate limit. The docs are also published as
+      Markdown (append `.md` to any page) with an index at
+      https://docs.usdd.io/llms.txt, and the vendor separately documents an MCP
+      server. Verified from the vendor's docs only -- no call was made through the
+      SkeletonKey proxy, so this is NOT a ledger promotion and promoted_by stays
+      unset. ToS not reviewed; the vendor publishes its own Terms of Use."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - stablecoin supply data
+      - collateral and vault data
+      - defi savings apy
+      - protocol transparency data
+    domain: openapi.usdd.io
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://openapi.usdd.io
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-11-02: \"USDD exposes a set of public,
+        read-only REST APIs for protocol data -- supply, yield, collateral, Vaults and
+        Smart Allocator allocations. All endpoints are free to use, require no API key,
+        and support CORS.\" There is no account, no key and no paid tier, so the free
+        tier is the whole API."
+      verified_url: https://docs.usdd.io/developers/usdd-public-api
+      verified_date: 2026-11-02
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.usdd.io/developers/usdd-public-api
+      - https://docs.usdd.io/developers/usdd-public-api.md
+      - https://x.com/MR_0FFICIALL/status/2116487104087592994
+    discovered_date: 2026-11-02
+  - name: woop-v1-api
+    url: https://usewoop.xyz/docs/api
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X, posted by the vendor (@usewoop, the
+      handle in the site's own twitter:site tag). The post's t.co link resolves to
+      https://usewoop.xyz/docs/api, which is how the vendor domain was established.
+      woop is a Solana coin-launch and trading venue with its own bonding curve
+      (\"woopcurve\") and AMM pool (\"WAMM\"). Verified 2026-11-02 against the
+      vendor's own docs: https://usewoop.xyz/docs/api gives \"Base URL
+      https://usewoop.xyz/api/v1\" and
+      https://usewoop.xyz/docs/api/authentication says \"Put the key in the
+      Authorization header\" as `Authorization: Bearer woop_...`, adding that
+      \"x-api-key: woop_... works too\". The vendor's own OpenAPI 3.1 schema at
+      https://usewoop.xyz/api/v1/openapi.json confirms both: `servers` is
+      https://usewoop.xyz/api/v1 and the single security scheme is HTTP bearer,
+      described as \"Your API key: woop_...\". That schema holds 24 paths and 25
+      operations, which matches the \"25 endpoints\" in the source post: GET /coins,
+      /coins/{mint} and its /candles, /curve, /events, /holders, /payouts,
+      /positions/{wallet}, /queue, /signals and /trades sub-resources, GET /pairs, GET
+      /me, GET /tickers/{symbol}, GET and POST /launches, GET
+      /wallets/{wallet}/portfolio, POST /trades, /exits, /exits/cancel,
+      /creator/claim, /creator/lock, /refunds, /uploads and /transactions. The API is
+      non-custodial by design: it \"checks everything and returns a ready
+      transaction\" that the user's own wallet signs, and \"woop never holds anyone's
+      keys\" -- so holding a woop API key is not enough to move funds, and a Solana
+      wallet is needed alongside it. One key per wallet, obtained by signing a message
+      rather than by paying. Rate limit, from the vendor's own Errors and limits page:
+      600 requests a minute per key, with `x-ratelimit-remaining` on every response,
+      and a built transaction is valid about a minute. usewoop.xyz serves no
+      robots.txt (HTTP 404) and its pages set `meta name=robots content=noindex`, so
+      only pages reachable from the site's own docs navigation were read. Verified
+      from the vendor's docs and its own published OpenAPI schema, not by a call
+      through the SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - coin launch transaction building
+      - token trading and exit queue
+      - holder trade and candle data
+      - bonding curve and pool state
+    domain: usewoop.xyz
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://usewoop.xyz/api/v1
+    signup_url: https://usewoop.xyz
+    requires_card: false
+    human_steps:
+      - "Connect a Solana wallet on usewoop.xyz, open the wallet menu and pick API
+        key, sign the message the wallet shows and press Create API key. The vendor
+        says the signature \"sends nothing; it only proves the wallet is yours\", and
+        the key belongs to that wallet -- one key per wallet."
+      - "Hold a funded Solana wallet to do anything but read: the API returns unsigned
+        transactions and the user's own wallet must sign and submit them (or POST the
+        signed transaction to /api/v1/transactions)."
+    billing:
+      model: free
+      free_tier_note: "Vendor's own Fees page read 2026-11-02
+        (https://usewoop.xyz/docs/fees): it prices the protocol, not API access, and
+        the docs quote no charge for calling the API or for holding a key -- the key is
+        created by signing a message. What costs money are the on-chain fees the
+        signing wallet pays: \"Curve trades pay 1.5%. Instant sells pay 10%. After
+        graduation, the WAMM pool takes 1%\", the Exit Queue takes \"1% a side\", and
+        \"Hold 100k $WOOP and you pay half, except on instant sells\". Launching a
+        coin is listed as free, with about 0.03 SOL of network/account cost.
+        free_tier_covers_api is true in the narrow sense that no plan or balance gates
+        the endpoints; it says nothing about the on-chain fees above."
+      verified_url: https://usewoop.xyz/docs/fees
+      verified_date: 2026-11-02
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://usewoop.xyz/docs/api
+      - https://usewoop.xyz/docs/api/authentication
+      - https://usewoop.xyz/api/v1/openapi.json
+      - https://usewoop.xyz/docs/api/errors
+      - https://usewoop.xyz/docs/fees
+      - https://x.com/usewoop/status/2116925181390410094
+    discovered_date: 2026-11-02
+  - name: apied-x402-marketplace
+    url: https://apied.xyz/docs
+    access_mode: wallet-x402
+    min_topup: null
+    billing_unit: "per call, settled on-chain in USDC or USDG"
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X, posted by the vendor (@Apiedxyz); the
+      post's t.co link resolves to https://apied.xyz/. APIED is a marketplace that
+      puts a pay-per-call x402 gateway in front of third-party HTTP APIs, and also
+      sells six on-chain analysis endpoints of its own. Verified 2026-11-02 against
+      the vendor's own docs at https://apied.xyz/docs: \"Every API gets a gateway URL
+      like /x/your-api\", the agent \"calls the URL and gets 402 Payment Required with
+      the price, token, chain and recipient\", signs \"a USDC or USDG transfer for that
+      exact amount and retries with a PAYMENT-SIGNATURE header\", and the docs state
+      plainly \"No keys, no signups, no invoices.\" auth_required is false and
+      auth_header/auth_format stay null because the vendor documents no registrable
+      credential: the per-call payment signature is the authentication. The vendor's
+      own six endpoints are GET /x/o/token-check, /x/o/contract-scan, /x/o/bundles,
+      /x/o/holders, /x/o/copycats and /x/o/trending, each taking `chain` and `address`
+      (or `window`) query parameters. Documented limits: APIs \"must use https and
+      can't point at private network addresses\", requests up to 1 MB, responses up to
+      5 MB, a 25-second timeout, each payment signature is single-use, and \"Agents
+      pay only for successful responses (status below 400)\". The vendor also
+      documents a remote MCP server, `claude mcp add --transport http apied
+      https://apied.xyz/api/mcp`, with search_apis, check_token and trending_coins
+      tools, and lists chains Robinhood (eip155:4663), Base, Base Sepolia, Ethereum,
+      Arbitrum, BNB, Polygon and Solana. Agent wallets with spend limits are marked
+      \"Coming soon\" on the vendor's own For agents page and are not recorded as
+      available. SkeletonKey pays in fiat only, so the wallet rail is recorded as a
+      fact about the vendor and is never routed to. Two notes on reading it: the
+      third-party APIs behind the gateway are listed by their owners, not run by
+      APIED, and none of them is indexed here; and the vendor's own homepage carries a
+      token contract banner ($APIED on Robinhood Chain) and self-reported marketplace
+      counts (\"4.4K projects, 87K paid endpoints, 885K paid calls this month\") which
+      are recorded as the vendor's own claims, not as checked numbers. apied.xyz
+      serves no robots.txt (HTTP 404) and its pages set `meta name=robots
+      content=noindex`, so only pages linked from the site's own navigation were read.
+      Verified from the vendor's docs only -- no call was made through the SkeletonKey
+      proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - x402 pay per call api gateway
+      - token safety and contract scanning
+      - holder and launch bundle analysis
+      - trending coin data
+    domain: apied.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://apied.xyz/x
+    signup_url: null
+    requires_card: false
+    human_steps:
+      - "Fund a crypto wallet with USDC or USDG on one of the chains the vendor lists
+        (Robinhood Chain, Base, Base Sepolia, Ethereum, Arbitrum, BNB, Polygon,
+        Solana): the vendor documents no other way to pay. SkeletonKey pays in fiat
+        only, so no SkeletonKey route can reach the paid endpoints."
+    billing:
+      model: payg
+      free_tier_note: "Vendor's own docs and For agents page read 2026-11-02: the six
+        endpoints APIED runs itself are priced per call in USDC on Base -- token-check
+        $0.01, contract-scan $0.005, bundles $0.02, holders $0.003, copycats $0.003
+        and trending $0.002 -- and \"Agents pay only for successful responses (status
+        below 400)\". Third-party APIs behind the gateway are priced by their own
+        creators (\"Charge from $0.000001 in USDC or USDG\"), so there is no single
+        rate for the marketplace; fetch the vendor's own Explore pages for a live
+        price. The vendor's homepage states \"0% platform fee during the preview\".
+        No free tier is documented -- there is no account to hold one -- so
+        free_tier_covers_api is false."
+      verified_url: https://apied.xyz/docs
+      verified_date: 2026-11-02
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://apied.xyz/docs
+      - https://apied.xyz/agents
+      - https://x.com/Apiedxyz/status/2117256739393540414
+    discovered_date: 2026-11-02
+  - name: amd-radeon-token-factory
+    url: https://amd-aim.github.io/radeon-cloud-docs/api/overview/
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X. The candidate was posted as an \"AMD GPU
+      Cloud\" free public API tier; what AMD actually documents is Token Factory, part
+      of AMD Radeon Cloud on AMD's China developer site. The chain to the vendor
+      matters here: https://developer.amd.com.cn/radeon/tokenfactory is AMD's own page
+      and links its \"Docs\" button to https://amd-aim.github.io/radeon-cloud-docs/,
+      an AMD-branded docs site whose Ask-AI widget posts to
+      https://developer.amd.com.cn/radeon/api/docs/ask and whose contact address is
+      member-service@mail.developer.amd.com.cn -- so the docs are the vendor's, though
+      published on GitHub Pages rather than on amd.com. Verified 2026-11-02 against
+      them: the API overview gives Token Factory's base URL
+      `https://developer.amd.com.cn/radeon/api/v1` and says it is \"OpenAI-compatible,
+      with an Anthropic-compatible Messages endpoint\", listing POST
+      /v1/chat/completions, GET /v1/models, POST /v1/messages, POST
+      /v1/messages/count_tokens and GET /v1/usage, plus per-model paths
+      /v1/audio/speech, /v1/ocr and /v1/systemone. The Authentication page documents
+      the credential: a key of the form `rc-` plus 48 hex characters, sent as
+      `Authorization: Bearer $RADEON_API_KEY`, and adds that \"Token Factory also
+      accepts the key in the x-api-key header, which is how Anthropic SDKs
+      authenticate\" (Authorization wins if both are present). Three limits are worth
+      recording as facts rather than as the post's framing. First, \"Token Factory is
+      available on the China site only.\" Second, the key is account-gated: it is
+      created the first time you open Token Factory, and \"Accounts that are still
+      under review don't get a key.\" Third, and a correction to the source post: the
+      vendor documents no \"1M tokens/day\" allowance. The daily cap is counted in
+      Token Factory points (pts), resets at 00:00 UTC+8, and the docs say outright
+      \"Limits differ between accounts ... Read your own limits from this endpoint
+      rather than assuming them\" -- the example response shows a cap of 10 pts/day
+      against rates of 0.035-0.28 pts per 1M input tokens. The 1M figure in the post
+      matches the documented 1,048,576-token context window of several models, not a
+      daily quota. The post's \"15 models\" is likewise close but not the vendor's
+      number: the catalog has 16 model pages, and the docs say \"GET /v1/models is the
+      source of truth for what is available -- a page existing here does not guarantee
+      the model is currently published.\" Also per-key rate limits of 30 requests a
+      minute and 8 concurrent requests on platform admission, and 20 requests a minute
+      at the gateway. Verified from the vendor's docs only -- no call was made through
+      the SkeletonKey proxy, so promoted_by stays unset. ToS not reviewed, but the
+      vendor's own API terms page is linked from the Token Factory guide, which states
+      Token Factory is \"a free trial and development service, not for production\"
+      and that \"Reselling access is not allowed\" -- relevant to any routing
+      decision."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - openai compatible llm inference
+      - anthropic messages compatible api
+      - document ocr and text to speech
+      - hosted free model endpoints
+    domain: developer.amd.com.cn
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://developer.amd.com.cn/radeon/api/v1
+    signup_url: https://developer.amd.com.cn
+    key_page_url: https://developer.amd.com.cn/radeon/tokenfactory
+    requires_card: false
+    human_steps:
+      - "Register an AMD AI Developer Program account on developer.amd.com.cn: the
+        vendor documents a mobile-number or email code login behind a slider captcha,
+        with ModelScope, CSDN or GitHub sign-in also offered. The program is free and
+        \"you don't need any AMD hardware to join\"."
+      - "Open Token Factory and copy the key from the \"Your API key\" card, which
+        also shows the base URL. The key is created the first time the page is opened,
+        and the docs say accounts still under review do not get one."
+      - "Rotating the key needs the classic interface (Settings -> Interface -> Use
+        classic, then Profile -> Regenerate Key): the vendor says the new console has
+        no button for it yet."
+    billing:
+      model: free
+      free_tier_note: "Vendor's own Token Factory guide read 2026-11-02: \"Token
+        Factory is free, but usage is capped\", with \"nothing to launch and no credits
+        to spend\". Usage is metered in points (pts) -- the docs are explicit that
+        \"Points aren't money and are separate from your credits\" and that, despite
+        the `_usd` suffixes on the usage fields, \"you aren't charged money\". The cap
+        is per account per calendar day in Beijing time and differs between accounts;
+        read it from GET /v1/usage rather than assuming it. Published rates, read off
+        the model cards on 2026-10-19 per the catalog page, run 0.035-0.28 pts per 1M
+        input tokens and 0.07-0.56 pts per 1M output tokens. The service is described
+        as \"a free trial and development service, not for production\", and
+        \"Reselling access is not allowed\". No paid tier for Token Factory is
+        documented at all -- running a model on a GPU instance is the paid alternative
+        and spends credits, which is a different product."
+      verified_url: https://amd-aim.github.io/radeon-cloud-docs/guides/token-factory/
+      verified_date: 2026-11-02
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://amd-aim.github.io/radeon-cloud-docs/api/overview/
+      - https://amd-aim.github.io/radeon-cloud-docs/api/authentication/
+      - https://amd-aim.github.io/radeon-cloud-docs/guides/token-factory/
+      - https://amd-aim.github.io/radeon-cloud-docs/api/rate-limits/
+      - https://amd-aim.github.io/radeon-cloud-docs/api/usage/
+      - https://amd-aim.github.io/radeon-cloud-docs/models/overview/
+      - https://amd-aim.github.io/radeon-cloud-docs/guides/developer-program/
+      - https://developer.amd.com.cn/radeon/tokenfactory
+      - https://x.com/bebuu_ai/status/2117143648853004704
+    discovered_date: 2026-11-02
+  - name: beggy-public-api
+    url: https://api.beggyterminal.xyz/docs/
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-02 from X, posted by the vendor (@Beggy1c, \"Beggy
+      Terminal\"). The post carries no link, so the vendor was resolved from the
+      profile's own t.co links, which point at https://beggyterminal.xyz/ and
+      https://api.beggyterminal.xyz/docs/. Note for anyone re-checking: beggy.fun is a
+      different product by a different handle (@beggyfun_ai) and beggy.xyz is a parked
+      lander -- neither is this vendor. Beggy runs YES/NO prediction markets staked in
+      USDG on Robinhood Chain. Verified 2026-11-02 against the vendor's own docs at
+      https://api.beggyterminal.xyz/docs/, which give \"Base URL
+      https://api.beggyterminal.xyz\", \"NETWORK Robinhood Chain - 4663\",
+      \"SETTLEMENT USDG - 6 decimals\" and state \"The public API needs no API key.\"
+      auth_required is false and auth_header/auth_format stay null because the vendor
+      documents no credential, and access_mode is keyless for the same reason: there
+      is no account to hold. Documented routes: GET /v1/markets (filters `type` =
+      COOK/RAID/HOLD, `status`, `limit` 1-100, `offset`), GET /v1/markets/{marketId}
+      and POST /v1/markets/{marketId}/call-intent. The last one is the reason this is
+      not a trading API: it returns an UNSIGNED_CONTRACT_INTENT -- chainId, from, to,
+      value, ABI, functionName `enterMarket(uint8,uint256)` and args -- and the docs
+      are explicit that \"Your integration owns signing, submission and recovery; the
+      API does not custody funds or relay transactions\" and that the endpoint \"does
+      not approve tokens, reserve a position or submit a call\". It rejects stale
+      journal data with HTTP 409. The vendor also publishes a read-only browser SDK at
+      https://api.beggyterminal.xyz/bot-client.mjs and an embeddable
+      `<beggy-market>` widget at https://api.beggyterminal.xyz/widget.mjs, with CORS
+      enabled; each visible card \"consumes read requests; account for the shared
+      per-IP rate limit\". The docs state the API \"does not expose reference, target
+      or live quote fields, wallet lists or personal positions\", and that YES/NO
+      percentages \"represent stake share, not player voting or a guaranteed
+      probability\" -- worth recording because it bounds what the data means.
+      Verified from the vendor's docs only -- no call was made through the SkeletonKey
+      proxy, so promoted_by stays unset. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-02
+    capabilities:
+      - prediction market data
+      - market pool and stake stats
+      - unsigned transaction intents
+      - embeddable market cards
+    domain: api.beggyterminal.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.beggyterminal.xyz
+    signup_url: null
+    requires_card: false
+    human_steps:
+      - "Reading markets and embedding cards needs nothing. Entering a market does:
+        the vendor documents one wallet holding the intended USDG stake plus enough
+        ETH for gas on Robinhood Chain (4663), an exact-amount USDG approval per pool,
+        and your own signer submitting the prepared transaction. SkeletonKey pays in
+        fiat only, so no SkeletonKey route can enter a market."
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-11-02: \"The public API needs no API
+        key\", there is no account, no plan and no per-call charge -- the only limit
+        documented is \"the shared per-IP rate limit\", and the only money involved is
+        the USDG stake and ETH gas a caller's own wallet pays on-chain, which the API
+        never touches (\"the API does not custody funds or relay transactions\").
+        free_tier_covers_api is true because every documented route, including the
+        unsigned-intent endpoint, is reachable with no credential."
+      verified_url: https://api.beggyterminal.xyz/docs/
+      verified_date: 2026-11-02
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://api.beggyterminal.xyz/docs/
+      - https://beggyterminal.xyz/
+      - https://x.com/Beggy1c/status/2117261558434676785
+    discovered_date: 2026-11-02
+  - name: videoworker-ffmpeg-api
+    url: https://videoworker.dev/docs
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: 'Discovered 2026-11-03 from X, posted by the vendor (@videoworkerdev). Verified
+      2026-11-03 against the vendor''s own docs at https://videoworker.dev/docs, which document
+      base URL https://videoworker.dev, endpoints POST /v1/files, POST /v1/jobs, GET /v1/jobs/{id}
+      and scoped API keys sent as Authorization Bearer token with scopes files:write, jobs:write,
+      jobs:read, outputs:read. Pricing read off https://videoworker.dev/pricing the same day:
+      verified accounts get 5 minutes of processing time per month free; Starter is US$9/month
+      for 100 processing minutes; web, REST and MCP share one allowance, with no automatic usage
+      overage. Launch offer on the source post is marketing copy, not restated as a standing
+      plan. Verified from docs only, not by a call through the proxy. ToS not reviewed.'
+    source: null
+    checked_date: '2026-11-03'
+    capabilities:
+    - ffmpeg media processing
+    - video audio image convert
+    - mcp media jobs
+    - async ffmpeg jobs
+    domain: videoworker.dev
+    auth_required: true
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    base_url: https://videoworker.dev
+    signup_url: https://videoworker.dev
+    requires_card: false
+    human_steps:
+    - Sign in on https://videoworker.dev (Google, GitHub or email, depending on operator configuration),
+      then create a scoped API key in /dashboard. Custom uploads and arbitrary FFmpeg commands
+      need that key; anonymous visitors can only run fixed demo recipes on the sample.
+    billing:
+      model: free_tier+subscription
+      free_tier_note: 'Vendor pricing page read 2026-11-03: Free is US$0/month with 5 minutes
+        of processing time per month for verified accounts (resets 00:00 UTC on the 1st, unused
+        time does not roll over). Starter is US$9/month for 100 processing minutes. Processing
+        time is FFmpeg wall time, not media duration. No automatic usage overage charges. free_tier_covers_api
+        is true for light workloads within the 5-minute free allowance.'
+      verified_url: https://videoworker.dev/pricing
+      verified_date: '2026-11-03'
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+    - https://videoworker.dev/docs
+    - https://videoworker.dev/pricing
+    - https://videoworker.dev
+    - https://x.com/videoworkerdev/status/2117394950681964663
+    discovered_date: '2026-11-03'
+  - name: hume-audio-decisions-api
+    url: https://dev.hume.ai/audio-decisions/docs/overview.md
+    access_mode: own-account
+    min_topup: null
+    billing_unit: input token
+    signup_automatable: null
+    tos_notes: 'Discovered 2026-11-03 from X (coverage of Hume AI''s Audio Decision API launch;
+      vendor blog dated November 2, 2026). Verified 2026-11-03 against the vendor''s own docs:
+      overview documents POST https://api.cloud.hume.ai/v0/decisions/file with multipart request
+      + file parts; https://dev.hume.ai/audio-decisions/docs/authentication.md requires X-Hume-Api-Key
+      on every request; https://dev.hume.ai/audio-decisions/docs/billing.md prices Create decision
+      at $0.47 / 1M input tokens with a one-time 1M-token trial credit once access is granted.
+      The launch blog also says to request API access by joining a waitlist / playground before
+      keys work for this product. Verified from docs only, not by a call through the proxy.
+      ToS not reviewed.'
+    source: null
+    checked_date: '2026-11-03'
+    capabilities:
+    - audio decision questions
+    - speech emotion judgment
+    - audio event spans
+    - voice agent evaluation
+    domain: api.cloud.hume.ai
+    auth_required: true
+    auth_header: X-Hume-Api-Key
+    auth_format: '{key}'
+    base_url: https://api.cloud.hume.ai
+    signup_url: https://app.hume.ai
+    requires_card: null
+    human_steps:
+    - 'Create or sign in to a Hume Platform account at https://app.hume.ai, obtain Audio Decisions
+      access (launch blog: waitlist / playground), then create an API key on the API keys page
+      and send it as X-Hume-Api-Key. Billing docs warn that requests without a payment method
+      (or with an unpaid invoice) return 402 payment_required after the trial credit.'
+    billing:
+      model: payg
+      free_tier_note: 'Vendor billing page read 2026-11-03: $0.47 per 1M input tokens with no
+        commitment; an organization gets a trial credit of 1M input tokens once granted access.
+        Answers, estimate-input-tokens, and run list/get are not billed. free_tier_covers_api
+        is false: the trial is a one-time credit after access is granted, not a standing free
+        tier that covers ongoing API use.'
+      verified_url: https://dev.hume.ai/audio-decisions/docs/billing.md
+      verified_date: '2026-11-03'
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+    - https://dev.hume.ai/audio-decisions/docs/overview.md
+    - https://dev.hume.ai/audio-decisions/docs/authentication.md
+    - https://dev.hume.ai/audio-decisions/docs/billing.md
+    - https://www.hume.ai/blog/introducing-hume-audio-decision-api
+    - https://x.com/GlobalFeedAI/status/2117332686754746376
+    - https://x.com/kadrkn/status/2117561477729042595
+    discovered_date: '2026-11-03'
+  - name: edifabric-cloud-api
+    url: https://www.edifabric.com/docs/edifabric-cloud/introduction.html
+    access_mode: own-account
+    min_topup: null
+    billing_unit: operation
+    signup_automatable: null
+    tos_notes: 'Discovered 2026-11-03 from X, posted by the vendor (@ediFabric) announcing Cloud
+      API v3 for X12. Verified 2026-11-03 against the vendor''s own docs at https://www.edifabric.com/docs/edifabric-cloud/introduction.html:
+      base URLs https://api.edination.com/v2 and https://api.edination.com/v3; auth is the serial
+      key as Ocp-Apim-Subscription-Key on every HTTPS request; v3 endpoints include POST /x12/parse
+      and POST /x12/build, while v2 keeps read/write/validate/ack for X12, EDIFACT, HL7, NCPDP
+      and VDA. A public demo serial is documented for evaluation. Plan quotas and overage prices
+      are on the same docs page. Verified from docs only, not by a call through the proxy. ToS/EULA
+      not reviewed beyond the docs pointer.'
+    source: null
+    checked_date: '2026-11-03'
+    capabilities:
+    - edi parse and generate
+    - x12 edifact hl7
+    - edi validation ack
+    - edi to json
+    domain: api.edination.com
+    auth_required: true
+    auth_header: Ocp-Apim-Subscription-Key
+    auth_format: '{key}'
+    base_url: https://api.edination.com
+    signup_url: https://www.edifabric.com
+    requires_card: false
+    human_steps:
+    - For evaluation, the docs publish a demo serial key as the API key with a limited quota.
+      For a lasting key, sign up for Community on edifabric.com and copy the serial from Your
+      account; send it as Ocp-Apim-Subscription-Key.
+    billing:
+      model: free_tier+payg
+      free_tier_note: 'Vendor Cloud introduction docs read 2026-11-03: Community is 250 operations
+        per day shared with .NET/Native, never expires, non-production. Developer is 3,000 Cloud
+        operations/month then $0.01 each. Enterprise is 25,000/month then $0.008 each. Cloud-only
+        plan: first 1,000 operations each month free, then $0.01. free_tier_covers_api is true
+        for Community/Cloud-only free allowances within those quotas.'
+      verified_url: https://www.edifabric.com/docs/edifabric-cloud/introduction.html
+      verified_date: '2026-11-03'
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+    - https://www.edifabric.com/docs/edifabric-cloud/introduction.html
+    - https://x.com/ediFabric/status/2117646791252549726
+    discovered_date: '2026-11-03'
+  - name: h081-x402-services
+    url: https://api.h081.xyz/v1/x402/catalog
+    access_mode: wallet-x402
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: 'Discovered 2026-11-03 from X, posted by the vendor (@H081CAP). Verified 2026-11-03
+      against the vendor''s own live catalog JSON at https://api.h081.xyz/v1/x402/catalog (x402Version
+      2, Solana mainnet, CDP facilitator, USDC): paid services relay-priority (POST .../solana/relay-priority,
+      0.25 USDC), preflight (POST .../solana/preflight, 0.002 USDC), loans-market (GET .../loans/market,
+      0.001 USDC) and prove-disclose (POST .../prove/disclose, 0.02 USDC). No H081 API key or
+      account is required for these x402 routes; payment is the credential. Catalog itself is
+      free to read. Vendor notes the private bank is live on Solana mainnet and not audited
+      yet. SkeletonKey pays in fiat only, so no SkeletonKey route can call the paid services.
+      Verified from vendor catalog only, not by a paid call through the proxy.'
+    source: null
+    checked_date: '2026-11-03'
+    capabilities:
+    - x402 solana banking tools
+    - private allowance proofs
+    - loan market data
+    - priority relay preflight
+    domain: api.h081.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.h081.xyz
+    signup_url: null
+    requires_card: false
+    human_steps:
+    - Fund a Solana wallet with USDC and use an x402-compatible client (vendor names @x402/fetch
+      with @x402/svm). SkeletonKey pays in fiat only, so no SkeletonKey route can reach the
+      paid services.
+    billing:
+      model: payg
+      free_tier_note: 'Vendor catalog read 2026-11-03: GET https://api.h081.xyz/v1/x402/catalog
+        is free and lists per-call USDC prices for the four paid services (0.001-0.25 USDC).
+        There is no account plan. free_tier_covers_api is false because the useful banking/loan/proof
+        tools are paid per call.'
+      verified_url: https://api.h081.xyz/v1/x402/catalog
+      verified_date: '2026-11-03'
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+    - https://api.h081.xyz/v1/x402/catalog
+    - https://www.h081.xyz/
+    - https://x.com/H081CAP/status/2117624964786606180
+    discovered_date: '2026-11-03'
+  - name: x402check-preflight
+    url: https://x402check.dev/llms.txt
+    access_mode: wallet-x402
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: 'Discovered 2026-11-03 from X, posted by the vendor (@x402checkdev). Verified
+      2026-11-03 against the vendor''s own llms.txt / OpenAPI: base https://x402check.dev with
+      GET/POST /preflight (and free one-shot /preflight/free*), optional deep check and watch;
+      MCP at https://x402check.dev/mcp. Auth for paid tools is x402 Exact USDC on Base (eip155:8453)
+      at $0.01 per regular check; one free regular check ever per agent wallet. No API key account
+      for the preflight path. SkeletonKey pays in fiat only, so no SkeletonKey route can settle
+      paid checks. Verified from docs only, not by a paid call through the proxy.'
+    source: null
+    checked_date: '2026-11-03'
+    capabilities:
+    - x402 endpoint preflight
+    - payto wallet verification
+    - x402 seller trust check
+    - mcp preflight tools
+    domain: x402check.dev
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://x402check.dev
+    signup_url: null
+    requires_card: false
+    human_steps:
+    - Use an x402-capable wallet on Base with USDC, or burn the one free regular check per agent
+      wallet via /preflight/free. SkeletonKey pays in fiat only, so no SkeletonKey route can
+      settle paid checks.
+    billing:
+      model: payg
+      free_tier_note: 'Vendor llms.txt read 2026-11-03: unit price $0.01 USDC Exact on Base
+        per regular check; one free regular check ever per agent wallet; optional deep check
+        $0.05; optional watch $5 / 30 days prepaid. free_tier_covers_api is false for ongoing
+        use beyond the single free check.'
+      verified_url: https://x402check.dev/llms.txt
+      verified_date: '2026-11-03'
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+    - https://x402check.dev/llms.txt
+    - https://x402check.dev/openapi.json
+    - https://x402check.dev/docs
+    - https://x.com/x402checkdev/status/2117634611241218452
+    discovered_date: '2026-11-03'
+
+  - name: eqall-api
+    url: https://www.eqall.com/developer
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@Eqallinc) for EQALL
+      1.0.14. Verified 2026-11-04 against the vendor's own Developer Guide at
+      https://www.eqall.com/developer: REST base https://api.eqall.com with endpoints under
+      /external/* (whoami, contacts, companies, meetings); MCP at https://api.eqall.com/mcp;
+      personal API keys start with eqk_ and are sent as Authorization Bearer; company keys
+      require onBehalfOf. Rate limits documented as 60 req/min per key and 120 across a
+      user's keys. Product page https://www.eqall.com/aiagents and release note
+      https://eqall.substack.com/release-1014 state API/MCP access on PRO (limited-time) and
+      with Enterprise. Verified from docs only, not by a call through the proxy. ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - sales contact company intel
+      - meeting prep and recap
+      - mcp sales agents
+      - crm deal intelligence
+    domain: api.eqall.com
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://api.eqall.com
+    signup_url: https://www.eqall.com
+    requires_card: null
+    human_steps:
+      - "Sign in to EQALL, open Settings → Integrations → API & AI agents (admin must enable
+        it), create a personal API key (eqk_…), then send Authorization: Bearer. Claude /
+        ChatGPT / Copilot / Glean can also connect via OAuth MCP without a key."
+    billing:
+      model: subscription
+      free_tier_note: "Vendor release note and aiagents page read 2026-11-04: API and MCP
+        access is offered on PRO for a limited time and included with Enterprise; the
+        Developer Guide documents request rate limits but no per-call USD price. No standing
+        free API tier is stated, so free_tier_covers_api is false."
+      verified_url: https://www.eqall.com/developer
+      verified_date: 2026-11-04
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://www.eqall.com/developer
+      - https://www.eqall.com/aiagents
+      - https://eqall.substack.com/release-1014
+      - https://x.com/Eqallinc/status/2118020477847249387
+    discovered_date: 2026-11-04
+  - name: yetitrade-public-api
+    url: https://docs.yetitrade.fi/api/overview
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by verified @Whitechain_io announcing
+      YetiTradeFi testnet with a public API from day one. Verified 2026-11-04 against the
+      vendor's own docs: base URL https://api.testnet.yetitrade.fi/api/v1; anonymous access
+      needs no key (5 rps / 10k requests per IP per month); optional partner keys are sent
+      as X-API-Key for higher limits. Endpoints cover tokens, pools, positions, swaps, stats
+      and quotes on Whitechain Sepolia testnet. Verified from docs only, not by a call
+      through the proxy. ToS not reviewed beyond the docs' testnet disclaimer."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - dex pool market data
+      - swap quotes
+      - liquidity positions
+      - whitechain testnet
+    domain: api.testnet.yetitrade.fi
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.testnet.yetitrade.fi/api/v1
+    signup_url: https://docs.yetitrade.fi/api/access
+    requires_card: false
+    human_steps:
+      - "Call the base URL with no credential for anonymous limits, or request a partner key
+        via the form on https://docs.yetitrade.fi/api/access and send X-API-Key for higher
+        limits. Testnet only."
+    billing:
+      model: free
+      free_tier_note: "Vendor API overview and access pages read 2026-11-04: anonymous access
+        is free with no key (5 rps, burst 10, 10,000 requests per IP per month). Partner and
+        Enterprise keys raise those limits; no per-call price is published for API access.
+        free_tier_covers_api is true for the anonymous tier within those quotas."
+      verified_url: https://docs.yetitrade.fi/api/overview
+      verified_date: 2026-11-04
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.yetitrade.fi/api/overview
+      - https://docs.yetitrade.fi/api/access
+      - https://docs.yetitrade.fi/quickstart
+      - https://x.com/Whitechain_io/status/2118010384166859155
+    discovered_date: 2026-11-04
+  - name: kakudo-agent-research
+    url: https://kakudo.xyz/agents
+    access_mode: wallet-x402
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@kakudo_app) announcing
+      x402 payments for agent research on Robinhood Chain. Verified 2026-11-04 against the
+      vendor's own agents page: HTTP GET https://kakudo.xyz/api/v1/premium/research with
+      product query params; MCP at https://kakudo.xyz/mcp (tool kakudo_paid_research); A2A
+      via agent card. Auth/pay is x402 (HTTP 402 → PAYMENT-SIGNATURE); no API key. Products:
+      stock-research, risk-signals, corporate-events, defi-markets, wallet-scan. Vendor notes
+      live payment settlement is still being tested. Verified from docs only, not by a call
+      through the proxy. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - stock token research
+      - risk signals
+      - corporate events
+      - defi markets wallet scan
+      - x402 agent payments
+    domain: kakudo.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://kakudo.xyz
+    signup_url: null
+    requires_card: false
+    human_steps:
+      - "Use an x402-capable wallet with USDG on Robinhood Chain (4663). Unpaid GET returns
+        402; sign and retry with PAYMENT-SIGNATURE. SkeletonKey pays in fiat only, so no
+        SkeletonKey route can settle these paid calls."
+    billing:
+      model: payg
+      free_tier_note: "Vendor agents page read 2026-11-04: each listed research product is
+        0.05 USDG per request on Robinhood Chain via x402; no free tier or subscription for
+        the paid products is stated. free_tier_covers_api is false."
+      verified_url: https://kakudo.xyz/agents
+      verified_date: 2026-11-04
+      free_tier_covers_api: false
+    status: docs-verified
+    source_urls:
+      - https://kakudo.xyz/agents
+      - https://x.com/kakudo_app/status/2117990512858693680
+    discovered_date: 2026-11-04
+  - name: moviodds-bet365-odds
+    url: https://moviodds.com/docs/sports/
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@MoviOdds). Verified
+      2026-11-04 against the vendor's own site: REST base https://moviodds.com with
+      endpoints such as GET /odds, /history, /closing, /results, /outrights, /racing and
+      WebSocket wss://moviodds.com/ws; homepage FAQ states the feed is free with no sign-up
+      and no key (Bet Builder pricing alone needs a Discord-issued key). OpenAPI is published
+      at https://moviodds.com/openapi.json. Independent odds feed of bet365 prices; not
+      affiliated with bet365. Verified from docs only, not by a call through the proxy. ToS
+      not reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - sports betting odds
+      - live websocket odds
+      - closing lines history
+      - racing odds results
+    domain: moviodds.com
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://moviodds.com
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_note: "Vendor homepage FAQ read 2026-11-04: \"Yes, no sign-up and no key
+        needed. Only Bet Builder pricing needs a key, just ask for one on Discord\". No paid
+        API plan is published for the main odds feed, so free_tier_covers_api is true for
+        the documented keyless endpoints."
+      verified_url: https://moviodds.com/
+      verified_date: 2026-11-04
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://moviodds.com/
+      - https://moviodds.com/docs/sports/
+      - https://moviodds.com/openapi.json
+      - https://x.com/MoviOdds/status/2117902742928699884
+    discovered_date: 2026-11-04
+  - name: bitnxs-trading-api
+    url: https://docs.bitnxs.com/api/
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@bitnxs) referring to
+      the Bitnxs public API. Verified 2026-11-04 against the vendor's own API overview at
+      https://docs.bitnxs.com/api/: base URL https://api.bitnxs.com and WebSocket
+      wss://api.bitnxs.com/ws. Auth is not a Bearer/HMAC shared secret: open a session with
+      POST /session/start, sign the challenge with a MAIN wallet or a delegate API key from
+      More → API Keys, then POST /session/complete and pass sessionId on trading calls.
+      Places real perp orders (BTC/ETH/SOL-USDC). Verified from docs only, not by a call
+      through the proxy. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - perpetual futures trading
+      - ai agent trading
+      - session signed orders
+      - crypto perps websocket
+    domain: api.bitnxs.com
+    auth_required: true
+    auth_header: null
+    auth_format: null
+    base_url: https://api.bitnxs.com
+    signup_url: https://www.bitnxs.com
+    requires_card: false
+    human_steps:
+      - "Connect a wallet on bitnxs.com, create an API key under More → API Keys, complete
+        the /session/start → sign challenge → /session/complete flow, then submit orders
+        with the returned sessionId."
+    billing:
+      model: free
+      free_tier_note: "Vendor docs read 2026-11-04: the API overview publishes no charge for
+        API access itself. Trading fees on the docs home page are 0.02% maker / 0.05% taker
+        on fills, which are brokerage/trading costs rather than an API access plan.
+        free_tier_covers_api is true for reaching the documented HTTP/WebSocket interface;
+        order costs remain between the caller and the venue."
+      verified_url: https://docs.bitnxs.com/api/
+      verified_date: 2026-11-04
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://docs.bitnxs.com/api/
+      - https://docs.bitnxs.com/
+      - https://www.bitnxs.com/
+      - https://x.com/bitnxs/status/2117998565146472764
+    discovered_date: 2026-11-04
+  - name: dbrij-developer-api
+    url: https://dbrij.com/products/developer-api
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@dbrij_hq) promoting the
+      Dbrij Developer API. Status unverified: the product page at
+      https://dbrij.com/products/developer-api and setup guide at
+      https://dbrij.com/products/developer-api/guide describe scoped API keys, webhooks,
+      usage billing in naira and REST APIs for meetings, chat, email and support, but the
+      rendered pages checked on 2026-11-04 do not state a concrete base URL or the exact
+      auth header/format (they point to a separate documentation page for the full
+      reference). auth_header/auth_format/base_url therefore stay null. ToS not reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - meetings chat email api
+      - support tickets api
+      - nigeria saas platform
+      - webhooks usage billing
+    domain: dbrij.com
+    auth_required: true
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://dbrij.com
+    requires_card: null
+    human_steps:
+      - "Create a Dbrij company account, open Apps and keys, create an app and an API key
+        (shown once). Full endpoint list and header format are on the vendor documentation
+        page linked from the product page -- re-check before promoting."
+    billing: null
+    status: unverified
+    source_urls:
+      - https://dbrij.com/products/developer-api
+      - https://dbrij.com/products/developer-api/guide
+      - https://dbrij.com/developers/api
+      - https://x.com/dbrij_hq/status/2117992481543401902
+    discovered_date: 2026-11-04
+  - name: ivora-ev-charging-api
+    url: https://www.ivoracharge.com/
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: "Discovered 2026-11-04 from X, posted by the vendor (@ivoracharge). Status
+      unverified: the vendor homepage https://www.ivoracharge.com/ markets a public REST /
+      OpenAPI platform API for chargers, prices, bills and team keys, plus an MCP server,
+      and prices the platform at 1¢ per kWh with no monthly fee, but no developer docs URL,
+      base URL or auth header was found on 2026-11-04 (docs.ivoracharge.com and
+      /docs paths did not resolve). Production access is described as starting with a short
+      meeting and a card on file. auth_header/auth_format/base_url stay null. ToS not
+      reviewed."
+    source: null
+    checked_date: 2026-11-04
+    capabilities:
+      - ev charging management
+      - charger remote control
+      - session billing
+      - ocpp csms
+    domain: ivoracharge.com
+    auth_required: true
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://www.ivoracharge.com/
+    requires_card: true
+    human_steps:
+      - "Contact Ivora via the site for production access (vendor: short meeting + card on
+        file). Data Tools on the same site is described as open without that gate. Re-check
+        for OpenAPI/docs before promoting."
+    billing: null
+    status: unverified
+    source_urls:
+      - https://www.ivoracharge.com/
+      - https://x.com/ivoracharge/status/2118020058681168312
+    discovered_date: 2026-11-04
+  - name: elylock-public-api
+    url: https://elylock.finance/app/developers
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@ely_lock). Verified 2026-11-05 against the vendor's own
+      developers page at https://elylock.finance/app/developers, which documents Base URL
+      `https://elylock.finance`, read-only JSON endpoints under `/api/v1/` (stats, tokens, locks,
+      vestings, badge SVG), states the API is free with no API key, and opens CORS
+      (`Access-Control-Allow-Origin: *`). auth_required is false and auth_header/auth_format stay
+      null. access_mode is keyless. Verified from vendor docs only -- no SkeletonKey proxy call. ToS
+      not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - token lock data
+      - vesting schedules
+      - verified lock badge
+      - elysium crypto
+    domain: elylock.finance
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://elylock.finance
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_covers_api: true
+      free_tier_note: >
+        Vendor developers page: free, no API key; cache 5 minutes; snapshot refreshed hourly and on
+        deploy.
+      verified_date: 2026-11-05
+      verified_url: https://elylock.finance/app/developers
+    status: docs-verified
+    source_urls:
+      - https://elylock.finance/app/developers
+      - https://x.com/ely_lock/status/2118285160890458520
+    discovered_date: 2026-11-05
+  - name: beacon-intel-api
+    url: https://intel.beacon.sh/llms.txt
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@jqdsouza / DoppelHQ launching Beacon Threat Intelligence).
+      Verified 2026-11-05 against the vendor's own index page https://intel.beacon.sh and
+      https://intel.beacon.sh/llms.txt, which document JSON API `intel.v1` with no account and no API
+      key: GET /api/v1/lookup, GET /api/v1/artifact, POST /api/v1/check (up to 50), GET
+      /api/v1/status. Full artifact pages and Cloud MCP tools need a free Beacon account with OAuth;
+      the public JSON API itself is keyless. auth_required is false; auth_header/auth_format null;
+      access_mode keyless. Verified from vendor docs only. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - mcp server security intel
+      - agent skill risk verdicts
+      - threat intelligence
+      - artifact lookup
+    domain: intel.beacon.sh
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://intel.beacon.sh
+    signup_url: https://beacon.sh
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_covers_api: true
+      free_tier_note: >
+        Vendor FAQ and llms.txt: index, API and feeds need no account and no API key; rate limited.
+        MCP/full artifact pages need a free Beacon account.
+      verified_date: 2026-11-05
+      verified_url: https://intel.beacon.sh/llms.txt
+    status: docs-verified
+    source_urls:
+      - https://intel.beacon.sh/
+      - https://intel.beacon.sh/llms.txt
+      - https://x.com/jqdsouza/status/2118364393914130529
+    discovered_date: 2026-11-05
+  - name: leakradar-api
+    url: https://docs.leakradar.io/
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@LeakRadario announcing new API docs and Python SDK). Verified
+      2026-11-05 against the vendor's own docs at https://docs.leakradar.io/ and
+      https://leakradar.io/en/developers: Base URL `https://api.leakradar.io`, auth is `Authorization:
+      Bearer YOUR_API_KEY` (API keys on paid plans only; generate under Settings → API key). Searching
+      is free of points; unlocking costs 1 point per new record. auth_required true; auth_header
+      Authorization; auth_format "Bearer {key}". Verified from vendor docs only. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - credential leak search
+      - stealer logs
+      - domain monitoring
+      - threat intelligence
+      - combolist dark web search
+    domain: api.leakradar.io
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    base_url: https://api.leakradar.io
+    signup_url: https://leakradar.io/en
+    requires_card: true
+    human_steps:
+      - >
+        Create a LeakRadar account, pick a paid plan (Starter or above for API keys), open Settings →
+        API key, generate a key (shown once; regenerating revokes the previous). Free accounts can use
+        the product UI but the docs say API keys come with every paid plan.
+    billing: null
+    status: docs-verified
+    source_urls:
+      - https://docs.leakradar.io/
+      - https://leakradar.io/en/developers
+      - https://x.com/LeakRadario/status/2118199850953269574
+    discovered_date: 2026-11-05
+  - name: pairsfun-public-api
+    url: https://pairsfun.xyz/api.html
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@pairsfun_xyz "Public API is live"). Verified 2026-11-05 against
+      the vendor's own https://pairsfun.xyz/api.html and OpenAPI at
+      https://pairsfun.xyz/v1/openapi.json: Base URL `https://pairsfun.xyz/v1` (also `/api/v1`), all
+      listed GETs need no key (tokens, stats, fees, buyback, prices, pairs, launches). Anonymous limit
+      60 req/min per IP; optional partner Bearer keys raise the limit. auth_required false for the
+      public read path; access_mode keyless (partner key is optional). Verified from vendor docs only.
+      ToS not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - solana token launch data
+      - bonding curve stats
+      - pairsfun protocol totals
+      - crypto market data
+    domain: pairsfun.xyz
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://pairsfun.xyz/v1
+    signup_url: null
+    requires_card: false
+    human_steps: []
+    billing:
+      model: free
+      free_tier_covers_api: true
+      free_tier_note: >
+        Vendor api.html: no key, no sign-up for public GETs; 60 requests/minute per IP. Partner Bearer
+        keys optional for higher limits.
+      verified_date: 2026-11-05
+      verified_url: https://pairsfun.xyz/api.html
+    status: docs-verified
+    source_urls:
+      - https://pairsfun.xyz/api.html
+      - https://pairsfun.xyz/v1/openapi.json
+      - https://x.com/pairsfun_xyz/status/2118323373855875221
+    discovered_date: 2026-11-05
+  - name: flash-base-live-api
+    url: https://tryflash.app/llms.txt
+    access_mode: keyless
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@Flash_Onchain promoting agent MCP/open API). Verified 2026-11-05
+      against the vendor's own https://tryflash.app/llms.txt and OpenAPI
+      https://tryflash.app/agents/flash/openapi.json: live JSON reads at `https://api.tryflash.app`
+      under `/v1/stack*` (stack, markets, tokens, perps, koth, launches, wars, revenue-share, etc.)
+      with no security scheme in the OpenAPI. Trading and launches go through wallet-signed Uniswap v4
+      calldata / MCP, not an API key. auth_required false for the documented live data GETs;
+      access_mode keyless. Verified from vendor docs only. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - base chain trading data
+      - tokenized perps quotes
+      - flash protocol stack
+      - agent trading skills
+    domain: api.tryflash.app
+    auth_required: false
+    auth_header: null
+    auth_format: null
+    base_url: https://api.tryflash.app
+    signup_url: https://tryflash.app/
+    requires_card: false
+    human_steps:
+      - >
+        Live data GETs need no account. To trade or launch, use the Flash agent skills/CLI which return
+        unsigned transactions for a wallet to sign; MCP at https://api.tryflash.app/mcp for
+        reads/quotes/unsigned calls.
+    billing:
+      model: free
+      free_tier_covers_api: true
+      free_tier_note: >
+        Vendor OpenAPI/llms.txt document public live JSON endpoints with no API key. On-chain trading
+        pays Uniswap/protocol fees, not an API subscription.
+      verified_date: 2026-11-05
+      verified_url: https://tryflash.app/llms.txt
+    status: docs-verified
+    source_urls:
+      - https://tryflash.app/llms.txt
+      - https://tryflash.app/agents/flash/openapi.json
+      - https://tryflash.app/docs/agents
+      - https://x.com/Flash_Onchain/status/2118358138672083293
+    discovered_date: 2026-11-05
+  - name: getblock-shared-node-rpc
+    url: https://docs.getblock.io/getting-started/authentication-with-access-tokens
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-05 from X (@getblockio announcing Webhooks live on BNB Chain, Polygon,
+      Robinhood Chain and Base in addition to Ethereum). Verified 2026-11-05 against the vendor's own
+      docs: Shared Node RPC authenticates via access token in the URL path
+      `https://shared.<region>.getblock.io/<ACCESS_TOKEN>/` (docs explicitly say access tokens cannot
+      be sent in headers). Platform API (manage tokens) uses `Authorization: Bearer gb_...` at
+      https://public-api.getblock.io/api/v1. Webhooks are a signed HTTPS delivery product on the same
+      account. auth_required true; auth_header null because the Shared Node credential lives in the
+      path, not a header. Verified from vendor docs only. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-05
+    capabilities:
+      - blockchain rpc
+      - multi-chain nodes
+      - webhooks on-chain events
+      - platform api token management
+    domain: getblock.io
+    auth_required: true
+    auth_header: null
+    auth_format: null
+    base_url: https://shared.eu-central-1.getblock.io
+    signup_url: https://account.getblock.io/
+    requires_card: null
+    human_steps:
+      - >
+        Create a GetBlock account, open the dashboard, create a Shared Node endpoint to receive an
+        access token, then POST JSON-RPC to https://shared.<region>.getblock.io/<ACCESS_TOKEN>/. For
+        account automation, create a Platform API key (gb_…) under Settings → API Keys and call
+        https://public-api.getblock.io/api/v1 with Authorization: Bearer.
+    billing: null
+    status: docs-verified
+    source_urls:
+      - https://docs.getblock.io/getting-started/authentication-with-access-tokens
+      - https://docs.getblock.io/platform-api/getting-started
+      - https://docs.getblock.io/
+      - https://x.com/getblockio/status/2118383135222116662
+    discovered_date: 2026-11-05
+  - name: taostats-api
+    url: https://taostats.io/docs/new/quickstart
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-06 from X (@taostats: new Taostats API is live; same keys/auth;
+      old /api/… endpoints retire Monday 2026-11-09). Verified 2026-11-06 against the
+      vendor's own quickstart and getting-started docs: base URL
+      `https://api.taostats.io/v1`; every request sends the API key whole in the
+      `Authorization` header with no Bearer prefix (or `?authorization=` when headers
+      cannot be set). Sign up / create keys at https://taostats.io/pro/api-keys; free
+      tier available, paid tiers raise rate limits (exact quotas only on the billing
+      dashboard after signup — not copied here). OpenAPI at
+      https://api.taostats.io/openapi.json; MCP at https://mcp.taostats.io/.
+      auth_required true. Verified from vendor docs only — no call through the
+      SkeletonKey proxy. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-06
+    capabilities:
+      - bittensor chain data
+      - subnet and validator analytics
+      - tao price and tax reports
+      - mcp server for agents
+    domain: api.taostats.io
+    auth_required: true
+    auth_header: Authorization
+    auth_format: "{key}"
+    base_url: https://api.taostats.io/v1
+    signup_url: https://taostats.io/pro/api-keys
+    requires_card: null
+    human_steps:
+      - >
+        Sign in at https://taostats.io/pro/ with Google, GitHub or email, create a
+        project API key, then call https://api.taostats.io/v1/... with header
+        Authorization: <YOUR_API_KEY> (no Bearer prefix).
+    billing: null
+    status: docs-verified
+    source_urls:
+      - https://taostats.io/docs/new/quickstart
+      - https://taostats.io/docs/start-here/getting-started-with-taostats-api
+      - https://docs.taostats.io/llms.txt
+      - https://x.com/taostats/status/2118629474078195884
+    discovered_date: 2026-11-06
+  - name: blockchain-com-api-trading
+    url: https://www.blockchain.com/institutional/api-trading
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-06 from X (coverage of Blockchain.com announcing institutional
+      API Trading on 2026-11-05). Vendor blog and product page describe a single API for
+      24/7 automated access to principal liquidity across major cryptocurrencies,
+      altcoins, stablecoins and fiat, with all-in executable quotes and flexible
+      settlement (including trading without pre-funding for eligible clients). Status
+      unverified: the public pages are marketing / "Get in touch" sales funnels and do
+      not publish a base URL, auth method or self-serve developer reference for this
+      product. Separate from Blockchain.com's older public Explorer/Exchange API
+      surfaces. Access appears institution/sales-gated. Pricing not published. No
+      sign-up attempted; ToS not reviewed.
+    source: null
+    checked_date: null
+    capabilities:
+      - institutional crypto trading
+      - principal liquidity access
+      - automated execution api
+      - fiat and stablecoin trading
+    domain: blockchain.com
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://www.blockchain.com/institutional/api-trading
+    requires_card: null
+    human_steps:
+      - >
+        Access appears to be through Blockchain.com Institutional sales ("Get in
+        touch" on the product page); no self-serve developer signup or public auth
+        docs found for API Trading.
+    billing: null
+    status: unverified
+    source_urls:
+      - https://www.blockchain.com/institutional/api-trading
+      - https://www.blockchain.com/blog/posts/expanding-institutional-access-to-deep-crypto-market-liquidity-through-api-powered-trading
+      - https://x.com/theKOLLAB_io/status/2118676048518725976
+    discovered_date: 2026-11-06
+  - name: nodit-solana-data-api
+    url: https://developer.nodit.io/guides/quickstart-for-developers
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-09 from X (@NoditPlatform announcing Solana Data API and Solana gRPC
+      Stream live, 2026-11-09). Verified 2026-11-09 against the vendor's own docs: Data API is
+      REST at https://web3.nodit.io/v1/{chain}/{network}/... with the project API key sent in the
+      `X-API-KEY` header; RPC API uses https://{chain}-{network}.nodit.io/ with the key either in
+      the URL path or in `X-API-KEY` (not both, or 401). Solana gRPC Stream is
+      Yellowstone-compatible. Vendor docs mention a free plan plus CU-based pay-as-you-go and a
+      separate x402 per-request option; plan prices not recorded here. Verified from vendor docs
+      only, no call made. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-09
+    capabilities:
+      - solana indexed data
+      - token and nft holdings
+      - transfer and transaction history
+      - yellowstone grpc stream
+      - multi-chain rpc
+    domain: nodit.io
+    auth_required: true
+    auth_header: X-API-KEY
+    auth_format: "{key}"
+    base_url: https://web3.nodit.io/v1
+    signup_url: https://console.nodit.io/
+    requires_card: null
+    human_steps:
+      - >
+        Sign up in the Nodit console (a first project is created automatically), copy the
+        project API key from the dashboard, then call https://web3.nodit.io/v1/solana/mainnet/...
+        with header X-API-KEY.
+    billing: null
+    status: docs-verified
+    source_urls:
+      - https://www.nodit.io/blog/solana-data-api-grpc-stream-live-on-nodit
+      - https://developer.nodit.io/guides/quickstart-for-developers
+      - https://developer.nodit.io/data/data-api/api-overview
+      - https://x.com/NoditPlatform/status/2119734075154125039
+    discovered_date: 2026-11-09
+  - name: crewpay-agent-api
+    url: https://crewpay.dev/agents
+    access_mode: own-account
+    access_modes:
+      - own-account
+      - wallet-x402
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-09 from X (@CrewPayHQ, 2026-11-09). Verified 2026-11-09 against the
+      vendor's own docs (crewpay.dev/agents, crewpay.dev/llms.txt, AGENTS.md): REST API at
+      https://api.crewpay.dev for AI agents to launch memecoins on Pump.fun, Bags, Zora or Clanker
+      with on-chain fee-shares and hire KOLs. Auth is a free self-serve key (`crew_ak_...` from
+      POST /api/agent/keys/claim) in the `x-crew-api-key` header, or x402 pay-per-call
+      (PAYMENT-SIGNATURE, USDC on Base or Solana) instead of a key. Mainnet launch calls also need
+      the agent's own wallet secret in `x-launcher-key`. OpenAPI at
+      https://api.crewpay.dev/openapi.json; hosted MCP at https://mcp.crewpay.dev/mcp. Crypto
+      launchpad product: recorded as a fact, not something SkeletonKey pays for. Verified from
+      vendor docs only, no call made. ToS not reviewed.
+    source: null
+    checked_date: 2026-11-09
+    capabilities:
+      - memecoin launch api
+      - kol hiring for agents
+      - on-chain fee-share
+      - x402 pay per call
+    domain: crewpay.dev
+    auth_required: true
+    auth_header: x-crew-api-key
+    auth_format: "{key}"
+    base_url: https://api.crewpay.dev
+    signup_url: https://crewpay.dev/agents
+    requires_card: false
+    human_steps:
+      - >
+        Claim a free key with POST https://api.crewpay.dev/api/agent/keys/claim (returned once,
+        5 per hour per IP) and send it as x-crew-api-key; or pay per call over x402 with a USDC
+        wallet. Mainnet launches additionally require the agent's own Solana wallet secret.
+    billing:
+      model: free
+      free_tier_note: "Vendor page: API key is free; x402 pay per call is listed at $0.10 USDC
+        (Base or Solana) as the keyless alternative."
+      verified_url: https://crewpay.dev/agents
+      verified_date: 2026-11-09
+      free_tier_covers_api: true
+    status: docs-verified
+    source_urls:
+      - https://crewpay.dev/agents
+      - https://crewpay.dev/llms.txt
+      - https://crewpay.dev/AGENTS.md
+      - https://x.com/CrewPayHQ/status/2119766210581795055
+    discovered_date: 2026-11-09
+  - name: teneo-live-web-data-api
+    url: https://teneo-protocol.ai/data-access
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    tos_notes: >
+      Discovered 2026-11-09 from X (post citing Teneo Protocol's Live Web Data API passing 100M
+      customer requests). Vendor's own pages describe live web page fetching for AI agents through
+      a community device network, accessed via the Agent Console or the Client SDK
+      (@teneo-protocol/sdk, WebSocket wss://backend.chatroom.teneo-protocol.ai/ws, auth by wallet
+      signature or an access key plus session-key wallet address). Status unverified: no public
+      REST reference for the "Live Web Data API" itself was found, the vendor's own post says
+      early access is by contacting them, and production SDK access requires whitelisting.
+      Pricing not published. No sign-up attempted; ToS not reviewed.
+    source: null
+    checked_date: null
+    capabilities:
+      - live web page fetching
+      - residential device network
+      - agent data access sdk
+    domain: teneo-protocol.ai
+    auth_header: null
+    auth_format: null
+    base_url: null
+    signup_url: https://teneo-protocol.ai/data-access
+    requires_card: null
+    human_steps:
+      - >
+        Request early access from Teneo Protocol; production SDK use requires whitelist access.
+    billing: null
+    status: unverified
+    source_urls:
+      - https://teneo-protocol.ai/data-access
+      - https://github.com/TeneoProtocolAI/teneo-sdk
+      - https://x.com/Sarut0biSasuke/status/2119826764662714592
+    discovered_date: 2026-11-09

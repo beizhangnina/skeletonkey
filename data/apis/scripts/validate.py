@@ -6,7 +6,9 @@ Checks, per entry:
   * enum membership for access_mode / signup / signup_automatable / auth_type
   * checked_date is a real ISO date (YYYY-MM-DD)
   * ids unique across every shard, and slug-shaped
-  * seen_in is a non-empty subset of {glasser, monid, flatkey}
+  * seen_in is a non-empty subset of {glasser, monid, flatkey, vendor-direct}
+  * the optional `access_modes` list, for a vendor documenting more than one way
+    in, whose first element must equal access_mode
   * category matches the filename the entry lives in
   * provider_url / docs_url / source_url are http(s) URLs when not null
   * min_topup / billing_unit / free_tier are null or of a sane type
@@ -33,8 +35,11 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
             'source_url', 'checked_date']
 
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
-# adding one to a shard cannot invalidate the rows that do not have it.
-OPTIONAL = ['offering', 'collection_scope', 'visibility', 'visibility_note']
+# adding one to a shard cannot invalidate the rows that do not have it. This is
+# the list the "unexpected key" check reads: a row carrying none of them is
+# exactly as valid as it was before any of them existed.
+OPTIONAL = ['offering', 'access_modes', 'collection_scope', 'visibility',
+            'visibility_note']
 
 # ---- catalog scope (Bei, 2026-11-24) ----------------------------------------
 # Kept byte-identical in meaning to src/apis.ts (COLLECTION_SCOPES, VISIBILITIES,
@@ -77,7 +82,12 @@ ENUMS = {
     'signup_automatable': {'yes', 'partial', 'no', 'unknown'},
     'auth_type': {'api_key', 'oauth', 'none', 'unknown'},
 }
-SOURCES = {'glasser', 'monid', 'flatkey'}
+# Where a row's facts came from. The three aggregator catalogs build.py reads,
+# plus `vendor-direct` for a row read off the VENDOR's own pages with no
+# aggregator in the loop (build.py emits it for curated.VENDOR_DIRECT ids; the
+# TypeScript side calls the same set SHARD_SEEN_IN_SOURCES in src/apis.ts).
+SOURCES = {'glasser', 'monid', 'flatkey', 'vendor-direct'}
+VENDOR_DIRECT = 'vendor-direct'
 SLUG = re.compile(r'^[a-z0-9][a-z0-9.-]*$')
 URL = re.compile(r'^https?://\S+$')
 
@@ -287,6 +297,41 @@ def iso_date(v):
     except ValueError:
         return False
     return len(v) == 10
+
+
+def check_access_modes(errs, where, e):
+    """The optional `access_modes` list: every way in the vendor documents.
+
+    Element 0 must equal `access_mode`, the single field every reader uses --
+    mirrors validateAccessModes() in src/apis.ts, including the message.
+    """
+    modes = e.get('access_modes')
+    if modes is None:
+        return
+    allowed = ENUMS['access_mode']
+    if not isinstance(modes, list):
+        errs.append('%s.access_modes: expected a list or null' % where)
+        return
+    if not modes:
+        errs.append('%s.access_modes: expected a non-empty list or null '
+                    '(null means access_mode is the whole story)' % where)
+        return
+    if len(modes) > len(allowed):
+        errs.append('%s.access_modes: expected at most %d modes, got %d'
+                    % (where, len(allowed), len(modes)))
+    seen = set()
+    for i, m in enumerate(modes):
+        if m not in allowed:
+            errs.append('%s.access_modes[%d]: expected one of %s'
+                        % (where, i, sorted(allowed)))
+            continue
+        if m in seen:
+            errs.append('%s.access_modes[%d]: duplicate mode %r' % (where, i, m))
+        seen.add(m)
+    if modes[0] != e.get('access_mode'):
+        errs.append('%s.access_modes[0]: must match access_mode %r -- the primary '
+                    'mode is the one SkeletonKey actually uses'
+                    % (where, e.get('access_mode')))
 
 
 def check_offering(errs, where, off):
@@ -565,6 +610,8 @@ def main(root):
                                 % (where, k, type(v).__name__))
             if e.get('billing_unit') is not None and not isinstance(e['billing_unit'], str):
                 errs.append('%s: billing_unit must be a string or null' % where)
+
+            check_access_modes(errs, where, e)
 
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])

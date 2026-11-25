@@ -13,7 +13,9 @@ import curated
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, '..', 'raw')
-OUT = os.path.join(HERE, '..')
+# Where the shards are written. Overridable so a test can build into a temp
+# directory instead of overwriting the committed shards; unset in normal use.
+OUT = os.environ.get('SKELETONKEY_BUILD_OUT') or os.path.join(HERE, '..')
 CHECKED = '2026-10-24'
 
 # Catalog scope (Bei, 2026-11-24): llm-models rows are set aside -- hidden from
@@ -147,17 +149,28 @@ NAMES = {  # display names for entries that only exist as a flatkey facet label
  'bytedance': 'ByteDance', 'openai': 'OpenAI', 'sfs': 'Simple FS',
 }
 
-stale = sorted(set(curated.P) - set(rec))
+# A vendor-direct id has no raw catalog record by definition -- its facts came
+# off the vendor's own pages -- so it is exempt from the sync check below rather
+# than a reason to fail the build.
+VENDOR_DIRECT = 'vendor-direct'
+direct_only = set(curated.VENDOR_DIRECT) - set(rec)
+stale = sorted(set(curated.P) - set(rec) - direct_only)
 if stale:
     raise SystemExit('curated table out of sync: no raw record for %s' % stale)
+undeclared = sorted(direct_only - set(curated.P))
+if undeclared:
+    raise SystemExit('VENDOR_DIRECT ids missing from the curated P table: %s' % undeclared)
 uncurated = sorted(set(rec) - set(curated.P))
 if uncurated:
     print('note: %d catalog slug(s) not in the curated table, skipped: %s'
           % (len(uncurated), uncurated))
 
+EMPTY = {'seen': set(), 'name': None, 'url': None, 'docs': None}
+
 entries = []
-for pid in sorted(set(rec) & set(curated.P)):
-    x = rec[pid]
+for pid in sorted((set(rec) | direct_only) & set(curated.P)):
+    direct = pid in direct_only
+    x = EMPTY if direct else rec[pid]
     cat, cap, purl, durl, mode, signup, auth = curated.P[pid]
     tos = curated.TOS[mode] + curated.TOS_EXTRA.get(pid, '')
     entries.append({
@@ -174,9 +187,11 @@ for pid in sorted(set(rec) & set(curated.P)):
         'billing_unit': None,
         'free_tier': None,
         'auth_type': auth,
-        'seen_in': sorted(x['seen']),
+        # A vendor-direct row says so, and its source_url is the vendor's own
+        # page -- never an aggregator's tool page.
+        'seen_in': [VENDOR_DIRECT] if direct else sorted(x['seen']),
         'tos_notes': tos,
-        'source_url': source_url(pid, x),
+        'source_url': curated.VENDOR_DIRECT[pid] if direct else source_url(pid, x),
         'checked_date': CHECKED,
         **({'collection_scope': 'llm', 'visibility': 'hidden', 'visibility_note': LLM_VISIBILITY_NOTE}
            if cat == 'llm-models' else {}),
@@ -224,6 +239,7 @@ stats = {
    'monid': sum(1 for e in entries if 'monid' in e['seen_in']),
    'flatkey': sum(1 for e in entries if 'flatkey' in e['seen_in']),
  },
+ 'vendor_direct_providers': sum(1 for e in entries if VENDOR_DIRECT in e['seen_in']),
  'per_category': dict(sorted(collections.Counter(e['category'] for e in entries).items())),
  'per_access_mode': dict(sorted(collections.Counter(e['access_mode'] for e in entries).items())),
  'per_signup': dict(sorted(collections.Counter(e['signup'] for e in entries).items())),
@@ -237,5 +253,7 @@ stats = {
    'flatkey_models': len(r('flatkey_models_extracted.json')),
  },
 }
-json.dump(stats, open(os.path.join(OUT, 'raw', 'build_stats.json'), 'w'), indent=1)
+stats_dir = os.path.join(OUT, 'raw')
+os.makedirs(stats_dir, exist_ok=True)
+json.dump(stats, open(os.path.join(stats_dir, 'build_stats.json'), 'w'), indent=1)
 print(json.dumps(stats, indent=1))
