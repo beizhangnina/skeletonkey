@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/bytedance"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.byteplus.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "elevenlabs"
     name: "ElevenLabs"
     capability: "Text-to-speech, multi-speaker dialogue, speech-to-text and voice cloning across many languages."
@@ -35,6 +43,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/elevenlabs"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.elevenlabs.io/v1/user/subscription"
+      docs_url: "https://elevenlabs.io/docs/api-reference/user/subscription/get"
+      limits: null
+      notes: "订阅与字符额度"
+      checked_date: 2026-11-24
   - id: "fishaudio"
     name: "Fish Audio"
     capability: "Expressive multilingual text-to-speech with instant and saved voice cloning."
@@ -52,6 +68,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/fishaudio"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.fish.audio/wallet/{user_id}/api-credit"
+      docs_url: "https://docs.fish.audio/api-reference/endpoint/wallet/get-api-credit"
+      limits: "Bearer token required (Authorization: Bearer <token>); user_id path param supports 'self'; optional query params check_free_credit, team_id"
+      notes: null
+      checked_date: 2026-11-24
   - id: "kling"
     name: "Kling"
     capability: "Text-to-video and image-to-video generation with the Kling model family."
@@ -69,6 +93,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/kling"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://klingai.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "magichour"
     name: "Magic Hour"
     capability: "Prompt-to-animation generation returning short looping GIF, MP4 or WebM clips."
@@ -86,6 +118,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/magichour"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.magichour.ai/v1/account"
+      docs_url: "https://docs.magichour.ai/api-reference/account/get-account-details"
+      limits: "Bearer API key (Authorization header) required; returns credits, tier, and subscription info; docs state the Magic Hour API has no concurrency or rate limits."
+      notes: null
+      checked_date: 2026-11-24
   - id: "minimax"
     name: "MiniMax"
     capability: "Music, image, video and speech generation plus MiniMax text models."
@@ -103,6 +143,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/minimax"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://platform.minimax.io/docs/faq/about-account"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "sonilo"
     name: "Sonilo"
     capability: "Video-to-music generation."
@@ -120,6 +168,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "suzanne"
     name: "Suzanne"
     capability: "Text-to-3D and photo-to-3D mesh generation with game-ready GLB/OBJ/STL output."
@@ -137,6 +193,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/suzanne"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "topaz"
     name: "Topaz Labs"
     capability: "Image and video enhancement: upscaling, denoise, deinterlace, face recovery and motion deblur."
@@ -154,3 +218,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/topaz"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.topazlabs.com/"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

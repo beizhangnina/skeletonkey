@@ -69,6 +69,20 @@ export interface GatewayConfig {
   fallback_bind?: string;
 }
 
+/**
+ * Thresholds `skeletonkey monitor run` (ND-5) judges an anomaly against. Every
+ * field is optional; a config with no `monitor:` section gets the safe
+ * defaults documented in `src/monitor/thresholds.ts`.
+ */
+export interface MonitorConfig {
+  /** Official usage delta must exceed ledger-implied usage by more than this multiple. */
+  anomaly_multiplier?: number;
+  /** ...or exceed ledger-implied usage by more than this many units, whichever bound is higher. */
+  anomaly_absolute_threshold?: number;
+  /** Flag a weekly drop in `remaining` bigger than this percentage. */
+  remaining_drop_pct_threshold?: number;
+}
+
 export interface Config {
   /** Dedicated email used to sign up for API accounts and to label vault items. */
   email: string;
@@ -79,6 +93,7 @@ export interface Config {
   bw_folder?: string;
   proxy?: ProxyConfig;
   gateway?: GatewayConfig;
+  monitor?: MonitorConfig;
   created: string;
 }
 

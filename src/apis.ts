@@ -290,6 +290,30 @@ export interface AuthHeaderSpec {
 /** A vendor may document at most this many credential headers before it is a smell. */
 export const AUTH_HEADERS_MAX = 5;
 
+/** HTTP methods a vendor-documented usage/billing API may be called with. */
+export const USAGE_API_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
+export type UsageApiMethod = (typeof USAGE_API_METHODS)[number];
+
+/**
+ * Does the vendor expose an API to check your OWN usage/spend/quota --
+ * separate from the product API the rest of the row describes. `available:
+ * null` is "not verified in official docs", never "no". `docs_url` is the
+ * official page that was actually read, and is required whenever `available`
+ * is true or false (a verified fact needs the page it was verified on).
+ */
+export interface UsageApiFacts {
+  available: boolean | null;
+  /** Required, non-null, when available is true. */
+  method: UsageApiMethod | null;
+  /** Endpoint URL or path. Required, non-null, when available is true. */
+  path: string | null;
+  docs_url: string | null;
+  /** Auth/plan/rate restrictions, in the vendor's own words. */
+  limits: string | null;
+  notes: string | null;
+  checked_date: string;
+}
+
 export interface ApiEntry {
   name: string;
   /**
@@ -376,6 +400,9 @@ export interface ApiEntry {
    */
   offering?: VendorOffering | null;
 
+  /** Whether the vendor documents an API to check your own usage/spend/quota. */
+  usage_api?: UsageApiFacts | null;
+
   // --- discover-on-miss provenance -----------------------------------------
 
   /**
@@ -436,6 +463,7 @@ const OPTIONAL_FIELDS = [
   "billing",
   "aggregators",
   "offering",
+  "usage_api",
   "status",
   "source_urls",
   "discovered_date",
@@ -602,6 +630,7 @@ export function validateApis(input: unknown): ValidationResult {
     validateBilling(errors, at, entry["billing"]);
     validateAggregators(errors, at, entry["aggregators"]);
     validateOffering(errors, at, entry["offering"]);
+    validateUsageApi(errors, at, entry["usage_api"]);
     validateDiscovery(errors, at, entry);
 
     const humanSteps = entry["human_steps"];
@@ -994,6 +1023,77 @@ function validateOfferingConnect(errors: string[], at: string, value: unknown): 
   }
 }
 
+/**
+ * Validates a `usage_api:` block -- whether the vendor documents an API to
+ * check your OWN usage/spend/quota, separate from the product API the rest of
+ * the row describes.
+ *   - `available` and `checked_date` are required keys.
+ *   - `method`/`path` are required, non-null, when available is true: a usage
+ *     API nobody can call is not documented.
+ *   - `docs_url` is required, non-null, whenever available is true or false --
+ *     a verified fact (yes or no) needs the page it was verified on.
+ */
+function validateUsageApi(errors: string[], at: string, value: unknown): void {
+  if (value === null || value === undefined) return;
+  const field = `${at}.usage_api`;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${field}: expected a mapping or null`);
+    return;
+  }
+  const raw = value as Record<string, unknown>;
+  const known = new Set(["available", "method", "path", "docs_url", "limits", "notes", "checked_date"]);
+  for (const key of Object.keys(raw)) {
+    if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
+  }
+
+  if (!("available" in raw)) {
+    errors.push(`${field}.available: missing (use null if unknown)`);
+  }
+  const available = raw["available"];
+  if (available !== null && available !== undefined && typeof available !== "boolean") {
+    errors.push(`${field}.available: expected a boolean or null`);
+  }
+
+  const method = raw["method"];
+  if (method !== null && method !== undefined) {
+    if (typeof method !== "string" || !(USAGE_API_METHODS as readonly string[]).includes(method)) {
+      errors.push(`${field}.method: expected one of ${USAGE_API_METHODS.join(" | ")} or null`);
+    }
+  }
+  requireStringOrNull(errors, field, "path", raw["path"]);
+  requireStringOrNull(errors, field, "limits", raw["limits"]);
+  requireStringOrNull(errors, field, "notes", raw["notes"]);
+
+  const docsUrl = raw["docs_url"];
+  if (docsUrl !== null && docsUrl !== undefined && !(typeof docsUrl === "string" && isHttpUrl(docsUrl))) {
+    errors.push(`${field}.docs_url: expected an http(s) URL or null`);
+  }
+
+  if (available === true) {
+    if (typeof method !== "string" || method.trim() === "") {
+      errors.push(`${field}.method: required when available is true (how is it called?)`);
+    }
+    const path = raw["path"];
+    if (typeof path !== "string" || path.trim() === "") {
+      errors.push(`${field}.path: required when available is true (what is the endpoint?)`);
+    }
+  }
+  if (available === true || available === false) {
+    if (typeof docsUrl !== "string" || docsUrl.trim() === "") {
+      errors.push(`${field}.docs_url: required when available is true or false (where was this verified?)`);
+    }
+  }
+
+  if (!("checked_date" in raw)) {
+    errors.push(`${field}.checked_date: missing (when was this checked?)`);
+  } else {
+    const checked = raw["checked_date"];
+    if (typeof checked !== "string" || !DATE_RE.test(checked) || Number.isNaN(Date.parse(checked))) {
+      errors.push(`${field}.checked_date: expected an ISO date (YYYY-MM-DD)`);
+    }
+  }
+}
+
 /** Layer 2: a capped sample of models/endpoints, never the catalog. */
 function validateHighlights(errors: string[], at: string, value: unknown): void {
   if (value === null || value === undefined) return;
@@ -1232,6 +1332,13 @@ function optionalIndexFields(entry: Record<string, unknown>): Partial<ApiEntry> 
         ? null
         : vendorOffering(raw as Record<string, unknown>);
   }
+  if ("usage_api" in entry) {
+    const raw = entry["usage_api"];
+    out["usage_api"] =
+      raw === null || typeof raw !== "object" || Array.isArray(raw)
+        ? null
+        : usageApiFacts(raw as Record<string, unknown>);
+  }
   if ("status" in entry) {
     out["status"] = typeof entry["status"] === "string" ? entry["status"] : null;
   }
@@ -1326,6 +1433,25 @@ function vendorOffering(raw: Record<string, unknown>): VendorOffering {
     verified_date: text("verified_date"),
     source_urls: Array.isArray(raw["source_urls"]) ? (raw["source_urls"] as string[]) : null,
     highlights,
+  };
+}
+
+/**
+ * Normalises a `usage_api:` block: every unknown becomes an explicit null.
+ * Only reached for a block the validator already accepted, so `checked_date`
+ * is always a real date string here.
+ */
+function usageApiFacts(raw: Record<string, unknown>): UsageApiFacts {
+  const text = (field: string): string | null =>
+    typeof raw[field] === "string" ? (raw[field] as string) : null;
+  return {
+    available: typeof raw["available"] === "boolean" ? (raw["available"] as boolean) : null,
+    method: typeof raw["method"] === "string" ? (raw["method"] as UsageApiMethod) : null,
+    path: text("path"),
+    docs_url: text("docs_url"),
+    limits: text("limits"),
+    notes: text("notes"),
+    checked_date: typeof raw["checked_date"] === "string" ? (raw["checked_date"] as string) : "",
   };
 }
 
@@ -1555,6 +1681,19 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       ? vendorOffering(offeringRaw as Record<string, unknown>)
       : null;
 
+  const usageApiErrors: string[] = [];
+  validateUsageApi(usageApiErrors, `${file}(${id})`, row["usage_api"]);
+  const usageApiRaw = row["usage_api"];
+  const usageApi =
+    usageApiErrors.length === 0 &&
+    usageApiRaw !== null &&
+    usageApiRaw !== undefined &&
+    typeof usageApiRaw === "object" &&
+    !Array.isArray(usageApiRaw)
+      ? usageApiFacts(usageApiRaw as Record<string, unknown>)
+      : null;
+  const nestedErrors = [...offeringErrors, ...usageApiErrors];
+
   const humanSteps =
     authType === "oauth"
       ? [
@@ -1565,7 +1704,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       : [];
 
   return {
-    ...(offeringErrors.length === 0 ? {} : { error: offeringErrors.join("; ") }),
+    ...(nestedErrors.length === 0 ? {} : { error: nestedErrors.join("; ") }),
     entry: {
       name: id,
       url: shardUrl(row["docs_url"]) ?? shardUrl(row["provider_url"]),
@@ -1600,6 +1739,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       billing: null,
       aggregators,
       offering,
+      usage_api: usageApi,
       vendor_url: shardUrl(row["provider_url"]),
       origin: "shard",
       origin_file: file,

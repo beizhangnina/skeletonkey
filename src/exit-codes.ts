@@ -47,6 +47,8 @@ export const EXIT = {
   backend_refused: 77,
   /** a secret-intake path was handed a payment-instrument-shaped value */
   card_number_rejected: 76,
+  /** `skeletonkey monitor run` found at least one invalid_key/usage_anomaly/error account */
+  monitor_alert: 78,
   /** `--timeout` fired */
   timeout: 124,
   /** the command could not be executed (EACCES) */

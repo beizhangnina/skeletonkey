@@ -252,6 +252,7 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
       register_key: { alias: "new-key-canary", platform: "Canary", domain: "api.canary.test" },
       ledger: { limit: 10 },
       disable: { alias: ACCOUNT, reason: "sweep" },
+      monitor_status: {},
     };
     expect(Object.keys(toolArgs).sort()).toEqual(SKELETONKEY_TOOLS.map((tool) => tool.name).sort());
     for (const tool of SKELETONKEY_TOOLS) {
