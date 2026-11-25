@@ -19,6 +19,7 @@ Two jobs, both idempotent:
 This script does not read the API index yaml. It only looks at the HTML that is
 already in public/, so it is safe to run on its own after a content edit.
 """
+import json
 import os
 import re
 import sys
@@ -104,14 +105,31 @@ def loc_for(path, html):
     return f'{SITE}/{rel.rsplit("/", 1)[0]}/'
 
 
+def hidden_page_paths():
+    """`/apis/<slug>/` and `/apis/aggregators/<slug>/` for every row or
+    aggregator apis.json marks hidden (the 2026-11-24 LLM set-aside). The page
+    stays on disk -- this only keeps it out of the sitemap. Returns an empty
+    set when apis.json has not been generated yet."""
+    apis_json = os.path.join(PUB, 'apis.json')
+    if not os.path.isfile(apis_json):
+        return set()
+    data = json.load(open(apis_json, encoding='utf-8'))
+    hidden = {f'/apis/{x["slug"]}/' for x in data.get('apis', []) if x.get('visibility') == 'hidden'}
+    hidden |= {f'/apis/aggregators/{a["slug"]}/' for a in data.get('aggregators', []) if a.get('visibility') == 'hidden'}
+    return hidden
+
+
 def write_sitemap():
     """Collect every page's URL and write public/sitemap.xml. Returns the locs."""
+    hidden = hidden_page_paths()
     urls = []
     for path in pages():
         html = open(path, encoding='utf-8').read()
         url = loc_for(path, html)
         if not url.startswith('https://'):
             raise SystemExit(f'refusing to write a non-https URL: {url}')
+        if url[len(SITE):] in hidden:
+            continue
         lastmod = time.strftime('%Y-%m-%d', time.localtime(os.path.getmtime(path)))
         urls.append((url, lastmod))
 

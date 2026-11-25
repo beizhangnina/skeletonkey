@@ -213,6 +213,7 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
       find_api: { capability: "embeddings" },
       list_keys: {},
       list_accounts: {},
+      signup_status: {},
       key_status: { alias: ALIAS },
       request_access: { platform: "Voyage AI", reason: "embed", est_budget: 4 },
       access_status: { request_id: requestId },

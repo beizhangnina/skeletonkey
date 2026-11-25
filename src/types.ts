@@ -122,6 +122,21 @@ export interface KeyMeta {
    * vendor you reach over plain HTTP on purpose -- a key goes into that header.
    */
   scheme?: UpstreamScheme;
+  /**
+   * Undefined/`"header"` (the default): the proxy injects `header`/`format`.
+   * `"env-only"`: the vendor authenticates some other way (e.g. a query
+   * parameter, like SerpApi's `api_key=`), so the proxy never injects a
+   * header for this key -- only `skeletonkey run --env NAME=vault://<alias>`
+   * reaches the raw secret.
+   */
+  injection?: KeyInjection;
+}
+
+export const KEY_INJECTIONS = ["header", "env-only"] as const;
+export type KeyInjection = (typeof KEY_INJECTIONS)[number];
+
+export function isKeyInjection(value: string): value is KeyInjection {
+  return (KEY_INJECTIONS as readonly string[]).includes(value);
 }
 
 export interface KeysFile {

@@ -662,13 +662,14 @@ its body into your `AGENTS.md`, or point to it from there.
 | --- | --- |
 | `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: what the vendor offers (`offering`: summary, categories, size, free tier, how to connect, its own catalog URL, up to 15 highlighted models/endpoints), the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
+| `signup_status(vendor?)` | ND-2 signup sessions (id, vendor, account, state, reason, timestamps — never a secret), and, for one vendor, its official URLs and remaining human steps. Read-only: there is no tool that can submit a key or complete a signup. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
 | `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. After an approved aggregator route it also carries `routed_via`, `routed_cost_usd`, `routed_http_status` and `routed_result` (the aggregator's answer). Opaque ids, statuses and that answer only — no key, no card, no OTP, no screenshot, no page text. |
 | `cancel_request(request_id, reason?)` | Cancels a request the agent raised, and closes any Secure Input Popup waiting on it. Agents may cancel; only a human approves. |
 | `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
 | `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
 | `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
-| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `auth_required` and `auth_headers` too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
+| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `access_modes`, `auth_required` and `auth_headers` (including `secret: false` for a required non-credential header) too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
 | `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
 | `ledger(alias?)` | Recent calls and a spend summary. `cost_usd: null` means unknown, not zero. |
 | `disable(alias)` | Stops injection **and** makes the proxy refuse calls to that domain locally with `403 {"error": "key_disabled"}`. The secret stays in the vault; only a human can re-enable it. |
@@ -828,6 +829,7 @@ editing the config and restarting.
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
 | `skeletonkey account add <name> --vendor <id>` | Registers a vendor account (metadata in `accounts.yaml`, never a secret). `--registered`, `--email-stdin` (masked hint only; plaintext `--email <value>` is refused), `--key-alias`, `--store-key --domain <d> [...]`, `--store-login [--url <u>]`, `--stdin`, `--yes`. See [Accounts (ND-1)](#accounts-nd-1). |
 | `skeletonkey account list` / `show <name>` / `disable <name>` / `enable <name>` | Lists, shows, or toggles one account and the vault entries it points at. `list`: `--json`, `--active`. `show`: `--json`. |
+| `skeletonkey signup list` / `start <vendor>` / `status [<vendor>]` / `complete <vendor>` / `abandon <vendor>` | On-demand signup for the six first-wave vendors: a guided human handoff, then bind the key via the ND-1 account path. See [Signup (ND-2)](#signup-nd-2). |
 | `skeletonkey disable --all` | **Kill switch.** Disables every key, voids pending approvals, closes any Secure Input Popup, and makes the proxy answer `403 {"error":"kill_switch"}` locally. Cleared by `skeletonkey resume`. |
 | `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
 | `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret, and every response is passed through the redactor. |
@@ -896,6 +898,25 @@ and neither is one whose only documented way to pay is a crypto wallet (x402 /
 MPP). SkeletonKey pays in fiat only, so `wallet-x402` is recorded as a fact
 about the vendor and is never routed to.
 
+Some vendors document **more than one** way in — glim.sh sells an API key after
+a top-up *and* answers a keyless x402 challenge; AStock's reads need no key
+while its integrator endpoints do. Those rows carry an optional
+`access_modes:` list, and `access_mode` stays the primary:
+
+```yaml
+access_mode: own-account        # the one SkeletonKey actually uses
+access_modes:
+  - own-account                 # element 0 must equal access_mode
+  - wallet-x402                 # recorded as a fact; never routed to
+```
+
+Element 0 is pinned to `access_mode` for the same reason `auth_headers[0]` is
+pinned to `auth_header`: every reader (CLI, MCP, routing) reads the single
+field, so a list that disagreed with it would be a second, silent answer to the
+same question. `null`/absent means `access_mode` is the whole story, so every
+row written before the list existed is unchanged. `skeletonkey apis show`
+prints it as `own-account (also wallet-x402)`.
+
 ### What a vendor offers: `offering`
 
 Two layers, both optional, every field null-when-unknown — so adding the block
@@ -960,10 +981,36 @@ Two fields sit alongside `auth_header` / `auth_format`:
   all, `true` when one is needed, `null` when nobody checked. Before it,
   `auth_header: null` had to mean both "needs no key" and "we never looked".
   A row may not claim `false` while naming a header.
-- **`auth_headers`** — a list of `{header, format, note}` for the vendors that
-  document more than one credential header. Each `format` must contain `{key}`,
-  at most 5, names unique, and element 0 must match `auth_header` /
-  `auth_format` when those are set, because that is the one the proxy injects.
+- **`auth_headers`** — a list of `{header, format, note, secret}` for the
+  vendors whose docs require more than one header: at most 5, names unique, and
+  element 0 must match `auth_header` / `auth_format` when those are set,
+  because that is the one the proxy injects.
+
+`secret` defaults to `true` — a credential, whose `format` must contain
+`{key}`. Pass `secret: false` for a header that is **required but is not a
+credential**; its `format` is then the literal value the vendor documents, or
+`null` when the vendor documents none, and the caller sends it. askRoger's
+reference demands three headers, only two of which are secrets:
+
+```yaml
+auth_required: true
+auth_header: api-key            # the one the proxy injects
+auth_format: "{key}"
+auth_headers:
+  - header: api-key
+    format: "{key}"
+  - header: Authorization
+    format: "Bearer {key}"      # a second credential, held by the caller
+  - header: source
+    format: null                # docs enumerate no accepted value
+    secret: false               # required, but not a secret
+    note: "The caller sends it."
+```
+
+Because `secret: false` headers are not credentials, they do **not** contradict
+`auth_required: false` — a keyless API may still require an API-version header.
+A `secret: false` element 0 is refused: the proxy injects element 0, so it has
+to be the credential.
 
 ### How `find_api` matches a capability
 
@@ -1104,6 +1151,12 @@ generated shards: the shards record `seen_in: [glasser, monid]` per provider, so
 a hand-written row that displaced a shard row keeps what the catalogs knew
 (carriage only — the shards publish no prices, so `per_call_price` stays `null`).
 
+`seen_in` also accepts **`vendor-direct`**, for a shard row read off the
+vendor's own pages with no aggregator in the loop. Such a row gets
+`aggregators: null` rather than three `carries: false` entries: no catalog was
+searched for it, so `false` would be a negative nobody established. See
+`data/apis/README.md` for how to add one.
+
 ### Keeping verified prices honest: `stale-check`
 
 A `verified_url` is a promise that somebody read a number off that page on a
@@ -1217,12 +1270,24 @@ Two rules, enforced by tests:
 
 Both rules are enforced across the whole merged index, not just `apis.yaml`.
 
-The entries shipped in this repo are all marked `example: true`, including the
-three that back the scenarios in
+Two kinds of row ship in this repo, and nothing in between.
+
+Seven are marked `example: true`, including the three that back the scenarios in
 [docs/v0.1-acceptance.md](docs/v0.1-acceptance.md) (`example-x-twitter-api`,
 `example-apify-scraping`, `example-voyage-embeddings`). They exist to show the
 shape of the file and to give `find_api` something to match. **They are not real
 offers and contain no verified prices.**
+
+The other fourteen are **vendor-direct** rows, read off each vendor's own pages
+with no sign-up and no API call: `nvidia-nim` and `treg`, plus the twelve
+vendors the treg `rea-growth` skill calls (`tinyfish`, `predictleads`,
+`dataforseo`, `akta`, `cloro`, `scrapecreators`, `serpapi`, `adyntel`,
+`anyapi`, `tikhub`, `crawl4ai`, `harvestapi`). Each names its `source` and the
+`checked_date` it was read, and the twelve also carry
+`status: docs-verified` — the vendor's own docs showed the endpoint *and* how it
+authenticates, and no call has been made. Nine of the twelve also appear in the
+generated shards; the hand-written row wins the merge and inherits what the
+catalogs knew about carriage.
 
 ## Accounts (ND-1)
 
@@ -1344,7 +1409,12 @@ full (`src/exit-codes.ts`): `usage` (64) for a bad flag or vendor id,
 target, `name_taken` (75) for a duplicate add without `--yes`,
 `backend_refused` (77) for the plaintext `file` backend without
 `SKELETONKEY_ALLOW_TEST_BACKEND=1`, and `entry_disabled` (71) when `run` is
-pointed at something an `account disable` turned off.
+pointed at something an `account disable` turned off. `vault_locked` (68)
+when the vault cannot be decrypted (wrong `SKELETONKEY_PASSPHRASE` or a
+modified file), and `card_number_rejected` (76) when the secret read for
+`--store-key` / `signup complete` is a 13-19 digit Luhn-valid number (spaces
+and dashes allowed): nothing is stored, `signup complete` leaves the session
+`needs_human`, and no digit of the value is printed.
 
 ### MCP: `list_accounts`
 
@@ -1353,6 +1423,38 @@ The MCP server exposes a read-only `list_accounts` tool: the same metadata as
 password, or a key — an agent gets a `vault://` reference and runs
 `skeletonkey run --env NAME=<ref> -- <command>` itself, or hands that exact
 command to a human.
+
+## Signup (ND-2)
+
+`skeletonkey signup` lets a human start registering one of six first-wave
+vendors — `apify`, `serpapi`, `firecrawl`, `exa`, `github`, `apollo` — and
+binds the resulting key into the account vault above once they have it. None
+of the six has a bundled browser driver, so it is always a guided human
+handoff today; see [docs/signup.md](docs/signup.md) for the full vendor
+table, the driver seam trusted host code can use later,
+and why `serpapi`'s key (a query parameter, not a header) is stored with
+`injection: "env-only"`.
+
+```bash
+skeletonkey signup list                     # the six vendors and their official URLs
+skeletonkey signup start apify              # opens the signup page, records a session,
+                                             #   and prints the steps -- status: needs_human
+# ... sign up and create the key in the browser yourself ...
+skeletonkey signup complete apify           # hidden prompt for the key; binds it into the vault
+#   vault://apify-main
+#   skeletonkey run --env APIFY_TOKEN=vault://apify-main -- <your command>
+skeletonkey signup status                   # every session and its state
+```
+
+`start` never claims success — its status line always says `status:
+needs_human` when (as today) no driver automated anything, and `--json`
+reports `{"status":"needs_human","reason":"no_driver",...}`. `complete` is the
+only command that ever touches the key, through the same hidden-prompt /
+`--stdin` / `--email-stdin` contract `account add` uses, and it prints only a
+`vault://` reference and the exact `skeletonkey run --env <ENV>=<ref> --
+<cmd>` example — never the key. The read-only MCP tool `signup_status` mirrors
+`signup status` plus one vendor's handoff info; there is no tool that can
+submit a key or complete a signup.
 
 ## Weekly monitor (ND-5)
 

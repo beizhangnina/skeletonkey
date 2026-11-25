@@ -5,6 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
 import {
+  effectiveVisibility,
   HIGHLIGHTS_MAX,
   loadApiIndex,
   rankByCapability,
@@ -67,6 +68,15 @@ import {
   type AccountAddOptions,
 } from "./accounts/cli.js";
 import {
+  cmdSignupAbandon,
+  cmdSignupComplete,
+  cmdSignupStart,
+  listSignupVendors,
+  signupStatusRows,
+  type SignupCompleteOptions,
+  type SignupStartOptions,
+} from "./signup/cli.js";
+import {
   DEFAULT_STALE_DAYS,
   httpFetcher,
   readStaleCache,
@@ -102,9 +112,31 @@ import {
   sameMailbox,
   type BwAccount,
 } from "./vault/bw-account.js";
+import { rejectIfPaymentCard } from "./secret-intake.js";
 
 const DEFAULT_HEADER = "Authorization";
 const DEFAULT_FORMAT = "Bearer {key}";
+
+/**
+ * Commander's default "unknown option" error echoes the raw token it was
+ * given, including anything after `=` -- so a typo like `--key=sk-...` would
+ * otherwise land that value in stderr. Patched once, process-wide, so every
+ * command (present and future) gets this for free.
+ */
+type UnknownOptionCommand = { unknownOption(flag: string): void };
+const originalUnknownOption = (Command.prototype as unknown as UnknownOptionCommand).unknownOption;
+(Command.prototype as unknown as UnknownOptionCommand).unknownOption = function (
+  this: Command,
+  flag: string,
+): void {
+  const eq = flag.indexOf("=");
+  let sanitized = eq === -1 ? flag : `${flag.slice(0, eq)}=<redacted>`;
+  // A short flag glued to its value (`-kVALUE`) would echo the value too.
+  if (!sanitized.startsWith("--") && sanitized.length > 2 && eq === -1) {
+    sanitized = `${sanitized.slice(0, 2)}<redacted>`;
+  }
+  originalUnknownOption.call(this, sanitized);
+};
 
 export function buildProgram(): Command {
   const program = new Command();
@@ -390,6 +422,89 @@ export function buildProgram(): Command {
       });
     });
 
+  const signup = program
+    .command("signup")
+    .description(
+      "on-demand vendor signup: a guided human handoff for the first-wave vendors, then bind the key",
+    );
+
+  signup
+    .command("list")
+    .description("list the first-wave vendors and their official signup/key-page URLs")
+    .option("--json", "machine-readable output", false)
+    .action((options: { json: boolean }) => {
+      withExitCodes("signup list", () => {
+        cmdSignupListPrint(options.json);
+      });
+    });
+
+  signup
+    .command("start <vendor>")
+    .description("start (or re-check) a vendor signup; stops for a human unless a driver is injected")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option("--no-open", "do not open the signup page in a browser")
+    .option("--json", "machine-readable output", false)
+    .action(
+      async (
+        vendor: string,
+        options: { account?: string; open: boolean; json: boolean; email?: string | boolean },
+      ) => {
+        await withExitCodes("signup start", async () => {
+          const startOptions: SignupStartOptions = {
+            noOpen: options.open === false,
+            json: options.json,
+            openUrl: systemOpener(),
+            ...(options.account === undefined ? {} : { account: options.account }),
+            ...(options.email === undefined ? {} : { email: options.email }),
+          };
+          await cmdSignupStart(vendor, startOptions);
+        });
+      },
+    );
+
+  signup
+    .command("status [vendor]")
+    .description("show signup sessions and their states")
+    .option("--json", "machine-readable output", false)
+    .action((vendor: string | undefined, options: { json: boolean }) => {
+      withExitCodes("signup status", () => {
+        cmdSignupStatusPrint(vendor, options.json);
+      });
+    });
+
+  signup
+    .command("complete <vendor>")
+    .description("bind the key a human just created into the vault (never prints the key)")
+    .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option(
+      "--email-stdin",
+      "read the account email from stdin (one line; two lines, email then key, with --stdin)",
+      false,
+    )
+    .option("--stdin", "read the key (or key+email, with --email-stdin) from stdin", false)
+    .option("--yes", "overwrite an existing account/session with the same name without asking", false)
+    .action(async (vendor: string, options: SignupCompleteOptions) => {
+      await withExitCodes("signup complete", async () => {
+        await cmdSignupComplete(vendor, options);
+      });
+    });
+
+  signup
+    .command("abandon <vendor>")
+    .description("mark a vendor's signup session abandoned")
+    .action((vendor: string) => {
+      withExitCodes("signup abandon", () => {
+        cmdSignupAbandon(vendor);
+      });
+    });
+
   const monitor = program
     .command("monitor")
     .description("weekly local check of ND-1 accounts against their vendor's own usage API");
@@ -535,7 +650,8 @@ export function buildProgram(): Command {
     .argument("[query]", "only entries matching this capability or name")
     .option("--limit <n>", "entries to show", (value: string) => Number(value), 10)
     .option("--json", "machine-readable output", false)
-    .action((query: string | undefined, options: { limit: number; json: boolean }) => {
+    .option("--all", "include hidden rows (e.g. LLM APIs set aside from the catalog)", false)
+    .action((query: string | undefined, options: { limit: number; json: boolean; all: boolean }) => {
       cmdApisShow(query, options);
     });
 
@@ -1257,6 +1373,7 @@ async function storeApiKey(alias: string, options: AddOptions): Promise<void> {
 
   const secret = (await readSecret(options.stdin)).trim();
   if (!secret) throw new Error("Empty secret; nothing stored.");
+  rejectIfPaymentCard(secret);
 
   await store.putApiKey(alias, secret);
 
@@ -1678,6 +1795,39 @@ function cmdAccountShow(name: string, json: boolean): void {
   if (runCommand !== null) console.log(`Run:         ${runCommand}`);
 }
 
+function cmdSignupListPrint(json: boolean): void {
+  const vendors = listSignupVendors();
+  if (json) {
+    console.log(JSON.stringify(vendors, null, 2));
+    return;
+  }
+  printTable(
+    ["VENDOR", "SIGNUP URL", "KEY PAGE URL", "AUTOMATION"],
+    vendors.map((v) => [v.vendor, v.signup_url ?? "-", v.key_page_url ?? "-", v.automation]),
+  );
+}
+
+function cmdSignupStatusPrint(vendor: string | undefined, json: boolean): void {
+  const home = skeletonKeyHome();
+  const rows = signupStatusRows(vendor, home);
+  if (json) {
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
+  if (rows.length === 0) {
+    console.log(
+      vendor === undefined
+        ? "No signup sessions yet. Start one with: skeletonkey signup start <vendor>"
+        : `No signup sessions for "${vendor}". Start one with: skeletonkey signup start ${vendor}`,
+    );
+    return;
+  }
+  printTable(
+    ["ID", "VENDOR", "ACCOUNT", "STATE", "REASON", "UPDATED"],
+    rows.map((row) => [row.id, row.vendor, row.account, row.state, row.reason ?? "-", row.updated]),
+  );
+}
+
 function cmdAccountEnableDisable(name: string, disabled: boolean): void {
   const home = skeletonKeyHome();
   const account = setAccountDisabled(name, disabled, home);
@@ -2075,6 +2225,7 @@ function newest(a: string | null, b: string | null): string | null {
 interface ApisShowOptions {
   limit: number;
   json: boolean;
+  all: boolean;
 }
 
 /**
@@ -2082,21 +2233,33 @@ interface ApisShowOptions {
  * free, how to connect, and a few highlighted models/endpoints. The offering
  * block is optional on every row, so the absence of one is printed as such
  * rather than as a row of empty fields.
+ *
+ * Hidden rows (e.g. the 2026-11-24 LLM set-aside) are left out of a browse or
+ * capability search by default -- pass `--all` to include them. An EXACT name
+ * match always shows, hidden or not: that is a lookup, not browsing.
  */
 function cmdApisShow(query: string | undefined, options: ApisShowOptions): void {
   const home = skeletonKeyHome();
   const index = loadApiIndex({ home });
   const asked = query?.trim() ?? "";
+  const exactName = new Set(
+    index.entries
+      .filter((entry) => asked !== "" && entry.name.toLowerCase() === asked.toLowerCase())
+      .map((entry) => entry.name),
+  );
+  const visible = options.all
+    ? index.entries
+    : index.entries.filter((entry) => exactName.has(entry.name) || effectiveVisibility(entry) !== "hidden");
   const matched =
     asked === ""
-      ? index.entries
-      : rankByCapability(index.entries, asked).map((scored) => scored.entry);
+      ? visible
+      : rankByCapability(visible, asked).map((scored) => scored.entry);
   // A name is what a human types when they already know the vendor, and the
   // capability matcher is whole-word, so `treg` alone would miss `treg.to`.
   const byName =
     asked === ""
       ? []
-      : index.entries.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
+      : visible.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
   const seen = new Set<string>();
   const entries = [...byName, ...matched].filter((entry) => {
     if (seen.has(entry.name)) return false;
@@ -2118,6 +2281,7 @@ function cmdApisShow(query: string | undefined, options: ApisShowOptions): void 
             name: entry.name,
             origin: entry.origin,
             access_mode: entry.access_mode,
+            access_modes: entry.access_modes ?? null,
             url: entry.url,
             domain: entry.domain ?? null,
             auth_required: entry.auth_required ?? null,
@@ -2125,6 +2289,7 @@ function cmdApisShow(query: string | undefined, options: ApisShowOptions): void 
             status: entry.status ?? null,
             checked_date: entry.checked_date,
             offering: entry.offering ?? null,
+            visibility: effectiveVisibility(entry),
           })),
         },
         null,
@@ -2194,9 +2359,30 @@ function printOffering(entry: IndexEntry): void {
     for (const text of wrapped(label, value)) console.log(text);
   };
   const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
+  // Extra access modes are printed next to the primary one rather than instead
+  // of it: the primary is what SkeletonKey will actually use.
+  const alsoModes = (entry.access_modes ?? []).filter((mode) => mode !== entry.access_mode);
+  const modes = `${entry.access_mode ?? "access unknown"}${
+    alsoModes.length === 0 ? "" : ` (also ${alsoModes.join(", ")})`
+  }`;
   console.log("");
-  console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+  console.log(`${entry.name}  [${origin}, ${modes}]`);
   printUsageApi(entry);
+
+  // A vendor that requires more than one header: an agent that sends only the
+  // injected one gets a 400 it cannot explain.
+  const headers = entry.auth_headers ?? [];
+  if (headers.length > 1) {
+    line(
+      "headers",
+      `${headers.length} required by the vendor's docs -- SkeletonKey injects the first; you send the rest`,
+    );
+    for (const item of headers) {
+      const value = item.secret === false ? (item.format ?? "value not documented") : (item.format ?? "{key}");
+      const kind = item.secret === false ? "not a secret" : "credential";
+      console.log(`    - ${item.header}: ${value}  [${kind}]${item.note === null || item.note === undefined ? "" : ` -- ${item.note}`}`);
+    }
+  }
 
   const offering = entry.offering ?? null;
   if (offering === null) {

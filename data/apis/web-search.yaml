@@ -18,6 +18,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/exa"
     checked_date: 2026-10-24
+    official_docs_url: "https://exa.ai/docs"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://exa.ai/llms-full.txt"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +82,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/keenable"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.keenable.ai/"
+    auth:
+      type: "api_key"
+      header: "X-API-Key"
+      format: "keen_<API_KEY>"
+      docs_url: "https://docs.keenable.ai/authentication"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: 0.01
+      unit: "per request (x402, USDC on Base)"
+      pricing_url: null
+      notes: "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each."
+    endpoints:
+      - method: "POST"
+        path: "/v1/search"
+        summary: "Search Keenable's web index and return ranked pages with URLs, titles, and snippets."
+        returns: "Ranked search results with URLs, titles, and snippets."
+        docs_url: "https://docs.keenable.ai/api-reference"
+      - method: "GET"
+        path: "/v1/fetch"
+        summary: "Fetch a known URL and return its page content as markdown with metadata."
+        returns: "Page content as markdown, with title and author."
+        docs_url: "https://docs.keenable.ai/api-reference"
+      - method: "POST"
+        path: "/v1/fetch"
+        summary: "Fetch multiple pages in one request, returning markdown, prompt answers, or typed JSON."
+        returns: "Up to 20 pages per call, each as markdown, a prompt’s answer or typed JSON."
+        docs_url: "https://docs.keenable.ai/api-reference"
+      - method: "GET"
+        path: "/v1/auth/user"
+        summary: "Check an API key and identify the user and organization associated with it."
+        returns: "The user who created the key and the organization it belongs to."
+        docs_url: "https://docs.keenable.ai/api-reference"
+      - method: "POST"
+        path: "/v1/monitors"
+        summary: "Create a monitor that watches a topic for new pages or watches one page for changes."
+        returns: "The created monitor; on creation, the response includes the webhook signing secret."
+        docs_url: "https://docs.keenable.ai/api-reference/monitors/create.md"
     usage_api:
       available: true
       method: "GET"
@@ -93,6 +146,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/litescrape"
     checked_date: 2026-10-24
+    official_docs_url: "https://litescrape.com/docs"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://litescrape.com/docs/bluesky-profile"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: 10
+      unit: "per 1,000 requests"
+      pricing_url: null
+      notes: "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls."
+    endpoints:
+      - method: "GET"
+        path: "/api/reddit/subreddit-posts"
+        summary: "Returns public posts from a subreddit, with sort/time controls and pagination for fetching further pages."
+        returns: "JSON with search_parameters, a posts array (id, title, link, author, timestamps, content_html, subreddit) and pagination info."
+        docs_url: "https://litescrape.com/docs/reddit-subreddit-posts"
+      - method: "GET"
+        path: "/api/tripadvisor/reviews"
+        summary: "Fetches public reviews for a Tripadvisor place, with offset/count paging, sort order and optional translation."
+        returns: "JSON including search_metadata, search_parameters, search_information, sort, reviews and pagination."
+        docs_url: "https://litescrape.com/docs/tripadvisor-reviews"
+      - method: "GET"
+        path: "/api/bluesky/profile"
+        summary: "Looks up a public Bluesky profile by handle or did:plc identifier."
+        returns: "JSON with search_parameters and a profile object (did, handle, display_name, description, avatar, follower/follows/post counts)."
+        docs_url: "https://litescrape.com/docs/bluesky-profile"
+      - method: "GET"
+        path: "/api/facebook/search-profiles"
+        summary: "Searches public Facebook profiles by name, returning up to a small limit of results (Alpha)."
+        returns: "Profile search results limited by a 'limit' parameter (maximum 12 per response)."
+        docs_url: "https://litescrape.com/docs/facebook-search-profiles"
+      - method: "GET"
+        path: "/api/google/search"
+        summary: "Returns Google search results for a query, including the AI Overview and People also ask sections."
+        returns: "Google search results including AI Overview and People also ask."
+        docs_url: "https://litescrape.com/docs"
     usage_api:
       available: true
       method: "GET"
@@ -118,6 +210,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/octen"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.octen.ai/"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages."
+    endpoints:
+      - method: "POST"
+        path: "/pulse-search"
+        summary: "Generates the most likely URLs for a query quickly and returns them in ranked order; lite mode gives URL and title, standard adds highlights, content, images."
+        returns: "Ranked results with title and URL (lite), plus highlights, full content, and images in standard mode."
+        docs_url: "https://docs.octen.ai/api-reference/pulse-search"
+      - method: "POST"
+        path: "/broad-search"
+        summary: "Splits a query into several related sub-queries, searches them concurrently, and groups the results under each sub-query."
+        returns: "The generated sub-queries plus per-sub-query result lists (title, url, highlight, full content, authors, timestamps)."
+        docs_url: "https://docs.octen.ai/api-reference/broad-search"
+      - method: "POST"
+        path: "/search"
+        summary: "Web Search: searches the live web for ranked results with optional filters, highlights, and full page content."
+        returns: "Ranked web results with highlights and full content."
+        docs_url: "https://docs.octen.ai/llms.txt"
+      - method: "POST"
+        path: "/extract"
+        summary: "Turns URLs into clean markdown content, with optional query-focused highlights, page classification, and multimedia resources."
+        returns: "Clean markdown content extracted from the supplied URLs."
+        docs_url: "https://docs.octen.ai/llms.txt"
+      - method: "POST"
+        path: "/place-search"
+        summary: "Searches for places matching a query and returns each as a place card with address, coordinates, contact details, opening status, rating."
+        returns: "Place cards plus optional web results and query/location metadata."
+        docs_url: "https://docs.octen.ai/api-reference/place-search.md"
     usage_api:
       available: null
       method: null
@@ -143,6 +269,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/search1api"
     checked_date: 2026-10-24
+    official_docs_url: "https://s1.dev/docs"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per request"
+      pricing_url: null
+      notes: "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20)."
+    endpoints:
+      - method: "POST"
+        path: "/search"
+        summary: "Web search that returns ranked pages for a topic or question; can also crawl top results when crawl_results is set."
+        returns: "Ranked web pages (links, snippets), optionally with full page text via crawl_results."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/crawl"
+        summary: "Fetches a single known public URL and returns the page as clean, readable content instead of links."
+        returns: "Readable page content for agents, summarization, and retrieval workflows."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/screenshot"
+        summary: "Renders a public webpage in a managed browser as a PNG, JPEG, or WebP image with viewport, readiness, and capture-area controls."
+        returns: "Image binary data (image/png shown in the response body), not JSON; costs 2 credits on success."
+        docs_url: "https://s1.dev/docs/basic/screenshot"
+      - method: "POST"
+        path: "/extract"
+        summary: "Extracts typed fields from a URL using an extraction prompt and a JSON Schema so the output follows a predictable shape."
+        returns: "Data that follows the JSON Schema you supply as response_format."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+      - method: "POST"
+        path: "/deepcrawl"
+        summary: "Asynchronously crawls many pages of one site, scoped with include_paths/exclude_paths and capped with max_pages."
+        returns: "202 Accepted with a taskId; poll GET /deepcrawl/status/{taskId} until finished (JSON or ZIP output)."
+        docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
     usage_api:
       available: true
       method: "GET"
@@ -168,6 +328,25 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpapi"
     checked_date: 2026-10-24
+    official_docs_url: "https://serpapi.com/search-api"
+    pricing:
+      model: "subscription"
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages."
+    endpoints:
+      - method: "GET"
+        path: "/search"
+        summary: "Main search endpoint; scrapes Google search results when called with engine=google plus query parameters such as q and location."
+        returns: "Google search page results as structured data (JSON by default; Markdown if requested via output=md)."
+        docs_url: "https://serpapi.com/search-api"
+      - method: "GET"
+        path: "/search.md"
+        summary: "Markdown variant of the search request used to get token-efficient Markdown output instead of JSON."
+        returns: "Search results rendered as clean Markdown for LLMs and AI agents."
+        docs_url: "https://serpapi.com/llms.txt"
     usage_api:
       available: true
       method: "GET"
@@ -193,6 +372,15 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serper"
     checked_date: 2026-10-24
+    official_docs_url: "https://serper.dev"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: "queries"
+      pricing_url: null
+      notes: "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null

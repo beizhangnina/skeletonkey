@@ -18,6 +18,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/agoda"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "Agoda's developer hub documents partner-only supply and demand APIs; access requires becoming an approved partner, with no self-serve signup."
     usage_api:
       available: null
       method: null
@@ -43,6 +45,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/booking"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "Booking.com's developer APIs are partner-only, requiring Managed Affiliate Partner status through Partner Centre; no public pricing is documented."
     usage_api:
       available: null
       method: null
