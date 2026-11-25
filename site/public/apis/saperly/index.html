@@ -22,8 +22,8 @@
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 </head>
 <body class="apis-page">
@@ -55,7 +55,7 @@
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-26</span></p>
 <p class="ap-lede">Saperly is a telephony layer for AI agents: one API call provisions a real phone number and binds it to a reusable &#x27;connection&#x27; that either runs a hosted voice agent or relays turns to your own runtime, with voice, SMS, 10DLC/consent compliance and an audit trail handled by Saperly.</p>
 <section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
-<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register Saperly for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>), then let your agent find and register Saperly for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.saperly.com</code></dd><dt>Auth</dt><dd>api_key · <code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://saperly.com/docs/" rel="noopener">https://saperly.com/docs/</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>google, email</dd><dt>Signup page</dt><dd><a href="https://saperly.com/sign-in" rel="noopener">https://saperly.com/sign-in</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>No</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free_tier+payg</dd><dt>Unit</dt><dd>per voice minute, per SMS segment, per number per month</dd><dt>Free tier</dt><dd>Yes · &#x27;$5 signup credit - No card to start - Credit never expires.&#x27; Pricing FAQ: &#x27;Every new account starts with $5 of free usage that never expires - enough to cover your first phone number and early calls and messages.&#x27;</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl><div class="ap-scroll"><table class="ap-table"><thead><tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Per</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">Pay as you go - voice (webhook/manual runtime)</th><td data-label="Price">$0.13/min</td><td data-label="Per">per minute</td><td data-label="Notes">&#x27;One flat rate to any destination&#x27;</td></tr><tr><th scope="row">Pay as you go - voice (hosted)</th><td data-label="Price">$0.26/min</td><td data-label="Per">per minute</td><td data-label="Notes">&#x27;One flat rate to any destination&#x27;</td></tr><tr><th scope="row">Pay as you go - SMS</th><td data-label="Price">$0.02/segment US/CA, $0.03/segment UK/EU/AU/JP/IL, $0.05/segment MX/BR/ZA</td><td data-label="Per">per SMS segment</td><td data-label="Notes">&#x27;Inbound included.&#x27; 10DLC US messaging registration handled by Saperly; &#x27;Carrier fees apply.&#x27;</td></tr><tr><th scope="row">Pay as you go - phone numbers</th><td data-label="Price">from $2/month</td><td data-label="Per">per number per month</td><td data-label="Notes">&#x27;from $2/month per number, by country. Your $5 credit covers the first.&#x27; Rent is swept from the prepaid balance.</td></tr><tr><th scope="row">Contact us</th><td data-label="Price">Custom pricing</td><td data-label="Per">n/a</td><td data-label="Notes">Enterprise terms: volume pricing across voice + SMS, custom MSA + Net-30/60, dedicated number pools, priority support + SLAs, dedicated Slack channel. Contact is mailto:hello@saperly.com.</td></tr></tbody></table></div><p class="ap-note">Prices as shown on the <a href="https://saperly.com/#pricing" rel="noopener">vendor pricing page</a> on 2026-10-26. Check there before you buy.</p></section>
@@ -77,7 +77,7 @@
       </svg>
     </a>
     <div class="foot-bar">
-      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
       <nav class="foot-nav" aria-label="Footer">
         <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
         <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>

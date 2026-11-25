@@ -22,8 +22,8 @@
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 </head>
 <body class="apis-page">
@@ -55,7 +55,7 @@
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">Kroger&#x27;s public developer APIs for US grocery retail: product search with store-level price and fulfilment availability, store locations, customer identity, and adding items to a customer&#x27;s cart.</p>
 <section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
-<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register Kroger for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>), then let your agent find and register Kroger for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.kroger.com/v1</code></dd><dt>Auth</dt><dd>oauth · <code>Authorization: Bearer {access_token}</code></dd><dt>Docs</dt><dd><a href="https://developer.kroger.com/documentation/public/getting-started/quick-start" rel="noopener">https://developer.kroger.com/documentation/public/getting-started/quick-start</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://developer.kroger.com/create-account" rel="noopener">https://developer.kroger.com/create-account</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>No</dd><dt>Other checks</dt><dd>email verification</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free</dd><dt>Unit</dt><dd>—</dd><dt>Free tier</dt><dd>Yes · Public APIs are free with self-service registration; no fees are published anywhere on the developer portal. Access is bounded by daily per-endpoint rate limits instead: Products 10,000 calls/day, Cart 5,000/day, Identity 5,000/day, Locations 1,600/day per endpoint. Limits are shared across all clients and reset 24 hours after the first call to an endpoint.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl></section>
@@ -77,7 +77,7 @@
       </svg>
     </a>
     <div class="foot-bar">
-      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
       <nav class="foot-nav" aria-label="Footer">
         <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
         <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>

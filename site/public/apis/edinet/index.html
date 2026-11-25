@@ -22,8 +22,8 @@
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 </head>
 <body class="apis-page">
@@ -55,7 +55,7 @@
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-26</span></p>
 <p class="ap-lede">EDINET is the Japanese Financial Services Agency&#x27;s statutory disclosure system. Its v2 REST API lists the documents filed on a given day (metadata JSON) and downloads a chosen filing as XBRL, PDF, an attachment archive or English/CSV data.</p>
 <section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
-<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register EDINET for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>), then let your agent find and register EDINET for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.edinet-fsa.go.jp/api/v2</code></dd><dt>Auth</dt><dd>api_key · Query parameter <code>Subscription-Key</code></dd><dt>Docs</dt><dd><a href="https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html" rel="noopener">https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://api.edinet-fsa.go.jp/api/auth/index.aspx?mode=1" rel="noopener">https://api.edinet-fsa.go.jp/api/auth/index.aspx?mode=1</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>Yes</dd><dt>Other checks</dt><dd>True</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free</dd><dt>Unit</dt><dd>—</dd><dt>Free tier</dt><dd>Yes · Free government open-data service. The EDINET API v2 specification documents the whole account-creation and API-key issuance flow with no payment step and names no fee, and the EDINET terms of use let anyone use the content under Japan&#x27;s Public Data License (PDL) 1.0; the only stated limits are operational (&#x27;the FSA may apply access restrictions depending on load&#x27; and a ban on high-volume bursts).</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl></section>
@@ -77,7 +77,7 @@
       </svg>
     </a>
     <div class="foot-bar">
-      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
       <nav class="foot-nav" aria-label="Footer">
         <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
         <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>

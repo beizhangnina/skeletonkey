@@ -22,8 +22,8 @@
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 </head>
 <body class="apis-page">
@@ -55,7 +55,7 @@
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">GTM data API over Sumble&#x27;s company knowledge graph: organization and tech-stack lookups, hiring/project signals, people and team records with reporting lines, and list/intelligence endpoints for account research and CRM enrichment.</p>
 <section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
-<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register Sumble for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>), then let your agent find and register Sumble for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.sumble.com/v9/</code></dd><dt>Auth</dt><dd>api_key · <code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://docs.sumble.com/api" rel="noopener">https://docs.sumble.com/api</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://sumble.com/" rel="noopener">https://sumble.com/</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>No</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free_tier+subscription</dd><dt>Unit</dt><dd>per credit</dd><dt>Free tier</dt><dd>Yes · Free plan: 500 credits a month and 7 signals a week, first page of search results. Docs: API access is available on all plans, and signing up with a work email automatically unlocks a 30-day Pro trial with no credit card required.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl><div class="ap-scroll"><table class="ap-table"><thead><tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Per</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">Free</th><td data-label="Price">USD 0</td><td data-label="Per"></td><td data-label="Notes">500 credits a month; 7 signals a week; Tech, Job Function and Firmographic filters; first page of results; Slack integration</td></tr><tr><th scope="row">Pro</th><td data-label="Price">USD 99/month</td><td data-label="Per">per month</td><td data-label="Notes">Docs state &#x27;$99 per user / month&#x27;. 9,900 credits a month; up to 20 signals a day; MCP server; full-text search; reporting hierarchy; 10 pages of results</td></tr><tr><th scope="row">Enterprise</th><td data-label="Price"></td><td data-label="Per"></td><td data-label="Notes">&#x27;Talk to Sales&#x27; — no price shown. Adds onboarding, RevOps/SFDC integrations, dedicated support, company-wide signal definition.</td></tr></tbody></table></div><p class="ap-note">Prices as shown on the <a href="https://sumble.com/pricing" rel="noopener">vendor pricing page</a> on 2026-10-25. Check there before you buy.</p></section>
@@ -77,7 +77,7 @@
       </svg>
     </a>
     <div class="foot-bar">
-      <p class="foot-meta"><span class="ver">skeletonkey v0.1</span><span class="ver">MIT license</span></p>
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
       <nav class="foot-nav" aria-label="Footer">
         <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
         <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
