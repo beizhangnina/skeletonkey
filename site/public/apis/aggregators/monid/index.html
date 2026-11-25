@@ -6,6 +6,7 @@
 <title>Monid — aggregator gateway — SkeletonKey</title>
 <meta name="description" content="An aggregation gateway where an agent discovers, inspects and runs third-party data endpoints at runtime through one key and one wallet, instead of signing">
 <link rel="canonical" href="https://skeletonkey.run/apis/aggregators/monid/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/aggregators/monid/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,7 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,6 +54,7 @@
 <h1 class="ap-title">Monid</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">An aggregation gateway where an agent discovers, inspects and runs third-party data endpoints at runtime through one key and one wallet, instead of signing up with each provider. Exposed as an HTTP API, MCP server, CLI and agent Skill, with an optional x402 crypto payment path.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://monid.ai" rel="noopener">https://monid.ai</a></dd><dt>API base URL</dt><dd><code>https://api.monid.ai</code></dd><dt>Auth</dt><dd><code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://monid.ai/docs" rel="noopener">https://monid.ai/docs</a></dd><dt>Catalog size claimed</dt><dd>1,700+ tools across 55+ providers (homepage); the docs site states &quot;1,800+ tools &amp; APIs&quot;</dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>google</dd><dt>Signup page</dt><dd><a href="https://app.monid.ai/?onboarding=1" rel="noopener">https://app.monid.ai/?onboarding=1</a></dd><dt>Card required</dt><dd>No</dd><dt>Free credit or trial</dt><dd>New accounts start with $1 in free credit.</dd></dl></section>
 <section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>prepaid_credits, payg, x402</dd><dt>How it bills</dt><dd>Pay-as-you-go from a prepaid wallet, no subscriptions or contracts: per-call flat fee or per-result fee with an optional base fee. Discover and inspect are free; runs are billed. New accounts start with $1 in free credit. Alternatively, runs can be paid per-call on-chain in USDC via x402 with no workspace balance at all.</dd><dt>Payment methods</dt><dd>card, credits (prepaid wallet), crypto/x402 (USDC on Base mainnet or Monad mainnet)</dd><dt>Fees stated</dt><dd>Minimum price: $0.01. Monid raises the advertised price to this floor if the run&#x27;s quote is lower.</dd><dt>Rate limits</dt><dd>None published</dd><dt>Pricing page</dt><dd><a href="https://monid.ai/docs/guide/how-it-works" rel="noopener">https://monid.ai/docs/guide/how-it-works</a></dd></dl></section>

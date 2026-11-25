@@ -6,17 +6,17 @@
 <title>百度千帆 API — SkeletonKey API index</title>
 <meta name="description" content="Baidu AI Cloud&#x27;s Qianfan platform hosts ERNIE plus third-party models (DeepSeek, Qwen, GLM, Kimi, InternVL) behind an OpenAI-compatible REST API, and adds ">
 <link rel="canonical" href="https://skeletonkey.run/apis/baidu-qianfan/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/baidu-qianfan/">
 <meta property="og:site_name" content="SkeletonKey">
 <meta property="og:title" content="百度千帆 API — SkeletonKey API index">
-<meta property="og:description" content="Baidu AI Cloud&#x27;s Qianfan platform hosts ERNIE plus third-party models (DeepSeek, Qwen, GLM, Kimi, InternVL) behind an OpenAI-compatible REST API, and adds">
+<meta property="og:description" content="Baidu AI Cloud&#x27;s Qianfan platform hosts ERNIE plus third-party models (DeepSeek, Qwen, GLM, Kimi, InternVL) behind an OpenAI-compatible REST API, and adds ">
 <meta property="og:image" content="https://skeletonkey.run/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,6 +54,8 @@
 <h1 class="ap-title">百度千帆</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-26</span></p>
 <p class="ap-lede">Baidu AI Cloud&#x27;s Qianfan platform hosts ERNIE plus third-party models (DeepSeek, Qwen, GLM, Kimi, InternVL) behind an OpenAI-compatible REST API, and adds fine-tuning, datasets, knowledge bases and Agent building.</p>
+<section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register 百度千帆 for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://qianfan.baidubce.com/v2</code></dd><dt>Auth</dt><dd>api_key · <code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://cloud.baidu.com/doc/qianfan/index.html" rel="noopener">https://cloud.baidu.com/doc/qianfan/index.html</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>unknown</dd><dt>Signup page</dt><dd><a href="https://login.bce.baidu.com/new-reg" rel="noopener">https://login.bce.baidu.com/new-reg</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>Yes</dd><dt>Other checks</dt><dd>Real-name verification (实名认证) is required to use Qianfan ModelBuilder: individual verification by face scan (个人刷脸认证) or bank card (个人银行卡认证), or enterprise verification.</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free_tier+payg</dd><dt>Unit</dt><dd>元/千tokens (CNY per 1,000 tokens)</dd><dt>Free tier</dt><dd>Yes · From 2025-10-24, Qianfan is auto-activated on first visit after accepting the user agreement and grants free tokens: 100万 (1,000,000) tokens valid 3 months for each of 17 listed preset models (ERNIE-4.5-Turbo-128K/32K/VL, ERNIE-X1-Turbo-32K, DeepSeek-R1/V3/V3.1 variants, Kimi-K2-Instruct, Qwen3 variants, bge-large-en/zh, qianfan-sug-8k). Free quota covers online inference only, not batch inference. The quick-start page also advertises a 20元 voucher for new users after real-name verification.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl><div class="ap-scroll"><table class="ap-table"><thead><tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Per</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">ERNIE-5.1 输入 (input &lt;=32k)</th><td data-label="Price">0.004</td><td data-label="Per">元/千tokens</td><td data-label="Notes">按量后付费 / pay-as-you-go online inference</td></tr><tr><th scope="row">ERNIE-5.1 输出 (input &lt;=32k)</th><td data-label="Price">0.018</td><td data-label="Per">元/千tokens</td><td data-label="Notes">按量后付费 / pay-as-you-go online inference</td></tr><tr><th scope="row">ERNIE-5.0 输入 (input &lt;=32k)</th><td data-label="Price">0.006</td><td data-label="Per">元/千tokens</td><td data-label="Notes"></td></tr><tr><th scope="row">ERNIE-5.0 输出 (input &lt;=32k)</th><td data-label="Price">0.024</td><td data-label="Per">元/千tokens</td><td data-label="Notes"></td></tr><tr><th scope="row">ERNIE-4.5-Turbo-32K 输入</th><td data-label="Price">0.0008</td><td data-label="Per">元/千tokens</td><td data-label="Notes">批量推理 (batch) 0.00032 元/千tokens; 命中缓存 0.0002 元/千tokens</td></tr><tr><th scope="row">ERNIE-4.5-Turbo-32K 输出</th><td data-label="Price">0.0032</td><td data-label="Per">元/千tokens</td><td data-label="Notes">批量推理 (batch) 0.00128 元/千tokens</td></tr><tr><th scope="row">DeepSeek-V4-Pro 输入</th><td data-label="Price">0.012</td><td data-label="Per">元/千tokens</td><td data-label="Notes"></td></tr><tr><th scope="row">DeepSeek-V4-Pro 输出</th><td data-label="Price">0.024</td><td data-label="Per">元/千tokens</td><td data-label="Notes"></td></tr><tr><th scope="row">ERNIE-4.5-Turbo-32K 系列预置服务共享量包 1亿 tokens</th><td data-label="Price">126</td><td data-label="Per">元 (折后价, 6个月有效期)</td><td data-label="Notes">原价 140 元, 90% 折扣; TPM=400K, RPM=5K</td></tr><tr><th scope="row">ERNIE-4.5-Turbo-32K 系列预置服务共享量包 10亿 tokens</th><td data-label="Price">1,120</td><td data-label="Per">元 (折后价, 6个月有效期)</td><td data-label="Notes">原价 1,400 元, 80% 折扣; TPM=1000K, RPM=5K</td></tr></tbody></table></div><p class="ap-note">Prices as shown on the <a href="https://cloud.baidu.com/doc/qianfan/s/wmh4sv6ya" rel="noopener">vendor pricing page</a> on 2026-10-26. Check there before you buy.</p></section>

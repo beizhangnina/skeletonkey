@@ -6,6 +6,7 @@
 <title>Sonilo API API — SkeletonKey API index</title>
 <meta name="description" content="Generates licensed music, sound effects, combined soundtracks, dubbing and subtitle translation from a video, text prompt or audio file, plus audio ducking">
 <link rel="canonical" href="https://skeletonkey.run/apis/sonilo/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skeletonkey.run/apis/sonilo/">
 <meta property="og:site_name" content="SkeletonKey">
@@ -16,7 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
@@ -42,6 +42,9 @@
         <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
       </svg>
     </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
     <a class="head-link head-apis" href="/apis/">API index</a>
     <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
   </div>
@@ -51,6 +54,8 @@
 <h1 class="ap-title">Sonilo API</h1>
 <p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-25</span></p>
 <p class="ap-lede">Generates licensed music, sound effects, combined soundtracks, dubbing and subtitle translation from a video, text prompt or audio file, plus audio ducking and video-to-brief analysis, as async REST jobs.</p>
+<section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register Sonilo API for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.sonilo.com/v1</code></dd><dt>Auth</dt><dd>api_key · <code>Authorization: Bearer {key}</code></dd><dt>Docs</dt><dd><a href="https://platform.sonilo.com/docs" rel="noopener">https://platform.sonilo.com/docs</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>google, email</dd><dt>Signup page</dt><dd><a href="https://platform.sonilo.com/sign-up" rel="noopener">https://platform.sonilo.com/sign-up</a></dd><dt>Card required</dt><dd>No</dd><dt>Phone required</dt><dd>No</dd><dt>Other checks</dt><dd>Sign-up is a hosted auth widget (Continue with Google or email); the reader flagged a possible bot check on the page. Top-ups are processed by Stripe.</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><dl class="ap-dl"><dt>Model</dt><dd>free_tier+payg</dd><dt>Unit</dt><dd>per second of output duration (also quoted per minute); dubbing and proofread are per language</dd><dt>Free tier</dt><dd>Yes · &#x27;Start with 17 free trials (1-2 per endpoint), then pay as you go.&#x27; Every endpoint tile on the pricing page lists a &#x27;Free trial call&#x27;.</dd><dt>Minimum top-up</dt><dd>None stated</dd></dl><div class="ap-scroll"><table class="ap-table"><thead><tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Per</th><th scope="col">Notes</th></tr></thead><tbody><tr><th scope="row">Video → Music</th><td data-label="Price">$0.54/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.009 / sec</td></tr><tr><th scope="row">Text → Music</th><td data-label="Price">$0.135/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.00225 / sec</td></tr><tr><th scope="row">Video → Sound Effect</th><td data-label="Price">$0.54/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.009 / sec</td></tr><tr><th scope="row">Text → Sound Effect</th><td data-label="Price">$0.108/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.0018 / sec</td></tr><tr><th scope="row">Video Translation (dubbing)</th><td data-label="Price">$3.49/ min per language</td><td data-label="Per">per minute per language</td><td data-label="Notes">also shown as $0.05817 / sec</td></tr><tr><th scope="row">Proofread (optional)</th><td data-label="Price">+$0.06/ min per language</td><td data-label="Per">per minute per language</td><td data-label="Notes">also shown as $0.001 / sec</td></tr><tr><th scope="row">Audio Ducking</th><td data-label="Price">$0.036/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.0006 / sec</td></tr><tr><th scope="row">Video Analysis</th><td data-label="Price">$0.012/ min</td><td data-label="Per">per minute</td><td data-label="Notes">also shown as $0.0002 / sec; cheapest endpoint</td></tr><tr><th scope="row">Auto top-up</th><td data-label="Price">$20</td><td data-label="Per">per top-up</td><td data-label="Notes">&#x27;When your balance falls below $5, automatically add $20&#x27;; the Add funds panel defaults to &#x27;You pay $20&#x27;, Secured by Stripe</td></tr></tbody></table></div><p class="ap-note">Prices as shown on the <a href="https://platform.sonilo.com/pricing" rel="noopener">vendor pricing page</a> on 2026-10-25. Check there before you buy.</p></section>

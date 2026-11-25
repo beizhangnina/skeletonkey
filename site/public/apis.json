@@ -183,7 +183,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "accuweather",
@@ -360,7 +365,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agentline",
@@ -541,7 +550,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agentmail",
@@ -707,7 +720,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agoda",
@@ -880,7 +897,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ahrefs",
@@ -1160,7 +1182,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "akta",
@@ -1369,7 +1395,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "alibaba-cloud",
@@ -1530,7 +1560,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "alibaba-com",
@@ -1717,7 +1751,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "amazon-bedrock",
@@ -1857,7 +1895,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "anthropic",
@@ -2079,7 +2121,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "anyapi",
@@ -2221,7 +2267,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apify",
@@ -2466,7 +2516,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apollo",
@@ -2680,7 +2734,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apple-maps",
@@ -2865,7 +2923,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "lmarena",
@@ -3081,7 +3143,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "artificial-analysis",
@@ -3280,7 +3347,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "autozone",
@@ -3445,7 +3516,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "aviato",
@@ -3577,7 +3653,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "bid-cars",
@@ -3789,7 +3869,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "blockrun",
@@ -4051,7 +4136,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "booking",
@@ -4217,7 +4306,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "brightdata",
@@ -4425,7 +4519,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "browserbase",
@@ -4589,7 +4687,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "builtin",
@@ -4804,7 +4906,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "builtwith",
@@ -5084,7 +5191,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "bytedance",
@@ -5353,7 +5464,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "capminal",
@@ -5430,7 +5545,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "capterra",
@@ -5641,7 +5760,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "carfax",
@@ -5899,7 +6023,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "cars-com",
@@ -6064,7 +6193,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "clay",
@@ -6254,7 +6388,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "cloro",
@@ -6514,7 +6652,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "clutch",
@@ -6793,7 +6935,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "contactout",
@@ -6911,7 +7057,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "context-dev",
@@ -7102,7 +7253,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "crunchbase",
@@ -7362,7 +7517,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "crustdata",
@@ -7493,7 +7653,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "datalegion",
@@ -7727,7 +7891,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "dataforseo",
@@ -8043,7 +8211,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "deepseek",
@@ -8212,7 +8384,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "defillama",
@@ -8423,7 +8599,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ebay",
@@ -8660,7 +8840,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "edinet",
@@ -8850,7 +9034,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "edmunds",
@@ -9063,7 +9251,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "elevenlabs",
@@ -9294,7 +9487,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "emc2ai",
@@ -9452,7 +9649,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "exa",
@@ -9709,7 +9910,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "financialdatasets",
@@ -9870,7 +10075,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "finviz",
@@ -10086,7 +10295,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "firecrawl",
@@ -10362,7 +10576,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "fishaudio",
@@ -10576,7 +10794,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "foreplay",
@@ -10735,7 +10957,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sfs",
@@ -10850,7 +11076,12 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "fundable",
@@ -11059,7 +11290,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "g2",
@@ -11332,7 +11567,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-gemini",
@@ -11562,7 +11801,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "getapp",
@@ -11775,7 +12018,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "github",
@@ -11987,7 +12235,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "gloria",
@@ -12181,7 +12433,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-maps",
@@ -12433,7 +12689,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-play",
@@ -12605,7 +12865,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hackernews",
@@ -12836,7 +13101,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hlrlookup",
@@ -13042,7 +13311,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "homes-com",
@@ -13206,7 +13479,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hunter",
@@ -13427,7 +13705,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "idealist",
@@ -13593,7 +13875,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "imdb",
@@ -13760,7 +14047,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "indeed",
@@ -14021,7 +14313,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "influencersclub",
@@ -14190,7 +14487,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "iqair",
@@ -14329,7 +14630,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "jd",
@@ -14511,7 +14816,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "justoneapi",
@@ -14643,7 +14952,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kadec0",
@@ -14762,7 +15075,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "keenable",
@@ -14931,7 +15248,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "keepa",
@@ -15152,7 +15473,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kbb",
@@ -15314,7 +15639,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kling",
@@ -15575,7 +15905,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kroger",
@@ -15762,7 +16096,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "leadmagic",
@@ -15925,7 +16263,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "levels-fyi",
@@ -16111,7 +16453,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "linkedin",
@@ -16294,7 +16640,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "litescrape",
@@ -16491,7 +16841,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "loopnet",
@@ -16702,7 +17056,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "lusha",
@@ -16874,7 +17233,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "macaron",
@@ -16937,7 +17300,12 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "magichour",
@@ -17149,7 +17517,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "marketbeat",
@@ -17310,7 +17682,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "marketstack",
@@ -17480,7 +17857,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "meijer",
@@ -17646,7 +18027,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "metixai",
@@ -17814,7 +18200,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "microsoft-azure-ai",
@@ -17946,7 +18336,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "minimax",
@@ -18243,7 +18637,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "moonshot-ai",
@@ -18437,7 +18835,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "mrscraper",
@@ -18634,7 +19036,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "nasdaq",
@@ -18861,7 +19267,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "octen",
@@ -19111,7 +19521,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "openai",
@@ -19314,7 +19728,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "openalex",
@@ -19542,7 +19960,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "opoint",
@@ -19671,7 +20093,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "orbit",
@@ -19880,7 +20306,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "pdl",
@@ -20083,7 +20513,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ploid",
@@ -20242,7 +20676,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "predictleads",
@@ -20421,7 +20859,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "producthunt",
@@ -20612,7 +21054,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "prospeo",
@@ -20784,7 +21230,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "quicknode",
@@ -20976,7 +21426,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "recall",
@@ -21152,7 +21606,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "rentcast",
@@ -21314,7 +21772,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "saperly",
@@ -21488,7 +21950,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "scrapecreators",
@@ -21704,7 +22170,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "search1api",
@@ -21962,7 +22432,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "secapi",
@@ -22183,7 +22657,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "secform4",
@@ -22344,7 +22822,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "segari",
@@ -22457,7 +22940,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "semrush",
@@ -22757,7 +23245,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serpapi",
@@ -23012,7 +23504,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serper",
@@ -23224,7 +23720,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serpstat",
@@ -23392,7 +23892,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "similarweb",
@@ -23572,7 +24076,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "smolmachine",
@@ -23777,7 +24285,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sonilo",
@@ -23919,7 +24431,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "xai",
@@ -24066,7 +24582,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "steam",
@@ -24253,7 +24773,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "stockanalysis",
@@ -24514,7 +25038,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "strale",
@@ -24677,7 +25206,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sumble",
@@ -24835,7 +25368,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "surf",
@@ -25003,7 +25540,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "suzanne",
@@ -25137,7 +25678,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "taobao",
@@ -25370,7 +25915,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tendata",
@@ -25531,7 +26080,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "the-companies-api",
@@ -25703,7 +26257,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "theirstack",
@@ -25977,7 +26535,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tikhub",
@@ -26218,7 +26780,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tiktok-shop",
@@ -26460,7 +27026,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tinyfish",
@@ -26644,7 +27214,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "topaz",
@@ -26811,7 +27385,11 @@
    ],
    "collection_scope": "tool",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "trustpilot",
@@ -27042,7 +27620,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "typesafe",
@@ -27249,7 +27831,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "us-census-bureau",
@@ -27393,7 +27979,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "upwork",
@@ -27579,7 +28169,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "censusdata-xyz",
@@ -27714,7 +28308,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "valyu",
@@ -27883,7 +28481,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "vaquill",
@@ -28150,7 +28752,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "watsons",
@@ -28312,7 +28918,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "weather-underground",
@@ -28493,7 +29104,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "web3-career",
@@ -28683,7 +29298,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "wechat",
@@ -28917,7 +29536,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "wellfound",
@@ -29131,7 +29754,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "x",
@@ -29550,7 +30178,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ycombinator",
@@ -29814,7 +30446,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "yahoo-finance",
@@ -30028,7 +30665,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zhipu-ai",
@@ -30181,7 +30823,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zepto",
@@ -30362,7 +31008,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zillow",
@@ -30587,7 +31237,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zoominfo",
@@ -30762,7 +31416,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "toutiao",
@@ -30941,7 +31600,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "youku",
@@ -31108,7 +31771,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "douyin-shop",
@@ -31371,7 +32039,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "baidu-qianfan",
@@ -31524,7 +32196,11 @@
    ],
    "collection_scope": "llm",
    "visibility": "hidden",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "douban",
@@ -31688,7 +32364,12 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "xianyu",
@@ -31867,7 +32548,11 @@
    ],
    "collection_scope": "data",
    "visibility": "listed",
-   "visibility_note": null
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   }
  ],
  "aggregators": [
