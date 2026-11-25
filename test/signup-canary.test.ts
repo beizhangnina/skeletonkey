@@ -133,6 +133,7 @@ describe("ND-2 HARD RULE: no signup key reaches any surface", () => {
       list_keys: {},
       list_accounts: {},
       signup_status: { vendor: VENDOR },
+      monitor_status: {},
       key_status: { alias: ACCOUNT },
       request_access: { platform: "Apify", reason: "canary sweep", est_budget: 1 },
       access_status: { request_id: "req_0000000000000000" },

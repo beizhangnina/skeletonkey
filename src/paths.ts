@@ -63,3 +63,22 @@ export function devVaultPath(home = skeletonKeyHome()): string {
 export function encryptedVaultPath(home = skeletonKeyHome()): string {
   return path.join(home, "vault.enc.json");
 }
+
+/** Everything the weekly monitor (ND-5) writes: state plus generated reports. */
+export function monitorDir(home = skeletonKeyHome()): string {
+  return path.join(home, "monitor");
+}
+
+/** Per-account last-known status, last normalized usage, and last run time. No secrets. */
+export function monitorStatePath(home = skeletonKeyHome()): string {
+  return path.join(monitorDir(home), "state.json");
+}
+
+export function monitorReportsDir(home = skeletonKeyHome()): string {
+  return path.join(monitorDir(home), "reports");
+}
+
+/** `weekly-YYYY-MM-DD.md` under the reports dir (or an explicit `--report-dir`). */
+export function monitorReportPath(date: string, dir = monitorReportsDir()): string {
+  return path.join(dir, `weekly-${date}.md`);
+}

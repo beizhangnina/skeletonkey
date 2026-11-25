@@ -57,7 +57,8 @@ import {
 import { accountSummary, readAccounts } from "./accounts/store.js";
 import { listSignupVendors, signupStatusRows } from "./signup/cli.js";
 import { openLedger, type LedgerSummary } from "./ledger.js";
-import { accountsPath, keysPath } from "./paths.js";
+import { readMonitorState } from "./monitor/state.js";
+import { accountsPath, keysPath, monitorStatePath } from "./paths.js";
 import { promptHiddenOnTty } from "./prompt.js";
 import { createVault } from "./vault/index.js";
 import { upstreamSchemeFor } from "./proxy.js";
@@ -1945,6 +1946,29 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       };
     },
   },
+
+  {
+    name: "monitor_status",
+    title: "Last weekly monitor status (metadata only)",
+    description:
+      "The last-known status for every account from `skeletonkey monitor run`'s state file: " +
+      "status (ok/invalid_key/usage_anomaly/no_usage_api/parse_error/error), when it last ran, and the last " +
+      "normalized usage numbers. Read-only: it never runs a new check and never returns a secret.",
+    readOnly: true,
+    inputSchema: {},
+    async handler(_args, ctx) {
+      const state = readMonitorState(ctx.home);
+      const accounts = Object.entries(state.accounts).map(([name, row]) => ({ name, ...row }));
+      return {
+        state_file: monitorStatePath(ctx.home),
+        count: accounts.length,
+        accounts,
+        note:
+          "Metadata only, from the last `skeletonkey monitor run`. This tool never contacts a " +
+          "vendor itself -- run `skeletonkey monitor run` to refresh it.",
+      };
+    },
+  },
 ];
 
 /** Tool names, handy for tests that assert full coverage. */
@@ -2026,7 +2050,12 @@ environment variable.
 
 list_accounts() lists the vendor accounts a human has registered (name, vendor, a masked
 email hint, disabled or not) and gives you vault:// references only -- never an email, a
-password, or a key.`;
+password, or a key.
+
+monitor_status() reports the last-known status (ok/invalid_key/usage_anomaly/no_usage_api/
+parse_error/error) from \`skeletonkey monitor run\`'s weekly check of each account's official
+usage API. It never runs a new check and never contacts a vendor -- a human runs \`skeletonkey monitor
+run\` (or schedules it themselves; this tool never installs a schedule).`;
 
 export interface McpServerHandle {
   /** Resolves when the transport closes. */
