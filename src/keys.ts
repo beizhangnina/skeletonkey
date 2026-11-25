@@ -51,6 +51,16 @@ export function setDisabled(alias: string, disabled: boolean, home = skeletonKey
   return key;
 }
 
+/** Drops a key from the metadata index. The vault record is the caller's job. */
+export function removeKey(alias: string, home = skeletonKeyHome()): boolean {
+  const data = readKeys(home);
+  const index = data.keys.findIndex((k) => k.alias === alias);
+  if (index < 0) return false;
+  data.keys.splice(index, 1);
+  writeKeys(data, home);
+  return true;
+}
+
 export function touchLastUsed(alias: string, when: string, home = skeletonKeyHome()): void {
   const data = readKeys(home);
   const key = data.keys.find((k) => k.alias === alias);

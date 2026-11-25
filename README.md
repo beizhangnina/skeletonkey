@@ -826,6 +826,8 @@ editing the config and restarting.
 | `skeletonkey list` | Shows all keys, their domains, upstream scheme, state, and last use. `--json`. |
 | `skeletonkey idle --days N` | Keys with no recorded use in N days (never-used keys always appear). `--json`. |
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
+| `skeletonkey account add <name> --vendor <id>` | Registers a vendor account (metadata in `accounts.yaml`, never a secret). `--registered`, `--email-stdin` (masked hint only; plaintext `--email <value>` is refused), `--key-alias`, `--store-key --domain <d> [...]`, `--store-login [--url <u>]`, `--stdin`, `--yes`. See [Accounts (ND-1)](#accounts-nd-1). |
+| `skeletonkey account list` / `show <name>` / `disable <name>` / `enable <name>` | Lists, shows, or toggles one account and the vault entries it points at. `list`: `--json`, `--active`. `show`: `--json`. |
 | `skeletonkey disable --all` | **Kill switch.** Disables every key, voids pending approvals, closes any Secure Input Popup, and makes the proxy answer `403 {"error":"kill_switch"}` locally. Cleared by `skeletonkey resume`. |
 | `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
 | `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret, and every response is passed through the redactor. |
@@ -1221,6 +1223,136 @@ three that back the scenarios in
 `example-apify-scraping`, `example-voyage-embeddings`). They exist to show the
 shape of the file and to give `find_api` something to match. **They are not real
 offers and contain no verified prices.**
+
+## Accounts (ND-1)
+
+An **account** is one record for a vendor account you registered: who it is
+with, when you registered it, and which vault entries (if any) hold its
+secrets. It is metadata, strictly separate from the secrets it points at — the
+account layer never stores an email, a password, or a key, only masked hints
+and `vault://` references. The secret is injected into a process only at the
+moment you ask for it, with
+`skeletonkey run --env NAME=vault://<entry>[.<field>] -- <command>`
+(`skeletonkey vault --help` and `skeletonkey run --help` document the entry
+model and the run command this builds on) — nothing here reads a value and
+nothing here hands one to an agent.
+
+### `skeletonkey account add <name>`
+
+```
+skeletonkey account add <name> --vendor <id>
+  [--registered YYYY-MM-DD] [--email-stdin]
+  [--key-alias <alias>]
+  [--store-key --domain <d> [--platform <p>] [--header <h>] [--format "Bearer {key}"]]
+  [--store-login [--url <https://...>]]
+  [--stdin] [--yes]
+```
+
+- `--vendor <id>` — the vendor's index id (e.g. `apify`), matching
+  `^[a-z0-9][a-z0-9._-]{0,63}$`. If the id is not in the bundled index
+  (`apis.yaml` plus the generated `data/apis/*.yaml` shards), the command
+  prints a one-line warning on stderr and still records the account.
+- `--registered <date>` — defaults to today's local date; must be a real
+  calendar date.
+- The account email never goes on the command line — anything there lands in
+  shell history and the process list. A plaintext `--email <value>` (with or
+  without a value) is refused with a usage error (exit 64) and writes
+  nothing. Instead:
+  - On a terminal: a hidden prompt, not echoed —
+    `Account email (not echoed, Enter to skip): `. Empty input means no email.
+  - Off a terminal, pass `--email-stdin` and put the email on stdin as a
+    single line. If you also need to send a secret on stdin (`--store-key` or
+    `--store-login` with `--stdin`), stdin carries **two** lines instead: the
+    email on the first, the secret on the second — stdin only has room for one
+    value otherwise, so this is the one way to supply both without either
+    ever appearing in argv.
+  - Off a terminal without `--email-stdin`, there is no email (as before).
+  - Only a **masked hint** (`b**********@gmail.com`) is ever written to
+    `accounts.yaml`. With `--store-login`, the same address becomes the
+    login's username, stored as a secret in the vault — never in metadata.
+- `--key-alias <alias>` — on its own, links an *existing* `api_key` vault
+  entry (it must already exist, or the command fails). With `--store-key`, it
+  names the *new* entry instead (default: the account name).
+- `--store-key` — stores a fresh API key (hidden prompt on a terminal, or
+  `--stdin`) the same way `skeletonkey vault add --type api_key` does, and
+  links it as `key_alias`.
+- `--store-login` — stores a fresh login (hidden, confirmed password prompt,
+  or `--stdin`) the same way `skeletonkey vault add --type login` does, named
+  `<name>-login`, and links it as `login_entry`. Needs an email, from the
+  prompt or `--email-stdin`.
+- `--store-key` and `--store-login` together with plain `--stdin` (no
+  `--email-stdin`) is refused: stdin carries exactly one secret, so run two
+  commands (or use a terminal) instead.
+- A name already in `accounts.yaml` is refused unless `--yes` is passed. A
+  failure partway through an `add` — after a secret was already written —
+  rolls that secret back on a best-effort basis; nothing is left half-stored,
+  and no value is ever echoed in an error message.
+
+Output never contains a value, only the references an agent may be given:
+
+```
+Registered account "apify-main" (vendor: apify).
+Metadata recorded in ~/.skeletonkey/accounts.yaml (never contains secret values).
+Give an agent only these references: vault://apify-main (api key)
+Use them with: skeletonkey run --env NAME=<ref> -- <your command>
+```
+
+### `skeletonkey account list` / `show` / `disable` / `enable`
+
+- `account list [--json] [--active]` — `NAME | VENDOR | REGISTERED | EMAIL |
+  KEY ALIAS | STATE`. `--active` hides disabled accounts. `--json` is the same
+  metadata plus `refs` — guaranteed free of any value.
+- `account show <name> [--json]` — one account's metadata, its `refs`, and an
+  example `skeletonkey run` command. Missing name → exit 66.
+- `account disable <name>` / `account enable <name>` — flips `disabled` on the
+  account **and** on whatever it points at (the `api_key` in `keys.yaml`, the
+  `login` in `entries.yaml`), so `skeletonkey run` refuses them
+  (`entry_disabled`, exit 71) and the proxy stops injecting the key.
+  Idempotent, and a missing name is exit 66.
+
+### `accounts.yaml`
+
+Mode `0600`, like `keys.yaml` and `entries.yaml`:
+
+```yaml
+# SkeletonKey account metadata -- NO SECRET VALUES ARE STORED HERE.
+version: 1
+accounts:
+  - name: apify-main
+    vendor: apify
+    registered: "2026-01-15"
+    email_hint: b**********@gmail.com
+    key_alias: apify-main
+    login_entry: null
+    created: 2026-01-15T12:00:00.000Z
+    disabled: false
+    disabled_at: null
+```
+
+Unknown fields are ignored and a malformed row is skipped rather than failing
+the whole file, the same tolerant style as `entries.yaml` and `keys.yaml`. A
+missing `accounts.yaml` means zero accounts, not an error.
+
+### Backends and exit codes
+
+Accounts work with any vault backend. v1 is tested end to end against
+`encrypted-file`, and against `keychain` via a fixture `secret-tool` on a box
+with no real OS keyring (`test/accounts-keychain.test.ts` — explicitly **not**
+a real OS keyring). `account *` reuses the `vault */run` exit-code table in
+full (`src/exit-codes.ts`): `usage` (64) for a bad flag or vendor id,
+`entry_not_found` (66) for a missing account or a missing `--key-alias`
+target, `name_taken` (75) for a duplicate add without `--yes`,
+`backend_refused` (77) for the plaintext `file` backend without
+`SKELETONKEY_ALLOW_TEST_BACKEND=1`, and `entry_disabled` (71) when `run` is
+pointed at something an `account disable` turned off.
+
+### MCP: `list_accounts`
+
+The MCP server exposes a read-only `list_accounts` tool: the same metadata as
+`account list --json`, plus `refs`. There is no tool that returns an email, a
+password, or a key — an agent gets a `vault://` reference and runs
+`skeletonkey run --env NAME=<ref> -- <command>` itself, or hands that exact
+command to a human.
 
 ## Roadmap
 

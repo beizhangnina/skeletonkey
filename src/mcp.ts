@@ -53,8 +53,9 @@ import {
   setDisabled,
   upsertKey,
 } from "./keys.js";
+import { accountSummary, readAccounts } from "./accounts/store.js";
 import { openLedger, type LedgerSummary } from "./ledger.js";
-import { keysPath } from "./paths.js";
+import { accountsPath, keysPath } from "./paths.js";
 import { promptHiddenOnTty } from "./prompt.js";
 import { createVault } from "./vault/index.js";
 import { upstreamSchemeFor } from "./proxy.js";
@@ -947,6 +948,29 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           last_used: key.last_used ?? lastUsed.get(key.alias) ?? null,
         })),
         note: "Call the API through the proxy; there is no tool that reveals a key.",
+      };
+    },
+  },
+
+  {
+    name: "list_accounts",
+    title: "List vendor accounts (metadata only)",
+    description:
+      "List every vendor account SkeletonKey knows about: its name, vendor id, when it was " +
+      "registered, a masked email hint, which vault entries (if any) hold its key and/or login, " +
+      "and whether it is disabled. Agents get vault:// references only -- there is no tool that " +
+      "returns an email, a password, or a key.",
+    readOnly: true,
+    inputSchema: {},
+    async handler(_args, ctx) {
+      const accounts = readAccounts(ctx.home).accounts;
+      return {
+        count: accounts.length,
+        metadata_files: [accountsPath(ctx.home)],
+        accounts: accounts.map((account) => accountSummary(account)),
+        note:
+          "Metadata only. There is no tool that returns a username, a password, or a key. Use the " +
+          "refs with `skeletonkey run --env NAME=<ref> -- <cmd>`.",
       };
     },
   },
@@ -1927,7 +1951,11 @@ research with your own tools, and write what you found with propose_entry. Rows 
 write are status: unverified until a call through the proxy returns 2xx.
 
 Never ask a human to tell you a key, and never write one to chat, a file, or an
-environment variable.`;
+environment variable.
+
+list_accounts() lists the vendor accounts a human has registered (name, vendor, a masked
+email hint, disabled or not) and gives you vault:// references only -- never an email, a
+password, or a key.`;
 
 export interface McpServerHandle {
   /** Resolves when the transport closes. */
