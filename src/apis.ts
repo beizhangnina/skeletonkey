@@ -311,6 +311,53 @@ export const PRICING_MODELS = [
 ] as const;
 export type PricingModel = (typeof PRICING_MODELS)[number];
 
+/**
+ * How `pricing.api_access_gate` says the API itself (not the product in
+ * general) is gated, or null for "nobody checked" (ND-12).
+ *
+ *   none                   free, or pure pay-as-you-go -- no gate at all
+ *   prepaid_min            must prepay a minimum balance, but no monthly fee
+ *   subscription_required  there is no API without a paid subscription
+ *   contact_sales          the API is reachable only through a sales process
+ *   unknown                nobody has checked the vendor's own pricing page
+ */
+export const API_ACCESS_GATES = [
+  "none",
+  "prepaid_min",
+  "subscription_required",
+  "contact_sales",
+  "unknown",
+] as const;
+export type ApiAccessGate = (typeof API_ACCESS_GATES)[number];
+
+/** The subset of ApiAccessGate an `alternatives[]` row may cite -- `unknown`
+ * says nothing about how the ALTERNATIVE is gated, so it is excluded there. */
+export const ALTERNATIVE_ACCESS_GATES = ["none", "prepaid_min", "subscription_required", "contact_sales"] as const;
+
+/**
+ * Derived `cost_badge`, never hand-filled -- build.py (or build.py's derive
+ * from `derive_cost_badge`) computes it from `pricing.api_access_gate`:
+ *
+ *   green  none | prepaid_min              -- no recurring fee required
+ *   red    subscription_required | contact_sales -- a recurring commitment or a sales call stands between you and the API
+ *   gray   unknown, null, or no pricing block at all
+ */
+export const COST_BADGES = ["green", "red", "gray"] as const;
+export type CostBadge = (typeof COST_BADGES)[number];
+
+/** `pricing` -> `cost_badge`. The one place this mapping is computed, so the
+ * validator (which only checks a hand-filled value agrees) and the loader
+ * (which exposes it on every entry) can never drift apart. */
+export function deriveCostBadge(pricing: unknown): CostBadge {
+  if (pricing === null || pricing === undefined || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return "gray";
+  }
+  const gate = (pricing as Record<string, unknown>)["api_access_gate"];
+  if (gate === "none" || gate === "prepaid_min") return "green";
+  if (gate === "subscription_required" || gate === "contact_sales") return "red";
+  return "gray";
+}
+
 /** HTTP methods an `endpoints[]` row may name. Always uppercase. */
 export const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] as const;
 export type HttpMethod = (typeof HTTP_METHODS)[number];
@@ -323,6 +370,8 @@ export const ENDPOINT_SUMMARY_MAX = 200;
 export const ENDPOINT_RETURNS_MAX = 200;
 export const PRICING_NOTES_MAX = 300;
 export const ENDPOINTS_NOTE_MAX = 300;
+export const ALTERNATIVES_WHY_MAX = 200;
+export const ALTERNATIVES_NOTE_MAX = 300;
 
 /**
  * How a vendor's endpoint is credentialed. `type` is required whenever this
@@ -349,6 +398,20 @@ export interface ApiPricing {
   unit: string | null;
   pricing_url: string | null;
   notes: string | null;
+
+  // --- the pricing gate (ND-12) ---------------------------------------------
+  // All optional, all null-when-unknown. `api_access_gate` is the fact being
+  // recorded; the two minimums only ever apply to ONE gate each, and
+  // `gate_source_url` is required whenever the gate is a real (non-"unknown")
+  // claim -- see ../data/apis/README.md "ND-12 pricing gate".
+
+  api_access_gate: ApiAccessGate | null;
+  /** Only meaningful (and only allowed) when api_access_gate is `subscription_required`. */
+  min_monthly_usd: number | null;
+  /** Only meaningful (and only allowed) when api_access_gate is `prepaid_min`. */
+  min_prepay_usd: number | null;
+  /** The vendor's own pricing page the gate above was read from. */
+  gate_source_url: string | null;
 }
 
 /** One documented endpoint: a method, a path, and what it is for. */
@@ -358,6 +421,19 @@ export interface ApiEndpoint {
   summary: string | null;
   returns: string | null;
   docs_url: string | null;
+}
+
+/**
+ * One alternative vendor to route to instead of paying this row's gate
+ * (ND-12). Only meaningful -- and only required -- when `pricing.api_access_gate`
+ * is `subscription_required` or `contact_sales`.
+ */
+export interface ApiAlternative {
+  /** Must resolve to a shard `id` or an apis.yaml `name` -- never invented. */
+  vendor_id: string;
+  /** One line, non-empty, at most ALTERNATIVES_WHY_MAX characters. */
+  why: string;
+  access_gate: (typeof ALTERNATIVE_ACCESS_GATES)[number];
 }
 
 export interface ApiEntry {
@@ -465,6 +541,21 @@ export interface ApiEntry {
   /** Why `endpoints` is empty or partial, when it is. */
   endpoints_note?: string | null;
 
+  // --- the pricing gate (ND-12) ----------------------------------------------
+  // `alternatives`/`alternatives_note` are required together with
+  // `pricing.api_access_gate` in {subscription_required, contact_sales}, and
+  // forbidden otherwise -- see validateAlternatives. `cost_badge` is written
+  // by build.py and never hand-filled; a value present here is only checked
+  // for agreement with `deriveCostBadge(pricing)`, never trusted on its own
+  // (see IndexEntry.costBadge for the computed value loaders should use).
+
+  /** Where else to get this capability instead of paying the gate above. */
+  alternatives?: ApiAlternative[] | null;
+  /** Required when `alternatives` is `[]`; optional otherwise. */
+  alternatives_note?: string | null;
+  /** Derived from pricing.api_access_gate by build.py. Never hand-edit. */
+  cost_badge?: CostBadge | null;
+
   // --- discover-on-miss provenance -----------------------------------------
 
   /**
@@ -530,6 +621,9 @@ const OPTIONAL_FIELDS = [
   "pricing",
   "endpoints",
   "endpoints_note",
+  "alternatives",
+  "alternatives_note",
+  "cost_badge",
   "status",
   "source_urls",
   "discovered_date",
@@ -551,7 +645,19 @@ const FLAG_FIELDS = [
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export function validateApis(input: unknown): ValidationResult {
+export interface ValidateApisOptions {
+  /**
+   * Ids an `alternatives[].vendor_id` may reference, beyond the names already
+   * in this same document (which are always included). Production callers
+   * (validateApisFile, readShardFile) default this to every shard id plus
+   * every apis.yaml name via collectKnownVendorIds; direct unit tests of
+   * validateApis pass whatever fixture set they need, with no filesystem
+   * access required.
+   */
+  knownVendorIds?: Iterable<string>;
+}
+
+export function validateApis(input: unknown, options: ValidateApisOptions = {}): ValidationResult {
   const errors: string[] = [];
 
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
@@ -562,6 +668,16 @@ export function validateApis(input: unknown): ValidationResult {
   if (!Array.isArray(root["entries"])) {
     errors.push("root.entries: expected a list");
     return { valid: false, errors, document: null };
+  }
+
+  // Rows in the same document may cite each other as `alternatives`, so their
+  // names are known regardless of what the caller passed in.
+  const knownVendorIds = new Set<string>(options.knownVendorIds ?? []);
+  for (const raw of root["entries"] as unknown[]) {
+    if (raw !== null && typeof raw === "object" && !Array.isArray(raw)) {
+      const name = (raw as Record<string, unknown>)["name"];
+      if (typeof name === "string") knownVendorIds.add(name);
+    }
   }
 
   const entries: ApiEntry[] = [];
@@ -696,7 +812,7 @@ export function validateApis(input: unknown): ValidationResult {
     validateBilling(errors, at, entry["billing"]);
     validateAggregators(errors, at, entry["aggregators"]);
     validateOffering(errors, at, entry["offering"]);
-    validateStructuredFields(errors, at, entry);
+    validateStructuredFields(errors, at, entry, knownVendorIds, typeof name === "string" ? name : null);
     validateDiscovery(errors, at, entry);
 
     const humanSteps = entry["human_steps"];
@@ -755,7 +871,10 @@ export function resolveApisPath(home = skeletonKeyHome()): string {
   return packagedApisPath();
 }
 
-export function validateApisFile(file: string): ValidationResult {
+export function validateApisFile(
+  file: string,
+  options: { knownVendorIds?: Iterable<string> } = {},
+): ValidationResult {
   if (!fs.existsSync(file)) {
     return { valid: false, errors: [`${file}: file not found`], document: null };
   }
@@ -766,7 +885,8 @@ export function validateApisFile(file: string): ValidationResult {
     const message = error instanceof Error ? error.message : String(error);
     return { valid: false, errors: [`${file}: invalid YAML -- ${message}`], document: null };
   }
-  return validateApis(parsed);
+  const knownVendorIds = options.knownVendorIds ?? collectKnownVendorIds({ apisFile: file });
+  return validateApis(parsed, { knownVendorIds });
 }
 
 function requireStringOrNull(
@@ -1145,11 +1265,22 @@ function validateHighlights(errors: string[], at: string, value: unknown): void 
 }
 
 /**
- * Validates the five structured core fields added by ND-8: `official_docs_url`,
- * `auth`, `pricing`, `endpoints` and `endpoints_note`. All optional, all
- * null-when-unknown, so every existing row stays valid.
+ * Validates the five structured core fields added by ND-8 (`official_docs_url`,
+ * `auth`, `pricing`, `endpoints`, `endpoints_note`) plus the ND-12 pricing-gate
+ * fields nested in `pricing` and the top-level `alternatives` /
+ * `alternatives_note` / `cost_badge`. All optional, all null-when-unknown, so
+ * every existing row stays valid.
+ *
+ * `knownVendorIds` and `selfId` exist only for `alternatives[].vendor_id`
+ * cross-referencing -- see validateAlternatives.
  */
-function validateStructuredFields(errors: string[], at: string, entry: Record<string, unknown>): void {
+function validateStructuredFields(
+  errors: string[],
+  at: string,
+  entry: Record<string, unknown>,
+  knownVendorIds: ReadonlySet<string>,
+  selfId: string | null,
+): void {
   const officialDocsUrl = entry["official_docs_url"];
   if (
     officialDocsUrl !== null &&
@@ -1161,6 +1292,8 @@ function validateStructuredFields(errors: string[], at: string, entry: Record<st
   validateAuth(errors, at, entry["auth"]);
   validatePricing(errors, at, entry["pricing"]);
   validateEndpoints(errors, at, entry);
+  validateAlternatives(errors, at, entry, knownVendorIds, selfId);
+  validateCostBadge(errors, at, entry);
 }
 
 /**
@@ -1231,7 +1364,18 @@ function validatePricing(errors: string[], at: string, value: unknown): void {
     return;
   }
   const raw = value as Record<string, unknown>;
-  const known = new Set(["model", "free_tier", "starting_price_usd", "unit", "pricing_url", "notes"]);
+  const known = new Set([
+    "model",
+    "free_tier",
+    "starting_price_usd",
+    "unit",
+    "pricing_url",
+    "notes",
+    "api_access_gate",
+    "min_monthly_usd",
+    "min_prepay_usd",
+    "gate_source_url",
+  ]);
   for (const key of Object.keys(raw)) {
     if (!known.has(key)) errors.push(`${field}.${key}: unknown field`);
   }
@@ -1269,6 +1413,50 @@ function validatePricing(errors: string[], at: string, value: unknown): void {
     } else if (notes.length > PRICING_NOTES_MAX) {
       errors.push(`${field}.notes: expected at most ${PRICING_NOTES_MAX} characters, got ${notes.length}`);
     }
+  }
+
+  // --- the pricing gate (ND-12) ----------------------------------------------
+  const gate = raw["api_access_gate"];
+  if (gate !== null && gate !== undefined) {
+    if (typeof gate !== "string" || !(API_ACCESS_GATES as readonly string[]).includes(gate)) {
+      errors.push(`${field}.api_access_gate: expected one of ${API_ACCESS_GATES.join(" | ")} or null`);
+    }
+  }
+  const minMonthly = raw["min_monthly_usd"];
+  if (minMonthly !== null && minMonthly !== undefined) {
+    if (typeof minMonthly !== "number" || !Number.isFinite(minMonthly) || minMonthly < 0) {
+      errors.push(`${field}.min_monthly_usd: expected a non-negative number or null`);
+    }
+    if (gate !== "subscription_required") {
+      errors.push(`${field}.min_monthly_usd: only allowed when pricing.api_access_gate is subscription_required`);
+    }
+  }
+  const minPrepay = raw["min_prepay_usd"];
+  if (minPrepay !== null && minPrepay !== undefined) {
+    if (typeof minPrepay !== "number" || !Number.isFinite(minPrepay) || minPrepay < 0) {
+      errors.push(`${field}.min_prepay_usd: expected a non-negative number or null`);
+    }
+    if (gate !== "prepaid_min") {
+      errors.push(`${field}.min_prepay_usd: only allowed when pricing.api_access_gate is prepaid_min`);
+    }
+  }
+  const gateSourceUrl = raw["gate_source_url"];
+  if (
+    gateSourceUrl !== null &&
+    gateSourceUrl !== undefined &&
+    !(typeof gateSourceUrl === "string" && isHttpUrl(gateSourceUrl))
+  ) {
+    errors.push(`${field}.gate_source_url: expected an http(s) URL or null`);
+  }
+  if (
+    gate !== null &&
+    gate !== undefined &&
+    gate !== "unknown" &&
+    (gateSourceUrl === null || gateSourceUrl === undefined)
+  ) {
+    errors.push(
+      `${field}.gate_source_url: required when pricing.api_access_gate is set and not unknown (what proves the gate?)`,
+    );
   }
 }
 
@@ -1369,6 +1557,126 @@ function validateEndpoints(errors: string[], at: string, entry: Record<string, u
       errors.push(`${row}.docs_url: expected an http(s) URL or null`);
     }
   });
+}
+
+const ALTERNATIVE_ROW_KEYS = ["vendor_id", "why", "access_gate"] as const;
+const GATED_ACCESS_GATES = ["subscription_required", "contact_sales"] as const;
+
+/**
+ * Validates `alternatives` and `alternatives_note` together (ND-12).
+ *
+ * Required together with `pricing.api_access_gate` in {subscription_required,
+ * contact_sales} -- that is the whole point: a row that forces a recurring fee
+ * or a sales call must say where else to go. Forbidden otherwise, so the field
+ * can never read as "checked" on a row nobody gated. `vendor_id` must resolve
+ * to a real index entry (never invented), never the row's own id, and never
+ * repeated within one list.
+ */
+function validateAlternatives(
+  errors: string[],
+  at: string,
+  entry: Record<string, unknown>,
+  knownVendorIds: ReadonlySet<string>,
+  selfId: string | null,
+): void {
+  const pricing = entry["pricing"];
+  const gate =
+    pricing !== null && typeof pricing === "object" && !Array.isArray(pricing)
+      ? (pricing as Record<string, unknown>)["api_access_gate"]
+      : undefined;
+  const gated = typeof gate === "string" && (GATED_ACCESS_GATES as readonly string[]).includes(gate);
+  const alts = entry["alternatives"];
+  const note = entry["alternatives_note"];
+
+  if (gated) {
+    if (!Array.isArray(alts)) {
+      errors.push(
+        `${at}.alternatives: required (a list) when pricing.api_access_gate is subscription_required or contact_sales`,
+      );
+    } else {
+      const seen = new Set<string>();
+      alts.forEach((raw, index) => {
+        const row = `${at}.alternatives[${index}]`;
+        if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+          errors.push(`${row}: expected a mapping`);
+          return;
+        }
+        const item = raw as Record<string, unknown>;
+        const known = new Set<string>(ALTERNATIVE_ROW_KEYS);
+        for (const key of Object.keys(item)) {
+          if (!known.has(key)) errors.push(`${row}.${key}: unknown field`);
+        }
+        const vid = item["vendor_id"];
+        const validVid = typeof vid === "string" && vid.trim() !== "";
+        if (!validVid) {
+          errors.push(`${row}.vendor_id: expected a non-empty string`);
+        } else if (vid === selfId) {
+          errors.push(`${row}.vendor_id: must not equal this row's own id`);
+        } else if (seen.has(vid)) {
+          errors.push(`${row}.vendor_id: duplicate vendor_id ${JSON.stringify(vid)}`);
+        } else if (!knownVendorIds.has(vid)) {
+          errors.push(`${row}.vendor_id: unknown vendor ${JSON.stringify(vid)} -- not a shard id or apis.yaml name`);
+        }
+        if (validVid) seen.add(vid as string);
+
+        const why = item["why"];
+        if (typeof why !== "string" || why.trim() === "") {
+          errors.push(`${row}.why: expected a non-empty string`);
+        } else if (/[\r\n]/.test(why)) {
+          errors.push(`${row}.why: expected a single line (no line breaks)`);
+        } else if (why.length > ALTERNATIVES_WHY_MAX) {
+          errors.push(`${row}.why: expected at most ${ALTERNATIVES_WHY_MAX} characters, got ${why.length}`);
+        }
+
+        const accessGate = item["access_gate"];
+        if (typeof accessGate !== "string" || !(ALTERNATIVE_ACCESS_GATES as readonly string[]).includes(accessGate)) {
+          errors.push(`${row}.access_gate: expected one of ${ALTERNATIVE_ACCESS_GATES.join(" | ")}`);
+        }
+      });
+      if (alts.length === 0 && (typeof note !== "string" || note.trim() === "")) {
+        errors.push(
+          `${at}.alternatives: expected a non-empty alternatives_note when alternatives is [] -- say where else to go`,
+        );
+      }
+    }
+  } else if (alts !== null && alts !== undefined) {
+    errors.push(
+      `${at}.alternatives: must be absent or null unless pricing.api_access_gate is subscription_required or contact_sales`,
+    );
+  }
+
+  if (note !== null && note !== undefined) {
+    if (typeof note !== "string" || note.trim() === "") {
+      errors.push(`${at}.alternatives_note: expected a non-empty string or null`);
+    } else if (/[\r\n]/.test(note)) {
+      errors.push(`${at}.alternatives_note: expected a single line (no line breaks)`);
+    } else if (note.length > ALTERNATIVES_NOTE_MAX) {
+      errors.push(`${at}.alternatives_note: expected at most ${ALTERNATIVES_NOTE_MAX} characters, got ${note.length}`);
+    }
+    if (!gated) {
+      errors.push(
+        `${at}.alternatives_note: must be absent or null unless pricing.api_access_gate is subscription_required or contact_sales`,
+      );
+    }
+  }
+}
+
+/**
+ * Validates a hand-filled `cost_badge`, if present: it must equal
+ * `deriveCostBadge(pricing)` exactly. `cost_badge` is written by build.py and
+ * never hand-filled, so this is the only check it gets -- absence is always
+ * valid (old data, or a row build.py has not regenerated yet).
+ */
+function validateCostBadge(errors: string[], at: string, entry: Record<string, unknown>): void {
+  if (!("cost_badge" in entry)) return;
+  const expected = deriveCostBadge(entry["pricing"]);
+  const got = entry["cost_badge"];
+  if (got !== expected) {
+    errors.push(
+      `${at}.cost_badge: derived field; expected ${expected} from pricing.api_access_gate, got ${String(got)}` +
+        " (do not hand-edit; run build)",
+    );
+  }
 }
 
 /**
@@ -1697,6 +2005,18 @@ function optionalStructuredFields(entry: Record<string, unknown>): Partial<ApiEn
   if ("endpoints_note" in entry) {
     out["endpoints_note"] = typeof entry["endpoints_note"] === "string" ? entry["endpoints_note"] : null;
   }
+  if ("alternatives" in entry) {
+    const raw = entry["alternatives"];
+    out["alternatives"] = Array.isArray(raw) ? raw.map((item) => apiAlternative(item as Record<string, unknown>)) : null;
+  }
+  if ("alternatives_note" in entry) {
+    out["alternatives_note"] = typeof entry["alternatives_note"] === "string" ? entry["alternatives_note"] : null;
+  }
+  if ("cost_badge" in entry) {
+    const raw = entry["cost_badge"];
+    out["cost_badge"] =
+      typeof raw === "string" && (COST_BADGES as readonly string[]).includes(raw) ? (raw as CostBadge) : null;
+  }
   return out as Partial<ApiEntry>;
 }
 
@@ -1717,6 +2037,10 @@ function apiPricing(raw: Record<string, unknown>): ApiPricing {
     unit: typeof raw["unit"] === "string" ? (raw["unit"] as string) : null,
     pricing_url: typeof raw["pricing_url"] === "string" ? (raw["pricing_url"] as string) : null,
     notes: typeof raw["notes"] === "string" ? (raw["notes"] as string) : null,
+    api_access_gate: typeof raw["api_access_gate"] === "string" ? (raw["api_access_gate"] as ApiAccessGate) : null,
+    min_monthly_usd: typeof raw["min_monthly_usd"] === "number" ? (raw["min_monthly_usd"] as number) : null,
+    min_prepay_usd: typeof raw["min_prepay_usd"] === "number" ? (raw["min_prepay_usd"] as number) : null,
+    gate_source_url: typeof raw["gate_source_url"] === "string" ? (raw["gate_source_url"] as string) : null,
   };
 }
 
@@ -1727,6 +2051,14 @@ function apiEndpoint(raw: Record<string, unknown>): ApiEndpoint {
     summary: typeof raw["summary"] === "string" ? (raw["summary"] as string) : null,
     returns: typeof raw["returns"] === "string" ? (raw["returns"] as string) : null,
     docs_url: typeof raw["docs_url"] === "string" ? (raw["docs_url"] as string) : null,
+  };
+}
+
+function apiAlternative(raw: Record<string, unknown>): ApiAlternative {
+  return {
+    vendor_id: String(raw["vendor_id"]),
+    why: String(raw["why"]),
+    access_gate: raw["access_gate"] as ApiAlternative["access_gate"],
   };
 }
 
@@ -1779,6 +2111,8 @@ export interface IndexEntry extends ApiEntry {
    * row for the same vendor that this row displaced in the merge.
    */
   aggregators_source?: string;
+  /** `deriveCostBadge(pricing)`, computed here -- never read off the row. */
+  costBadge?: CostBadge;
 }
 
 export interface ApiIndex {
@@ -1889,7 +2223,11 @@ function shardUrl(value: unknown): string | null {
  * Nothing is invented here -- "unknown" becomes `null`, and no auth header is
  * synthesised from `auth_type` because `api_key` does not say *which* header.
  */
-function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: string } {
+function shardEntry(
+  raw: unknown,
+  file: string,
+  knownVendorIds: ReadonlySet<string>,
+): { entry?: IndexEntry; error?: string } {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return { error: `${file}: expected a mapping in apis[]` };
   }
@@ -1949,7 +2287,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
   // row. A malformed one is reported and dropped, never thrown -- same
   // contract as `offering` above.
   const structuredErrors: string[] = [];
-  validateStructuredFields(structuredErrors, `${file}(${id})`, row);
+  validateStructuredFields(structuredErrors, `${file}(${id})`, row, knownVendorIds, id);
   const structured = structuredErrors.length === 0 ? optionalStructuredFields(row) : {};
   const allErrors = [...offeringErrors, ...structuredErrors];
 
@@ -2007,8 +2345,17 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
   };
 }
 
-/** Reads one generated shard file. Never throws: bad files become errors. */
-export function readShardFile(file: string): { entries: IndexEntry[]; errors: string[] } {
+/**
+ * Reads one generated shard file. Never throws: bad files become errors.
+ *
+ * `knownVendorIds` defaults to `collectKnownVendorIds()` (every shard id plus
+ * every apis.yaml name, scanned fresh) when not given -- callers reading many
+ * shards in one pass (buildApiIndex) compute it once and pass it down instead.
+ */
+export function readShardFile(
+  file: string,
+  knownVendorIds?: ReadonlySet<string>,
+): { entries: IndexEntry[]; errors: string[] } {
   let parsed: unknown;
   try {
     parsed = YAML.parse(fs.readFileSync(file, "utf8"));
@@ -2023,10 +2370,16 @@ export function readShardFile(file: string): { entries: IndexEntry[]; errors: st
   if (!Array.isArray(list)) {
     return { entries: [], errors: [`${file}: expected an apis: list`] };
   }
+  // Scoped to this file's own directory by default (mirroring
+  // collect_known_vendor_ids(root) in validate.py), so a sibling row in the
+  // SAME shard directory resolves without the caller having to compute a
+  // broader set first. Production callers reading many directories at once
+  // (buildApiIndex) pass their own precomputed set instead.
+  const ids = knownVendorIds ?? collectKnownVendorIds({ shardDirs: [path.dirname(file)] });
   const entries: IndexEntry[] = [];
   const errors: string[] = [];
   for (const raw of list) {
-    const { entry, error } = shardEntry(raw, file);
+    const { entry, error } = shardEntry(raw, file, ids);
     if (entry !== undefined) entries.push(entry);
     if (error !== undefined) errors.push(error);
   }
@@ -2046,6 +2399,59 @@ export function shardFiles(dir: string): string[] {
     .filter((name) => name.endsWith(".yaml") || name.endsWith(".yml"))
     .sort()
     .map((name) => path.join(dir, name));
+}
+
+/**
+ * Every id an `alternatives[].vendor_id` may reference: every shard row's
+ * `id` under `shardDirs`, plus every entry `name` in `apisFile`. Both default
+ * to the packaged locations (resolveApisPath / resolveShardDirs).
+ *
+ * Best-effort: a missing or malformed file contributes no ids rather than
+ * throwing -- it is reported as an error elsewhere in the normal validation
+ * path, and a vendor_id that happens to reference something inside it would
+ * then correctly fail as "unknown vendor".
+ */
+export function collectKnownVendorIds(options: { apisFile?: string; shardDirs?: string[] } = {}): Set<string> {
+  const ids = new Set<string>();
+  const apisFile = options.apisFile ?? resolveApisPath();
+  if (fs.existsSync(apisFile)) {
+    try {
+      const parsed = YAML.parse(fs.readFileSync(apisFile, "utf8"));
+      const entries =
+        parsed !== null && typeof parsed === "object" ? (parsed as Record<string, unknown>)["entries"] : undefined;
+      if (Array.isArray(entries)) {
+        for (const raw of entries) {
+          if (raw !== null && typeof raw === "object") {
+            const name = (raw as Record<string, unknown>)["name"];
+            if (typeof name === "string") ids.add(name);
+          }
+        }
+      }
+    } catch {
+      // best effort -- a malformed apis.yaml is reported elsewhere
+    }
+  }
+  const dirs = options.shardDirs ?? resolveShardDirs();
+  for (const dir of dirs) {
+    for (const file of shardFiles(dir)) {
+      try {
+        const parsed = YAML.parse(fs.readFileSync(file, "utf8"));
+        const list =
+          parsed !== null && typeof parsed === "object" ? (parsed as Record<string, unknown>)["apis"] : undefined;
+        if (Array.isArray(list)) {
+          for (const raw of list) {
+            if (raw !== null && typeof raw === "object") {
+              const id = (raw as Record<string, unknown>)["id"];
+              if (typeof id === "string") ids.add(id);
+            }
+          }
+        }
+      } catch {
+        // best effort -- a malformed shard is reported elsewhere
+      }
+    }
+  }
+  return ids;
 }
 
 /**
@@ -2192,7 +2598,12 @@ function cachedApiIndex(sources: ResolvedIndexSources, noCache: boolean): ApiInd
 
 function buildApiIndex(sources: ResolvedIndexSources): ApiIndex {
   const { apisFile, userFile, shardDirs } = sources;
-  const primary = validateApisFile(apisFile);
+  // Computed once and reused for every file below: scanning apis.yaml and
+  // every shard per-file (once per readShardFile call) would be quadratic in
+  // the shard count for no benefit, since the answer does not change within
+  // one build.
+  const knownVendorIds = collectKnownVendorIds({ apisFile, shardDirs });
+  const primary = validateApisFile(apisFile, { knownVendorIds });
   const errors = [...primary.errors];
   const files = [apisFile];
 
@@ -2246,7 +2657,7 @@ function buildApiIndex(sources: ResolvedIndexSources): ApiIndex {
 
   for (const dir of shardDirs) {
     for (const file of shardFiles(dir)) {
-      const shard = readShardFile(file);
+      const shard = readShardFile(file, knownVendorIds);
       errors.push(...shard.errors);
       files.push(file);
       for (const entry of shard.entries) {
@@ -2293,6 +2704,12 @@ function buildApiIndex(sources: ResolvedIndexSources): ApiIndex {
         break;
       }
     }
+  }
+
+  // ND-12: exposed as a computed property on every entry, never read off the
+  // row itself -- see deriveCostBadge and IndexEntry.costBadge.
+  for (const entry of entries) {
+    entry.costBadge = deriveCostBadge(entry.pricing);
   }
 
   return {

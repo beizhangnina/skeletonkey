@@ -39,7 +39,7 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
 # adding one to a shard cannot invalidate the rows that do not have it.
 OPTIONAL = ['offering', 'official_docs_url', 'auth', 'pricing', 'endpoints',
-            'endpoints_note']
+            'endpoints_note', 'alternatives', 'alternatives_note', 'cost_badge']
 
 ENUMS = {
     # `keyless` = the vendor documents no credential at all; `wallet-x402` = the
@@ -98,8 +98,75 @@ PRICING_NOTES_MAX = 300
 ENDPOINTS_NOTE_MAX = 300
 AUTH_KEYS = ['type', 'header', 'format', 'docs_url']
 PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
-                'pricing_url', 'notes']
+                'pricing_url', 'notes', 'api_access_gate', 'min_monthly_usd',
+                'min_prepay_usd', 'gate_source_url']
 ENDPOINT_ROW_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
+
+# ---- the pricing gate (ND-12) ------------------------------------------------
+# Kept byte-identical in meaning to src/apis.ts (API_ACCESS_GATES,
+# ALTERNATIVE_ACCESS_GATES, COST_BADGES, ALTERNATIVES_WHY_MAX,
+# ALTERNATIVES_NOTE_MAX). test/pricing-gate.test.ts asserts the lists have not
+# drifted apart.
+API_ACCESS_GATES = ['none', 'prepaid_min', 'subscription_required',
+                     'contact_sales', 'unknown']
+# `unknown` says nothing about how the ALTERNATIVE itself is gated, so it is
+# excluded from the gates an alternatives[] row may cite.
+ALTERNATIVE_ACCESS_GATES = ['none', 'prepaid_min', 'subscription_required',
+                             'contact_sales']
+GATED_ACCESS_GATES = ('subscription_required', 'contact_sales')
+COST_BADGES = ['green', 'red', 'gray']
+ALTERNATIVES_WHY_MAX = 200
+ALTERNATIVES_NOTE_MAX = 300
+ALTERNATIVE_ROW_KEYS = ['vendor_id', 'why', 'access_gate']
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+# The repo's own apis.yaml, fixed relative to this script -- NOT relative to
+# whatever shard directory a caller passes to main(). A vendor_id may point at
+# a root apis.yaml entry regardless of which shard directory is being checked.
+REPO_APIS_YAML = os.path.normpath(os.path.join(HERE, '..', '..', '..', 'apis.yaml'))
+
+
+def derive_cost_badge(pricing):
+    """`pricing` -> `cost_badge`. The one place this mapping is computed, so
+    this validator (which only checks a hand-filled value agrees) and
+    build.py (which writes the computed value) can never drift apart."""
+    if not isinstance(pricing, dict):
+        return 'gray'
+    gate = pricing.get('api_access_gate')
+    if gate in ('none', 'prepaid_min'):
+        return 'green'
+    if gate in ('subscription_required', 'contact_sales'):
+        return 'red'
+    return 'gray'
+
+
+def collect_known_vendor_ids(root):
+    """Every id an `alternatives[].vendor_id` may reference: every shard
+    row's `id` across every *.yaml in `root`, plus every entry `name` in the
+    repo's own apis.yaml. Best-effort: a file that fails to parse (e.g.
+    apis.yaml read by the no-PyYAML fallback reader, which does not cover its
+    full structure) contributes no ids rather than raising."""
+    ids = set()
+    for path in sorted(glob.glob(os.path.join(root, '*.yaml'))):
+        try:
+            doc = load(path)
+        except Exception:
+            continue
+        if not isinstance(doc, dict):
+            continue
+        for e in (doc.get('apis') or []):
+            if isinstance(e, dict) and isinstance(e.get('id'), str):
+                ids.add(e['id'])
+    if os.path.exists(REPO_APIS_YAML):
+        try:
+            doc = load(REPO_APIS_YAML)
+        except Exception:
+            doc = None
+        if isinstance(doc, dict):
+            for e in (doc.get('entries') or []):
+                if isinstance(e, dict) and isinstance(e.get('name'), str):
+                    ids.add(e['name'])
+    return ids
 
 
 # ---- fallback reader (no PyYAML) --------------------------------------------
@@ -457,15 +524,22 @@ def check_offering(errs, where, off):
             errs.append('%s.url: expected an http(s) URL or null' % rat)
 
 
-def check_structured_fields(errs, where, e):
+def check_structured_fields(errs, where, e, known_vendor_ids):
     """The five structured core fields (ND-8): `official_docs_url`, `auth`,
-    `pricing`, `endpoints`, `endpoints_note`. All optional, all
-    null-when-unknown, mirroring src/apis.ts field for field."""
+    `pricing`, `endpoints`, `endpoints_note`, plus the ND-12 pricing-gate
+    fields nested in `pricing` and the top-level `alternatives` /
+    `alternatives_note` / `cost_badge`. All optional, all null-when-unknown,
+    mirroring src/apis.ts field for field.
+
+    `known_vendor_ids` is only used for `alternatives[].vendor_id`
+    cross-referencing -- see check_alternatives."""
     if e.get('official_docs_url') is not None and not is_url(e.get('official_docs_url')):
         errs.append('%s.official_docs_url: expected an http(s) URL or null' % where)
     check_auth(errs, where, e.get('auth'))
     check_pricing(errs, where, e.get('pricing'))
     check_endpoints(errs, where, e)
+    check_alternatives(errs, where, e, known_vendor_ids)
+    check_cost_badge(errs, where, e)
 
 
 def check_auth(errs, where, auth):
@@ -541,6 +615,124 @@ def check_pricing(errs, where, pricing):
         elif len(notes) > PRICING_NOTES_MAX:
             errs.append('%s.notes: expected at most %d characters, got %d'
                         % (at, PRICING_NOTES_MAX, len(notes)))
+
+    # ---- the pricing gate (ND-12) --------------------------------------------
+    gate = pricing.get('api_access_gate')
+    if gate is not None and gate not in API_ACCESS_GATES:
+        errs.append('%s.api_access_gate: expected one of %s or null'
+                    % (at, ' | '.join(API_ACCESS_GATES)))
+    min_monthly = pricing.get('min_monthly_usd')
+    if min_monthly is not None:
+        if isinstance(min_monthly, bool) or not isinstance(min_monthly, (int, float)) or min_monthly < 0:
+            errs.append('%s.min_monthly_usd: expected a non-negative number or null' % at)
+        if gate != 'subscription_required':
+            errs.append('%s.min_monthly_usd: only allowed when pricing.api_access_gate'
+                        ' is subscription_required' % at)
+    min_prepay = pricing.get('min_prepay_usd')
+    if min_prepay is not None:
+        if isinstance(min_prepay, bool) or not isinstance(min_prepay, (int, float)) or min_prepay < 0:
+            errs.append('%s.min_prepay_usd: expected a non-negative number or null' % at)
+        if gate != 'prepaid_min':
+            errs.append('%s.min_prepay_usd: only allowed when pricing.api_access_gate'
+                        ' is prepaid_min' % at)
+    gate_source_url = pricing.get('gate_source_url')
+    if gate_source_url is not None and not is_url(gate_source_url):
+        errs.append('%s.gate_source_url: expected an http(s) URL or null' % at)
+    if gate is not None and gate != 'unknown' and gate_source_url is None:
+        errs.append('%s.gate_source_url: required when pricing.api_access_gate is set'
+                    ' and not unknown (what proves the gate?)' % at)
+
+
+def check_alternatives(errs, where, e, known_vendor_ids):
+    """`alternatives` + `alternatives_note` (ND-12): required together with
+    `pricing.api_access_gate` in {subscription_required, contact_sales} --
+    that is the whole point: a row that forces a recurring fee or a sales
+    call must say where else to go. Forbidden otherwise, so the field can
+    never read as "checked" on a row nobody gated. `vendor_id` must resolve
+    to a real index entry (never invented), never the row's own id, and
+    never repeated within one list."""
+    pricing = e.get('pricing')
+    gate = pricing.get('api_access_gate') if isinstance(pricing, dict) else None
+    gated = gate in GATED_ACCESS_GATES
+    alts = e.get('alternatives')
+    note = e.get('alternatives_note')
+    self_id = e.get('id')
+
+    if gated:
+        if not isinstance(alts, list):
+            errs.append('%s.alternatives: required (a list) when pricing.api_access_gate'
+                        ' is subscription_required or contact_sales' % where)
+        else:
+            seen = set()
+            for n, row in enumerate(alts):
+                rat = '%s.alternatives[%d]' % (where, n)
+                if not isinstance(row, dict):
+                    errs.append('%s: expected a mapping' % rat)
+                    continue
+                for k in row:
+                    if k not in ALTERNATIVE_ROW_KEYS:
+                        errs.append('%s.%s: unknown field' % (rat, k))
+                vid = row.get('vendor_id')
+                valid_vid = isinstance(vid, str) and vid.strip() != ''
+                if not valid_vid:
+                    errs.append('%s.vendor_id: expected a non-empty string' % rat)
+                elif vid == self_id:
+                    errs.append("%s.vendor_id: must not equal this row's own id" % rat)
+                elif vid in seen:
+                    errs.append('%s.vendor_id: duplicate vendor_id %r' % (rat, vid))
+                elif vid not in known_vendor_ids:
+                    errs.append('%s.vendor_id: unknown vendor %r -- not a shard id or'
+                                ' apis.yaml name' % (rat, vid))
+                if valid_vid:
+                    seen.add(vid)
+                why = row.get('why')
+                if not isinstance(why, str) or not why.strip():
+                    errs.append('%s.why: expected a non-empty string' % rat)
+                elif '\n' in why or '\r' in why:
+                    errs.append('%s.why: expected a single line (no line breaks)' % rat)
+                elif len(why) > ALTERNATIVES_WHY_MAX:
+                    errs.append('%s.why: expected at most %d characters, got %d'
+                                % (rat, ALTERNATIVES_WHY_MAX, len(why)))
+                access_gate = row.get('access_gate')
+                if access_gate not in ALTERNATIVE_ACCESS_GATES:
+                    errs.append('%s.access_gate: expected one of %s'
+                                % (rat, ' | '.join(ALTERNATIVE_ACCESS_GATES)))
+            if isinstance(alts, list) and not alts:
+                if not isinstance(note, str) or not note.strip():
+                    errs.append('%s.alternatives: expected a non-empty alternatives_note'
+                                ' when alternatives is [] -- say where else to go' % where)
+    elif alts is not None:
+        errs.append('%s.alternatives: must be absent or null unless pricing.api_access_gate'
+                    ' is subscription_required or contact_sales' % where)
+
+    if note is not None:
+        if not isinstance(note, str) or not note.strip():
+            errs.append('%s.alternatives_note: expected a non-empty string or null' % where)
+        elif '\n' in note or '\r' in note:
+            errs.append('%s.alternatives_note: expected a single line (no line breaks)' % where)
+        elif len(note) > ALTERNATIVES_NOTE_MAX:
+            errs.append('%s.alternatives_note: expected at most %d characters, got %d'
+                        % (where, ALTERNATIVES_NOTE_MAX, len(note)))
+        if not gated:
+            errs.append('%s.alternatives_note: must be absent or null unless'
+                        ' pricing.api_access_gate is subscription_required or'
+                        ' contact_sales' % where)
+
+
+def check_cost_badge(errs, where, e):
+    """A hand-filled `cost_badge`, if present, must equal
+    `derive_cost_badge(pricing)` exactly. `cost_badge` is written by
+    build.py and never hand-filled, so this is the only check it gets --
+    absence is always valid (old data, or a row build.py has not
+    regenerated yet)."""
+    if 'cost_badge' not in e:
+        return
+    expected = derive_cost_badge(e.get('pricing'))
+    got = e.get('cost_badge')
+    if got != expected:
+        errs.append('%s.cost_badge: derived field; expected %s from'
+                    ' pricing.api_access_gate, got %s (do not hand-edit; run build)'
+                    % (where, expected, got))
 
 
 def check_endpoints(errs, where, e):
@@ -630,6 +822,12 @@ def main(root):
         print('FAIL: no *.yaml shards found in %s' % root)
         return 1
 
+    # Computed once, scanning every shard in `root` plus the repo's own
+    # apis.yaml -- see collect_known_vendor_ids. Needed up front because a row
+    # near the top of one shard may cite a vendor_id defined in a shard
+    # processed later.
+    known_ids = collect_known_vendor_ids(root)
+
     for path in files:
         shard = os.path.splitext(os.path.basename(path))[0]
         doc = load(path)
@@ -704,7 +902,7 @@ def main(root):
 
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])
-            check_structured_fields(errs, where, e)
+            check_structured_fields(errs, where, e, known_ids)
 
             d = e.get('checked_date')
             d = d.isoformat() if isinstance(d, datetime.date) else d

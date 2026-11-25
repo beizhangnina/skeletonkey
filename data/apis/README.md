@@ -128,6 +128,147 @@ of wiping it -- the mechanism is generic and covers these five fields the
 same way it covers `offering` and any other hand-filled extra a shard row
 carries.
 
+## ND-12 pricing gate
+
+Four more fields nested in `pricing` (independent of the five ND-8 fields
+above), plus two new top-level row fields and one derived field -- validated
+identically by `validate.py` and `src/apis.ts`, and checked for drift by
+`test/pricing-gate.test.ts`. The point: tell a human or an agent, at a
+glance, whether an API can be reached for free or pay-as-you-go, or whether
+it forces a recurring commitment or a sales call first -- and if it does,
+where else to get the same capability.
+
+### `pricing.*` (nested, all optional, all null-when-unknown)
+
+| field | type | meaning |
+|---|---|---|
+| `api_access_gate` | enum or null | what stands between you and the API -- see below |
+| `min_monthly_usd` | number ≥ 0 or null | the subscription's minimum monthly fee, only when `api_access_gate` is `subscription_required` |
+| `min_prepay_usd` | number ≥ 0 or null | the minimum prepaid balance, only when `api_access_gate` is `prepaid_min` |
+| `gate_source_url` | http(s) URL or null | the vendor's own pricing page the gate was read from |
+
+`api_access_gate` is one of:
+
+- **`none`** -- free, or pure pay-as-you-go: no gate at all.
+- **`prepaid_min`** -- must prepay a minimum balance, but there is no
+  monthly fee. The minimum goes in `min_prepay_usd`.
+- **`subscription_required`** -- there is no API access without a paid
+  subscription. The minimum monthly fee goes in `min_monthly_usd`.
+- **`contact_sales`** -- the API is reachable only through a sales process.
+- **`unknown`** -- nobody has checked the vendor's own pricing page yet.
+- `null` -- same as `unknown`, for a row nobody has touched at all.
+
+`min_monthly_usd` is **only allowed** (non-null) when the gate is
+`subscription_required`, and `min_prepay_usd` only when it is `prepaid_min`
+-- a minimum attached to the wrong gate is rejected, the same way
+`starting_price_usd` is never guessed elsewhere in this file.
+`gate_source_url` is **required** whenever `api_access_gate` is set and is
+not `unknown` -- a real claim about how the API is gated needs the page it
+came from; `unknown` (nobody checked) and `null` need no source.
+
+### `alternatives` / `alternatives_note` (top-level, optional)
+
+- **`alternatives`** -- null/absent, or a list of
+  `{vendor_id, why, access_gate}`:
+  - `vendor_id` -- non-empty string. Must resolve to an existing index
+    entry: a shard row's `id` in `data/apis/*.yaml`, or a root `apis.yaml`
+    entry's `name` -- **never invented**. Must not equal this row's own id,
+    and must not repeat within one list.
+  - `why` -- non-empty single-line string, at most 200 characters.
+  - `access_gate` -- one of `none | prepaid_min | subscription_required |
+    contact_sales` (the same five values as `pricing.api_access_gate`,
+    **minus** `unknown` -- `unknown` says nothing about how the alternative
+    itself is gated, so it cannot describe one).
+- **`alternatives_note`** -- single-line non-empty string, at most 300
+  characters, or null.
+
+These two are **required together with the gate**, never independent of it:
+
+- When `pricing.api_access_gate` is `subscription_required` or
+  `contact_sales`: `alternatives` must be a list (non-null). An empty list
+  (`[]`) is allowed, but then `alternatives_note` is required -- say in
+  words why there is nowhere else to go.
+- For every other gate (including `unknown`, `null`, or no `pricing` block
+  at all): `alternatives` and `alternatives_note` must both be absent or
+  null. A row nobody has gated has nothing to route around yet.
+
+### `cost_badge` (top-level, derived -- never hand-fill this)
+
+| `pricing.api_access_gate` | `cost_badge` |
+|---|---|
+| `none`, `prepaid_min` | `green` |
+| `subscription_required`, `contact_sales` | `red` |
+| `unknown`, `null`, or no `pricing` block at all | `gray` |
+
+`cost_badge` is **never hand-filled**: `build.py` writes it on every row it
+emits, computed from that row's own `pricing` *after* hand-filled fields
+have been merged back onto it (see "Preserving hand-filled fields" below).
+The validators only ever check that a `cost_badge` present on a row (old
+data a human typed in, or a stale regenerate) still agrees with what
+`pricing.api_access_gate` derives -- a row with no `cost_badge` at all is
+still valid. A mismatch is rejected with:
+
+```
+<row>.cost_badge: derived field; expected <x> from pricing.api_access_gate, got <y> (do not hand-edit; run build)
+```
+
+`src/apis.ts` exports the mapping as `deriveCostBadge(pricing)` (constants
+`API_ACCESS_GATES`, `ALTERNATIVE_ACCESS_GATES`, `COST_BADGES`); the index
+loader (`loadApiIndex` / `buildApiIndex`) also sets a computed `costBadge`
+property on every loaded entry, so a consumer never has to call
+`deriveCostBadge` itself. `validate.py` exports the same mapping as
+`derive_cost_badge(pricing)`.
+
+### Every validation error string
+
+```
+<row>.pricing.api_access_gate: expected one of none | prepaid_min | subscription_required | contact_sales | unknown or null
+<row>.pricing.min_monthly_usd: expected a non-negative number or null
+<row>.pricing.min_monthly_usd: only allowed when pricing.api_access_gate is subscription_required
+<row>.pricing.min_prepay_usd: expected a non-negative number or null
+<row>.pricing.min_prepay_usd: only allowed when pricing.api_access_gate is prepaid_min
+<row>.pricing.gate_source_url: expected an http(s) URL or null
+<row>.pricing.gate_source_url: required when pricing.api_access_gate is set and not unknown (what proves the gate?)
+<row>.alternatives: required (a list) when pricing.api_access_gate is subscription_required or contact_sales
+<row>.alternatives: must be absent or null unless pricing.api_access_gate is subscription_required or contact_sales
+<row>.alternatives: expected a non-empty alternatives_note when alternatives is [] -- say where else to go
+<row>.alternatives[N]: expected a mapping
+<row>.alternatives[N].<field>: unknown field
+<row>.alternatives[N].vendor_id: expected a non-empty string
+<row>.alternatives[N].vendor_id: must not equal this row's own id
+<row>.alternatives[N].vendor_id: duplicate vendor_id '<id>'
+<row>.alternatives[N].vendor_id: unknown vendor '<id>' -- not a shard id or apis.yaml name
+<row>.alternatives[N].why: expected a non-empty string
+<row>.alternatives[N].why: expected a single line (no line breaks)
+<row>.alternatives[N].why: expected at most 200 characters, got <n>
+<row>.alternatives[N].access_gate: expected one of none | prepaid_min | subscription_required | contact_sales
+<row>.alternatives_note: expected a non-empty string or null
+<row>.alternatives_note: expected a single line (no line breaks)
+<row>.alternatives_note: expected at most 300 characters, got <n>
+<row>.alternatives_note: must be absent or null unless pricing.api_access_gate is subscription_required or contact_sales
+<row>.cost_badge: derived field; expected <x> from pricing.api_access_gate, got <y> (do not hand-edit; run build)
+```
+
+### `data/apis/scripts/derive_cost_badge.py`
+
+A standalone script that rewrites/inserts `cost_badge` lines directly in the
+shard YAML text, for exactly the reason `build.py` cannot be run in a clean
+clone: `raw/` is not committed (see "Layout" above). It never touches
+anything but `cost_badge` lines, is idempotent (a second run changes
+nothing), and supports `--check` (reports what would change, without
+writing, exit 1 if anything would):
+
+```
+python3 data/apis/scripts/derive_cost_badge.py [--check] [dir]
+```
+
+No shard row carries `pricing`, `alternatives` or `alternatives_note` yet --
+same reason as the ND-8 fields above. `build.py` preserves all three (and
+the four new `pricing.*` keys) across a rebuild exactly as it does the five
+ND-8 fields, emitting `alternatives` then `alternatives_note` right after
+them -- see "Preserving hand-filled fields" below, which already covers
+these generically.
+
 ## Preserving hand-filled fields
 
 `build.py` only ever computes a fixed set of base fields for a row -- `id`,
@@ -153,11 +294,19 @@ So `python3 scripts/build.py` can only ever pick up a hand-filled value for
 one of these keys, never strip or guess one, and a row that has none of them
 regenerates byte-identical to before any of them existed. Once emitted
 (`emit_row`), the base fields come first, then the five ND-8 fields present on
-the row in their defined order, then any other preserved extra key in the
-order it appeared on the existing shard row. The nested value itself can be
-anything PyYAML and `validate.py`'s fallback reader both round-trip:
-mappings, lists of scalars or mappings, nested mappings, multi-line strings,
-booleans, numbers, null and dates.
+the row in their defined order, then the two ND-12 fields (`alternatives`,
+`alternatives_note`) present on the row in their defined order, then any other
+preserved extra key in the order it appeared on the existing shard row. The
+nested value itself can be anything PyYAML and `validate.py`'s fallback reader
+both round-trip: mappings, lists of scalars or mappings, nested mappings,
+multi-line strings, booleans, numbers, null and dates.
+
+**`cost_badge` is the one exception to "never invents":** it is the one key
+`build.py` *does* compute itself on every row, derived from that row's own
+(already-merged) `pricing` -- see "ND-12 pricing gate" above. `merge_preserved`
+treats it like a base field (never pulled from the existing shard), even
+though it is not in `ORDER`, so a stale `cost_badge` from before a pricing
+edit can never survive a rebuild.
 
 ## Counts
 
