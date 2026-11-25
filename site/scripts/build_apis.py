@@ -1,15 +1,72 @@
-"""Generate /apis/, /apis/<slug>/, /apis/aggregators/, /apis.json and /llms.txt from the staging index.
-    python3 scripts/build_apis.py [index.yaml]
-Routes and aggregator profiles are read from <index dir>/routes/.
+"""Generate /apis/, /apis/<slug>/, /apis/aggregators/, /apis.json and /llms.txt
+from the repo's own data: data/apis/*.yaml (canonical for every field a shard
+row carries, including the ND-7/ND-8 structured fields) merged with the
+committed site/data/vendor-research.json overlay (research-only fields the
+shards don't carry) and site/data/routes/ (aggregator profiles and vendor
+routes). Nothing outside the repo is read, so a clean clone can build the
+site.
+
+    python3 scripts/build_apis.py [--out DIR]
+
+--out (default: site/public) is where apis/, apis.json, llms.txt and
+sitemap.xml are written. public/index.html is always read from site/public
+(its header/footer markup is reused), regardless of --out.
+
+Run scripts/export_site_data.py --index <path/to/index.yaml> to refresh
+vendor-research.json and routes/ from a new research pass.
 """
-import sys, os, re, json, html, shutil, yaml
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PUB = os.path.join(ROOT, 'public')
-SRC = sys.argv[1] if len(sys.argv) > 1 else '/workspace/skeletonkey-index-research/index.yaml'
-RDIR = os.path.join(os.path.dirname(os.path.abspath(SRC)), 'routes')
+import sys, os, re, json, html, shutil, glob, argparse, yaml
+SCRIPTS = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(SCRIPTS)              # site/
+REPO_ROOT = os.path.dirname(ROOT)            # repo root
+PUB = os.path.join(ROOT, 'public')           # source of index.html, always
+SHARD_DIR = os.path.join(REPO_ROOT, 'data', 'apis')
+SITE_DATA = os.path.join(ROOT, 'data')
+RDIR = os.path.join(SITE_DATA, 'routes')
+
+_ap = argparse.ArgumentParser()
+_ap.add_argument('--out', default=PUB, help='directory to write apis/, apis.json, llms.txt, sitemap.xml into (default: site/public)')
+OUT_ROOT = os.path.abspath(_ap.parse_args().out)
+os.makedirs(OUT_ROOT, exist_ok=True)
+
 SITE = 'https://skeletonkey.run'
 TODAY = '2026-10-26'
-doc = yaml.safe_load(open(SRC))
+
+# ---- shards + research overlay merge ---------------------------------------
+# data/apis/*.yaml shards are canonical for every field they carry (id, name,
+# category, provider_url, docs_url, auth_type, signup, access_mode, seen_in,
+# checked_date, min_topup, billing_unit, free_tier, and the ND-7/ND-8
+# structured fields: official_docs_url, auth, pricing, endpoints,
+# endpoints_note, collection_scope, visibility, visibility_note).
+# site/data/vendor-research.json carries the research-only fields the shards
+# never gained (what_it_does, url, signup_url, ...) -- a committed snapshot of
+# the external research index, refreshed by export_site_data.py.
+# Merge rule: a shard value wins whenever both sides have the key, EXCEPT when
+# the shard's value is null/absent and the overlay has one, in which case the
+# overlay fills -- which matters today for docs_url/min_topup/billing_unit/
+# free_tier: shard-canonical fields that are null on every shard row (a known
+# research gap), so the overlay's old-index value is what actually reaches the
+# site until a shard fills one in. The one field excluded from this fallback
+# on purpose is `seen_in`: the shard's list form and the old index's scalar
+# bucket aren't the same shape, so `catalogs()` below reads the shard's list
+# only and the overlay never carries `seen_in` at all.
+OVERLAY = json.load(open(os.path.join(SITE_DATA, 'vendor-research.json')))
+VENDOR_RESEARCH = OVERLAY.get('vendors') or {}
+
+def load_shard_rows():
+    rows = []
+    for f in sorted(glob.glob(os.path.join(SHARD_DIR, '*.yaml'))):
+        rows.extend((yaml.safe_load(open(f)) or {}).get('apis') or [])
+    return rows
+
+def merge_row(shard_row):
+    merged = dict(VENDOR_RESEARCH.get(shard_row['id']) or {})
+    for k, v in shard_row.items():
+        if v is not None or k not in merged:
+            merged[k] = v
+    return merged
+
+ENTRIES = [merge_row(r) for r in load_shard_rows()]
 E = lambda s: html.escape('' if s is None else str(s))
 home = open(os.path.join(PUB, 'index.html')).read()
 HEAD = re.search(r'<header class="site-head">.*?</header>', home, re.S).group(0).replace(' aria-current="page"', '')
@@ -40,13 +97,15 @@ def derive_collection_scope(category):
     return 'data'
 
 def vendor_collection(r):
-    """(collection_scope, visibility, visibility_note) for one vendor row: an
-    overlay override wins, else the row's own field (external index rows never
-    set one), else category derivation -- same precedence as apis.yaml."""
+    """(collection_scope, visibility, visibility_note) for one vendor row:
+    site/data/collection.json's vendor_overrides wins, else the shard row's
+    own collection_scope/visibility/visibility_note (set on the llm-models
+    shard rows), else category derivation -- same precedence as apis.yaml."""
     ov = VENDOR_OVERRIDES.get(r['id']) or {}
-    scope = ov.get('collection_scope') or derive_collection_scope(r.get('category'))
-    visibility = ov.get('visibility') or ('hidden' if scope == 'llm' else 'listed')
-    return scope, visibility, ov.get('visibility_note')
+    scope = ov.get('collection_scope') or r.get('collection_scope') or derive_collection_scope(r.get('category'))
+    visibility = ov.get('visibility') or r.get('visibility') or ('hidden' if scope == 'llm' else 'listed')
+    note = ov.get('visibility_note') if ov.get('visibility_note') is not None else r.get('visibility_note')
+    return scope, visibility, note
 
 AGGS = json.load(open(os.path.join(RDIR, 'aggregators.json'))) + EXTRA_AGGREGATORS
 for _a in AGGS:
@@ -65,8 +124,9 @@ def status(r):
 LABEL = {'verified': 'Verified', 'unverified': 'Unverified', 'sales-only': 'Sales only', 'no-public-api': 'No public API'}
 
 def catalogs(r):
-    s = r.get('seen_in')
-    return {'both': ['glasser', 'monid'], 'glasser': ['glasser'], 'monid': ['monid'], 'existing': ['flatkey']}.get(s, [])
+    """Shard `seen_in` is a list (subset of glasser/monid/flatkey/vendor-direct);
+    only the three catalog slugs CATS knows how to label are kept."""
+    return [c for c in (r.get('seen_in') or []) if c in CATS]
 
 def clean_note(t):
     if not t: return t
@@ -195,11 +255,11 @@ def agg_route(rt):
             'verified': bool(rt.get('verified')), 'verified_at': str((a or {}).get('checked_date') or TODAY),
             'source_url': link, 'aggregator_page': f'{SITE}/apis/aggregators/{s}/' if a else None}
 
+VENDOR_ROUTES = json.load(open(os.path.join(RDIR, 'vendor-routes.json')))
+
 def routes_for(r, st):
     out = [direct_route(r, st)]
-    f = os.path.join(RDIR, r['id'] + '.json')
-    if os.path.isfile(f):
-        for rt in (json.load(open(f)).get('routes') or []): out.append(agg_route(rt))
+    for rt in VENDOR_ROUTES.get(r['id'], []): out.append(agg_route(rt))
     return out
 
 # ---------- when to pick ----------
@@ -295,7 +355,7 @@ def public(r):
 # direct URL still works); `rows` is the listing/browsing surface -- hidden
 # rows (the LLM set-aside) are left out of the /apis/ index, llms.txt and the
 # apis.json count/counts, same rule src/apis.ts and the CLI/MCP apply.
-ALL_ROWS = sorted((public(r) for r in doc['entries'] if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())
+ALL_ROWS = sorted((public(r) for r in ENTRIES if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())
 rows = [x for x in ALL_ROWS if x['visibility'] != 'hidden']
 hidden_rows = [x for x in ALL_ROWS if x['visibility'] == 'hidden']
 HIDDEN_SLUGS = {x['slug'] for x in hidden_rows}
@@ -613,7 +673,7 @@ def agg_index_body(aggs_list):
             f'<p class="ap-small">Payment model tokens come from our own reading of each gateway\'s billing pages: '
             f'<code>prepaid_credits</code>, <code>payg</code>, <code>subscription</code>, <code>x402</code>, <code>no_account</code>.</p>')
 
-out = os.path.join(PUB, 'apis'); shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
+out = os.path.join(OUT_ROOT, 'apis'); shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
 shutil.copy(os.path.join(ROOT, 'scripts', 'apis.css'), os.path.join(out, 'apis.css'))
 # Every vendor's own page is generated, hidden or not: a direct URL keeps
 # working, which is what makes "hidden" recoverable rather than deleted.
@@ -655,14 +715,14 @@ by_src = {}
 for x in rows:
     for rt in x['routes']: by_src[rt['source_slug']] = by_src.get(rt['source_slug'], 0) + 1
 vrt = sum(1 for x in rows for rt in x['routes'] if rt['verified'])
-json.dump({'name': 'SkeletonKey API index', 'url': f'{SITE}/apis/', 'generated': str(doc.get('checked_date')), 'count': len(rows), 'counts': cnt,
+json.dump({'name': 'SkeletonKey API index', 'url': f'{SITE}/apis/', 'generated': str(OVERLAY.get('checked')), 'count': len(rows), 'counts': cnt,
            'hidden_count': len(hidden_rows),
            'route_counts': {'total': nrt, 'verified': vrt, 'by_source': dict(sorted(by_src.items(), key=lambda kv: -kv[1]))},
            'note': 'Verified rows were read on the vendor\'s own pages on checked_date. Unverified rows carry no prices. '
                    'hidden_count rows (collection_scope "llm", set aside 2026-11-24) are excluded from count/counts and '
                    'from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.',
            'schema': f'{SITE}/llms.txt', 'apis': ALL_ROWS, 'aggregators': aggs},
-          open(os.path.join(PUB, 'apis.json'), 'w'), indent=1, ensure_ascii=False, default=str)
+          open(os.path.join(OUT_ROOT, 'apis.json'), 'w'), indent=1, ensure_ascii=False, default=str)
 
 L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor\'s own pages, plus {nrt} routes ({vrt} verified) to reach them: direct from the vendor or through one of {len(VISIBLE_AGGS)} aggregator gateways. Full data: {SITE}/apis.json', '',
      'Status: verified = pricing and auth read on the vendor site; unverified = not confirmed, no prices shown; sales-only = no public prices; no-public-api = reachable only through an aggregator catalog.', '',
@@ -701,7 +761,7 @@ for c in cats:
         if x['category'] == c:
             L.append(f'- [{x["name"]}]({x["page"]}): {x["status"]}. {(x.get("summary") or "").strip()}')
     L.append('')
-open(os.path.join(PUB, 'llms.txt'), 'w').write('\n'.join(L))
+open(os.path.join(OUT_ROOT, 'llms.txt'), 'w').write('\n'.join(L))
 print('pages', len(rows), cnt)
 print('aggregator pages', len(aggs), {a['slug']: a['vendor_count'] for a in aggs})
 print('routes total', nrt, '| verified', vrt, '| by source', dict(sorted(by_src.items(), key=lambda kv: -kv[1])))
@@ -709,4 +769,4 @@ print('routes total', nrt, '| verified', vrt, '| by source', dict(sorted(by_src.
 # The pages just written change the URL set, so refresh the sitemap with them.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_sitemap
-print(f'sitemap: {len(build_sitemap.write_sitemap())} urls -> public/sitemap.xml')
+print(f'sitemap: {len(build_sitemap.write_sitemap(OUT_ROOT))} urls -> {os.path.join(OUT_ROOT, "sitemap.xml")}')
