@@ -18,6 +18,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/anyapi"
     checked_date: 2026-10-24
+    official_docs_url: "https://getanyapi.com/docs"
+    endpoints:
+      - method: "POST"
+        path: "/v1/run/{sku}"
+        summary: "Run any catalog API by its SKU, sending the SKU's normalized input; returns a normalized result envelope with per-call USD cost."
+        returns: "Envelope containing output, provider, costUsd (the charge for this call) and items (number of results)."
+        docs_url: "https://getanyapi.com/docs"
+      - method: "GET"
+        path: "/v1/apis/{sku}"
+        summary: "Fetch the selected SKU's contract before writing a request; with MCP, the equivalent tool is get_api."
+        returns: "The SKU's contract, including the inputSchema whose declared fields must be used."
+        docs_url: "https://getanyapi.com/docs"
+      - method: "GET"
+        path: "/v1/apis"
+        summary: "Discover available SKUs in the catalog; can also be scoped with a category query parameter."
+        returns: "The list of available SKUs in the catalog."
+        docs_url: "https://getanyapi.com/llms.txt"
+      - method: "POST"
+        path: "/v1/apis/{sku}/quote"
+        summary: "Price and validate the exact input for a SKU before spending; nothing is executed or charged."
+        returns: "A price quote for the exact request; it is free and nothing is executed or charged."
+        docs_url: "https://getanyapi.com/llms.txt"
+      - method: "GET"
+        path: "/v1/requests/{requestId}"
+        summary: "Read the stored state of a durable Request by polling; polling never repeats the paid provider operation."
+        returns: "Request snapshot with a public status of queued, running, succeeded, failed, or expired."
+        docs_url: "https://getanyapi.com/docs/durable-requests"
     usage_api:
       available: true
       method: "GET"
@@ -43,6 +70,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apify"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.apify.com/api/v2"
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +97,13 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/brightdata"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
+    endpoints:
+      - method: "POST"
+        path: "/dca/trigger_hp"
+        summary: "Trigger a media extraction job to retrieve video, audio, captions, thumbnails and storyboards."
+        returns: "Acknowledgement with success flag, inputs count and job_id."
+        docs_url: "https://docs.brightdata.com/api-reference/media-data-api/media-data-api"
     usage_api:
       available: true
       method: "GET"
@@ -93,6 +129,35 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/context-dev"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.context.dev/"
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: null
+      unit: "credits (monthly credit allowance per plan)"
+      pricing_url: null
+      notes: "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available."
+    endpoints:
+      - method: "POST"
+        path: "/web/scrape"
+        summary: "Scrape a single public URL and return whichever outputs you enable in the formats object, such as markdown, html, screenshot, images, json, or parsed data."
+        returns: "One object per output format with requested/success/data fields, plus final url, page metadata, cache_metadata, request_id, and key_metadata credits consumed and remaining."
+        docs_url: "https://docs.context.dev/api-reference/web-scraping/scrape"
+      - method: "POST"
+        path: "/webhooks/deliveries"
+        summary: "List batch and monitor webhook deliveries recorded in the last 30 days, filtered by source, IDs, status, creation time, tags, and cursor paging."
+        returns: "A page of webhook deliveries with data array, has_more, next_cursor, key_metadata, and request_id."
+        docs_url: "https://docs.context.dev/api-reference/webhooks/list.md"
+      - method: "GET"
+        path: "/monitors/limits"
+        summary: "Retrieve the organization's monitor allowance and current usage; requires the monitors:read permission."
+        returns: "Monitors used count, maximum monitors limit, plan category, key_metadata, and request_id."
+        docs_url: "https://docs.context.dev/api-reference/monitors/limits.md"
+      - method: "GET"
+        path: "/org/usage"
+        summary: "Check the organization's credit balance and usage; the docs state it costs no credits and stays available at zero balance."
+        returns: "Organization credit balance and usage information (per the billing guide's reference to the usage endpoint)."
+        docs_url: "https://docs.context.dev/llms-full.txt"
     usage_api:
       available: true
       method: "GET"
@@ -118,6 +183,18 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/firecrawl"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.firecrawl.dev"
+    endpoints:
+      - method: "POST"
+        path: "/v2/scrape"
+        summary: "Scrape any URL and return its content as markdown, HTML, structured JSON, screenshots, links, and metadata."
+        returns: "JSON with success flag and data object containing markdown, html, links, screenshot, metadata, and other requested formats."
+        docs_url: "https://docs.firecrawl.dev/api-reference/endpoint/scrape"
+      - method: "POST"
+        path: "/v2/search"
+        summary: "Search the web and get full page content from results in one call."
+        returns: "Payload with data.web, data.images, and data.news arrays containing url, title, description/snippet, and position."
+        docs_url: "https://docs.firecrawl.dev"
     usage_api:
       available: true
       method: "GET"
@@ -143,6 +220,28 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/mrscraper"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.mrscraper.com/docs/getting-started/overview"
+    auth:
+      type: "api_key"
+      header: "x-api-token"
+      format: "<API_KEY>"
+      docs_url: "https://docs.mrscraper.com/llms-full.txt"
+    endpoints:
+      - method: "GET"
+        path: "/api/v1/subscription-accounts"
+        summary: "Verify an API token and retrieve subscription account information."
+        returns: "Subscription account information including token usage, limits, and billing details."
+        docs_url: "https://docs.mrscraper.com/llms-full.txt"
+      - method: "GET"
+        path: "/api/v1/results"
+        summary: "List scraping results with pagination, sorting, search, and date filters."
+        returns: "A paginated list of results; supports page, pageSize, sortField, sortOrder, search, and date range parameters."
+        docs_url: "https://docs.mrscraper.com/llms-full.txt"
+      - method: "GET"
+        path: "/api/v1/analytic/statuses"
+        summary: "Retrieve scrape status counts for a domain within a date range."
+        returns: "Status counts for a domain, optionally filtered by action and API token name."
+        docs_url: "https://docs.mrscraper.com/llms-full.txt"
     usage_api:
       available: null
       method: null
@@ -168,6 +267,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/tinyfish"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.tinyfish.ai/"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Wallet-based: Agent, Browser and Research runs draw from wallet; Search and Fetch free within a daily allowance; agent top-ups range $10.00 to $500.00 USD."
+    endpoints:
+      - method: "POST"
+        path: "/v1/automation/run-sse"
+        summary: "Run a goal-based browser automation on a URL and stream progress back over SSE until the final result arrives."
+        returns: "Server-Sent Events stream: STARTED, STREAMING_URL, PROGRESS, and COMPLETE events with run_id, status, and result."
+        docs_url: "https://docs.tinyfish.ai/api-reference/automation/run-browser-automation-with-sse-streaming"
+      - method: "POST"
+        path: "/"
+        summary: "Create a remote TinyBrowser session on api.browser.tinyfish.ai, optionally with target url, timeout_seconds, and proxy_config."
+        returns: "201 Created with session_id, cdp_url (WebSocket CDP endpoint), and base_url."
+        docs_url: "https://docs.tinyfish.ai/tinybrowser/reference"
+      - method: "DELETE"
+        path: "/{session_id}"
+        summary: "Terminate a TinyBrowser session immediately by its session_id; idempotent if the session already ended."
+        returns: "204 No Content with an empty body on success."
+        docs_url: "https://docs.tinyfish.ai/tinybrowser/reference"
+      - method: "GET"
+        path: "/"
+        summary: "TinySearch query endpoint on api.search.tinyfish.ai taking query plus optional location, language, domain filters, dates, and page."
+        returns: "JSON with query, results[] (position, site_name, title, snippet, url), total_results, and page."
+        docs_url: "https://docs.tinyfish.ai/tinysearch/reference"
+      - method: "POST"
+        path: "/v1/wallet/top-up"
+        summary: "Ask TinyFish to top up the account wallet by an amount; returns a 402 payment challenge to pay, then retry with the payment credential."
+        returns: "402 payment challenge in WWW-Authenticate first; after payment, 200 settled with amount, payment_reference, available_balance (or 202)."
+        docs_url: "https://docs.tinyfish.ai/llms-full.txt"
     usage_api:
       available: true
       method: "GET"

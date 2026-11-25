@@ -18,6 +18,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/browserbase"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.browserbase.com"
+    auth:
+      type: "api_key"
+      header: "X-BB-API-Key"
+      format: "<API_KEY>"
+      docs_url: "https://docs.browserbase.com/reference/api/create-an-agent.md"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: 20
+      unit: "per month"
+      pricing_url: null
+      notes: "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go."
+    endpoints:
+      - method: "POST"
+        path: "/v1/agents"
+        summary: "Create a reusable Agent with a name, optional system prompt, and optional result schema guiding every run that references it."
+        returns: "201 with an Agent object containing agentId, name, systemPrompt, resultSchema, createdAt, and updatedAt."
+        docs_url: "https://docs.browserbase.com/reference/api/create-an-agent.md"
+      - method: "GET"
+        path: "/v1/agents"
+        summary: "List agents across the account, filterable by creation time, with limit and cursor pagination."
+        returns: "200 with a page of agents: data array, limit, and nextCursor (null when no more results)."
+        docs_url: "https://docs.browserbase.com/reference/api/openapi.v1.yaml"
+      - method: "POST"
+        path: "/v1/agents/runs"
+        summary: "Run a browser agent to complete a natural-language task using web search and browser tooling, optionally with a custom agentId, variables, and browser settings."
+        returns: "Response body not stated in the provided excerpt (schema truncated after request fields)."
+        docs_url: "https://docs.browserbase.com/reference/api/openapi.v1.yaml"
+      - method: "POST"
+        path: "/v1/sessions/{id}/recording/downloads"
+        summary: "Request one downloadable MP4 per recorded page of a session; assembly is asynchronous and re-posting re-enqueues and retries pages."
+        returns: "202 with a downloads array of RecordingDownload objects (pageId, status); GET polling returns per-page status and download URLs."
+        docs_url: "https://docs.browserbase.com/reference/api/create-session-recording-downloads.md"
     usage_api:
       available: true
       method: "GET"
@@ -43,6 +77,28 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/github"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.github.com/en/rest"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.github.com/en/rest/migrations/users"
+    endpoints:
+      - method: "GET"
+        path: "/user/migrations"
+        summary: "List every migration the authenticated account owner has started."
+        returns: null
+        docs_url: "https://docs.github.com/en/rest/migrations/users"
+      - method: "GET"
+        path: "/api/article/body"
+        summary: "Fetch the rendered content of a docs page as markdown, via the pathname query parameter."
+        returns: "Full rendered content of a docs page as markdown."
+        docs_url: "https://docs.github.com/llms.txt"
+      - method: "GET"
+        path: "/api/search/v1"
+        summary: "Search across all documentation content by query, language, and version."
+        returns: "Search results across all docs content."
+        docs_url: "https://docs.github.com/llms.txt"
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +124,8 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
+    official_docs_url: "https://api.kadec0.xyz/docs"
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null
@@ -93,6 +151,8 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site. Operated by the Monid aggregator itself rather than an independent vendor."
     source_url: "https://monid.ai/tools/sfs"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key."
     usage_api:
       available: null
       method: null
@@ -118,6 +178,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/smolmachine"
     checked_date: 2026-10-24
+    official_docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+    endpoints:
+      - method: "POST"
+        path: "/v1/machines"
+        summary: "Create a persistent cloud microVM from an OCI image or .smolmachine registry reference, specifying CPU, memory, network policy, env, ports and lifecycle limits."
+        returns: "The created machine record including its id; the examples read '.id' from the JSON response."
+        docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+      - method: "POST"
+        path: "/v1/machines/{id}/exec"
+        summary: "Run a command in a machine; command may be a shell string or an argv array, with optional cwd, env, stdin, timeoutSeconds, stream and background."
+        returns: "Output per stream as UTF-8 text (stdout/stderr, capped at 1 MiB) and as base64 (stdoutB64/stderrB64); use ?output=text or ?output=b64 to get one family."
+        docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+      - method: "POST"
+        path: "/v1/machines/{id}/jobs"
+        summary: "Run a command detached as a job; takes command with optional cwd, env, user and timeoutSeconds, wakes a stopped machine and keeps it from auto-stopping."
+        returns: "202 immediately; the job's stdout, stderr and exit code are kept in the machine for later reads."
+        docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+      - method: "GET"
+        path: "/v1/machines/{id}/files/{path}"
+        summary: "Download a file from the machine filesystem at the given absolute guest path without its leading slash; needs the machine:files scope."
+        returns: "The file contents as the response body."
+        docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+      - method: "PUT"
+        path: "/v1/registry/credentials"
+        summary: "Store a pull credential for an external registry host (such as ghcr.io or Docker Hub) so cloud machines can pull private images."
+        returns: "Credential record; the password is never returned and the list shows only the username."
+        docs_url: "https://smolmachines.com/docs/cloud/registry"
     usage_api:
       available: true
       method: "GET"

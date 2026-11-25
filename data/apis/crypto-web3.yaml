@@ -18,6 +18,40 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools/blockrun"
     checked_date: 2026-10-24
+    official_docs_url: "https://blockrun.ai/docs"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: null
+      unit: "per call"
+      pricing_url: null
+      notes: "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free."
+    endpoints:
+      - method: "POST"
+        path: "/v1/chat/completions"
+        summary: "OpenAI-compatible chat endpoint that routes a request to any supported LLM (OpenAI, Anthropic, Google, xAI, DeepSeek, Qwen and others)."
+        returns: "The model's completion, billed per token at the vendor's list price plus a 5% platform fee."
+        docs_url: "https://blockrun.ai/llms.txt"
+      - method: "GET"
+        path: "/v1/models"
+        summary: "Lists available models so a caller can choose one by price, context window or capability; documented as a free call."
+        returns: "Model catalog with pricing/context details; free to call."
+        docs_url: "https://blockrun.ai/llms.txt"
+      - method: "POST"
+        path: "/v1/images/generations"
+        summary: "Generates an image from a prompt, paid per image over the x402 flow."
+        returns: "The generated image, priced $0.015 – $0.15 per image."
+        docs_url: "https://blockrun.ai/llms.txt"
+      - method: "POST"
+        path: "/v1/audio/generations"
+        summary: "Generates a music track from a style/mood prompt, paid per track."
+        returns: "A generated music track, $0.20 per track."
+        docs_url: "https://blockrun.ai/llms.txt"
+      - method: "POST"
+        path: "/v1/search"
+        summary: "Searches the live web and news and returns a summarized answer with citations."
+        returns: "A summarized, cited search answer, priced $0.081 per call."
+        docs_url: "https://blockrun.ai/llms.txt"
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +102,35 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/defillama"
     checked_date: 2026-10-24
+    official_docs_url: "https://api-docs.defillama.com/"
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 300
+      unit: "per month"
+      pricing_url: null
+      notes: "Free API hosts need no key and are rate limited; Pro API requires a key at $300/mo with higher rate limits."
+    endpoints:
+      - method: "GET"
+        path: "/protocols"
+        summary: "Returns the list of all protocols tracked on DefiLlama together with their TVL; on the Pro host this path is served as /api/protocols."
+        returns: "A list of protocols with their TVL values."
+        docs_url: "https://api-docs.defillama.com/llms.txt"
+      - method: "GET"
+        path: "/pools"
+        summary: "Latest yield pool data, including enriched information such as predictions; served as /yields/v1/pools on the Pro host."
+        returns: "Latest data for all pools, including enriched information such as predictions."
+        docs_url: "https://api-docs.defillama.com/llms.txt"
+      - method: "GET"
+        path: "/stablecoins"
+        summary: "Lists all stablecoins with their circulating amounts; the Pro equivalent is /stablecoins/stablecoins."
+        returns: "All stablecoins along with their circulating amounts."
+        docs_url: "https://api-docs.defillama.com/llms.txt"
+      - method: "GET"
+        path: "/overview/dexs"
+        summary: "Lists all DEXes with summaries of their volumes and dataType history data; Pro path is /api/overview/dexs."
+        returns: "All DEXes along with summaries of their volumes and dataType history data."
+        docs_url: "https://api-docs.defillama.com/llms.txt"
     usage_api:
       available: true
       method: "GET"
@@ -93,6 +156,40 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
+    official_docs_url: "https://emc2ai.io/docs"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: 0.2
+      unit: "USDC per request"
+      pricing_url: null
+      notes: "Per-request prices: on-chain data $0.20-$0.60, security scans $0.55, AI analysis $1.00, inference $0.35, chart forecast $0.65. Free MCP tools need no account or payment."
+    endpoints:
+      - method: "GET"
+        path: "/api/einstein/v1/forecast/accuracy"
+        summary: "Returns the public leaderboard of scored price forecasts — MAPE, RMSE and direction hit rate per asset/model/interval. Free and unauthenticated."
+        returns: "A 'leaderboard' JSON object with a metrics glossary and a data array of graded asset/interval/model rows."
+        docs_url: "https://emc2ai.io/llms.txt"
+      - method: "POST"
+        path: "/api/einstein/v1/forecast"
+        summary: "Runs a TimesFM + Kronos chart forecast (drift, direction, quantile bands, optional consensus/attestation)."
+        returns: "Forecast output for the requested asset and candle interval (drift %, direction, quantile bands)."
+        docs_url: "https://emc2ai.io/llms.txt"
+      - method: "GET"
+        path: "/api/einstein/v1/models"
+        summary: "Lists available forecast models (timesfm-3.0, kronos-mini, kronos-small, kronos-base, consensus) with context/horizon limits and per-call pricing."
+        returns: "A model list with id, source, max_context, max_horizon, quantile support, latency, plus endpoints and pricing blocks."
+        docs_url: "https://emc2ai.io/llms.txt"
+      - method: "POST"
+        path: "/api/einstein/v1/inference/chat/completions"
+        summary: "OpenAI-wire-format chat completion answered from Einstein's market context, billed per call from a prepaid balance with a key."
+        returns: "Chat completion in OpenAI wire format; every answer carries a signed, hash-chained receipt (no streaming/tools)."
+        docs_url: "https://emc2ai.io/llms.txt"
+      - method: "POST"
+        path: "/api/a2a"
+        summary: "A2A 0.3 JSON-RPC transport (message/send, tasks/get, tasks/cancel) for invoking Einstein skills, payable per call via x402."
+        returns: "JSON-RPC result or a Task in 'working' state (HTTP 202) for slow skills, pollable or delivered to a callbackUrl."
+        docs_url: "https://emc2ai.io/llms.txt"
     usage_api:
       available: null
       method: null
@@ -118,6 +215,30 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/quicknode"
     checked_date: 2026-10-24
+    official_docs_url: "https://www.quicknode.com/docs/welcome"
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 49
+      unit: "per month"
+      pricing_url: null
+      notes: "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing."
+    endpoints:
+      - method: "POST"
+        path: "/{your-token}/"
+        summary: "JSON-RPC call to your Quicknode endpoint URL (https://{your-endpoint-name}.quiknode.pro/{your-token}/), e.g. sending eth_blockNumber with Content-Type: application/json."
+        returns: "A JSON-RPC response; for the docs demo call it returns the latest Ethereum block number."
+        docs_url: "https://www.quicknode.com/docs/welcome"
+      - method: "POST"
+        path: "/api/v1/agent/subscriptions"
+        summary: "Autonomous agents can create a subscription without human signup, paying via x402 or MPP from a funded EVM wallet."
+        returns: "A `QN_*` API key; POSTing with no body returns a 402 listing plans and accepted payment methods."
+        docs_url: "https://www.quicknode.com/llms.txt"
+      - method: "POST"
+        path: "/v0/endpoints"
+        summary: "Admin API call that creates an RPC endpoint on any chain using the QN_* key returned by the agent subscription call."
+        returns: "An RPC endpoint (creation result) on any supported chain."
+        docs_url: "https://www.quicknode.com/llms.txt"
     usage_api:
       available: true
       method: "GET"
@@ -143,6 +264,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/surf"
     checked_date: 2026-10-24
+    official_docs_url: "https://surf-api.com/docs"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: "searches per month"
+      pricing_url: null
+      notes: "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
+    endpoints:
+      - method: "GET"
+        path: "/search.json"
+        summary: "Run a search for a given engine and query; returns a single JSON envelope with metadata blocks and parsed result arrays."
+        returns: "JSON object containing search_metadata, search_parameters, and engine-specific result arrays (e.g. organic_results, news_results)."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/search"
+        summary: "Alias of the /search.json endpoint; behaves identically when running a search."
+        returns: "Same JSON search response as /search.json."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/account"
+        summary: "Check live quota: returns your plan name, monthly allowance, total searches left, and this month's usage."
+        returns: "Plan name, searches per month, total searches left, and this month usage as JSON."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/searches/:t/:id.json"
+        summary: "Retrieve a previously archived search result by its type and id, as JSON."
+        returns: "Archived search result as JSON."
+        docs_url: "https://surf-api.com/docs"
+      - method: "GET"
+        path: "/engines"
+        summary: "List the search engines that are available on the API."
+        returns: "List of available engines."
+        docs_url: "https://surf-api.com/docs"
     usage_api:
       available: null
       method: null

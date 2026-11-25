@@ -18,6 +18,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/bytedance"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.byteplus.com/en/docs/ModelArk/quick-start"
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null
@@ -43,6 +45,30 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/elevenlabs"
     checked_date: 2026-10-24
+    official_docs_url: "https://elevenlabs.io/docs/api-reference/authentication"
+    auth:
+      type: "api_key"
+      header: "xi-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://elevenlabs.io/docs/api-reference/authentication"
+    pricing:
+      model: "subscription"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credit"
+      pricing_url: null
+      notes: "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available."
+    endpoints:
+      - method: "GET"
+        path: "/v1/reception/staff"
+        summary: "List staff members; referenced as the endpoint for listing staff IDs."
+        returns: "Not described in the provided text."
+        docs_url: "https://elevenlabs.io/docs/api-reference/reception/staff/get"
+      - method: "GET"
+        path: "/v1/reception/staff/:staff_id"
+        summary: "Get a specific staff member by ID."
+        returns: "Staff member object including name, id, groups, contact details, working hours, and timestamps."
+        docs_url: "https://elevenlabs.io/docs/api-reference/reception/staff/get"
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +94,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/fishaudio"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.fish.audio"
+    endpoints:
+      - method: "POST"
+        path: "/v1/tts"
+        summary: "Generate speech audio from text, choosing a voice via reference_id, output format, and the model header."
+        returns: "Streamed audio file in the requested format (e.g., mp3)."
+        docs_url: "https://docs.fish.audio/developer-guide/getting-started/api-key"
+      - method: "POST"
+        path: "/v1/asr"
+        summary: "Transcribe audio to text, with the transcription model selected by the model header."
+        returns: "Transcript, optionally with speaker markers, emotion cues, and timestamps."
+        docs_url: "https://docs.fish.audio"
+      - method: "POST"
+        path: "/v1/audio/infill"
+        summary: "Regenerate a span of an existing recording with a revised transcript, keeping the rest of the take."
+        returns: "The whole take back with only the specified span regenerated."
+        docs_url: "https://docs.fish.audio/api-reference/introduction"
+      - method: "POST"
+        path: "/v1/voice-design"
+        summary: "Generate candidate voices from a natural-language description prompt."
+        returns: "Candidate voices generated from the prompt."
+        docs_url: "https://docs.fish.audio/api-reference/introduction"
+      - method: "POST"
+        path: "/v1/agent/background-sounds"
+        summary: "Upload a custom background-sound audio clip for a voice agent, sent as multipart/form-data."
+        returns: "Clip object with _id, name, duration_seconds, size_bytes, created_at."
+        docs_url: "https://docs.fish.audio/llms-full.txt"
     usage_api:
       available: true
       method: "GET"
@@ -93,6 +146,15 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/kling"
     checked_date: 2026-10-24
+    official_docs_url: "https://kling.ai/document-api/api/video/3-0-omni"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: 0.07
+      unit: "USD per second of generated video (lowest listed per-second rate)"
+      pricing_url: null
+      notes: "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD."
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null
@@ -118,6 +180,28 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/magichour"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.magichour.ai/introduction"
+    endpoints:
+      - method: "POST"
+        path: "/v1/ai-image-generator"
+        summary: "Create an AI image from a text description, with model and quality options; returns a project to poll."
+        returns: "A project ID immediately; poll the matching details endpoint or receive a webhook to track completion."
+        docs_url: "https://docs.magichour.ai/api-reference/overview"
+      - method: "GET"
+        path: "/v1/account"
+        summary: "Read the current credit balance and subscription details for the account that owns the API key."
+        returns: "Credit balance and subscription details of the account."
+        docs_url: "https://docs.magichour.ai/api-reference/overview"
+      - method: "GET"
+        path: "/v1/image-projects/{id}"
+        summary: "Check the progress and status of an image project."
+        returns: "Project status (queued, rendering, complete, error, canceled) and a downloads field after a successful render."
+        docs_url: "https://docs.magichour.ai/llms-full.txt"
+      - method: "POST"
+        path: "/v1/ai-music-generator"
+        summary: "Generate music from a description, with optional custom lyrics or instrumental-only output."
+        returns: "A project ID; poll GET /v1/audio-projects/{id} for status and downloads."
+        docs_url: "https://docs.magichour.ai/llms-full.txt"
     usage_api:
       available: true
       method: "GET"
@@ -143,6 +227,13 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/minimax"
     checked_date: 2026-10-24
+    official_docs_url: "https://platform.minimax.io/docs/api-reference/text-chat-openai"
+    endpoints:
+      - method: "POST"
+        path: "/v1/chat/completions"
+        summary: "OpenAI-compatible chat completion endpoint that generates model replies, with streaming or non-streaming output."
+        returns: "Chat completion object with id, choices, created, model, object, usage, sensitivity flags and base_resp error status."
+        docs_url: "https://platform.minimax.io/docs/api-reference/text-chat-openai"
     usage_api:
       available: null
       method: null
@@ -168,6 +259,40 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    official_docs_url: "https://platform.sonilo.com/docs"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
+    endpoints:
+      - method: "POST"
+        path: "/v1/text-to-music"
+        summary: "Generate music from a text prompt and a duration; streaming or async modes."
+        returns: "application/x-ndjson stream of title, audio_chunk, complete, error events (default), or 202 JSON with task_id in async mode."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "POST"
+        path: "/v1/video-to-music"
+        summary: "Generate music scored to a video file or URL, with optional prompt, segments, and output format."
+        returns: "NDJSON stream of audio events in stream mode, or 202 JSON with task_id to poll in async mode."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "POST"
+        path: "/v1/video-to-sfx"
+        summary: "Generate sound effects synchronized to a video, accepting a video file or video_url with optional prompt or segments."
+        returns: "202 Accepted JSON with task_id and status processing; poll GET /v1/tasks/:task_id for the audio result."
+        docs_url: "https://platform.sonilo.com/docs/api/video-to-sfx"
+      - method: "GET"
+        path: "/v1/tasks/{task_id}"
+        summary: "Retrieve the status and results of an async generation task such as SFX, combined sound, or audio ducking."
+        returns: "Task status and result URLs, including audio.url, content_type and file_size on success."
+        docs_url: "https://platform.sonilo.com/docs"
+      - method: "GET"
+        path: "/v1/account/usage"
+        summary: "Retrieve credit usage for the account, with a summary plus daily breakdown over a lookback window."
+        returns: "JSON with summary totals (requests, duration, cost, period) and a per-day daily breakdown."
+        docs_url: "https://platform.sonilo.com/docs/api/get-usage"
     usage_api:
       available: null
       method: null
@@ -218,6 +343,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/topaz"
     checked_date: 2026-10-24
+    official_docs_url: "https://developer.topazlabs.com/"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits"
+      pricing_url: "https://developer.topazlabs.com/getting-started/model-pricing"
+      notes: "Costs vary by model family base rate, output size, and for some video models input resolution/frame rates; Credit Calculator gives estimates."
+    endpoints:
+      - method: "POST"
+        path: "/video/"
+        summary: "Create a video enhancement request specifying source video details, output parameters, and the filters/models to apply."
+        returns: "A request object containing a requestId used for the subsequent accept, upload, complete, and status calls."
+        docs_url: "https://developer.topazlabs.com/getting-started/video-quickstart"
     usage_api:
       available: null
       method: null
