@@ -14,13 +14,29 @@ Scrape date / `checked_date` on every entry: **2026-10-24**.
 
 ## Layout
 
-Vendor-direct additions that were not observed in these aggregator scrapes belong
-in root `apis.yaml`. NVIDIA API Catalog / NIM (`nvidia-nim`) is recorded there
-with vendor-documented LLM auth and offerings/free-access notes checked on
-2026-10-28. It is not added to `llm-models.yaml`: shard `seen_in` must name at least
-one of the three aggregators, and `build.py` rejects curated providers without
-raw records. Root entries are loaded alongside the generated shards and survive
-regeneration; the counts below describe only the aggregator shards.
+Vendor-direct rows belong in root `apis.yaml`, whether or not a catalog also
+lists the vendor. NVIDIA API Catalog / NIM (`nvidia-nim`) and treg (`treg`) are
+recorded there with vendor-documented auth and offerings/free-access notes
+checked on 2026-10-28, and the twelve vendors the treg `rea-growth` skill calls
+(`tinyfish`, `predictleads`, `dataforseo`, `akta`, `cloro`, `scrapecreators`,
+`serpapi`, `adyntel`, `anyapi`, `tikhub`, `crawl4ai`, `harvestapi`) were added
+there on 2026-10-30 with `status: docs-verified` and the endpoints that skill
+uses in `offering.highlights`. They are not written into the shards because the
+shard shape has no room for what they carry — `auth_header`, `base_url`,
+`human_steps`, the full `billing` block, `offering` — and because **the shards
+are generated**: a hand edit here is overwritten by the next `build.py` run.
+
+Nine of those twelve (`tinyfish`, `predictleads`, `dataforseo`, `akta`,
+`cloro`, `scrapecreators`, `serpapi`, `anyapi`, `tikhub`) *are* in these
+shards, seen in an aggregator catalog. Nothing was removed: the root row wins
+the merge by name/registrable domain, the shard row is dropped as a
+`merged_duplicate`, and the root row inherits its `seen_in` carriage, so
+"Glasser and Monid carry DataForSEO" survives on the richer row. Root entries
+are loaded alongside the generated shards and survive regeneration; the counts
+below describe only the aggregator shards.
+
+A vendor-direct row that needs **only** the shard's 17 fields can live in a
+shard instead: see *Vendor-direct rows* below.
 
 ```
 data/apis/
@@ -80,6 +96,14 @@ all) and **`wallet-x402`** (the only documented way to pay is a crypto wallet �
 recorded as a fact; SkeletonKey itself pays in fiat only), beside the original
 `intermediary` / `own-account` / `byok` / `unknown`.
 
+A row whose vendor documents more than one way in may carry an optional
+`access_modes:` list (`["own-account", "wallet-x402"]`). Element 0 must equal
+`access_mode`, which stays the one SkeletonKey uses. `OPTIONAL` at the top of
+`validate.py` is the single list of keys a row *may* carry — `offering` and
+`access_modes` today — so a row carrying neither is exactly as valid as it was
+before either existed, and anything **not** in that list is still rejected as an
+unexpected key.
+
 **No shard row carries an `offering` block yet, and `build.py` does not emit
 one.** The three aggregator catalogs do not publish Layer 1 facts about the
 underlying vendor, and copying their descriptions would describe the aggregator
@@ -107,6 +131,34 @@ The rules are enforced identically here and by `skeletonkey apis validate`
 (see `src/apis.ts`): unknown keys are rejected, `method`/`path` cannot be null
 when `available` is `true`, and `docs_url` cannot be null when `available` is
 `true` or `false` -- a verified fact needs the page it was verified on.
+
+## Vendor-direct rows
+
+`seen_in` accepts a fourth source, **`vendor-direct`**: a row whose facts were
+read off the **vendor's own** pages, with no aggregator in the loop. Both
+validators accept it and `src/apis.ts` calls the same set
+`SHARD_SEEN_IN_SOURCES`.
+
+To add one, put the provider in `curated.P` as usual and add its id to
+`curated.VENDOR_DIRECT`, mapping it to the vendor page the facts were read from:
+
+```python
+VENDOR_DIRECT = {"some-vendor": "https://some-vendor.example/docs/api"}
+```
+
+`build.py` then emits that row with `seen_in: ["vendor-direct"]` and that URL as
+its `source_url`, and exempts it from the "every curated id needs a raw catalog
+record" check — no catalog lists it, which is the point. Nothing else changes:
+with the table empty, `build.py` reproduces all 162 committed shards byte for
+byte (asserted by `test/schema-gaps.test.ts`).
+
+A vendor-direct row gets `aggregators: null` on the merged index rather than
+three `carries: false` rows: no aggregator catalog was searched for it, so
+`false` would be a negative nobody established.
+
+**`VENDOR_DIRECT` is empty today**, deliberately — the two vendor-direct rows
+written so far need fields the shard shape does not have and live in root
+`apis.yaml` (see *Layout*).
 
 ## Counts
 
@@ -316,4 +368,8 @@ python3 scripts/validate.py   # must exit 0
 ```
 
 `build.py` fails loudly if `raw/` grows a provider that `curated.py` has no row
-for (or vice versa), so a re-scrape cannot silently drop metadata.
+for (or vice versa), so a re-scrape cannot silently drop metadata. The one
+exception is an id listed in `curated.VENDOR_DIRECT`, which has no raw record by
+definition; an id in that table but missing from `curated.P` still fails.
+`SKELETONKEY_BUILD_OUT=<dir>` writes the shards somewhere else, which is how the
+test suite builds without touching the committed ones.

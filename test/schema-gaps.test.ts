@@ -527,7 +527,8 @@ describe.skipIf(!fs.existsSync(DISCOVERED_X))("data/discovered-x.yaml after the 
     for (const row of entries) {
       if (row.auth_required === false) {
         expect(row.auth_header ?? null, row.name).toBeNull();
-        expect(row.access_mode, row.name).toBe("keyless");
+        // wallet-x402 vendors have no API credential either -- payment IS the auth.
+        expect(["keyless", "wallet-x402"], row.name).toContain(row.access_mode);
       }
       // A docs-verified row that names a header has had its auth CHECKED, so
       // auth_required must not still be the "nobody looked" null.
