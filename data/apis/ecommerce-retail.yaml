@@ -35,6 +35,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/autozone"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Re-checked 2026-10-26: no developer API, API docs, API pricing or API signup exist on any AutoZone-owned domain. www.autozone.com is behind DataDome bot protection - the home page, /developers, /api, /pricing and /sitemap_index."
   - id: "douyin-shop"
     name: "Douyin Shop"
     capability: "Product pages, SKUs, buyer comments and search for Douyin's e-commerce marketplace."
@@ -160,6 +163,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/meijer"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Confirmed no public API, this time from Meijer's own API portals rather than only from 404s on www.meijer.com. Meijer runs Azure API Management developer portals at apiportal.meijer.com, capiportal.meijer.com and iapiportal.meij"
   - id: "segari"
     name: "Segari"
     capability: "Indonesian grocery product pricing, discounts and ratings."
@@ -177,6 +183,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/segari"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live: segari.id is a client-rendered single-page app served through CloudFront. Every path, including /api, /developers and /career, returns the same 200 HTML shell ('You need to enable JavaScript to run this app'), s"
   - id: "taobao"
     name: "Taobao"
     capability: "Item reviews and buyer Q&A from the Taobao/Tmall marketplaces."
@@ -233,6 +242,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/watsons"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer product of any kind: /developers, /api and /pricing all return pages titled 'Not Found | Watsons Malaysia'. The home page is a retail storefront (store finder, Watsons Club membership, app downloads, e-invoice) and"
   - id: "xianyu"
     name: "Xianyu"
     capability: "Second-hand marketplace item pages and keyword search."

@@ -18,6 +18,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/agoda"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); developer.agoda.com does exist (it 302s to /supply, a ReadMe-hosted hub; the same content is mirrored at agoda-enterprise-group.readme.io) and documents real APIs, but there is no self-serve access and no published pricing, so n"
   - id: "booking"
     name: "Booking.com"
     capability: "Guest review data for individual hotels, including score, stay length and stated positives/negatives."
@@ -35,3 +38,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/booking"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Auth is now confirmed from the Demand API authentication guide: every request carries both 'Authorization: Bearer <key>' (an API key token generated in Partner Centre) and 'X-Affiliate-Id: <aid>', over HTTPS. Only the sandbox ho"

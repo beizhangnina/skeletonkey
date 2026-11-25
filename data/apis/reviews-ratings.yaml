@@ -18,6 +18,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/capterra"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Still unreadable. Every HTML page on www.capterra.com returns a Cloudflare 'Just a moment...' interstitial to curl with a browser User-Agent, to the r.jina.ai reader, and to the saved snapshots: /, /pricing, /api, /developers, /"
   - id: "clutch"
     name: "Clutch"
     capability: "B2B service-provider directory: agency search, profiles, client reviews and portfolios."
@@ -82,6 +85,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/getapp"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); No public or self-serve API exists on GetApp's own domain, so there is no base_url, auth or pricing to verify - hence status stays unverified with no_public_api true. Evidence: robots.txt disallows the internal paths /api/*, /ap"
   - id: "google-play"
     name: "Google Play"
     capability: "Android app, book and film store listings and search."
@@ -99,6 +105,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/google-play"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); no_public_api is kept true in the sense that matters for this index: Google publishes no API for third-party Google Play app metadata, ratings or reviews. The documented APIs are publisher-scoped - the REST reference states the"
   - id: "trustpilot"
     name: "Trustpilot"
     capability: "Company ratings, consumer reviews and category rankings."

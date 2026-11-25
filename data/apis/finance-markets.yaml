@@ -90,6 +90,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/finviz"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); finviz.com/apis is not API documentation — it serves the 'Finviz Elite' subscription page (the footer 'APIs' link points there, and /elite returns the same content). The only API-shaped endpoint the vendor exposes is the footer'"
   - id: "marketbeat"
     name: "MarketBeat"
     capability: "Analyst ratings, price targets, earnings, insider trades and institutional ownership."
@@ -107,6 +110,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/marketbeat"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Reviewed saved pages and live homepage plus All Access signup/pricing page. Found consumer research subscriptions and CSV exports, but no documented developer API, API auth, or API prices. Consumer subscription prices are exclud"
   - id: "marketstack"
     name: "marketstack"
     capability: "Stock market reference and historical price data, including corporate actions."
@@ -195,6 +201,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/secform4"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer API: /developers and /pricing 404, and /api returns the site CMS's generic {\"errors\":[{\"title\":\"Resource not found\",\"code\":404}]} rather than any product endpoint. The homepage and navigation offer only web screener"
   - id: "stockanalysis"
     name: "Stock Analysis"
     capability: "Stock overviews, statistics, IPO calendar and pre-market movers."
@@ -212,6 +221,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/stockanalysis"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Got past the Cloudflare block that stopped the earlier pass (curl and r.jina.ai still 403; WebFetch renders the pages). The Pro page shows 'Pro' at '$8.25 a month when billed annually' or '$9.99 a month' and 'Unlimited' at '$16."
   - id: "yahoo-finance"
     name: "Yahoo Finance"
     capability: "Quotes, OHLCV history, company profiles and market news."
@@ -229,3 +241,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/yahoo-finance"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live. developer.yahoo.com/api lists exactly three things - 'Get started using our APIs with OAuth', 'Yahoo Fantasy Sports API' and 'Sign In With Yahoo' - and no finance API. finance.yahoo.com/developers returns 404 an"

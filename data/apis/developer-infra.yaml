@@ -131,6 +131,9 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site. Operated by the Monid aggregator itself rather than an independent vendor."
     source_url: "https://monid.ai/tools/sfs"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); API access is real and fully documented but not self-serve. The Redocly API docs say: 'Please reach out to your account manager to begin the process of setting up API access. API keys are issued by FreightSimple once access is a"
   - id: "smolmachine"
     name: "Smol Machines"
     capability: "Persistent Linux microVM sandboxes for agents, created from a container image."

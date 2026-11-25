@@ -18,6 +18,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/aaa-gas-prices"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Live homepage now readable: public fuel averages and news, not API pricing. No public API documentation or API signup found. No saved AAA vendor page was present under pages/ or live/; reviewed the saved index row instead. Remov"
   - id: "bid-cars"
     name: "bid.cars"
     capability: "Salvage and insurance vehicle auction lots: VIN lookup, photos and historical sale prices."
@@ -35,6 +38,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/bid-cars"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Signup fields describe a consumer auction account, not developer access. No card field on the visible two-step signup form. No public developer API found on the pages read; this does not establish that private integrations are u"
   - id: "carfax"
     name: "CARFAX"
     capability: "Used and new vehicle listings with history summaries, valuations and dealer detail."
@@ -52,6 +58,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/carfax"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); CARFAX does run a documented developer API - CARFAX Connect, a GraphQL API at https://connect.carfax.com/v1/graphql - but it is partner-gated, not self-serve. Auth is OAuth 2.0 (Authorization Code / Web Application, Single Page"
   - id: "cars-com"
     name: "Cars.com"
     capability: "Vehicle listing search, listing specifications and dealer inventory."
@@ -69,6 +78,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/cars-com"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked the developer portal that search engines still index: https://developer.cars.com/ and https://developer.cars.com/faq-category/search-api both return HTTP 302 to https://www.cars.com/contact/, so the Search API documen"
   - id: "edmunds"
     name: "Edmunds"
     capability: "Car inventory search by make/model/year or VIN, with specifications and pricing."
@@ -86,6 +98,9 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/edmunds"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Open API Program was retired February 15, 2018. The developer-portal FAQ, re-read live, says there are no exceptions, 'We're not currently accepting new applicants at this time' and 'No, we do not expect to be able to accommodat"
   - id: "kbb"
     name: "Kelley Blue Book"
     capability: "Vehicle reference data, expert ratings, lease deals and OBD-II diagnostic codes."
@@ -103,3 +118,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/kbb"
     checked_date: 2026-10-24
+    official_docs_url: null
+    endpoints: []
+    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); A real KBB Developer Portal exists at developer.kbb.com (nav lists IDWS 4.0, Advertising Data API, Instant Cash Office (ICO) API, Batch VIN, API Documentation), but every documentation route renders only the page shell with 'Una"
