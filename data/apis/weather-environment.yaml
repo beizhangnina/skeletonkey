@@ -18,6 +18,21 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/accuweather"
     checked_date: 2026-10-24
+    official_docs_url: "https://developer.accuweather.com/documentation/overview"
+    auth: null
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 2
+      unit: "per month"
+      pricing_url: "https://developer.accuweather.com/documentation/overview"
+      notes: "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately."
+    endpoints:
+      - method: "GET"
+        path: "/forecasts/v1/daily/1day/349727"
+        summary: "Fetches the 1-day daily forecast for a location key; the example uses New York, NY with location key 349727 and a bearer auth header."
+        returns: "A JSON forecast payload returned by the fetch call and printed to the console."
+        docs_url: "https://developer.accuweather.com"
   - id: "iqair"
     name: "IQAir"
     capability: "Real-time and historical air-quality readings, city rankings and pollution maps."

@@ -18,6 +18,35 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/anyapi"
     checked_date: 2026-10-24
+    official_docs_url: "https://getanyapi.com/docs"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/v1/run/{sku}"
+        summary: "Run any catalog API by its SKU, sending the SKU's normalized input; returns a normalized result envelope with per-call USD cost."
+        returns: "Envelope containing output, provider, costUsd (the charge for this call) and items (number of results)."
+        docs_url: "https://getanyapi.com/docs"
+      - method: "GET"
+        path: "/v1/apis/{sku}"
+        summary: "Fetch the selected SKU's contract before writing a request; with MCP, the equivalent tool is get_api."
+        returns: "The SKU's contract, including the inputSchema whose declared fields must be used."
+        docs_url: "https://getanyapi.com/docs"
+      - method: "GET"
+        path: "/v1/apis"
+        summary: "Discover available SKUs in the catalog; can also be scoped with a category query parameter."
+        returns: "The list of available SKUs in the catalog."
+        docs_url: "https://getanyapi.com/llms.txt"
+      - method: "POST"
+        path: "/v1/apis/{sku}/quote"
+        summary: "Price and validate the exact input for a SKU before spending; nothing is executed or charged."
+        returns: "A price quote for the exact request; it is free and nothing is executed or charged."
+        docs_url: "https://getanyapi.com/llms.txt"
+      - method: "GET"
+        path: "/v1/requests/{requestId}"
+        summary: "Read the stored state of a durable Request by polling; polling never repeats the paid provider operation."
+        returns: "Request snapshot with a public status of queued, running, succeeded, failed, or expired."
+        docs_url: "https://getanyapi.com/docs/durable-requests"
   - id: "apify"
     name: "Apify"
     capability: "Marketplace of hosted scraper programs ('actors') that turn public sites into structured JSON on demand."
@@ -35,6 +64,11 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apify"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.apify.com/api/v2"
+    auth: null
+    pricing: null
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "brightdata"
     name: "Bright Data"
     capability: "Large-scale structured datasets and scraping infrastructure covering commerce, social and property sites."
@@ -52,6 +86,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/brightdata"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/serp/req?zone=YOUR_ZONE_NAME"
+        summary: "Submits an asynchronous SERP job for the given zone and returns immediately."
+        returns: "A response_id that you save and later use to collect the result."
+        docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
+      - method: "POST"
+        path: "/dca/trigger_hp"
+        summary: "Trigger a media extraction job to retrieve video, audio, captions, thumbnails and storyboards."
+        returns: "Acknowledgement with success flag, inputs count and job_id."
+        docs_url: "https://docs.brightdata.com/api-reference/media-data-api/media-data-api"
   - id: "context-dev"
     name: "Context.dev"
     capability: "Unified web-context API: URL to clean Markdown or HTML, whole-site crawls, and brand/page extraction."
@@ -69,6 +117,36 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/context-dev"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.context.dev/"
+    auth: null
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: null
+      unit: "credits (monthly credit allowance per plan)"
+      pricing_url: "https://docs.context.dev/llms-full.txt"
+      notes: "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available."
+    endpoints:
+      - method: "POST"
+        path: "/web/scrape"
+        summary: "Scrape a single public URL and return whichever outputs you enable in the formats object, such as markdown, html, screenshot, images, json, or parsed data."
+        returns: "One object per output format with requested/success/data fields, plus final url, page metadata, cache_metadata, request_id, and key_metadata credits consumed and remaining."
+        docs_url: "https://docs.context.dev/api-reference/web-scraping/scrape"
+      - method: "POST"
+        path: "/webhooks/deliveries"
+        summary: "List batch and monitor webhook deliveries recorded in the last 30 days, filtered by source, IDs, status, creation time, tags, and cursor paging."
+        returns: "A page of webhook deliveries with data array, has_more, next_cursor, key_metadata, and request_id."
+        docs_url: "https://docs.context.dev/api-reference/webhooks/list.md"
+      - method: "GET"
+        path: "/monitors/limits"
+        summary: "Retrieve the organization's monitor allowance and current usage; requires the monitors:read permission."
+        returns: "Monitors used count, maximum monitors limit, plan category, key_metadata, and request_id."
+        docs_url: "https://docs.context.dev/api-reference/monitors/limits.md"
+      - method: "GET"
+        path: "/org/usage"
+        summary: "Check the organization's credit balance and usage; the docs state it costs no credits and stays available at zero balance."
+        returns: "Organization credit balance and usage information (per the billing guide's reference to the usage endpoint)."
+        docs_url: "https://docs.context.dev/llms-full.txt"
   - id: "firecrawl"
     name: "Firecrawl"
     capability: "Page and whole-site capture into Markdown, HTML or schema-shaped JSON, with crawl jobs and caching."

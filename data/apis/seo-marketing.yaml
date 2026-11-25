@@ -18,6 +18,30 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/ahrefs"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.ahrefs.com/en/api/docs/introduction"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/site-explorer/backlinks-stats"
+        summary: "Backlinks stats report in the Site Explorer tool of the Ahrefs API."
+        returns: null
+        docs_url: "https://docs.ahrefs.com/openapi.json"
+      - method: "GET"
+        path: "/site-explorer/metrics"
+        summary: "Metrics report in the Site Explorer tool, taking a date and target as required query parameters."
+        returns: null
+        docs_url: "https://docs.ahrefs.com/openapi.json"
+      - method: "GET"
+        path: "/limits-and-usage"
+        summary: "Subscription Information endpoint under base URL https://api.ahrefs.com/v3/subscription-info."
+        returns: "Subscription limits and usage information."
+        docs_url: "https://docs.ahrefs.com/en/api/reference/subscription-info"
+      - method: "GET"
+        path: "/projects"
+        summary: "Management endpoint that lists projects, under base URL https://api.ahrefs.com/v3/management."
+        returns: null
+        docs_url: "https://docs.ahrefs.com/en/api/reference/management"
   - id: "cloro"
     name: "cloro"
     capability: "Captures what AI assistants and search engines answer for a prompt from a chosen country, with citations."
@@ -35,6 +59,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/cloro"
     checked_date: 2026-10-24
+    official_docs_url: "https://cloro.dev/docs/"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://cloro.dev/llms-full.txt"
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 30
+      unit: "per month"
+      pricing_url: "https://cloro.dev/llms.txt"
+      notes: "Free monthly tier, paid plans from $30/mo, plus published per-request credit costs per provider."
+    endpoints:
+      - method: "POST"
+        path: "/v1/monitor/chatgpt"
+        summary: "Run a synchronous ChatGPT monitor request that returns the answer text, sources, citations and optional markdown/html output."
+        returns: "Structured JSON result with answer text, markdown, sources, citations, shopping cards and query fan-out."
+        docs_url: "https://cloro.dev/llms-full.txt"
+      - method: "POST"
+        path: "/v1/monitor/bing"
+        summary: "Bing Search endpoint returning organic results, ads and optionally the AI Overview of Bing results pages."
+        returns: "Organic results and ads in the same shapes as Google Search, plus AI Overview when include.aioverview is set."
+        docs_url: "https://cloro.dev/docs/changelog"
+      - method: "POST"
+        path: "/v1/monitor/bing/aimode"
+        summary: "Returns the answer text, sources and citation pills from Bing AI Mode."
+        returns: "Bing AI Mode answer text, sources and citation pills; optional markdown or html."
+        docs_url: "https://cloro.dev/docs/changelog"
+      - method: "POST"
+        path: "/v1/monitor/google/goto"
+        summary: "Resolves a Google redirect link (redirectLink) to its destination; free for paying customers."
+        returns: "The destination of the redirect link."
+        docs_url: "https://cloro.dev/docs/changelog"
+      - method: "GET"
+        path: "/v1/states"
+        summary: "Lists the US state codes available for state-level targeting, filtered by country."
+        returns: "The full list of state codes (50 states + DC)."
+        docs_url: "https://cloro.dev/docs/guides/providers"
   - id: "dataforseo"
     name: "DataForSEO"
     capability: "SERP, keyword, backlink, app-store and local-pack data across search engines, billed per task."
@@ -52,6 +115,31 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/dataforseo"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.dataforseo.com/v3/auth/"
+    auth: null
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://docs.dataforseo.com/v3/keywords_data/bing/keyword_performance/task_get/"
+      notes: "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
+    endpoints:
+      - method: "GET"
+        path: "/v3/keywords_data/bing/keyword_performance/task_get/$id"
+        summary: "Retrieve Bing keyword performance results for a previously posted task by its unique task id."
+        returns: "JSON with a tasks array containing keyword KPI metrics (ad position, clicks, impressions) per keyword, device type, location and language."
+        docs_url: "https://docs.dataforseo.com/v3/keywords_data/bing/keyword_performance/task_get/"
+      - method: "POST"
+        path: "/v3/app_data/google/app_listings/search/live"
+        summary: "Live search of apps published on Google Play filtered by title, description and categories, with live results."
+        returns: "List of Google Play app listings with ID, icon, reviews count, rating, price and other data."
+        docs_url: "https://docs.dataforseo.com/v3/app_data/google/app_listings/search/live/"
+      - method: "GET"
+        path: "/v3/keywords_data/bing/languages"
+        summary: "Get the list of languages supported by the Bing Ads API for Keywords Data."
+        returns: "JSON with a tasks array whose result lists language_name and language_code (ISO 639-1) values."
+        docs_url: "https://docs.dataforseo.com/v3/keywords_data/bing/languages/"
   - id: "foreplay"
     name: "Foreplay"
     capability: "Cross-network ad library: ad search with transcripts and per-brand daily ad activity."

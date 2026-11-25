@@ -18,6 +18,40 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools/censusdata-xyz"
     checked_date: 2026-10-24
+    official_docs_url: "https://censusdata.xyz/skill"
+    auth:
+      type: "api_key"
+      header: "X-API-Key"
+      format: "X-API-Key: <API_KEY>"
+      docs_url: "https://censusdata.xyz/skill"
+    pricing:
+      model: "free"
+      free_tier: true
+      starting_price_usd: null
+      unit: "queries per day"
+      pricing_url: "https://censusdata.xyz/skill"
+      notes: "Free key via Google sign-in; free tier has a daily query allowance; 429 means daily quota exhausted and resets at midnight UTC."
+    endpoints:
+      - method: "GET"
+        path: "/health"
+        summary: "Service health check endpoint."
+        returns: null
+        docs_url: "https://censusdata.xyz/skill"
+      - method: "GET"
+        path: "/query?q=<natural_language_query>"
+        summary: "Run a natural-language Census query with a URL-encoded q parameter."
+        returns: "JSON with original query, natural-language summary, and raw Census data points."
+        docs_url: "https://censusdata.xyz/skill"
+      - method: "POST"
+        path: "/query"
+        summary: "Submit a natural-language Census query via POST."
+        returns: "JSON with original query, natural-language summary, and raw Census data points."
+        docs_url: "https://censusdata.xyz/skill"
+      - method: "GET"
+        path: "/explore-variables"
+        summary: "Discover Census variables by keyword."
+        returns: "Matching variables, descriptions, and suggested natural-language queries."
+        docs_url: "https://censusdata.xyz/skill"
   - id: "tendata"
     name: "Tendata"
     capability: "Shipment-level customs import/export records with importer, exporter, HS code and volume detail."

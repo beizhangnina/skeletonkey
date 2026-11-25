@@ -35,6 +35,10 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/clutch"
     checked_date: 2026-10-24
+    official_docs_url: null
+    auth: null
+    pricing: null
+    endpoints: null
   - id: "g2"
     name: "G2"
     capability: "Software product reviews, category rankings and pricing pages."
