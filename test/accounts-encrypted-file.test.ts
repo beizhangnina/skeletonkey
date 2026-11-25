@@ -124,8 +124,8 @@ describe("the encrypted-file backend end to end", () => {
   it("account add --store-login stores the login half, read back via <name>-login.password", async () => {
     const add = await runCli(
       home,
-      ["account", "add", LOGIN_ACCOUNT, "--vendor", "apify", "--email", EMAIL, "--store-login", "--stdin"],
-      PASSWORD,
+      ["account", "add", LOGIN_ACCOUNT, "--vendor", "apify", "--email-stdin", "--store-login", "--stdin"],
+      `${EMAIL}\n${PASSWORD}`,
       env,
     );
     expect(add.code, add.stderr).toBe(0);
@@ -165,14 +165,13 @@ describe("the encrypted-file backend end to end", () => {
         ACCOUNT,
         "--vendor",
         "apify",
-        "--email",
-        EMAIL,
+        "--email-stdin",
         "--store-key",
         "--domain",
         DOMAIN,
         "--stdin",
       ],
-      API_KEY,
+      `${EMAIL}\n${API_KEY}`,
       env,
     );
     expect(add.code, add.stderr).toBe(0);
@@ -280,14 +279,13 @@ describe("the encrypted-file backend end to end", () => {
         ACCOUNT,
         "--vendor",
         "apify",
-        "--email",
-        EMAIL,
+        "--email-stdin",
         "--store-key",
         "--domain",
         DOMAIN,
         "--stdin",
       ],
-      API_KEY,
+      `${EMAIL}\n${API_KEY}`,
       env,
     );
     expect(addKey.code, addKey.stderr).toBe(0);
@@ -295,8 +293,8 @@ describe("the encrypted-file backend end to end", () => {
 
     const addLogin = await runCli(
       home,
-      ["account", "add", LOGIN_ACCOUNT, "--vendor", "apify", "--email", EMAIL, "--store-login", "--stdin"],
-      PASSWORD,
+      ["account", "add", LOGIN_ACCOUNT, "--vendor", "apify", "--email-stdin", "--store-login", "--stdin"],
+      `${EMAIL}\n${PASSWORD}`,
       env,
     );
     expect(addLogin.code, addLogin.stderr).toBe(0);

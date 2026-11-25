@@ -10,7 +10,7 @@
 import { SkeletonKeyError } from "../exit-codes.js";
 import { findKey, normalizeDomain, setDisabled, upsertKey } from "../keys.js";
 import { accountsPath, skeletonKeyHome } from "../paths.js";
-import { promptHidden, promptLine, readSecret, readStdin } from "../prompt.js";
+import { promptHidden, readSecret, readStdin } from "../prompt.js";
 import type { KeyMeta, UpstreamScheme } from "../types.js";
 import { fieldsFor, findEntry, maskUsername, setEntryDisabled, upsertEntry } from "../vault/entries.js";
 import { openEntryStore } from "../vault/entry-store.js";
@@ -32,7 +32,13 @@ import {
 export interface AccountAddOptions {
   vendor: string;
   registered?: string;
-  email?: string;
+  /**
+   * Set only when the removed `--email <value>` flag was passed (commander
+   * reports `true` with no value, or the string with one); its sole purpose
+   * is to be detected and rejected before anything else runs.
+   */
+  email?: string | boolean;
+  emailStdin: boolean;
   keyAlias?: string;
   storeKey: boolean;
   domain?: string;
@@ -105,15 +111,67 @@ async function readAccountPassword(stdin: boolean): Promise<string> {
   return requirePassword(password);
 }
 
-/** The account email: `--email`, else a TTY prompt (echoed), else null. */
-async function resolveEmail(options: AccountAddOptions): Promise<string | null> {
-  const given = options.email?.trim();
-  if (given !== undefined && given !== "") return given;
-  if (process.stdin.isTTY !== true) return null;
-  const answer = (
-    await promptLine("Account email (optional, only a masked hint is stored; Enter to skip): ")
-  ).trim();
-  return answer === "" ? null : answer;
+function rejectPlaintextEmailFlag(options: AccountAddOptions): void {
+  if (options.email === undefined) return;
+  throw new SkeletonKeyError(
+    "usage",
+    "--email <value> is no longer accepted: it would stay in shell history and the process list.",
+    "Type it at the hidden prompt, or pipe it with --email-stdin.",
+  );
+}
+
+/** A non-empty, single-line email read off stdin, or a usage error. */
+function requireEmailLine(line: string | undefined): string {
+  const email = (line ?? "").trim();
+  if (email === "") {
+    throw new SkeletonKeyError(
+      "usage",
+      "An empty email is not a value; nothing was stored.",
+      "Pipe a non-empty email address, or type it at the hidden prompt.",
+    );
+  }
+  return email;
+}
+
+/**
+ * The account email and, when `--email-stdin` shares stdin with `--stdin`,
+ * the secret that followed it on a second line.
+ *
+ * - `--email-stdin` alone: stdin must be exactly one line, the email.
+ * - `--email-stdin --stdin`: stdin must be exactly two lines, the email then
+ *   the secret (stdin carries only one value otherwise, so this is the one
+ *   way to supply both without either ever appearing in argv).
+ * - Neither flag, on a TTY: a hidden prompt (not echoed; Enter to skip).
+ * - Neither flag, off a TTY: no email, same as today.
+ */
+async function resolveEmailAndStdinSecret(
+  options: AccountAddOptions,
+): Promise<{ email: string | null; stdinSecret: string | null }> {
+  if (options.emailStdin) {
+    const data = await readStdin();
+    const lines = data.split("\n");
+    if (options.stdin) {
+      if (lines.length !== 2) {
+        throw new SkeletonKeyError(
+          "usage",
+          "--email-stdin with --stdin expects exactly two lines on stdin: the email, then the secret.",
+          "Put the email on the first line and the secret on the second.",
+        );
+      }
+      return { email: requireEmailLine(lines[0]), stdinSecret: lines[1] ?? "" };
+    }
+    if (lines.length !== 1) {
+      throw new SkeletonKeyError(
+        "usage",
+        "--email-stdin expects a single line on stdin.",
+        "Pipe just the email address, or add --stdin to also send the secret as a second line.",
+      );
+    }
+    return { email: requireEmailLine(lines[0]), stdinSecret: null };
+  }
+  if (process.stdin.isTTY !== true) return { email: null, stdinSecret: null };
+  const answer = (await promptHidden("Account email (not echoed, Enter to skip): ")).trim();
+  return { email: answer === "" ? null : answer, stdinSecret: null };
 }
 
 export async function cmdAccountAdd(
@@ -121,6 +179,7 @@ export async function cmdAccountAdd(
   options: AccountAddOptions,
   home = skeletonKeyHome(),
 ): Promise<void> {
+  rejectPlaintextEmailFlag(options);
   assertUsableAccountName(name);
   if (!isValidVendorId(options.vendor)) {
     throw new SkeletonKeyError(
@@ -159,12 +218,12 @@ export async function cmdAccountAdd(
     );
   }
 
-  const email = await resolveEmail(options);
+  const { email, stdinSecret } = await resolveEmailAndStdinSecret(options);
   if (options.storeLogin && email === null) {
     throw new SkeletonKeyError(
       "usage",
       "--store-login needs an email for the login username.",
-      "Pass --email <address>, or omit --store-login.",
+      "Type it at the hidden prompt, or pipe it with --email-stdin.",
     );
   }
 
@@ -190,7 +249,7 @@ export async function cmdAccountAdd(
       }
       const alias = options.keyAlias ?? name;
       const domain = normalizeDomain(options.domain);
-      const secret = (await readSecret(options.stdin)).trim();
+      const secret = (stdinSecret ?? (await readSecret(options.stdin))).trim();
       if (secret === "") {
         throw new SkeletonKeyError("usage", "An empty API key is not an entry; nothing was stored.");
       }
@@ -228,7 +287,7 @@ export async function cmdAccountAdd(
         throw new SkeletonKeyError("usage", "--url must be an http(s) URL.", "Example: --url https://apify.com/login");
       }
       const loginName = `${name}-login`;
-      const password = await readAccountPassword(options.stdin);
+      const password = stdinSecret !== null ? requirePassword(stdinSecret) : await readAccountPassword(options.stdin);
       await store.putLogin(loginName, { username: email as string, password });
       createdLoginName = loginName;
       const domain = url === undefined || url === "" ? null : normalizeDomain(url);

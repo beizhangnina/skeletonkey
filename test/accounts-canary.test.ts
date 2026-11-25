@@ -47,15 +47,14 @@ async function setUp(): Promise<Harness> {
       ACCOUNT,
       "--vendor",
       "apify",
-      "--email",
-      CANARIES.email,
+      "--email-stdin",
       "--store-key",
       "--domain",
       DOMAIN,
       "--stdin",
       "--yes",
     ],
-    CANARIES.api_key,
+    `${CANARIES.email}\n${CANARIES.api_key}`,
   );
   if (add.code !== 0) throw new Error(`account add (key) failed: ${add.stderr}`);
   surfaces.push({ name: "cli:account add (key)", text: `${add.stdout}\n${add.stderr}` });
@@ -64,8 +63,8 @@ async function setUp(): Promise<Harness> {
   // secret off stdin, which is the rule `account add` enforces.
   const addLogin = await runCli(
     home,
-    ["account", "add", ACCOUNT, "--vendor", "apify", "--email", CANARIES.email, "--store-login", "--stdin", "--yes"],
-    CANARIES.password,
+    ["account", "add", ACCOUNT, "--vendor", "apify", "--email-stdin", "--store-login", "--stdin", "--yes"],
+    `${CANARIES.email}\n${CANARIES.password}`,
   );
   if (addLogin.code !== 0) throw new Error(`account add (login) failed: ${addLogin.stderr}`);
   surfaces.push({ name: "cli:account add (login)", text: `${addLogin.stdout}\n${addLogin.stderr}` });
@@ -127,8 +126,11 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
 
     // --- failing variants: none of them may echo a canary ----------------
     const failing: { argv: string[]; stdin?: string }[] = [
-      { argv: ["account", "add", "bad-vendor-canary", "--vendor", "NOT_VALID!", "--email", CANARIES.email] },
-      { argv: ["account", "add", ACCOUNT, "--vendor", "apify", "--email", CANARIES.email] }, // duplicate, no --yes
+      {
+        argv: ["account", "add", "bad-vendor-canary", "--vendor", "NOT_VALID!", "--email-stdin"],
+        stdin: CANARIES.email,
+      },
+      { argv: ["account", "add", ACCOUNT, "--vendor", "apify", "--email-stdin"], stdin: CANARIES.email }, // duplicate, no --yes
       {
         argv: [
           "account",
@@ -138,9 +140,9 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
           "apify",
           "--key-alias",
           "does-not-exist-canary",
-          "--email",
-          CANARIES.email,
+          "--email-stdin",
         ],
+        stdin: CANARIES.email,
       },
       {
         argv: [
@@ -149,14 +151,18 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
           "wrong-backend-canary",
           "--vendor",
           "apify",
-          "--email",
-          CANARIES.email,
+          "--email-stdin",
           "--store-key",
           "--domain",
           DOMAIN,
           "--stdin",
         ],
-        stdin: CANARIES.api_key,
+        stdin: `${CANARIES.email}\n${CANARIES.api_key}`,
+      },
+      // The removed plaintext flag itself: rejected with a usage error, and
+      // its value never reaches any surface either.
+      {
+        argv: ["account", "add", "plaintext-email-canary", "--vendor", "apify", "--email", CANARIES.email],
       },
     ];
     for (const { argv, stdin } of failing) {
@@ -168,6 +174,21 @@ describe("ND-1 HARD RULE: no account secret reaches any surface", () => {
     expect(
       surfaces.find((s) => s.name.includes("wrong-backend-canary"))?.text,
     ).toContain("error backend_refused");
+    const plaintextRejection = surfaces.find((s) => s.name.includes("plaintext-email-canary"))?.text;
+    expect(plaintextRejection).toContain("error usage");
+    expect(plaintextRejection).toContain("no longer accepted");
+    const plaintextResult = await runCli(h.home, [
+      "account",
+      "add",
+      "plaintext-email-canary",
+      "--vendor",
+      "apify",
+      "--email",
+      CANARIES.email,
+    ]);
+    expect(plaintextResult.code).toBe(64);
+    const plaintextShow = await runCli(h.home, ["account", "show", "plaintext-email-canary"]);
+    expect(plaintextShow.code).toBe(66); // nothing was written
 
     // --- `run`: redacted stdout, and proof the injection really happened --
     const redacted = await runCli(h.home, [

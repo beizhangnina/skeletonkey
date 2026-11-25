@@ -826,7 +826,7 @@ editing the config and restarting.
 | `skeletonkey list` | Shows all keys, their domains, upstream scheme, state, and last use. `--json`. |
 | `skeletonkey idle --days N` | Keys with no recorded use in N days (never-used keys always appear). `--json`. |
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
-| `skeletonkey account add <name> --vendor <id>` | Registers a vendor account (metadata in `accounts.yaml`, never a secret). `--registered`, `--email` (masked hint only), `--key-alias`, `--store-key --domain <d> [...]`, `--store-login [--url <u>]`, `--stdin`, `--yes`. See [Accounts (ND-1)](#accounts-nd-1). |
+| `skeletonkey account add <name> --vendor <id>` | Registers a vendor account (metadata in `accounts.yaml`, never a secret). `--registered`, `--email-stdin` (masked hint only; plaintext `--email <value>` is refused), `--key-alias`, `--store-key --domain <d> [...]`, `--store-login [--url <u>]`, `--stdin`, `--yes`. See [Accounts (ND-1)](#accounts-nd-1). |
 | `skeletonkey account list` / `show <name>` / `disable <name>` / `enable <name>` | Lists, shows, or toggles one account and the vault entries it points at. `list`: `--json`, `--active`. `show`: `--json`. |
 | `skeletonkey disable --all` | **Kill switch.** Disables every key, voids pending approvals, closes any Secure Input Popup, and makes the proxy answer `403 {"error":"kill_switch"}` locally. Cleared by `skeletonkey resume`. |
 | `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
@@ -1241,7 +1241,7 @@ nothing here hands one to an agent.
 
 ```
 skeletonkey account add <name> --vendor <id>
-  [--registered YYYY-MM-DD] [--email <address>]
+  [--registered YYYY-MM-DD] [--email-stdin]
   [--key-alias <alias>]
   [--store-key --domain <d> [--platform <p>] [--header <h>] [--format "Bearer {key}"]]
   [--store-login [--url <https://...>]]
@@ -1254,10 +1254,22 @@ skeletonkey account add <name> --vendor <id>
   prints a one-line warning on stderr and still records the account.
 - `--registered <date>` — defaults to today's local date; must be a real
   calendar date.
-- `--email <address>` — only a **masked hint** (`b**********@gmail.com`) is
-  ever written to `accounts.yaml`. With `--store-login`, this same address
-  becomes the login's username, stored as a secret in the vault — never in
-  metadata.
+- The account email never goes on the command line — anything there lands in
+  shell history and the process list. A plaintext `--email <value>` (with or
+  without a value) is refused with a usage error (exit 64) and writes
+  nothing. Instead:
+  - On a terminal: a hidden prompt, not echoed —
+    `Account email (not echoed, Enter to skip): `. Empty input means no email.
+  - Off a terminal, pass `--email-stdin` and put the email on stdin as a
+    single line. If you also need to send a secret on stdin (`--store-key` or
+    `--store-login` with `--stdin`), stdin carries **two** lines instead: the
+    email on the first, the secret on the second — stdin only has room for one
+    value otherwise, so this is the one way to supply both without either
+    ever appearing in argv.
+  - Off a terminal without `--email-stdin`, there is no email (as before).
+  - Only a **masked hint** (`b**********@gmail.com`) is ever written to
+    `accounts.yaml`. With `--store-login`, the same address becomes the
+    login's username, stored as a secret in the vault — never in metadata.
 - `--key-alias <alias>` — on its own, links an *existing* `api_key` vault
   entry (it must already exist, or the command fails). With `--store-key`, it
   names the *new* entry instead (default: the account name).
@@ -1266,9 +1278,11 @@ skeletonkey account add <name> --vendor <id>
   links it as `key_alias`.
 - `--store-login` — stores a fresh login (hidden, confirmed password prompt,
   or `--stdin`) the same way `skeletonkey vault add --type login` does, named
-  `<name>-login`, and links it as `login_entry`.
-- `--store-key` and `--store-login` together with `--stdin` is refused: stdin
-  carries exactly one secret, so run two commands (or use a terminal) instead.
+  `<name>-login`, and links it as `login_entry`. Needs an email, from the
+  prompt or `--email-stdin`.
+- `--store-key` and `--store-login` together with plain `--stdin` (no
+  `--email-stdin`) is refused: stdin carries exactly one secret, so run two
+  commands (or use a terminal) instead.
 - A name already in `accounts.yaml` is refused unless `--yes` is passed. A
   failure partway through an `add` — after a secret was already written —
   rolls that secret back on a best-effort basis; nothing is left half-stored,

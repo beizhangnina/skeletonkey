@@ -151,8 +151,8 @@ describe("the keychain backend via fixture secret-tool (not a real OS keyring)",
   it("builds the login half (apify-kc-login) through the same fixture backend", async () => {
     const add = await runCli(
       home,
-      ["account", "add", "login-kc", "--vendor", "apify", "--email", EMAIL, "--store-login", "--stdin"],
-      PASSWORD,
+      ["account", "add", "login-kc", "--vendor", "apify", "--email-stdin", "--store-login", "--stdin"],
+      `${EMAIL}\n${PASSWORD}`,
       env,
     );
     expect(add.code, add.stderr).toBe(0);

@@ -37,14 +37,13 @@ describe("the account CLI", () => {
         "apify",
         "--registered",
         "2026-01-15",
-        "--email",
-        EMAIL,
+        "--email-stdin",
         "--store-key",
         "--domain",
         "api.apify.com",
         "--stdin",
       ],
-      API_KEY,
+      `${EMAIL}\n${API_KEY}`,
     );
     expect(add.code, add.stderr).toBe(0);
     expect(add.stdout).toContain('Registered account "apify-main"');
@@ -71,8 +70,8 @@ describe("the account CLI", () => {
   it("registers an account with a freshly stored login (email becomes the username)", async () => {
     const add = await runCli(
       home,
-      ["account", "add", "github-acct", "--vendor", "treg", "--email", EMAIL, "--store-login", "--stdin"],
-      PASSWORD,
+      ["account", "add", "github-acct", "--vendor", "treg", "--email-stdin", "--store-login", "--stdin"],
+      `${EMAIL}\n${PASSWORD}`,
     );
     expect(add.code, add.stderr).toBe(0);
     expect(add.stdout).toContain("vault://github-acct-login.password");
@@ -178,8 +177,6 @@ describe("the account CLI", () => {
         "both-secrets",
         "--vendor",
         "apify",
-        "--email",
-        EMAIL,
         "--store-key",
         "--domain",
         "api.example.test",
@@ -208,10 +205,9 @@ describe("the account CLI", () => {
         "--store-login",
         "--url",
         "ftp://not-http",
-        "--email",
-        EMAIL,
+        "--email-stdin",
       ],
-      API_KEY,
+      `${EMAIL}\n${API_KEY}`,
     );
     expect(add.code).toBe(64);
     // Nothing was left behind: no account row, no orphaned key.
@@ -223,7 +219,7 @@ describe("the account CLI", () => {
   });
 
   it("lists accounts as a table and as JSON, metadata only", async () => {
-    await runCli(home, ["account", "add", "acct-one", "--vendor", "apify", "--email", EMAIL]);
+    await runCli(home, ["account", "add", "acct-one", "--vendor", "apify", "--email-stdin"], EMAIL);
     await runCli(home, ["account", "add", "acct-two", "--vendor", "treg"]);
     await runCli(home, ["account", "disable", "acct-two"]);
 
@@ -281,6 +277,127 @@ describe("the account CLI", () => {
 
     const enable2 = await runCli(home, ["account", "enable", "flip-acct"]);
     expect(enable2.code, enable2.stderr).toBe(0);
+  });
+
+  it("refuses a plaintext --email value, with or without an argument, and writes nothing", async () => {
+    const withValue = await runCli(home, ["account", "add", "email-flag-acct", "--vendor", "apify", "--email", EMAIL]);
+    expect(withValue.code).toBe(64);
+    expect(withValue.stderr).toContain(
+      "skeletonkey account add: error usage: --email <value> is no longer accepted: " +
+        "it would stay in shell history and the process list.",
+    );
+    expect(withValue.stderr).toContain(
+      "hint: Type it at the hidden prompt, or pipe it with --email-stdin.",
+    );
+    expect(withValue.stdout).not.toContain(EMAIL);
+    expect(withValue.stderr).not.toContain(EMAIL);
+
+    const bareFlag = await runCli(home, ["account", "add", "email-flag-acct", "--vendor", "apify", "--email"]);
+    expect(bareFlag.code).toBe(64);
+    expect(bareFlag.stderr).toContain("--email <value> is no longer accepted");
+
+    const show = await runCli(home, ["account", "show", "email-flag-acct"]);
+    expect(show.code).toBe(66); // nothing was ever written
+  });
+
+  it("reads the account email from a single line on stdin with --email-stdin, never from argv", async () => {
+    const argv = ["account", "add", "stdin-email-acct", "--vendor", "apify", "--email-stdin"];
+    expect(argv.join(" ")).not.toContain(EMAIL);
+
+    const add = await runCli(home, argv, EMAIL);
+    expect(add.code, add.stderr).toBe(0);
+    expect(add.stdout).not.toContain(EMAIL);
+
+    const show = await runCli(home, ["account", "show", "stdin-email-acct", "--json"]);
+    const parsed = JSON.parse(show.stdout) as Record<string, unknown>;
+    expect(parsed["email_hint"]).toMatch(/^c\*+@example\.test$/);
+    expect(show.stdout).not.toContain(EMAIL);
+    expect(fs.readFileSync(accountsPath(home), "utf8")).not.toContain(EMAIL);
+  });
+
+  it("reads email (line 1) and secret (line 2) on stdin with --email-stdin --stdin", async () => {
+    const add = await runCli(
+      home,
+      [
+        "account",
+        "add",
+        "two-line-acct",
+        "--vendor",
+        "apify",
+        "--email-stdin",
+        "--store-key",
+        "--domain",
+        "api.example.test",
+        "--stdin",
+      ],
+      `${EMAIL}\n${API_KEY}`,
+    );
+    expect(add.code, add.stderr).toBe(0);
+    expect(add.stdout).not.toContain(EMAIL);
+    expect(add.stdout).not.toContain(API_KEY);
+
+    const show = await runCli(home, ["account", "show", "two-line-acct", "--json"]);
+    const parsed = JSON.parse(show.stdout) as Record<string, unknown>;
+    expect(parsed["email_hint"]).toMatch(/^c\*+@example\.test$/);
+    expect(parsed["key_alias"]).toBe("two-line-acct");
+  });
+
+  it("rejects an empty line on stdin with --email-stdin", async () => {
+    const add = await runCli(home, ["account", "add", "empty-email-acct", "--vendor", "apify", "--email-stdin"], "");
+    expect(add.code).toBe(64);
+    expect(add.stderr).toContain("error usage");
+    expect(add.stderr).toContain("An empty email is not a value");
+  });
+
+  it("rejects more than one line on stdin with --email-stdin alone", async () => {
+    const add = await runCli(
+      home,
+      ["account", "add", "multiline-email-acct", "--vendor", "apify", "--email-stdin"],
+      `${EMAIL}\nextra-line`,
+    );
+    expect(add.code).toBe(64);
+    expect(add.stderr).toContain("error usage");
+    expect(add.stderr).toContain("--email-stdin expects a single line on stdin");
+  });
+
+  it("rejects anything other than exactly two lines with --email-stdin --stdin", async () => {
+    const oneLine = await runCli(
+      home,
+      [
+        "account",
+        "add",
+        "two-line-short-acct",
+        "--vendor",
+        "apify",
+        "--email-stdin",
+        "--store-key",
+        "--domain",
+        "api.example.test",
+        "--stdin",
+      ],
+      EMAIL,
+    );
+    expect(oneLine.code).toBe(64);
+    expect(oneLine.stderr).toContain("expects exactly two lines on stdin");
+
+    const threeLines = await runCli(
+      home,
+      [
+        "account",
+        "add",
+        "two-line-long-acct",
+        "--vendor",
+        "apify",
+        "--email-stdin",
+        "--store-key",
+        "--domain",
+        "api.example.test",
+        "--stdin",
+      ],
+      `${EMAIL}\n${API_KEY}\nextra`,
+    );
+    expect(threeLines.code).toBe(64);
+    expect(threeLines.stderr).toContain("expects exactly two lines on stdin");
   });
 
   it("disabled key via an account makes `run` refuse it", async () => {

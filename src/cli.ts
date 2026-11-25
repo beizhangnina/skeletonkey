@@ -319,7 +319,14 @@ export function buildProgram(): Command {
     .description("register a vendor account, optionally storing its key and/or login in the vault")
     .requiredOption("--vendor <id>", "vendor id from the API index, e.g. apify")
     .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
-    .option("--email <address>", "account email (only a masked hint is ever stored)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
+    .option(
+      "--email-stdin",
+      "read the account email from stdin (one line; two lines, email then secret, with --stdin)",
+      false,
+    )
     .option("--key-alias <alias>", "link to (or name, with --store-key) an api_key vault entry")
     .option("--store-key", "store a new API key in the vault for this account", false)
     .option("--domain <domain>", "destination domain for the stored key (with --store-key)")
