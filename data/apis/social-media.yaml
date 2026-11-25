@@ -124,7 +124,7 @@ apis:
       free_tier: null
       starting_price_usd: 0.025
       unit: "per call (batch gift-name lookup endpoint)"
-      pricing_url: "https://docs.tikhub.io/llms.txt"
+      pricing_url: null
       notes: "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

@@ -106,7 +106,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "credits"
-      pricing_url: "https://theirstack.com/llms.txt"
+      pricing_url: null
       notes: "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months."
     endpoints:
       - method: "POST"

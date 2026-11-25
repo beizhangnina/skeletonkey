@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://exa.ai/llms.txt"
+      pricing_url: null
       notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
@@ -78,7 +78,7 @@ apis:
       free_tier: true
       starting_price_usd: 0.01
       unit: "per request (x402, USDC on Base)"
-      pricing_url: "https://docs.keenable.ai/authentication"
+      pricing_url: null
       notes: "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each."
     endpoints:
       - method: "POST"
@@ -134,7 +134,7 @@ apis:
       free_tier: true
       starting_price_usd: 10
       unit: "per 1,000 requests"
-      pricing_url: "https://litescrape.com/llms.txt"
+      pricing_url: null
       notes: "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls."
     endpoints:
       - method: "GET"
@@ -186,7 +186,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: "https://docs.octen.ai/llms.txt"
+      pricing_url: null
       notes: "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages."
     endpoints:
       - method: "POST"
@@ -238,7 +238,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credits per request"
-      pricing_url: "https://s1.dev/docs/basic/screenshot"
+      pricing_url: null
       notes: "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20)."
     endpoints:
       - method: "POST"
@@ -290,7 +290,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: "https://serpapi.com/llms.txt"
+      pricing_url: null
       notes: "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages."
     endpoints:
       - method: "GET"
@@ -327,7 +327,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "queries"
-      pricing_url: "https://serper.dev"
+      pricing_url: null
       notes: "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

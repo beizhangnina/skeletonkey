@@ -180,7 +180,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: "https://sec-api.io/llms.txt"
+      pricing_url: null
       notes: "Only indication on the provided pages is a marketplace listing mentioning 'Free trial'; no plan tiers or prices are stated."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

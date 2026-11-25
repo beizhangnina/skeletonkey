@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: "https://docs.agentline.cloud"
+      pricing_url: null
       notes: "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message."
     endpoints:
       - method: "POST"
@@ -85,7 +85,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://docs.agentmail.to"
+      pricing_url: null
       notes: "Free tier limited to 3 inboxes and 100 emails per day with no credit card required."
     endpoints:
       - method: "POST"
@@ -178,7 +178,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://saperly.com/llms.txt"
+      pricing_url: null
       notes: "Prepaid balance metered per call and per message via reserve → settle; $5 free signup credit and first number free for 30 days."
     endpoints:
       - method: "POST"

@@ -51,7 +51,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credit"
-      pricing_url: "https://elevenlabs.io/docs"
+      pricing_url: null
       notes: "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available."
     endpoints:
       - method: "GET"
@@ -134,7 +134,7 @@ apis:
       free_tier: true
       starting_price_usd: 0.07
       unit: "USD per second of generated video (lowest listed per-second rate)"
-      pricing_url: "https://kling.ai/llms.txt"
+      pricing_url: null
       notes: "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
@@ -229,7 +229,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://platform.sonilo.com/docs"
+      pricing_url: null
       notes: "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
     endpoints:
       - method: "POST"

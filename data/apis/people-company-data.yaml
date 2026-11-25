@@ -29,7 +29,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credits per API call"
-      pricing_url: "https://docs.akta.pro/getting-started/overview"
+      pricing_url: null
       notes: "Usage is metered in credits that vary by endpoint/section; some commands are billed per record."
     endpoints:
       - method: "GET"
@@ -152,7 +152,7 @@ apis:
       free_tier: null
       starting_price_usd: 0.5
       unit: "10 lookups"
-      pricing_url: "https://api.builtwith.com/llms-full.txt"
+      pricing_url: null
       notes: "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
@@ -291,7 +291,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credit"
-      pricing_url: "https://datalegion.ai/docs/sdks/python"
+      pricing_url: null
       notes: "Credit-based: each returned record costs a credit; count, utility, and report tools are free. Self-serve credits or enterprise contracts."
     endpoints:
       - method: "POST"
@@ -343,7 +343,7 @@ apis:
       free_tier: true
       starting_price_usd: 0.06
       unit: "per credit"
-      pricing_url: "https://docs.tryfundable.ai/llms.txt"
+      pricing_url: null
       notes: "250 one-time signup credits; purchased credits $0.06 each; Pro is $100/month with 2,000 monthly credits."
     endpoints:
       - method: "POST"
@@ -395,7 +395,7 @@ apis:
       free_tier: null
       starting_price_usd: 99
       unit: "per month (credit-based plans)"
-      pricing_url: "https://leadmagic.io/llms-full.txt"
+      pricing_url: null
       notes: "Credit-based; credits deducted only for valid results. Some search endpoints run zero-credit on Professional/Ultimate under fair use; validation costs 0.25 credits per definitive result."
     endpoints:
       - method: "POST"
@@ -447,7 +447,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credits per billable action"
-      pricing_url: "https://docs.lusha.com/llms-full.txt"
+      pricing_url: null
       notes: "Account usage response reports a credits balance and per-action credit costs (e.g. api_search, email, phone); no USD prices stated."
     endpoints:
       - method: "POST"
@@ -503,7 +503,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "API Credits"
-      pricing_url: "https://platform.metix.ai/llms.txt"
+      pricing_url: null
       notes: "Billed in API Credits; empty Query Spec searches are free, contact unlock is billed per value returned. No dollar amount is stated in these pages."
     endpoints:
       - method: "POST"
@@ -548,6 +548,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/orbit"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.orbitsearch.com"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.orbitsearch.com/authentication"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per profile"
+      pricing_url: null
+      notes: "Credits are consumed for profile work; face search costs 100 credits per profile vs 10 for normal full generation."
+    endpoints:
+      - method: "POST"
+        path: "/v3/search"
+        summary: "Start a people search and return one pollable search resource; builds selected results to the requested profile depth."
+        returns: "A search resource with search_id, status, results, profile data, confidence, and billing."
+        docs_url: "https://docs.orbitsearch.com/api/search/search.md"
+      - method: "POST"
+        path: "/v3/enrich/{profile_id}"
+        summary: "Enrich a known profile by Orbit ID or slug, choosing quick, partial, full, or regenerate."
+        returns: "An enrich snapshot with request_id, status, operation, profile, and billing; 202 when running, 200 when terminal."
+        docs_url: "https://docs.orbitsearch.com/api/enrich/enrich-profile.md"
+      - method: "POST"
+        path: "/v3/faces/index-search"
+        summary: "Search the face index using a face reference and bounding box to find matching Orbit profiles."
+        returns: "Matches array with profile_id, similarity, and image_url; empty when the index has no match."
+        docs_url: "https://docs.orbitsearch.com/api/search/faces-index-search.md"
+      - method: "POST"
+        path: "/v3/agents/signup"
+        summary: "Create an Orbit workspace and API key for an agent without dashboard sign-in."
+        returns: "API key, scopes, signup credits, sign-up URL, and organization_id."
+        docs_url: "https://docs.orbitsearch.com/llms-full.txt"
   - id: "pdl"
     name: "People Data Labs"
     capability: "Person and company datasets for identity resolution, work history and firmographic enrichment."
@@ -565,6 +599,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/pdl"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.peopledatalabs.com/docs/authentication"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/v5/person/enrich"
+        summary: "Person Enrichment endpoint; call with parameters such as company and email to enrich a person profile."
+        returns: "A JSON API response containing the enriched person record."
+        docs_url: "https://docs.peopledatalabs.com/docs/authentication"
+      - method: "GET"
+        path: "/v5/person/subjectrequest"
+        summary: "Subject Request API endpoint that lets customers fetch a list of opted-out consumer IDs."
+        returns: "A stream of lines listing opted out IDs (fetched with stream=True)."
+        docs_url: "https://docs.peopledatalabs.com/docs/subject-request-api"
   - id: "ploid"
     name: "Ploid"
     capability: "Plain-language search over a refreshed professional-profile index, with person enrichment."
@@ -582,6 +630,35 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/ploid"
     checked_date: 2026-10-24
+    official_docs_url: "https://ploid.com/documentation"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/v1/person"
+        summary: "Research one identified person and get a reviewed report with professional history, source links, and field-level provenance; may return 202 with a run to poll."
+        returns: "Reviewed summary, up to 25 deduplicated source_links, identity, professional/presence/signals sections, and provenance per field, plus usage metadata."
+        docs_url: "https://ploid.com/documentation/api/person"
+      - method: "POST"
+        path: "/v1/search"
+        summary: "Synchronous people search from a semantic query, structured hard filters, and optional plain-English criteria; returns up to 150 ranked matches inline."
+        returns: "List of matching people with filter_match entries per filter, optional contents fields, and meta.next_offset while more matches remain."
+        docs_url: "https://ploid.com/documentation/api/search"
+      - method: "POST"
+        path: "/v1/sets"
+        summary: "Create a background People Set that compiles a query into a search plan and admits only people who pass every verified criterion (preview)."
+        returns: "201 with the Set id, the search, a pricing estimate, and events_url and items_url for following progress."
+        docs_url: "https://ploid.com/documentation/api/sets"
+      - method: "POST"
+        path: "/v1/github/search"
+        summary: "Search Ploid's index of GitHub accounts by company, repository, commits, activity, language, and profile flags, optionally attaching live profiles (beta)."
+        returns: "Paginated results with login, repos, repo_count, activity stats, optional live profile, returned/offset/limit/next_offset and usage metadata."
+        docs_url: "https://ploid.com/documentation/api/github"
+      - method: "GET"
+        path: "/v1/linkedin/profile"
+        summary: "Read a public LinkedIn profile by URL without caller-provided cookies, proxies, or provider keys."
+        returns: "Public LinkedIn profile data for the requested URL, drawn from the documented public LinkedIn read operations."
+        docs_url: "https://ploid.com/documentation/api/social"
   - id: "predictleads"
     name: "PredictLeads"
     capability: "Company event signals: funding, hiring, product launches, partnerships and job postings."
@@ -668,7 +745,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "credits (per endpoint, per row/attribute)"
-      pricing_url: "https://docs.sumble.com/api/api"
+      pricing_url: null
       notes: "Free plan exists (personal email signups); per-call credit costs vary by endpoint; 402 returned for insufficient credits."
     endpoints:
       - method: "POST"

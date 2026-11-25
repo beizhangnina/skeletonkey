@@ -25,7 +25,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "per call"
-      pricing_url: "https://strale.dev/llms.txt"
+      pricing_url: null
       notes: "Prepaid wallet, charged only when a call succeeds; free tools cost nothing; keyless free tools allow 300 calls a month per IP; hourly spend limit EUR 100 by default; minimum top-up EUR 10.00."
     endpoints:
       - method: "POST"
@@ -81,7 +81,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "API credits"
-      pricing_url: "https://www.vaquill.ai/llms.txt"
+      pricing_url: null
       notes: "Calls are metered in credits; 1,000 free welcome credits ($10) are granted once per person."
     endpoints:
       - method: "GET"

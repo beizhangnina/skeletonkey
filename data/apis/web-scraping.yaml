@@ -119,7 +119,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "credits (monthly credit allowance per plan)"
-      pricing_url: "https://docs.context.dev/llms-full.txt"
+      pricing_url: null
       notes: "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available."
     endpoints:
       - method: "POST"
@@ -237,7 +237,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://docs.tinyfish.ai/"
+      pricing_url: null
       notes: "Wallet-based: Agent, Browser and Research runs draw from wallet; Search and Fetch free within a daily allowance; agent top-ups range $10.00 to $500.00 USD."
     endpoints:
       - method: "POST"

@@ -65,7 +65,7 @@ apis:
       free_tier: true
       starting_price_usd: 29
       unit: "per month for 5,000 credits"
-      pricing_url: "https://docs.valyu.ai/home"
+      pricing_url: null
       notes: "Usage is charged from one credit balance; 2,000 free monthly credits with a work email; plans start at $29/month for 5,000 credits."
     endpoints:
       - method: "POST"

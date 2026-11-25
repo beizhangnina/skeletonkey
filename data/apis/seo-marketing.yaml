@@ -70,7 +70,7 @@ apis:
       free_tier: true
       starting_price_usd: 30
       unit: "per month"
-      pricing_url: "https://cloro.dev/llms.txt"
+      pricing_url: null
       notes: "Free monthly tier, paid plans from $30/mo, plus published per-request credit costs per provider."
     endpoints:
       - method: "POST"
@@ -122,7 +122,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: "https://docs.dataforseo.com/v3/keywords_data/bing/keyword_performance/task_get/"
+      pricing_url: null
       notes: "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
     endpoints:
       - method: "POST"

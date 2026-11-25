@@ -25,7 +25,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "per call"
-      pricing_url: "https://blockrun.ai/llms.txt"
+      pricing_url: null
       notes: "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free."
     endpoints:
       - method: "POST"
@@ -94,7 +94,7 @@ apis:
       free_tier: true
       starting_price_usd: 300
       unit: "per month"
-      pricing_url: "https://api-docs.defillama.com/llms.txt"
+      pricing_url: null
       notes: "Free API hosts need no key and are rate limited; Pro API requires a key at $300/mo with higher rate limits."
     endpoints:
       - method: "GET"
@@ -141,7 +141,7 @@ apis:
       free_tier: true
       starting_price_usd: 0.2
       unit: "USDC per request"
-      pricing_url: "https://emc2ai.io/llms.txt"
+      pricing_url: null
       notes: "Per-request prices: on-chain data $0.20-$0.60, security scans $0.55, AI analysis $1.00, inference $0.35, chart forecast $0.65. Free MCP tools need no account or payment."
     endpoints:
       - method: "GET"
@@ -193,7 +193,7 @@ apis:
       free_tier: true
       starting_price_usd: 49
       unit: "per month"
-      pricing_url: "https://www.quicknode.com/llms-full.txt"
+      pricing_url: null
       notes: "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing."
     endpoints:
       - method: "POST"
@@ -235,7 +235,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "searches per month"
-      pricing_url: "https://surf-api.com/docs"
+      pricing_url: null
       notes: "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
     endpoints:
       - method: "GET"

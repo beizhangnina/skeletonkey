@@ -25,7 +25,7 @@ apis:
       free_tier: true
       starting_price_usd: 2
       unit: "per month"
-      pricing_url: "https://developer.accuweather.com/documentation/overview"
+      pricing_url: null
       notes: "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

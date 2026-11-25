@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: "https://artificialanalysis.ai/data-api/docs"
+      pricing_url: null
       notes: "Three tiers: Free, Pro, Commercial. Free tier gets 100 requests per 24-hour window; paid tier prices are not stated in the text (Commercial: contact the team)."
     endpoints:
       - method: "GET"

@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "queries per day"
-      pricing_url: "https://censusdata.xyz/skill"
+      pricing_url: null
       notes: "Free key via Google sign-in; free tier has a daily query allowance; 429 means daily quota exhausted and resets at midnight UTC."
     endpoints:
       - method: "GET"
@@ -91,7 +91,7 @@ apis:
       free_tier: true
       starting_price_usd: 0
       unit: null
-      pricing_url: "https://www.census.gov/data/developers.html"
+      pricing_url: null
       notes: "Page describes the API as free; no paid tiers, quotas or rate plans are stated in the provided text."
     endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

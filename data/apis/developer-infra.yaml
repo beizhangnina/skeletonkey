@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: "https://docs.browserbase.com/llms-full.txt"
+      pricing_url: null
       notes: "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go."
     endpoints:
       - method: "POST"
