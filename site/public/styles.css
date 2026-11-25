@@ -282,6 +282,15 @@ input { caret-color: var(--accent); }
    links claims the slack and the rest follow it to the right edge. */
 .head-directory { margin-left: auto; }
 
+/* Narrow phones: the API pages carry a third header link (API index), which
+   pushed the row past 375px. Tighten the wordmark and link padding there. */
+@media (max-width: 480px) {
+  .site-head .wrap { gap: var(--s-75); }
+  .wordmark svg { height: 17px; }
+  .head-link { padding: var(--s-75) var(--s-50, 4px); margin-right: 0; white-space: nowrap; }
+  .head-link span[aria-hidden="true"] { display: none; }
+}
+
 /* ---------- section rhythm ----------
    Wide bands of nothing between the plates: the page is paced by air, and a
    hairline is the only thing that ever separates two cream sections. */

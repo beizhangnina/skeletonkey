@@ -362,8 +362,8 @@ def page(title, desc, path, body, extra_head=''):
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 {extra_head}</head>
 <body class="apis-page">
@@ -474,7 +474,7 @@ def register_section(x):
     """Guidance (ND-9): registration happens on the person's own machine,
     through their own SkeletonKey install -- this website never collects,
     forwards or stores a key."""
-    setup = f'Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>)'
+    setup = f'Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>)'
     if x['status'] == 'no-public-api':
         body = (f'{setup}. This vendor publishes no self-serve API of its own to register for, so there is no vendor '
                  'key for SkeletonKey to hold here -- the aggregator listings below are the only programmatic path we found, '

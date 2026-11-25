@@ -22,8 +22,8 @@
 <meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
 <link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4">
-<link rel="stylesheet" href="/apis/apis.css?v=2">
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
 <link rel="alternate" type="application/json" href="/apis.json">
 </head>
 <body class="apis-page">
@@ -55,7 +55,7 @@
 <p class="ap-meta"><span class="ap-badge ap-unverified">Unverified</span> <span>Checked 2026-10-26</span></p>
 <p class="ap-lede">Tencent&#x27;s WeChat developer platform exposes server-side HTTP APIs for Official/Service Accounts, Mini Programs and Mini Games, Open Platform (UnionID, WeChat Login for mobile/web apps), WeChat Store, Channels, WeChat Pay and AI/OCR services - all called against api.weixin.qq.com with an access_token minted from an app&#x27;s AppID and AppSecret.</p>
 <section class="ap-card" id="api-surface"><h2>API surface</h2><dl class="ap-dl"><dt>Official docs</dt><dd>Not yet verified</dd></dl><p class="ap-note">Endpoints: not yet verified.</p></section>
-<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx skeletonkey init</code>), then let your agent find and register WeChat for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
+<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>This page does not collect your key. Install SkeletonKey on your own machine (<a href="/#install">setup</a>: <code>npx -y @dormy/skeletonkey init</code>), then let your agent find and register WeChat for you: it signs up on the vendor's own pages under your own account, verification codes and payment stay with you, and the key it gets back is saved to your own local vault &mdash; never shown to an AI assistant, and never sent to this site.</p></section>
 <section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Base URL</dt><dd><code>https://api.weixin.qq.com</code></dd><dt>Auth</dt><dd>oauth · Query parameter <code>access_token</code></dd><dt>Docs</dt><dd><a href="https://developers.weixin.qq.com/doc/" rel="noopener">https://developers.weixin.qq.com/doc/</a></dd></dl></section>
 <section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Method</dt><dd>email</dd><dt>Signup page</dt><dd><a href="https://open.weixin.qq.com/" rel="noopener">https://open.weixin.qq.com/</a></dd><dt>Card required</dt><dd>—</dd><dt>Phone required</dt><dd>—</dd><dt>Other checks</dt><dd>Account registration requires picking an entity type (government / media / enterprise / other organisation / individual) and verifying it against the business licence, plus an administrator scanning a QR code in the WeChat app; Open Platform mobile/website apps additionally go through Tencent review before an AppID is issued.</dd></dl></section>
 <section class="ap-card"><h2>Pricing</h2><p>We could not confirm pricing on the vendor's own pages, so we show none. Unverified rows never show a price.</p></section>
