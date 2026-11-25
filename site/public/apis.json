@@ -15,9 +15,9 @@
   "gray": 94
  },
  "cost_label_counts": {
-  "FREE": 36,
+  "FREE": 40,
   "PAYG": 9,
-  "SUBS": 9
+  "SUBS": 5
  },
  "hidden_count": 13,
  "route_counts": {
@@ -7407,7 +7407,8 @@
     "min_monthly_usd": null,
     "min_prepay_usd": null,
     "gate_source_url": "https://cloro.dev/docs/guides/billing",
-    "cost_label": "SUBS"
+    "free_usage_source_url": "https://cloro.dev/pricing/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -7448,7 +7449,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "SUBS",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -8079,7 +8080,8 @@
     "min_monthly_usd": null,
     "min_prepay_usd": null,
     "gate_source_url": "https://www.context.dev/pricing",
-    "cost_label": "SUBS"
+    "free_usage_source_url": "https://www.context.dev/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -8113,7 +8115,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "SUBS",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -9566,7 +9568,8 @@
     "min_monthly_usd": null,
     "min_prepay_usd": null,
     "gate_source_url": "https://api-docs.defillama.com/",
-    "cost_label": "SUBS"
+    "free_usage_source_url": "https://api-docs.defillama.com/",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -9600,7 +9603,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "SUBS",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },
@@ -10534,7 +10537,8 @@
     "min_monthly_usd": null,
     "min_prepay_usd": null,
     "gate_source_url": "https://elevenlabs.io/pricing/api",
-    "cost_label": "SUBS"
+    "free_usage_source_url": "https://elevenlabs.io/pricing",
+    "cost_label": "FREE"
    },
    "endpoints": [
     {
@@ -10554,7 +10558,7 @@
    ],
    "endpoints_note": null,
    "cost_badge": "green",
-   "cost_label": "SUBS",
+   "cost_label": "FREE",
    "alternatives": null,
    "alternatives_note": null
   },

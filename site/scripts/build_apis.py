@@ -534,8 +534,6 @@ def cost_pill(x):
         if mm is not None: text = f'{cl} · {money(mm)}/mo'
     cls = 'ap-cost-green' if cl in ('FREE', 'PAYG') else 'ap-cost-red'
     title = COST_LABEL_TITLE[cl]
-    if cl == 'SUBS' and (x.get('pricing') or {}).get('api_access_gate') != 'subscription_required':
-        title = 'Priced mainly through subscription plans'
     return f'<span class="ap-badge {cls}" title="{E(title)}" aria-label="{E(cl + ": " + title)}">{E(text)}</span>'
 def ext(u, t): return f'<a href="{E(u)}" rel="noopener nofollow">{E(t)}</a>' if u else E(t)
 
@@ -576,14 +574,6 @@ def cost_section(x):
     if cl in ('FREE', 'PAYG'):
         return f'<p class="ap-cost">{pill}</p>'
     # SUBS
-    if gate != 'subscription_required':
-        # ND-18c: SUBS because the vendor's pricing model is a subscription
-        # (ND-18b rule), but the access gate itself is none/prepaid_min -- so do
-        # not claim a paid plan is required for API access.
-        src = p.get('gate_source_url') or p.get('pricing_url')
-        return (f'<p class="ap-cost">{pill}</p>'
-                f'<section class="ap-card ap-cost-red" id="cost"><h2>Subscription pricing</h2>'
-                f'<p>This vendor prices its API mainly through subscription plans.{" " + ext(src, "Source") if src else ""}</p></section>')
     if p.get('min_monthly_usd') is not None:
         heading, text = 'Subscription required for API access', f'API access needs a paid plan from {money(p["min_monthly_usd"])}/month.'
     else:
