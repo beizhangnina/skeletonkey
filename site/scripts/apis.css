@@ -1,4 +1,21 @@
-/* API index pages. Uses only tokens from /styles.css. */
+/* API index pages. Uses only tokens from /styles.css, plus the --ap-ok/--ap-warn
+   pair below (ND-13 cost badge): styles.css has no red/green tokens, and these
+   are local to this file, with a dark override mirroring styles.css's own
+   plain `@media (prefers-color-scheme: dark)` -- no `data-theme` attribute. */
+:root {
+  --ap-ok: #176B36;
+  --ap-ok-wash: rgba(23, 107, 54, 0.09);
+  --ap-warn: #A3321C;
+  --ap-warn-wash: rgba(163, 50, 28, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ap-ok: #6FCF8E;
+    --ap-ok-wash: rgba(111, 207, 142, 0.12);
+    --ap-warn: #F2876B;
+    --ap-warn-wash: rgba(242, 135, 107, 0.12);
+  }
+}
 .apis-page .site-head { position: relative; background: var(--panel); }
 .apis-page .site-head .wrap > div, .apis-page .head-nav { display: flex; }
 .head-apis { margin-left: auto; margin-right: var(--s-100); }
@@ -38,7 +55,7 @@
 .ap-filters input:focus-visible, .ap-filters select:focus-visible, .ap-list a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ap-count { font-size: var(--f--1); color: var(--meta); }
 .ap-list { list-style: none; padding: 0; margin: 0 0 var(--s-400); display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: var(--s-200); }
-.ap-list a { display: grid; grid-template-columns: 1fr auto; gap: var(--s-75); height: 100%; padding: var(--s-200); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); color: var(--text); text-decoration: none; transition: border-color var(--dur-fast) var(--ease); }
+.ap-list a { display: grid; grid-template-columns: 1fr auto auto; align-content: start; align-items: start; gap: var(--s-75); height: 100%; padding: var(--s-200); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); color: var(--text); text-decoration: none; transition: border-color var(--dur-fast) var(--ease); }
 .ap-list a:hover { border-color: var(--accent); }
 .ap-name { font-family: var(--font-display); font-size: var(--f-1); }
 .ap-cat { grid-column: 1 / -1; font-size: var(--f--2); text-transform: uppercase; letter-spacing: .06em; color: var(--meta); }
@@ -61,6 +78,21 @@
 .ap-rnotes { font-size: var(--f--1); }
 .ap-rnotes dt { color: var(--text); font-weight: 600; font-size: var(--f--1); }
 .ap-rnotes dd { color: var(--muted); line-height: var(--lh-micro); }
+
+/* ---------- ND-13: cost badge, red callout, alternatives ---------- */
+.ap-badge.ap-cost-green { background: var(--ap-ok-wash); border-color: var(--ap-ok); color: var(--ap-ok); }
+.ap-badge.ap-cost-red { background: var(--ap-warn-wash); border-color: var(--ap-warn); color: var(--ap-warn); }
+.ap-badge.ap-cost-gray { color: var(--meta); }
+.ap-cost { margin: 0 0 var(--s-300); }
+.apis-main .ap-card.ap-cost-red { border-color: var(--ap-warn); padding: var(--s-300); background: var(--ap-warn-wash); }
+.ap-card.ap-cost-red h2 { color: var(--ap-warn); }
+.ap-alt { list-style: none; margin: var(--s-200) 0 0; padding: 0; display: grid; gap: var(--s-150); }
+.ap-alt li { border-top: 1px solid var(--border); padding-top: var(--s-150); }
+.ap-alt-name a { color: var(--accent); font-weight: 600; }
+.ap-alt-gate { font-size: var(--f--2); text-transform: uppercase; letter-spacing: .04em; color: var(--meta); margin-left: var(--s-75); }
+.ap-alt-why { margin: var(--s-50) 0 0; color: var(--muted); line-height: var(--lh-micro); overflow-wrap: anywhere; }
+.ap-alt-why a { color: var(--accent); }
+.ap-badges { display: flex; flex-wrap: wrap; gap: var(--s-75); justify-content: flex-end; }
 
 @media (max-width: 600px) { .ap-dl { grid-template-columns: 1fr; } .ap-filters input, .ap-filters select { min-width: 0; width: 100%; } .ap-filters label { flex: 1 1 100%; } }
 
