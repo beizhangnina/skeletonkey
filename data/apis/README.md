@@ -29,8 +29,15 @@ data/apis/
   scripts/validate.py    schema validator (exit 0 = pass)
   scripts/build.py       regenerates the shards from raw/
   scripts/curated.py     hand-written per-provider facts used by build.py
-  raw/                   cached scrape artifacts (45 files, ~8 MB)
+  raw/                   cached scrape artifacts -- NOT in the repo, see below
 ```
+
+`raw/` is listed in the root `.gitignore` and is not committed: it holds
+verbatim third-party catalog captures (45 files, ~8 MB) that `scripts/build.py`
+reads but nothing in the repo ships. To run `scripts/build.py`, place a `raw/`
+directory with those captures under `data/apis/` yourself; without it, every
+other file here -- the committed shards, `validate.py`, `curated.py` -- works
+as normal.
 
 Validate with:
 
@@ -113,10 +120,44 @@ same way by both `validate.py` and `src/apis.ts` (and checked for drift by
 - **`endpoints_note`** -- string or null, one line, at most 300 characters:
   why `endpoints` is empty or partial.
 
-Like `offering`, no shard row carries any of these yet and `build.py` does not
-emit them -- the aggregator catalogs do not publish a vendor's own docs URL,
-auth/pricing specifics or endpoint catalog. They stay curated by hand in
-`apis.yaml` or a hand-edited shard.
+No shard row carries any of these yet, because the aggregator catalogs do not
+publish a vendor's own docs URL, auth/pricing specifics or endpoint catalog --
+`build.py` never invents one of these five fields itself. See "Preserving
+hand-filled fields" below for how a rebuild keeps a hand-filled value instead
+of wiping it -- the mechanism is generic and covers these five fields the
+same way it covers `offering` and any other hand-filled extra a shard row
+carries.
+
+## Preserving hand-filled fields
+
+`build.py` only ever computes a fixed set of base fields for a row -- `id`,
+`name`, `capability`, `category`, `provider_url`, `docs_url`, `access_mode`,
+`signup`, `signup_automatable`, `min_topup`, `billing_unit`, `free_tier`,
+`auth_type`, `seen_in`, `tos_notes`, `source_url`, `checked_date` (`ORDER` in
+`scripts/build.py`) -- from `raw/` and `curated.py`. **Any other key** a shard
+row carries -- the five ND-8 fields above, `offering`, or a key nobody has
+written yet -- is something `build.py` itself never invents, so a rebuild
+**preserves** whatever is already there instead of wiping it. This is a
+generic mechanism keyed only off "is this one of the base fields I compute,"
+not a hard-coded list of known extra field names, so a brand-new hand-filled
+key works the same way without a `build.py` change.
+
+For each key not in that base set, `build.py` (`merge_preserved` in
+`scripts/build.py`) picks, in order:
+
+1. the existing shard's value, if that file already has one and it is non-null;
+2. else `curated.py`'s `STRUCTURED[id]` value for that key, if any and non-null;
+3. else the key is left out of the row entirely.
+
+So `python3 scripts/build.py` can only ever pick up a hand-filled value for
+one of these keys, never strip or guess one, and a row that has none of them
+regenerates byte-identical to before any of them existed. Once emitted
+(`emit_row`), the base fields come first, then the five ND-8 fields present on
+the row in their defined order, then any other preserved extra key in the
+order it appeared on the existing shard row. The nested value itself can be
+anything PyYAML and `validate.py`'s fallback reader both round-trip:
+mappings, lists of scalars or mappings, nested mappings, multi-line strings,
+booleans, numbers, null and dates.
 
 ## Counts
 
@@ -326,4 +367,6 @@ python3 scripts/validate.py   # must exit 0
 ```
 
 `build.py` fails loudly if `raw/` grows a provider that `curated.py` has no row
-for (or vice versa), so a re-scrape cannot silently drop metadata.
+for (or vice versa), so a re-scrape cannot silently drop metadata. `raw/` is
+not in the repo (see Layout above) -- supply it locally before running either
+command.
