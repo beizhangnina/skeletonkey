@@ -230,3 +230,38 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/tinyfish"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.tinyfish.ai/"
+    auth: null
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://docs.tinyfish.ai/"
+      notes: "Wallet-based: Agent, Browser and Research runs draw from wallet; Search and Fetch free within a daily allowance; agent top-ups range $10.00 to $500.00 USD."
+    endpoints:
+      - method: "POST"
+        path: "/v1/automation/run-sse"
+        summary: "Run a goal-based browser automation on a URL and stream progress back over SSE until the final result arrives."
+        returns: "Server-Sent Events stream: STARTED, STREAMING_URL, PROGRESS, and COMPLETE events with run_id, status, and result."
+        docs_url: "https://docs.tinyfish.ai/api-reference/automation/run-browser-automation-with-sse-streaming"
+      - method: "POST"
+        path: "/"
+        summary: "Create a remote TinyBrowser session on api.browser.tinyfish.ai, optionally with target url, timeout_seconds, and proxy_config."
+        returns: "201 Created with session_id, cdp_url (WebSocket CDP endpoint), and base_url."
+        docs_url: "https://docs.tinyfish.ai/tinybrowser/reference"
+      - method: "DELETE"
+        path: "/{session_id}"
+        summary: "Terminate a TinyBrowser session immediately by its session_id; idempotent if the session already ended."
+        returns: "204 No Content with an empty body on success."
+        docs_url: "https://docs.tinyfish.ai/tinybrowser/reference"
+      - method: "GET"
+        path: "/"
+        summary: "TinySearch query endpoint on api.search.tinyfish.ai taking query plus optional location, language, domain filters, dates, and page."
+        returns: "JSON with query, results[] (position, site_name, title, snippet, url), total_results, and page."
+        docs_url: "https://docs.tinyfish.ai/tinysearch/reference"
+      - method: "POST"
+        path: "/v1/wallet/top-up"
+        summary: "Ask TinyFish to top up the account wallet by an amount; returns a 402 payment challenge to pay, then retry with the payment credential."
+        returns: "402 payment challenge in WWW-Authenticate first; after payment, 200 settled with amount, payment_reference, available_balance (or 202)."
+        docs_url: "https://docs.tinyfish.ai/llms-full.txt"

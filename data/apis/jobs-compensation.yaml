@@ -86,6 +86,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/theirstack"
     checked_date: 2026-10-24
+    official_docs_url: "https://theirstack.com/en/docs/api-reference/quickstart"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://theirstack.com/llms-full.txt"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: "credits"
+      pricing_url: "https://theirstack.com/llms.txt"
+      notes: "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months."
+    endpoints:
+      - method: "POST"
+        path: "/v1/jobs/search"
+        summary: "Search job postings across thousands of websites, filtered by job titles, companies, locations, company attributes and dates."
+        returns: "Jobs matching the filters; 1 API credit is consumed for each job returned in the response."
+        docs_url: "https://theirstack.com/en/docs/api-reference/jobs/search_jobs_v1"
+      - method: "POST"
+        path: "/v0/jobs/search"
+        summary: "Job search endpoint called on-demand from a Make HTTP module with search filters sent as JSON."
+        returns: "Job postings matching the search filters; each record returned costs 1 API credit, duplicates included."
+        docs_url: "https://theirstack.com/en/docs/integrations/make"
+      - method: "POST"
+        path: "/v0/companies/search"
+        summary: "Company search endpoint called through the API, e.g. to pull technographic data about companies in a CRM."
+        returns: "Company records matching the filters, including technographic data that can be routed back to a CRM."
+        docs_url: "https://theirstack.com/en/docs/integrations/make"
+      - method: "GET"
+        path: "/v0/billing/credit-balance"
+        summary: "Retrieve the team's current credit balance, including credits available for API calls, searches and data exports."
+        returns: "api_credits, ui_credits, used_api_credits, used_ui_credits and earliest_expiration among invoices with remaining credits."
+        docs_url: "https://theirstack.com/llms-full.txt"
+      - method: "GET"
+        path: "/v0/catalog/industries"
+        summary: "List industries and their IDs with job and company counts, and search them by name; use IDs in search filters."
+        returns: "A data array of industries with job and company counts plus metadata containing total_results."
+        docs_url: "https://theirstack.com/llms-full.txt"
   - id: "upwork"
     name: "Upwork"
     capability: "Freelance job search on a large contract-work marketplace."
@@ -120,6 +159,15 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/web3-career"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/api/v1"
+        summary: "Returns the latest Web3 job listings as JSON, with optional filters for tag, country, remote status, result limit, and whether to include descriptions."
+        returns: "A top-level JSON array of mixed types; job objects sit in a nested array found as the first element that is itself an array."
+        docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
   - id: "wellfound"
     name: "Wellfound"
     capability: "Startup job listings, trending roles and startup company profiles."

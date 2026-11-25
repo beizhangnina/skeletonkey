@@ -291,3 +291,18 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/topaz"
     checked_date: 2026-10-24
+    official_docs_url: "https://developer.topazlabs.com/"
+    auth: null
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits"
+      pricing_url: "https://developer.topazlabs.com/getting-started/model-pricing"
+      notes: "Costs vary by model family base rate, output size, and for some video models input resolution/frame rates; Credit Calculator gives estimates."
+    endpoints:
+      - method: "POST"
+        path: "/video/"
+        summary: "Create a video enhancement request specifying source video details, output parameters, and the filters/models to apply."
+        returns: "A request object containing a requestId used for the subsequent accept, upload, complete, and status calls."
+        docs_url: "https://developer.topazlabs.com/getting-started/video-quickstart"
