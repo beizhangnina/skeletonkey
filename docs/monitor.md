@@ -43,11 +43,10 @@ For each active account:
    hardcoded host, over **https only**; the host *and* protocol of the index
    row's `usage_api.path` are checked against it before anything is sent, so
    an edited index can never redirect a key elsewhere or downgrade it to
-   plain HTTP. If the official host itself answers with a cross-origin
-   redirect, the default transport follows it (so a legitimate same-host
-   redirect still works) but never forwards any header — `Authorization`,
-   `x-api-key`, or otherwise — to a different origin; a key never leaves the
-   official host. Exa's usage endpoint needs a distinct Team Management
+   plain HTTP. If the official host answers with a redirect, the default transport follows
+   it only when it stays on the same origin; a redirect to any other host is a
+   hard `error` -- the other host is never contacted, so the key never reaches
+   it and nothing it returns is read as usage. Exa's usage endpoint needs a distinct Team Management
    service credential — stored as a second vault entry named
    `<key_alias>-service` — and is skipped with a clear note when that entry
    does not exist.
@@ -64,7 +63,7 @@ For each active account:
      checker looks for). Reported explicitly rather than as a silent `ok`, so
      a vendor changing its response shape does not look like "nothing to
      report".
-   - `error` — a network failure, a non-2xx/3xx status, too many redirects,
+   - `error` — a network failure, a non-2xx/3xx status, a cross-host redirect, too many redirects,
      a non-https `usage_api.path`, or a host mismatch.
    - `skipped` — the account is disabled.
    `invalid_key`, `usage_anomaly`, `parse_error`, and `error` are **alerts**.

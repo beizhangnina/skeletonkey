@@ -23,7 +23,7 @@ import { maskUsername } from "../vault/entries.js";
 import { openEntryStore, type VaultEntryStore } from "../vault/entry-store.js";
 import type { Config } from "../types.js";
 import { detectAnomaly, type LedgerWindowStats } from "./anomaly.js";
-import { CHECKERS, defaultTransport } from "./checkers.js";
+import { CHECKERS, CrossHostRedirectError, defaultTransport } from "./checkers.js";
 import { renderMonitorReport } from "./report.js";
 import { readMonitorState, writeMonitorState } from "./state.js";
 import { resolveMonitorThresholds } from "./thresholds.js";
@@ -295,10 +295,28 @@ export async function runMonitor(options: MonitorRunOptions = {}): Promise<Monit
         serviceKey,
         transport,
       });
-    } catch {
+    } catch (err) {
       // Never store the raw error: it may embed the request URL (and, for
       // serpapi, the key as a query param), which redaction has not seen yet.
-      results.push(result(account, "error", { reasons: [`error: network error contacting ${url.host}`] }));
+      const crossHost = err instanceof CrossHostRedirectError;
+      results.push(
+        result(account, "error", {
+          reasons: [
+            crossHost
+              ? `error: ${url.host} redirected to a different host; refused (the key was not sent there and its response was not read)`
+              : `error: network error contacting ${url.host}`,
+          ],
+        }),
+      );
+      if (crossHost) {
+        nextState.accounts[account.name] = {
+          vendor: account.vendor,
+          last_status: "error",
+          last_run_at: now.toISOString(),
+          last_usage: null,
+          last_http_status: null,
+        };
+      }
       continue;
     }
 

@@ -12,6 +12,21 @@
 import type { CheckerInput, CheckerOutcome, HttpTransport, NormalizedUsage, VendorChecker } from "./types.js";
 
 const MAX_REDIRECTS = 5;
+
+/**
+ * Thrown by `defaultTransport` when the official host redirects to a
+ * different origin. Carries only the official host -- never the target URL,
+ * which an attacker controls and could use to smuggle data into logs.
+ */
+export class CrossHostRedirectError extends Error {
+  readonly officialHost: string;
+  constructor(officialHost: string) {
+    super(`refused a cross-host redirect from ${officialHost}`);
+    this.name = "CrossHostRedirectError";
+    this.officialHost = officialHost;
+  }
+}
+
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
 /**
@@ -22,13 +37,14 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
  * `Proxy-Authorization` on a cross-origin hop, but leaves any other header --
  * including the custom `x-api-key` apollo and exa send the account's key in
  * -- untouched, so it travels straight to whatever host the redirect names.
- * Following manually lets every header be dropped on a cross-origin hop,
- * whatever it is named.
+ * Following manually means only same-origin redirects are followed (with
+ * the original headers); any cross-origin redirect throws
+ * `CrossHostRedirectError` before the target is contacted.
  */
 export const defaultTransport: HttpTransport = async (url, init) => {
   let currentUrl = url;
-  let currentInit: RequestInit = { ...(init as RequestInit) };
-  let currentOrigin = new URL(url).origin;
+  const currentInit: RequestInit = { ...(init as RequestInit) };
+  const currentOrigin = new URL(url).origin;
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
     const response = await fetch(currentUrl, { ...currentInit, redirect: "manual" });
@@ -41,11 +57,12 @@ export const defaultTransport: HttpTransport = async (url, init) => {
     }
     const nextUrl = new URL(location, currentUrl);
     if (nextUrl.origin !== currentOrigin) {
-      // Never forward credentials (or anything else) to a different origin.
-      currentInit = { method: currentInit.method };
+      // PM decision (ND-6 §7): a cross-host redirect is a hard error. The
+      // target is never requested, so neither the key nor anything else is
+      // sent there, and nothing it would return is ever parsed as usage.
+      throw new CrossHostRedirectError(new URL(url).host);
     }
     currentUrl = nextUrl.toString();
-    currentOrigin = nextUrl.origin;
   }
   throw new Error(`too many redirects fetching ${new URL(url).host}`);
 };
