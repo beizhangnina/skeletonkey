@@ -14,6 +14,12 @@
 INT = "intermediary"          # no first-party API found; catalogs scrape it
 OWN = "own-account"
 UNK = "unknown"
+# Only reachable by a vendor-direct row: no aggregator catalog records either of
+# these, so nothing in P below uses them yet. Kept here so the TOS table covers
+# every access_mode the validators accept.
+KEYLESS = "keyless"           # the vendor documents no credential at all
+X402 = "wallet-x402"          # paid per call from a crypto wallet (x402 / MPP)
+BYOK = "byok"                 # takes a key issued by someone else
 
 # id: (category, capability, provider_url, docs_url, access_mode, signup, auth_type)
 P = {
@@ -189,7 +195,26 @@ TOS = {
  OWN: "Direct vendor account is the documented path; review the vendor's own API "
       "terms, rate limits and redistribution rules.",
  UNK: "Access path and terms were not verified from the vendor's own site.",
+ KEYLESS: "The vendor documents no credential for this API, so there is no account "
+          "to hold; its own terms still govern the data you get back.",
+ X402: "Documented payment is a per-call crypto-wallet challenge (x402 / MPP). "
+       "SkeletonKey pays in fiat only, so this is recorded as a fact about the "
+       "vendor and is never routed to.",
+ BYOK: "The service accepts a key issued by an upstream provider, so the billing "
+       "relationship -- and that provider's terms -- live elsewhere.",
 }
+
+# Providers whose row was read off the VENDOR's own pages, with no aggregator in
+# the loop: `id -> the vendor page the facts were read from`. build.py emits
+# these with `seen_in: ["vendor-direct"]` and exempts them from the "every
+# curated id needs a raw catalog record" check, since no catalog lists them.
+#
+# Empty today, and deliberately so: the two vendor-direct rows written for T2
+# (nvidia-nim, treg) live in the root apis.yaml because they need fields the
+# generated shard shape does not have -- auth_header, base_url, human_steps, the
+# full billing block. See data/apis/README.md. This table is the supported path
+# for a vendor-direct row that only needs the shard's 17 fields.
+VENDOR_DIRECT = {}
 
 TOS_EXTRA = {
  "sfs": " Operated by the Monid aggregator itself rather than an independent vendor.",
