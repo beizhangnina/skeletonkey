@@ -17,6 +17,9 @@
 .ap-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s-300); margin: 0 0 var(--s-300); max-width: 52rem; }
 .ap-register, .ap-caution { border-color: var(--accent); }
 .ap-register h2, .ap-caution h2 { color: var(--accent); }
+.ap-shelved-badge { background: var(--text); border-color: var(--text); color: var(--bg); }
+.ap-shelved { background: var(--text); border-color: var(--text); }
+.ap-shelved h2, .ap-shelved p { color: var(--bg); }
 .ap-card h2 { font-family: var(--font-display); font-weight: 400; font-size: var(--f-2); margin: 0 0 var(--s-200); }
 .ap-card p { margin: 0 0 var(--s-100); color: var(--muted); line-height: var(--lh-body); }
 .ap-dl { display: grid; grid-template-columns: minmax(8rem, 12rem) 1fr; gap: var(--s-75) var(--s-200); margin: 0; }
