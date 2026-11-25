@@ -11,6 +11,7 @@ import { SkeletonKeyError } from "../exit-codes.js";
 import { findKey, normalizeDomain, setDisabled, upsertKey } from "../keys.js";
 import { accountsPath, skeletonKeyHome } from "../paths.js";
 import { promptHidden, readSecret, readStdin } from "../prompt.js";
+import { rejectIfPaymentCard } from "../secret-intake.js";
 import type { KeyInjection, KeyMeta, UpstreamScheme } from "../types.js";
 import { fieldsFor, findEntry, maskUsername, setEntryDisabled, upsertEntry } from "../vault/entries.js";
 import { openEntryStore } from "../vault/entry-store.js";
@@ -117,8 +118,13 @@ async function readAccountPassword(stdin: boolean): Promise<string> {
   return requirePassword(password);
 }
 
-function rejectPlaintextEmailFlag(options: AccountAddOptions): void {
-  if (options.email === undefined) return;
+/**
+ * Rejects the removed plaintext `--email <value>` flag, shared by `account
+ * add` and anything else that could plausibly be handed it (`signup
+ * start`/`signup complete`; see `src/signup/cli.ts`).
+ */
+export function rejectPlaintextEmailFlag(email: string | boolean | undefined): void {
+  if (email === undefined) return;
   throw new SkeletonKeyError(
     "usage",
     "--email <value> is no longer accepted: it would stay in shell history and the process list.",
@@ -191,7 +197,7 @@ export async function addAccount(
   options: AccountAddOptions,
   home = skeletonKeyHome(),
 ): Promise<AccountMeta> {
-  rejectPlaintextEmailFlag(options);
+  rejectPlaintextEmailFlag(options.email);
   assertUsableAccountName(name);
   if (!isValidVendorId(options.vendor)) {
     throw new SkeletonKeyError(
@@ -265,6 +271,7 @@ export async function addAccount(
       if (secret === "") {
         throw new SkeletonKeyError("usage", "An empty API key is not an entry; nothing was stored.");
       }
+      rejectIfPaymentCard(secret);
       await store.putApiKey(alias, secret);
       createdKeyAlias = alias;
       const keyExisting = findKey(alias, home);

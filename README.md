@@ -1346,7 +1346,12 @@ full (`src/exit-codes.ts`): `usage` (64) for a bad flag or vendor id,
 target, `name_taken` (75) for a duplicate add without `--yes`,
 `backend_refused` (77) for the plaintext `file` backend without
 `SKELETONKEY_ALLOW_TEST_BACKEND=1`, and `entry_disabled` (71) when `run` is
-pointed at something an `account disable` turned off.
+pointed at something an `account disable` turned off. `vault_locked` (68)
+when the vault cannot be decrypted (wrong `SKELETONKEY_PASSPHRASE` or a
+modified file), and `card_number_rejected` (76) when the secret read for
+`--store-key` / `signup complete` is a 13-19 digit Luhn-valid number (spaces
+and dashes allowed): nothing is stored, `signup complete` leaves the session
+`needs_human`, and no digit of the value is printed.
 
 ### MCP: `list_accounts`
 

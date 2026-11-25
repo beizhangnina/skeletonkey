@@ -108,9 +108,27 @@ import {
   sameMailbox,
   type BwAccount,
 } from "./vault/bw-account.js";
+import { rejectIfPaymentCard } from "./secret-intake.js";
 
 const DEFAULT_HEADER = "Authorization";
 const DEFAULT_FORMAT = "Bearer {key}";
+
+/**
+ * Commander's default "unknown option" error echoes the raw token it was
+ * given, including anything after `=` -- so a typo like `--key=sk-...` would
+ * otherwise land that value in stderr. Patched once, process-wide, so every
+ * command (present and future) gets this for free.
+ */
+type UnknownOptionCommand = { unknownOption(flag: string): void };
+const originalUnknownOption = (Command.prototype as unknown as UnknownOptionCommand).unknownOption;
+(Command.prototype as unknown as UnknownOptionCommand).unknownOption = function (
+  this: Command,
+  flag: string,
+): void {
+  const eq = flag.indexOf("=");
+  const sanitized = eq === -1 ? flag : `${flag.slice(0, eq)}=<redacted>`;
+  originalUnknownOption.call(this, sanitized);
+};
 
 export function buildProgram(): Command {
   const program = new Command();
@@ -416,19 +434,28 @@ export function buildProgram(): Command {
     .command("start <vendor>")
     .description("start (or re-check) a vendor signup; stops for a human unless a driver is injected")
     .option("--account <name>", "account name to register (default: <vendor>-main)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
     .option("--no-open", "do not open the signup page in a browser")
     .option("--json", "machine-readable output", false)
-    .action(async (vendor: string, options: { account?: string; open: boolean; json: boolean }) => {
-      await withExitCodes("signup start", async () => {
-        const startOptions: SignupStartOptions = {
-          noOpen: options.open === false,
-          json: options.json,
-          openUrl: systemOpener(),
-          ...(options.account === undefined ? {} : { account: options.account }),
-        };
-        await cmdSignupStart(vendor, startOptions);
-      });
-    });
+    .action(
+      async (
+        vendor: string,
+        options: { account?: string; open: boolean; json: boolean; email?: string | boolean },
+      ) => {
+        await withExitCodes("signup start", async () => {
+          const startOptions: SignupStartOptions = {
+            noOpen: options.open === false,
+            json: options.json,
+            openUrl: systemOpener(),
+            ...(options.account === undefined ? {} : { account: options.account }),
+            ...(options.email === undefined ? {} : { email: options.email }),
+          };
+          await cmdSignupStart(vendor, startOptions);
+        });
+      },
+    );
 
   signup
     .command("status [vendor]")
@@ -445,6 +472,9 @@ export function buildProgram(): Command {
     .description("bind the key a human just created into the vault (never prints the key)")
     .option("--account <name>", "account name to register (default: <vendor>-main)")
     .option("--registered <date>", "YYYY-MM-DD this account was registered (default: today)")
+    .addOption(
+      new Option("--email [value]", "removed: always rejected, kept only to produce a clear error").hideHelp(),
+    )
     .option(
       "--email-stdin",
       "read the account email from stdin (one line; two lines, email then key, with --stdin)",
@@ -1287,6 +1317,7 @@ async function storeApiKey(alias: string, options: AddOptions): Promise<void> {
 
   const secret = (await readSecret(options.stdin)).trim();
   if (!secret) throw new Error("Empty secret; nothing stored.");
+  rejectIfPaymentCard(secret);
 
   await store.putApiKey(alias, secret);
 

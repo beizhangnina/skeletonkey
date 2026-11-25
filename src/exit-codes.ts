@@ -45,6 +45,8 @@ export const EXIT = {
   name_taken: 75,
   /** the backend refuses to be used here (e.g. the plaintext test backend) */
   backend_refused: 77,
+  /** a secret-intake path was handed a payment-instrument-shaped value */
+  card_number_rejected: 76,
   /** `--timeout` fired */
   timeout: 124,
   /** the command could not be executed (EACCES) */
