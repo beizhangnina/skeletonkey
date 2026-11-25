@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import { ensureHome } from "../config.js";
 import { monitorDir, monitorStatePath, skeletonKeyHome } from "../paths.js";
+import { redactDeepShapes } from "../redact.js";
 import {
   ACCOUNT_STATUSES,
   type AccountStatus,
@@ -33,7 +34,10 @@ export function readMonitorState(home = skeletonKeyHome()): MonitorStateFile {
     const coerced = coerceAccountState(value);
     if (coerced !== null) accounts[name] = coerced;
   }
-  return { version: 1, accounts };
+  // Defense in depth: this run's own Redactor already strips known secrets
+  // before anything is written, but a file written before that fix (or
+  // hand-edited) is still only one shape-rule pass away from leaking.
+  return redactDeepShapes({ version: 1, accounts });
 }
 
 export function writeMonitorState(state: MonitorStateFile, home = skeletonKeyHome()): void {

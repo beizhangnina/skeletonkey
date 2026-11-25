@@ -11,10 +11,43 @@
  */
 import type { CheckerInput, CheckerOutcome, HttpTransport, NormalizedUsage, VendorChecker } from "./types.js";
 
-/** The real transport: a thin `fetch` wrapper, used everywhere but tests. */
+const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
+/**
+ * The real transport: a `fetch` wrapper that follows redirects itself instead
+ * of letting `fetch` auto-follow them.
+ *
+ * `fetch`'s own redirect-follow strips `Authorization`/`Cookie`/
+ * `Proxy-Authorization` on a cross-origin hop, but leaves any other header --
+ * including the custom `x-api-key` apollo and exa send the account's key in
+ * -- untouched, so it travels straight to whatever host the redirect names.
+ * Following manually lets every header be dropped on a cross-origin hop,
+ * whatever it is named.
+ */
 export const defaultTransport: HttpTransport = async (url, init) => {
-  const response = await fetch(url, init as RequestInit);
-  return { status: response.status, text: () => response.text() };
+  let currentUrl = url;
+  let currentInit: RequestInit = { ...(init as RequestInit) };
+  let currentOrigin = new URL(url).origin;
+
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
+    const response = await fetch(currentUrl, { ...currentInit, redirect: "manual" });
+    if (!REDIRECT_STATUSES.has(response.status)) {
+      return { status: response.status, text: () => response.text() };
+    }
+    const location = response.headers.get("location");
+    if (location === null) {
+      return { status: response.status, text: () => response.text() };
+    }
+    const nextUrl = new URL(location, currentUrl);
+    if (nextUrl.origin !== currentOrigin) {
+      // Never forward credentials (or anything else) to a different origin.
+      currentInit = { method: currentInit.method };
+    }
+    currentUrl = nextUrl.toString();
+    currentOrigin = nextUrl.origin;
+  }
+  throw new Error(`too many redirects fetching ${new URL(url).host}`);
 };
 
 function parseJson(body: string): Record<string, unknown> | null {

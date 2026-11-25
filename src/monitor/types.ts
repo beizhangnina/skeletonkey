@@ -59,6 +59,7 @@ export const ACCOUNT_STATUSES = [
   "usage_anomaly",
   "no_usage_api",
   "error",
+  "parse_error",
   "skipped",
 ] as const;
 export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
