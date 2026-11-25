@@ -507,22 +507,20 @@ export function deriveCostBadge(pricing: unknown): CostBadge {
 }
 
 /**
- * Derived `pricing.cost_label` (ND-18b), never hand-filled -- build.py
- * computes it from `pricing.api_access_gate`, `pricing.model`, and the
- * hand-filled `pricing.free_usage_source_url`:
+ * Derived `pricing.cost_label` (ND-18b/d), never hand-filled -- build.py
+ * computes it from `pricing.api_access_gate` and the hand-filled
+ * `pricing.free_usage_source_url`. `pricing.model` is never consulted:
  *
  *   FREE   gate is `none` AND a sourced http(s) free_usage_source_url is present
  *   PAYG   gate is `none` (no sourced free URL) or `prepaid_min`
- *   SUBS   gate is `subscription_required`, OR gate is `none`/`prepaid_min`
- *          with `model: subscription` -- a verified gate already says the
- *          API itself requires a recurring commitment
+ *   SUBS   gate is `subscription_required`
  *   null   unknown, contact_sales, missing, or no pricing block at all
  *
- * `model: subscription` alone never produces SUBS when the gate is
- * `unknown` or absent: an unverified gate says nothing about the API.
- * `prepaid_min` is never FREE, even alongside a one-time trial/signup
- * credit -- the same rule `cost_badge` follows (`prepaid_min` is `green`,
- * not free).
+ * A vendor billing itself as a subscription (`model: subscription`) says
+ * nothing about whether the API *access* requires one -- only a verified
+ * `subscription_required` gate does. `prepaid_min` is never FREE, even
+ * alongside a one-time trial/signup credit -- the same rule `cost_badge`
+ * follows (`prepaid_min` is `green`, not free).
  */
 export const COST_LABELS = ["FREE", "PAYG", "SUBS"] as const;
 export type CostLabel = (typeof COST_LABELS)[number];
@@ -537,10 +535,8 @@ export function deriveCostLabel(pricing: unknown): CostLabel | null {
   }
   const raw = pricing as Record<string, unknown>;
   const gate = raw["api_access_gate"];
-  const model = raw["model"];
 
   if (gate === "subscription_required") return "SUBS";
-  if ((gate === "none" || gate === "prepaid_min") && model === "subscription") return "SUBS";
 
   if (gate === "none") {
     const url = raw["free_usage_source_url"];

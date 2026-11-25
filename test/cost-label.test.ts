@@ -45,9 +45,28 @@ describe("deriveCostLabel", () => {
     expect(deriveCostLabel({ api_access_gate: "subscription_required", model: "pay_as_you_go" })).toBe("SUBS");
   });
 
-  it("derives SUBS when a none/prepaid_min gate is paired with model: subscription", () => {
-    expect(deriveCostLabel({ api_access_gate: "none", model: "subscription" })).toBe("SUBS");
-    expect(deriveCostLabel({ api_access_gate: "prepaid_min", model: "subscription" })).toBe("SUBS");
+  it("ignores pricing.model entirely -- a none/prepaid_min gate stays FREE/PAYG even when model is subscription", () => {
+    expect(deriveCostLabel({ api_access_gate: "none", model: "subscription" })).toBe("PAYG");
+    expect(
+      deriveCostLabel({
+        api_access_gate: "none",
+        model: "subscription",
+        free_usage_source_url: "https://vendor.test/pricing",
+      }),
+    ).toBe("FREE");
+    expect(
+      deriveCostLabel({
+        api_access_gate: "none",
+        model: "subscription",
+        free_usage_source_url: "http://vendor.test/pricing",
+      }),
+    ).toBe("FREE");
+    expect(deriveCostLabel({ api_access_gate: "prepaid_min", model: "subscription" })).toBe("PAYG");
+  });
+
+  it("stays null for unknown/contact_sales gates even when model is subscription", () => {
+    expect(deriveCostLabel({ api_access_gate: "unknown", model: "subscription" })).toBeNull();
+    expect(deriveCostLabel({ api_access_gate: "contact_sales", model: "subscription" })).toBeNull();
   });
 
   it("derives FREE only for a none gate with a sourced http(s) free_usage_source_url", () => {
@@ -211,7 +230,7 @@ describe("the pricing allowlist covers the new keys", () => {
   });
 });
 
-describe("shipped shards: ND-18b cost_label", () => {
+describe("shipped shards: ND-18b/d cost_label", () => {
   const shards = fs.readdirSync(SHARD_DIR).filter((name) => name.endsWith(".yaml"));
 
   function readAll(): Map<string, { label: string | null; freeUrl: string | null }> {
@@ -268,14 +287,27 @@ describe("shipped shards: ND-18b cost_label", () => {
     "us-census-bureau",
     "valyu",
     "serper",
+    "cloro",
+    "context-dev",
+    "defillama",
+    "elevenlabs",
   ];
 
-  const SUBS_FROM_MODEL_IDS = ["cloro", "context-dev", "defillama", "elevenlabs"];
+  // ND-18d: these four were SUBS under the old model=subscription rule;
+  // under the gate-only rule they are FREE on their own published free
+  // allowance, each sourced by an official URL already in the repo.
+  const ND18D_FREE_URLS: Record<string, string> = {
+    cloro: "https://cloro.dev/pricing/",
+    "context-dev": "https://www.context.dev/pricing",
+    defillama: "https://api-docs.defillama.com/",
+    elevenlabs: "https://elevenlabs.io/pricing",
+  };
+
   const SUBS_FROM_GATE_IDS = ["agentline", "ahrefs", "foreplay", "leadmagic", "ploid"];
   const PAYG_NONE_NO_FREE_IDS = ["akta", "minimax", "smolmachine", "x"];
   const PAYG_PREPAID_MIN_IDS = ["dataforseo", "datalegion", "financialdatasets", "litescrape", "metixai"];
 
-  it("labels all 36 FREE rows, each with its mapped free_usage_source_url", () => {
+  it("labels all 40 FREE rows, each with its mapped free_usage_source_url", () => {
     const byId = readAll();
     for (const id of FREE_IDS) {
       const row = byId.get(id);
@@ -286,12 +318,12 @@ describe("shipped shards: ND-18b cost_label", () => {
     }
   });
 
-  it("labels the 4 model=subscription rows SUBS, with no free_usage_source_url", () => {
+  it("labels the 4 ND-18d rows (model=subscription, gate=none) FREE with their exact sourced free_usage_source_url", () => {
     const byId = readAll();
-    for (const id of SUBS_FROM_MODEL_IDS) {
+    for (const [id, url] of Object.entries(ND18D_FREE_URLS)) {
       const row = byId.get(id);
-      expect(row?.label, id).toBe("SUBS");
-      expect(row?.freeUrl, id).toBeNull();
+      expect(row?.label, id).toBe("FREE");
+      expect(row?.freeUrl, id).toBe(url);
     }
   });
 
@@ -329,7 +361,7 @@ describe("shipped shards: ND-18b cost_label", () => {
     expect(row?.freeUrl).toBeNull();
   });
 
-  it("totals 162 rows: 36 FREE, 9 PAYG, 9 SUBS, 108 with no cost_label", () => {
+  it("totals 162 rows: 40 FREE, 9 PAYG, 5 SUBS, 108 with no cost_label", () => {
     const byId = readAll();
     expect(byId.size).toBe(162);
     const counts = { FREE: 0, PAYG: 0, SUBS: 0, absent: 0 };
@@ -339,7 +371,7 @@ describe("shipped shards: ND-18b cost_label", () => {
       else if (label === "SUBS") counts.SUBS++;
       else counts.absent++;
     }
-    expect(counts).toEqual({ FREE: 36, PAYG: 9, SUBS: 9, absent: 108 });
+    expect(counts).toEqual({ FREE: 40, PAYG: 9, SUBS: 5, absent: 108 });
   });
 
   it("every FREE row's cost_label and free_usage_source_url agree with deriveCostLabel", () => {

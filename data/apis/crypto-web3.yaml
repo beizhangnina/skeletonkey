@@ -121,7 +121,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://api-docs.defillama.com/"
-      cost_label: "SUBS"
+      free_usage_source_url: "https://api-docs.defillama.com/"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/protocols"

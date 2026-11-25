@@ -356,17 +356,19 @@ URL has to earn `FREE` through the gate first (see the derivation table).
 | condition | `cost_label` |
 |---|---|
 | `api_access_gate` is `subscription_required` | `SUBS` |
-| `api_access_gate` is `none` or `prepaid_min`, AND `model` is `subscription` | `SUBS` |
 | `api_access_gate` is `none`, AND a sourced http(s) `free_usage_source_url` is present | `FREE` |
 | `api_access_gate` is `none` (no sourced free URL), or `prepaid_min` | `PAYG` |
 | `api_access_gate` is `unknown`, `contact_sales`, missing, or no `pricing` block at all | no `cost_label` key (null) |
 
-Read top to bottom, first match wins. Two things fall out of that order that
-are easy to miss:
+Read top to bottom, first match wins. `pricing.model` is never consulted --
+only the gate is. Two things fall out of that order that are easy to miss:
 
-- `model: subscription` alone never produces `SUBS` when the gate is
-  `unknown` or absent -- an unverified gate says nothing about the API
-  itself, only a gate someone actually recorded does.
+- `SUBS` requires a verified `subscription_required` gate. `model:
+  subscription` alone never produces `SUBS` -- a vendor billing itself as a
+  subscription says nothing about whether the API *access* itself requires
+  one; a row with `api_access_gate: none` (or `prepaid_min`) and `model:
+  subscription` is `FREE`/`PAYG` like any other `none`/`prepaid_min` row, not
+  `SUBS`.
 - `prepaid_min` is **never** `FREE`, even alongside a one-time trial or
   signup credit -- the same split `cost_badge` already draws (`prepaid_min`
   is `green`, not free). A vendor that requires a prepaid balance before the

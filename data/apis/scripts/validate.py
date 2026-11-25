@@ -204,26 +204,24 @@ def derive_cost_badge(pricing):
 
 
 def derive_cost_label(pricing):
-    """`pricing` -> `pricing.cost_label` (ND-18b): 'FREE' | 'PAYG' | 'SUBS' |
+    """`pricing` -> `pricing.cost_label` (ND-18b/d): 'FREE' | 'PAYG' | 'SUBS' |
     None. The one place this mapping is computed, so this validator (which
     only checks a value already on the row agrees) and build.py (which
     writes the computed value) can never drift apart. See ../README.md
     "ND-18b cost_label" for the full rule table.
 
-    SUBS only when the gate itself is already verified as a subscription
-    commitment -- `model: subscription` alone, with an `unknown` or absent
-    gate, says nothing about the API itself. FREE requires BOTH a verified
-    `none` gate AND a sourced http(s) `free_usage_source_url` -- `prepaid_min`
-    is never FREE even when a trial/signup credit exists.
+    SUBS only when `api_access_gate` is itself `subscription_required`.
+    `pricing.model` is never consulted -- a vendor billing itself as a
+    subscription says nothing about whether the API *access* requires one;
+    only a verified gate does. FREE requires BOTH a verified `none` gate AND
+    a sourced http(s) `free_usage_source_url` -- `prepaid_min` is never FREE
+    even when a trial/signup credit exists.
     """
     if not isinstance(pricing, dict):
         return None
     gate = pricing.get('api_access_gate')
-    model = pricing.get('model')
 
     if gate == 'subscription_required':
-        return 'SUBS'
-    if gate in ('none', 'prepaid_min') and model == 'subscription':
         return 'SUBS'
 
     if gate == 'none':

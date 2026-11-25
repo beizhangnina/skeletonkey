@@ -183,7 +183,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://www.context.dev/pricing"
-      cost_label: "SUBS"
+      free_usage_source_url: "https://www.context.dev/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/web/scrape"
