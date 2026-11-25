@@ -68,7 +68,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credit"
-      pricing_url: null
+      pricing_url: "https://elevenlabs.io/pricing/api"
       notes: "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -117,7 +117,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null
@@ -220,7 +220,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://docs.magichour.ai/billing/overview"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null
@@ -279,7 +279,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://platform.minimax.io/docs/pricing/overview"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null
@@ -323,7 +323,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://platform.sonilo.com/pricing"
       notes: "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
       api_access_gate: "none"
       min_monthly_usd: null

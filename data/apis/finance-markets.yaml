@@ -68,7 +68,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://www.financialdatasets.ai/pricing"
       notes: null
       api_access_gate: "prepaid_min"
       min_monthly_usd: null
@@ -186,7 +186,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://marketstack.com/pricing"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null

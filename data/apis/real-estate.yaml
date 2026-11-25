@@ -78,7 +78,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "API requests per month"
-      pricing_url: null
+      pricing_url: "https://developers.rentcast.io/reference/billing-and-pricing"
       notes: "Free plan of 50 requests/month; paid plans scale with request volume; current pricing listed on the RentCast website, enterprise plans via contact."
       api_access_gate: "none"
       min_monthly_usd: null

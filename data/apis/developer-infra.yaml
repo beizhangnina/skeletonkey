@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: null
+      pricing_url: "https://docs.browserbase.com/account/billing/plans"
       notes: "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -213,7 +213,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://smolmachines.com/pricing"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null

@@ -127,7 +127,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null
@@ -171,7 +171,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "credits (monthly credit allowance per plan)"
-      pricing_url: null
+      pricing_url: "https://www.context.dev/pricing"
       notes: "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available."
       api_access_gate: "none"
       min_monthly_usd: null

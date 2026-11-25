@@ -162,7 +162,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://dataforseo.com/pricing"
       notes: "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
       api_access_gate: "prepaid_min"
       min_monthly_usd: null
@@ -211,7 +211,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://www.foreplay.co/pricing"
       notes: null
       api_access_gate: "subscription_required"
       min_monthly_usd: 175

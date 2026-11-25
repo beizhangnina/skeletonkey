@@ -49,7 +49,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://developers.google.com/maps/billing-and-pricing"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null

@@ -135,7 +135,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "credits"
-      pricing_url: null
+      pricing_url: "https://theirstack.com/en/pricing"
       notes: "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months."
       api_access_gate: "none"
       min_monthly_usd: null

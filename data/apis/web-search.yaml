@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://exa.ai/docs/admin/pricing"
       notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -98,7 +98,7 @@ apis:
       free_tier: true
       starting_price_usd: 0.01
       unit: "per request (x402, USDC on Base)"
-      pricing_url: null
+      pricing_url: "https://keenable.ai/pricing"
       notes: "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -167,7 +167,7 @@ apis:
       free_tier: true
       starting_price_usd: 10
       unit: "per 1,000 requests"
-      pricing_url: null
+      pricing_url: "https://litescrape.com/pricing"
       notes: "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls."
       api_access_gate: "prepaid_min"
       min_monthly_usd: null
@@ -231,7 +231,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://octen.ai/pricing"
       notes: "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages."
       api_access_gate: "none"
       min_monthly_usd: null

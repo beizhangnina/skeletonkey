@@ -167,7 +167,7 @@ apis:
       free_tier: null
       starting_price_usd: 0.025
       unit: "per call (batch gift-name lookup endpoint)"
-      pricing_url: null
+      pricing_url: "https://tikhub.io/pricing"
       notes: "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -231,7 +231,7 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://docs.x.com/x-api/getting-started/pricing"
       notes: null
       api_access_gate: "none"
       min_monthly_usd: null

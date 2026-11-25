@@ -24,7 +24,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "per call"
-      pricing_url: null
+      pricing_url: "https://blockrun.ai/pricing"
       notes: "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free."
       api_access_gate: "none"
       min_monthly_usd: null
@@ -290,7 +290,7 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: "searches per month"
-      pricing_url: null
+      pricing_url: "https://surf-api.com/pricing"
       notes: "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
       api_access_gate: "none"
       min_monthly_usd: null

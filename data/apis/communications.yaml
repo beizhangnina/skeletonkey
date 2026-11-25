@@ -29,7 +29,7 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: null
+      pricing_url: "https://agentline.cloud/pricing"
       notes: "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message."
       api_access_gate: "subscription_required"
       min_monthly_usd: 20
