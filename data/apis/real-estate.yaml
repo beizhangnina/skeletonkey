@@ -19,7 +19,7 @@ apis:
     source_url: "https://monid.ai/tools/homes-com"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Every www.homes.com URL — home page, robots.txt, /developers, /api, /pricing — returns an Akamai 'Access Denied' 403 to non-browser clients, both directly and through a reader proxy, so nothing on the main domain could be read t"
+    endpoints_note: "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product."
     usage_api:
       available: null
       method: null
@@ -46,7 +46,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/loopnet"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Live homepage now accessible and confirms commercial property marketplace; saved generic developer/API/pricing pages were denied, and signup retry was also denied. No documented public self-serve API, auth, or API prices found."
+    endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
       available: null
       method: null

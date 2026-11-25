@@ -152,7 +152,7 @@ apis:
     source_url: "https://monid.ai/tools/sfs"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); API access is real and fully documented but not self-serve. The Redocly API docs say: 'Please reach out to your account manager to begin the process of setting up API access. API keys are issued by FreightSimple once access is a"
+    endpoints_note: "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key."
     usage_api:
       available: null
       method: null

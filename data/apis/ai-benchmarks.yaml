@@ -83,7 +83,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/lmarena"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); lmarena.ai now 301-redirects to arena.ai. No developer API exists on the vendor's own pages: /api, /docs, /developers and /pricing all render the generic app shell, and robots.txt lists only consumer routes (/chat, /leaderboard,"
+    endpoints_note: "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries."
     usage_api:
       available: null
       method: null

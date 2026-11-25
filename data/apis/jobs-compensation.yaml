@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/builtin"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live: builtin.com/api, builtin.com/developers and builtin.com/pricing all return real 404s (not SPA shells), and there is no developer portal, API reference or API pricing anywhere on the vendor's domains. The employe"
+    endpoints_note: "No public developer API; Built In offers only sales-led employer-brand visibility services, not data access."
     usage_api:
       available: null
       method: null
@@ -46,7 +46,7 @@ apis:
     source_url: "https://monid.ai/tools/idealist"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Auth confirmed verbatim in the Job Posting API docs: 'You must use the API key as the username for Basic HTTP authentication. Use an empty string for the password', with a Python sample using BASE_URL = 'https://www.idealist.org"
+    endpoints_note: "A Job Posting API exists but is gated to approved US organizations with purchased job credits; production keys are issued only on request."
     usage_api:
       available: null
       method: null
@@ -73,7 +73,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/indeed"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Indeed's developer documentation could not be read: https://docs.indeed.com/, every /docs.indeed.com/* page, https://www.indeed.com/developers, https://developer.indeed.com (redirects to partners.indeed.com), https://partners.in"
+    endpoints_note: "A partner-gated developer platform exists for ATS and job-board partners, but there is no self-serve signup or published API pricing."
     usage_api:
       available: null
       method: null
@@ -246,7 +246,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/wellfound"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No public developer API or documentation: /api, /mcp and /.well-known/mcp.json all 404, and /developers redirects to the marketing /hire page. The Reach Starter tier advertises 'Use Reach with your AI assistant', but no endpoint"
+    endpoints_note: "No public developer API is published; an AI-assistant feature is advertised with no public endpoint or key."
     usage_api:
       available: null
       method: null

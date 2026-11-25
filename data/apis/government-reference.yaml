@@ -73,7 +73,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/tendata"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Confirmed sales-only from Tendata's own pages, including two the earlier pass missed. Pricing FAQ on the homepage: 'Tendata offers flexible plans based on your specific needs. Contact us via WhatsApp to get a personalized quote."
+    endpoints_note: "Access is sales-only; pricing is negotiated per customer, with inquiries handled through a WhatsApp contact number."
     usage_api:
       available: null
       method: null

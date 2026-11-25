@@ -103,7 +103,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/finviz"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); finviz.com/apis is not API documentation — it serves the 'Finviz Elite' subscription page (the footer 'APIs' link points there, and /elite returns the same content). The only API-shaped endpoint the vendor exposes is the footer'"
+    endpoints_note: "No public developer API; the vendor's 'APIs' link leads only to its Elite consumer subscription page."
     usage_api:
       available: null
       method: null
@@ -130,7 +130,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/marketbeat"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Reviewed saved pages and live homepage plus All Access signup/pricing page. Found consumer research subscriptions and CSV exports, but no documented developer API, API auth, or API prices. Consumer subscription prices are exclud"
+    endpoints_note: "No public developer API; the vendor offers consumer research subscriptions and CSV exports instead."
     usage_api:
       available: null
       method: null
@@ -248,7 +248,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/secform4"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer API: /developers and /pricing 404, and /api returns the site CMS's generic {\"errors\":[{\"title\":\"Resource not found\",\"code\":404}]} rather than any product endpoint. The homepage and navigation offer only web screener"
+    endpoints_note: "No public developer API; the vendor offers a web-based filings screener and CSV export instead."
     usage_api:
       available: null
       method: null
@@ -275,7 +275,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/stockanalysis"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Got past the Cloudflare block that stopped the earlier pass (curl and r.jina.ai still 403; WebFetch renders the pages). The Pro page shows 'Pro' at '$8.25 a month when billed annually' or '$9.99 a month' and 'Unlimited' at '$16."
+    endpoints_note: "No public developer API; the vendor sells consumer website subscriptions instead."
     usage_api:
       available: null
       method: null
@@ -302,7 +302,7 @@ apis:
     source_url: "https://monid.ai/tools/yahoo-finance"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live. developer.yahoo.com/api lists exactly three things - 'Get started using our APIs with OAuth', 'Yahoo Fantasy Sports API' and 'Sign In With Yahoo' - and no finance API. finance.yahoo.com/developers returns 404 an"
+    endpoints_note: "No public finance API; Yahoo's developer site lists only a Fantasy Sports API and sign-in APIs."
     usage_api:
       available: null
       method: null

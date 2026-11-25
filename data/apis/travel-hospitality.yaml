@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/agoda"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); developer.agoda.com does exist (it 302s to /supply, a ReadMe-hosted hub; the same content is mirrored at agoda-enterprise-group.readme.io) and documents real APIs, but there is no self-serve access and no published pricing, so n"
+    endpoints_note: "Agoda's developer hub documents partner-only supply and demand APIs; access requires becoming an approved partner, with no self-serve signup."
     usage_api:
       available: null
       method: null
@@ -46,7 +46,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/booking"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Auth is now confirmed from the Demand API authentication guide: every request carries both 'Authorization: Bearer <key>' (an API key token generated in Partner Centre) and 'X-Affiliate-Id: <aid>', over HTTPS. Only the sandbox ho"
+    endpoints_note: "Booking.com's developer APIs are partner-only, requiring Managed Affiliate Partner status through Partner Centre; no public pricing is documented."
     usage_api:
       available: null
       method: null

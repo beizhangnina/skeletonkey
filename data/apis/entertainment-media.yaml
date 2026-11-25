@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/douban"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer portal exists any more: developers.douban.com and open.douban.com do not resolve at all, and www.douban.com/developers and /api return nothing. The legacy API host is still up - GET https://api.douban.com/v2/movie/t"
+    endpoints_note: "The developer portal no longer exists; a legacy API endpoint still responds but needs a key issued through business-development contact."
     usage_api:
       available: null
       method: null
@@ -46,7 +46,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/imdb"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); developer.imdb.com now 301-redirects to data.imdb.com, the current developer site. Products: 'New IMDb API' (GraphQL) plus bulk data, in IMDb Ratings, Essential Metadata and Box Office Mojo packages with Meters/User Reviews/Pare"
+    endpoints_note: "Data is offered only through a sales-approved subscription on AWS Data Exchange, covering a GraphQL API and bulk metadata packages; no price is published."
     usage_api:
       available: null
       method: null
@@ -100,7 +100,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/youku"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); youku.com/api, /developers and /pricing all return 404. The only open-platform presence is open.youku.com, which presents itself as the Youku OTT open platform (内容合作 content partnership, 能力开放 capability opening, 优酷AI, and indust"
+    endpoints_note: "No public developer API; the related open platform is a partner-application portal for content and device partnerships, not self-serve access."
     usage_api:
       available: null
       method: null

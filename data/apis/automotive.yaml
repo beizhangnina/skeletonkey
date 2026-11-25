@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/aaa-gas-prices"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Live homepage now readable: public fuel averages and news, not API pricing. No public API documentation or API signup found. No saved AAA vendor page was present under pages/ or live/; reviewed the saved index row instead. Remov"
+    endpoints_note: "No public API; the site publishes consumer fuel-price averages and news, not API documentation or signup."
     usage_api:
       available: null
       method: null
@@ -46,7 +46,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/bid-cars"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Signup fields describe a consumer auction account, not developer access. No card field on the visible two-step signup form. No public developer API found on the pages read; this does not establish that private integrations are u"
+    endpoints_note: "No public developer API; signup is for a consumer vehicle-auction account, not developer access."
     usage_api:
       available: null
       method: null
@@ -73,7 +73,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/carfax"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); CARFAX does run a documented developer API - CARFAX Connect, a GraphQL API at https://connect.carfax.com/v1/graphql - but it is partner-gated, not self-serve. Auth is OAuth 2.0 (Authorization Code / Web Application, Single Page"
+    endpoints_note: "A partner-only GraphQL API (CARFAX Connect) exists using OAuth 2.0, but it is not self-serve and requires an existing partnership."
     usage_api:
       available: null
       method: null
@@ -100,7 +100,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/cars-com"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked the developer portal that search engines still index: https://developer.cars.com/ and https://developer.cars.com/faq-category/search-api both return HTTP 302 to https://www.cars.com/contact/, so the Search API documen"
+    endpoints_note: "No public developer API; the former developer portal now leads only to a sales contact page."
     usage_api:
       available: null
       method: null
@@ -127,7 +127,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/edmunds"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Open API Program was retired February 15, 2018. The developer-portal FAQ, re-read live, says there are no exceptions, 'We're not currently accepting new applicants at this time' and 'No, we do not expect to be able to accommodat"
+    endpoints_note: "The former public API program was retired; access is now limited to select partners, dealers and advertisers through an account executive."
     usage_api:
       available: null
       method: null
@@ -154,7 +154,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/kbb"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); A real KBB Developer Portal exists at developer.kbb.com (nav lists IDWS 4.0, Advertising Data API, Instant Cash Office (ICO) API, Batch VIN, API Documentation), but every documentation route renders only the page shell with 'Una"
+    endpoints_note: "A developer portal lists several valuation and VIN APIs, but access runs through a sales contact form, not self-serve signup."
     usage_api:
       available: null
       method: null

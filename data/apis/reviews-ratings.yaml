@@ -19,7 +19,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/capterra"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Still unreadable. Every HTML page on www.capterra.com returns a Cloudflare 'Just a moment...' interstitial to curl with a browser User-Agent, to the r.jina.ai reader, and to the saved snapshots: /, /pricing, /api, /developers, /"
+    endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
       available: null
       method: null
@@ -103,7 +103,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/getapp"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); No public or self-serve API exists on GetApp's own domain, so there is no base_url, auth or pricing to verify - hence status stays unverified with no_public_api true. Evidence: robots.txt disallows the internal paths /api/*, /ap"
+    endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
       available: null
       method: null
@@ -130,7 +130,7 @@ apis:
     source_url: "https://glasser.ai/data-sources/google-play"
     checked_date: 2026-10-24
     endpoints: []
-    endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); no_public_api is kept true in the sense that matters for this index: Google publishes no API for third-party Google Play app metadata, ratings or reviews. The documented APIs are publisher-scoped - the REST reference states the"
+    endpoints_note: "Google publishes no API for third-party app metadata, ratings or reviews; its only APIs are publisher-scoped, for managing one's own app."
     usage_api:
       available: null
       method: null
