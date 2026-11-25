@@ -5,15 +5,15 @@
 :root {
   --ap-ok: #176B36;
   --ap-ok-wash: rgba(23, 107, 54, 0.09);
-  --ap-warn: #A3321C;
-  --ap-warn-wash: rgba(163, 50, 28, 0.08);
+  --ap-warn: #A83F2C;
+  --ap-warn-wash: rgba(168, 63, 44, 0.08);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --ap-ok: #6FCF8E;
     --ap-ok-wash: rgba(111, 207, 142, 0.12);
-    --ap-warn: #F2876B;
-    --ap-warn-wash: rgba(242, 135, 107, 0.12);
+    --ap-warn: #EE9580;
+    --ap-warn-wash: rgba(238, 149, 128, 0.14);
   }
 }
 .apis-page .site-head { position: relative; background: var(--panel); }
@@ -28,7 +28,6 @@
 .ap-crumb a { color: var(--accent); }
 .ap-meta { display: flex; gap: var(--s-200); align-items: center; font-size: var(--f--1); color: var(--meta); margin: 0 0 var(--s-300); }
 .ap-badge { display: inline-block; font-size: var(--f--2); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); color: var(--muted); white-space: nowrap; }
-.ap-verified { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .ap-sales-only { border-color: var(--accent); color: var(--accent); }
 .ap-no-public-api { border-style: dashed; }
 .ap-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s-300); margin: 0 0 var(--s-300); max-width: 52rem; }
@@ -79,11 +78,11 @@
 .ap-rnotes dt { color: var(--text); font-weight: 600; font-size: var(--f--1); }
 .ap-rnotes dd { color: var(--muted); line-height: var(--lh-micro); }
 
-/* ---------- ND-13: cost badge, red callout, alternatives ---------- */
+/* ---------- ND-18: FREE/PAYG/SUBS cost pill, red callout, alternatives ---------- */
 .ap-badge.ap-cost-green { background: var(--ap-ok-wash); border-color: var(--ap-ok); color: var(--ap-ok); }
 .ap-badge.ap-cost-red { background: var(--ap-warn-wash); border-color: var(--ap-warn); color: var(--ap-warn); }
-.ap-badge.ap-cost-gray { color: var(--meta); }
 .ap-cost { margin: 0 0 var(--s-300); }
+.ap-cost-note { font-size: var(--f--1); color: var(--meta); }
 .apis-main .ap-card.ap-cost-red { border-color: var(--ap-warn); padding: var(--s-300); background: var(--ap-warn-wash); }
 .ap-card.ap-cost-red h2 { color: var(--ap-warn); }
 .ap-alt { list-style: none; margin: var(--s-200) 0 0; padding: 0; display: grid; gap: var(--s-150); }
@@ -115,3 +114,6 @@
   /* the sub-label sits under its value, not under the data-label column */
   .ap-routes td .ap-ex { grid-column: 2; }
 }
+
+/* ND-18: long endpoint paths must wrap at 375px instead of widening the page. */
+.apis-main code, .apis-main .ap-ex, .apis-main td, .apis-main th { overflow-wrap: anywhere; }
