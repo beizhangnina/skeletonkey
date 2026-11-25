@@ -220,3 +220,21 @@ TOS_EXTRA = {
  "sfs": " Operated by the Monid aggregator itself rather than an independent vendor.",
  "linkedin": " First-party API access is partner-gated; scraped access is contrary to LinkedIn's terms.",
 }
+
+# Optional hand-filled extra fields, by provider id (see ../README.md
+# "Preserving hand-filled fields"). A row here is a partial mapping -- any
+# key build.py does not itself compute from raw/, not just the five ND-8
+# fields (official_docs_url/auth/pricing/endpoints/endpoints_note) -- and
+# only its non-null entries are used; build.py never invents a value for a
+# field missing here.
+#
+# Precedence build.py applies when writing a shard (see build.py's
+# merge_preserved): an existing, non-null value already hand-filled in the
+# generated shard wins over a value here, which wins over leaving the field
+# out entirely. So this table is a fallback default, not an override -- once
+# someone hand-edits a shard row directly, that edit survives every rebuild
+# even if this table disagrees.
+#
+# Empty for now: none of these facts have been verified against a vendor's
+# own docs/pricing page yet.
+STRUCTURED = {}
