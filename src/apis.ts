@@ -1629,6 +1629,15 @@ function shardUrl(value: unknown): string | null {
   return typeof value === "string" && isHttpUrl(value) ? value : null;
 }
 
+/**
+ * Converts one row of a generated shard into an index entry.
+ *
+ * The shards are a different shape (`id`, `capability`, `provider_url`,
+ * `auth_type`, string tri-states) and a different provenance: machine-generated
+ * from three aggregator catalogs, with prices and free tiers deliberately null.
+ * Nothing is invented here -- "unknown" becomes `null`, and no auth header is
+ * synthesised from `auth_type` because `api_key` does not say *which* header.
+ */
 /** A shard row's optional `access_modes`, or null when it has none worth keeping. */
 function shardAccessModes(raw: unknown): AccessMode[] | null {
   if (!Array.isArray(raw)) return null;
@@ -1639,15 +1648,6 @@ function shardAccessModes(raw: unknown): AccessMode[] | null {
   return modes.length === 0 ? null : modes;
 }
 
-/**
- * Converts one row of a generated shard into an index entry.
- *
- * The shards are a different shape (`id`, `capability`, `provider_url`,
- * `auth_type`, string tri-states) and a different provenance: machine-generated
- * from three aggregator catalogs, with prices and free tiers deliberately null.
- * Nothing is invented here -- "unknown" becomes `null`, and no auth header is
- * synthesised from `auth_type` because `api_key` does not say *which* header.
- */
 function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: string } {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return { error: `${file}: expected a mapping in apis[]` };

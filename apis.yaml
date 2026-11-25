@@ -14,6 +14,17 @@
 #                          intermediary  -- a gateway resells access; you top up the gateway
 #                          own-account   -- you hold the account and the billing relationship
 #                          byok          -- the service accepts a key you got elsewhere
+#                          keyless       -- the vendor documents no credential at all;
+#                                           the endpoint answers without a key
+#                          wallet-x402   -- paid per call from a crypto wallet (x402 /
+#                                           MPP). SkeletonKey pays in fiat only, so this
+#                                           is a fact about the vendor, never a route
+#   access_modes         list of access_mode values, or null. OPTIONAL, and only
+#                        for a vendor that documents MORE THAN ONE way in (a key
+#                        after a top-up AND a keyless x402 challenge). Element 0
+#                        must equal access_mode -- that stays the one SkeletonKey
+#                        uses, and is never wallet-x402 while a fiat path exists.
+#                        No duplicates. null/absent = access_mode is the whole story.
 #   min_topup            number >= 0 in USD, or null. NULL MEANS UNKNOWN.
 #                        Never put a guessed number here -- an unknown price is null.
 #   billing_unit         string or null. e.g. "per request", "per 1M input tokens".
@@ -71,13 +82,22 @@
 #                        needed. null = nobody checked. This exists because
 #                        `auth_header: null` alone could not tell "needs no key"
 #                        from "we never looked". Cannot be false while
-#                        auth_header, auth_format or auth_headers is set.
-#   auth_headers         list of {header, format, note} or null, for the vendors
-#                        that document MORE THAN ONE credential header (a key
-#                        plus a paired secret, say). Each `format` must contain
-#                        {key}; at most 5; header names unique. When
-#                        auth_header/auth_format are also set, element 0 must
-#                        match them -- that is the one the proxy injects.
+#                        auth_header, auth_format or a CREDENTIAL entry in
+#                        auth_headers is set (a non-secret header is fine: a
+#                        keyless API may still require an API-version header).
+#   auth_headers         list of {header, format, note, secret} or null, for the
+#                        vendors whose docs require MORE THAN ONE header. At
+#                        most 5; header names unique. When auth_header/
+#                        auth_format are also set, element 0 must match them --
+#                        that is the one the proxy injects.
+#                          secret   boolean, optional, DEFAULT TRUE. true = a
+#                                   credential, and `format` must contain {key}.
+#                                   false = a header the docs require that is
+#                                   NOT a secret (a caller id, an API version);
+#                                   `format` is then the literal value, or null
+#                                   when the vendor documents none, and the
+#                                   CALLER sends it. Element 0 may not be
+#                                   secret: false.
 #   human_steps          list of strings or null. Steps only a human can do, in
 #                        the vendor's own terms. request_access turns these into
 #                        explicit human gates in the signup plan.
@@ -195,11 +215,22 @@
 #
 # DISCOVERED ROWS (written by the agent, not by hand)
 # ---------------------------------------------------
-# `status`, `source_urls`, `discovered_date`, `promoted_date` and `promoted_by`
-# belong to rows the MCP tool `propose_entry` wrote into the LOCAL user index
-# ($SKELETONKEY_HOME/discovered.yaml), not to this file. status is `unverified`
-# on write and becomes `verified` only after a call to that domain through the
-# proxy returns 2xx, with the ledger row recorded in promoted_by.
+# `source_urls`, `discovered_date`, `promoted_date` and `promoted_by` belong to
+# rows the MCP tool `propose_entry` wrote into the LOCAL user index
+# ($SKELETONKEY_HOME/discovered.yaml), not to this file. There, status is
+# `unverified` on write and becomes `verified` only after a call to that domain
+# through the proxy returns 2xx, with the ledger row recorded in promoted_by.
+#
+#   status               unverified | docs-verified | verified, or null.
+#                        Optional here, and only ever `docs-verified` on a
+#                        hand-written row: the VENDOR's own docs showed the
+#                        endpoint and how it authenticates (and its price,
+#                        where listed), and no call has been made. `verified`
+#                        means a call through the proxy returned 2xx, which
+#                        nothing in this file claims. A row with no status is
+#                        not a weaker row -- its provenance is `checked_date` +
+#                        `source` either way; the field exists so "the docs
+#                        showed it, nobody called it" is machine-readable.
 #
 # THE GENERATED SHARDS
 # --------------------
@@ -214,9 +245,12 @@
 version: 1
 entries:
   # --- Vendor-direct rows -------------------------------------------------
-  # Read off the vendor's OWN pages, with no sign-up and no live API call. No
-  # `status`: this file records provenance as `checked_date` + `source`, and
-  # proxy-ledger promotion applies to the discovered user index, not here.
+  # Read off the vendor's OWN pages, with no sign-up and no live API call.
+  # Provenance is `checked_date` + `source` on every row; proxy-ledger
+  # promotion applies to the discovered user index, not here. Rows whose vendor
+  # docs showed both the endpoint and its auth also say so in
+  # `status: docs-verified` (nvidia-nim and treg predate the field and state
+  # the same thing in `offering.verified_url` + `verified_date`).
 
   - name: nvidia-nim
     url: https://build.nvidia.com/
@@ -275,20 +309,31 @@ entries:
           Every model, LLMs included. NVIDIA's own FAQ at
           https://build.nvidia.com/llms.txt reads: "Which models are free? All
           models offer a free trial tier with no credit card required. Sign in
-          to generate an API key." The NIM FAQ adds that "Members of the NVIDIA
-          Developer Program have free access to NIM API endpoints for
+          to generate an API key." NVIDIA's own docs site adds, at
+          https://docs.api.nvidia.com/nim/docs/product, that "Members of the
+          NVIDIA Developer Program have free access to NIM API endpoints for
           prototyping".
         limits: >-
-          NVIDIA states NO number. Its NIM FAQ says only that "The number of
-          calls allowed during a certain period of time is designed to serve
-          evaluation and prototyping needs only" and "The rate of requests will
-          vary per model queried and may vary based on the number of concurrent
-          users", and points you at your signed-in account for the current
-          limit. Free access is "for prototyping, research, development and
-          testing purposes only"; production use requires an NVIDIA AI
-          Enterprise license. No requests-per-minute or per-day figure, and no
-          credit allowance, appears on any NVIDIA page read for this row -- so
-          the numeric limit is unknown, not unlimited.
+          NVIDIA states NO number. The only rate-limit language found is on
+          NVIDIA's own developer FORUM
+          (https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317): "the
+          number of calls allowed during a certain period of time is designed to
+          serve evaluation and prototyping needs only" and "The rate of requests
+          will vary per model queried and may vary based on the number of
+          concurrent users", pointing you at your signed-in account for the
+          current limit. SOURCE CAVEAT: that wording is forum-only -- it is
+          absent from https://docs.api.nvidia.com/nim/docs/product,
+          /nim/docs/introduction, /nim/docs/api-quickstart and
+          https://build.nvidia.com/llms.txt, all re-checked 2026-10-28. A
+          vendor-owned forum post by a vendor employee is weaker than a docs
+          page, so whether it counts as the vendor's own docs is an open
+          question for Bei (see handoffs/T2-backend.md). The surrounding facts do
+          NOT depend on it: "for prototyping, research, development and testing
+          purposes only" and "Using NIM in production requires an NVIDIA AI
+          Enterprise license" are both on docs.api.nvidia.com/nim/docs/product
+          itself. No requests-per-minute or per-day figure, and no credit
+          allowance, appears on any NVIDIA page read for this row -- so the
+          numeric limit is unknown, not unlimited.
         requires_key: true
         requires_account: true
       connect:
@@ -307,6 +352,9 @@ entries:
         - https://docs.api.nvidia.com/nim/reference/llm-apis
         - https://docs.api.nvidia.com/nim/docs/introduction
         - https://build.nvidia.com/nvidia/llama-3_3-nemotron-super-49b-v1_5
+        # Vendor-owned but FORUM-hosted, not a docs page. The only fact that
+        # rests on it alone is the rate-limit wording in free_tier.limits --
+        # flagged there and in handoffs/T2-backend.md as a question for Bei.
         - https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317
       highlights:
         - id: nvidia/llama-3.1-70b-instruct
@@ -381,7 +429,7 @@ entries:
         NVIDIA states no numeric allowance (see offering.free_tier.limits).
         Production use is not covered: the NIM FAQ says "Using NIM in production
         requires an NVIDIA AI Enterprise license", which that page prices from
-        $4,500 per GPU per year. There is no documented self-serve top-up for
+        "$4500 per GPU per year". There is no documented self-serve top-up for
         the hosted endpoints, so min_topup stays null.
       free_tier_covers_api: true
       verified_url: https://docs.api.nvidia.com/nim/docs/product
@@ -396,7 +444,10 @@ entries:
       by the NVIDIA API Trial Terms of Service"
       (https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf),
       which was not read for this row. Everything above came off NVIDIA's own
-      pages on 2026-10-28, with no sign-up and no API call.
+      pages on 2026-10-28, with no sign-up and no API call. One of those pages is
+      NVIDIA's developer forum rather than its docs site, and only the
+      rate-limit wording in offering.free_tier.limits rests on it -- see the
+      SOURCE CAVEAT there.
     source: https://build.nvidia.com/llms.txt
     checked_date: "2026-10-28"
 
@@ -541,6 +592,1508 @@ entries:
       off treg's own pages on 2026-10-28, with no sign-up.
     source: https://treg.to/llms.txt
     checked_date: "2026-10-28"
+
+  # --- The 12 vendors the treg `rea-growth` skill calls ---------------------
+  # Read off each VENDOR's own docs on 2026-10-30, with no sign-up and no API
+  # call. The ids, paths and headers below are the vendor's own; the
+  # `<vendor>.<thing>` names in the skill are treg gateway aliases and are
+  # recorded only as a mapping note, never as an endpoint. Nine of these
+  # vendors also appear in the generated shards (seen in an aggregator
+  # catalog); the row here is the richer one and displaces that shard row,
+  # inheriting its carriage -- see "THE GENERATED SHARDS" above.
+
+  - name: tinyfish
+    url: https://docs.tinyfish.ai
+    domain: api.search.tinyfish.ai
+    capabilities:
+      - TinyFish
+      - web search
+      - web page extract
+      - fetch url content
+      - browser automation
+      - web agents
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per request
+    signup_automatable: null
+    base_url: https://api.search.tinyfish.ai
+    auth_header: X-API-Key
+    auth_format: "{key}"
+    auth_required: true
+    signup_url: https://agent.tinyfish.ai/api-keys
+    key_page_url: https://agent.tinyfish.ai/api-keys
+    human_steps:
+      - >-
+        Create a key at https://agent.tinyfish.ai/api-keys ("Create API Key").
+        The docs warn the key "are shown only once", so copy it immediately.
+      - >-
+        Each product answers on its own host (search, fetch, agent, browser),
+        so the base_url above covers Search only; Fetch is
+        POST https://api.fetch.tinyfish.ai with the same X-API-Key header.
+    status: docs-verified
+    offering:
+      summary: >-
+        Web search, page fetch/extract, browser automation and research APIs,
+        each on its own host and all keyed by one X-API-Key header.
+      categories:
+        - search
+        - web-scraping
+        - agents
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        docs.tinyfish.ai/index.md names six products (Agent, Search, Fetch,
+        Browser, Research, Datasets); TinyFish publishes no endpoint count.
+      free_tier:
+        available: true
+        what: >-
+          "Search, Fetch and Research are free within a daily allowance; beyond
+          it they draw from your wallet" (docs.tinyfish.ai/index.md). The
+          reference pages give the numbers: "Search is free up to 12,000
+          requests per day" and "Fetch is free up to 1,000 URLs per day,
+          counted per successfully fetched URL"; Research's FAQ says "the first
+          2 completed runs each day are free".
+        limits: >-
+          Allowances reset at 00:00 UTC. Beyond them a request needs a positive
+          wallet balance or returns HTTP 402 INSUFFICIENT_CREDITS. Separate
+          rate limits apply: personal accounts default to 30 requests/minute on
+          Search and 150 URLs/minute on Fetch. Research beyond the 2 free runs
+          is $2 (Deep) / $3 (Max) per completed run; TinyFish publishes no
+          per-request price for Search or Fetch past the allowance.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.search.tinyfish.ai
+        auth: api_key
+        auth_header: X-API-Key
+        auth_format: "{key}"
+      catalog_url: https://docs.tinyfish.ai/llms.txt
+      verified_url: https://docs.tinyfish.ai/search-api/reference.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.tinyfish.ai
+        - https://docs.tinyfish.ai/index.md
+        - https://docs.tinyfish.ai/llms.txt
+        - https://docs.tinyfish.ai/authentication
+        - https://docs.tinyfish.ai/search-api/reference.md
+        - https://docs.tinyfish.ai/fetch-api/reference.md
+        - https://docs.tinyfish.ai/faq.md
+        - https://docs.tinyfish.ai/for-coding-agents.md
+      highlights:
+        - id: GET https://api.search.tinyfish.ai
+          kind: endpoint
+          free: true
+          note: >-
+            Search API. Params query, purpose, location, language,
+            include_domains, recency_minutes, page. Free to 12,000/day.
+          url: https://docs.tinyfish.ai/search-api/reference.md
+        - id: POST https://api.fetch.tinyfish.ai
+          kind: endpoint
+          free: true
+          note: >-
+            Fetch API: up to 10 urls per request, format html|markdown|json.
+            This is what the skill's page reads use. Free to 1,000 URLs/day.
+          url: https://docs.tinyfish.ai/fetch-api/reference.md
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        Daily free allowances, per TinyFish's own reference pages: Search
+        12,000 requests/day, Fetch 1,000 successfully fetched URLs/day, both
+        resetting at 00:00 UTC, and 2 free Research runs/day. Past the
+        allowance a call draws from a prepaid wallet
+        (https://agent.tinyfish.ai/wallet) or fails with HTTP 402. No
+        per-request price is published for Search or Fetch, so min_topup and a
+        number stay null.
+      free_tier_covers_api: true
+      verified_url: https://docs.tinyfish.ai/search-api/reference.md
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill reaches TinyFish through treg's route-preference header
+      (`X-Treg-Route-Prefer: tinyfish`) on treg.web.search / treg.web.extract;
+      direct, those are the Search and Fetch APIs above. The skill's third call,
+      treg.web.map ("every URL on a site"), has NO documented TinyFish
+      equivalent: docs.tinyfish.ai/llms.txt lists Agent, Search, Fetch,
+      Browser, Research and Datasets only, with no site-map or crawl endpoint.
+      TinyFish also documents agent-paid wallet top-ups over the Machine
+      Payments Protocol (docs.tinyfish.ai/agent-payments.md); SkeletonKey pays
+      in fiat, so that path is recorded, not routed to. Terms of service were
+      not reviewed. Read off TinyFish's own docs on 2026-10-30 with no sign-up
+      and no API call.
+    source: https://docs.tinyfish.ai/search-api/reference.md
+    checked_date: "2026-10-30"
+
+  - name: predictleads
+    url: https://docs.predictleads.com
+    domain: predictleads.com
+    capabilities:
+      - PredictLeads
+      - company signals
+      - technology detections
+      - technographics
+      - ad pixels
+      - company connections
+      - partnerships
+      - news events
+      - funding events
+      - job openings
+      - hiring signals
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per API credit (1 request = 1 credit)
+    signup_automatable: null
+    base_url: https://predictleads.com/api/v3
+    auth_header: X-Api-Key
+    auth_format: "{key}"
+    auth_required: true
+    auth_headers:
+      - header: X-Api-Key
+        format: "{key}"
+        note: >-
+          First of TWO credentials PredictLeads requires: "For direct access,
+          pass your credentials as request headers: X-Api-Key: {your_api_key}
+          X-Api-Token: {your_api_token}".
+      - header: X-Api-Token
+        format: "{key}"
+        note: >-
+          The second credential. The SkeletonKey proxy injects element 0 only,
+          so this one is still a manual header today.
+    signup_url: https://predictleads.com/pricing
+    key_page_url: null
+    human_steps:
+      - >-
+        Sign up and open "Your Subscription Plans" in the PredictLeads app: the
+        docs say "Your API key and token are available on the Your Subscription
+        Plans page". That page is behind the login, so no stable URL is
+        recorded.
+      - >-
+        Two secrets are needed at once (X-Api-Key and X-Api-Token), or OAuth2
+        client credentials against https://oauth.predictleads.com/token with
+        the key as client_id and the token as client_secret.
+    status: docs-verified
+    offering:
+      summary: >-
+        Company signals API: technology detections, connections, news and
+        financing events and job openings, keyed by company id or domain.
+      categories:
+        - data-enrichment
+        - analytics
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        PredictLeads documents one dataset per section (companies, job
+        openings, technology detections, news/financing events, connections,
+        followings and more) but states no endpoint total.
+      free_tier:
+        available: true
+        what: >-
+          "100 API credits Free -- Up to 100 free API calls per month -- $0"
+          (predictleads.com/pricing, read 2026-10-30), with "Sign up for free".
+        limits: >-
+          100 credits per month on the free plan; paid usage starts at a "$40
+          minimum monthly charge" with "$0.04 per API credit" for 101-5,000
+          credits, falling to $0.002 at the top tier. "Every API request costs
+          1 credit, regardless of which endpoint you use", except Discovery
+          endpoints which bill 1 credit per RESULT. Credits "do not roll over,
+          and unused credits expire at the end of each billing period". Monthly
+          request limits come from the plan; past the limit every request
+          returns HTTP 402.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://predictleads.com/api/v3
+        auth: api_key
+        auth_header: X-Api-Key
+        auth_format: "{key}"
+      catalog_url: https://docs.predictleads.com
+      verified_url: https://docs.predictleads.com
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.predictleads.com
+        - https://docs.predictleads.com/api_endpoints/introduction/authentication/with_http_headers
+        - https://predictleads.com/pricing
+      highlights:
+        - id: GET /companies/{company_id_or_domain}/technology_detections
+          kind: endpoint
+          free: null
+          note: >-
+            "1 Credit / Response". The skill's step 2 pixel/stack read; filter
+            on score and behind_firewall yourself.
+          url: https://docs.predictleads.com
+        - id: GET /companies/{company_id_or_domain}/connections
+          kind: endpoint
+          free: null
+          note: '"1 Credit / Response". Partners, integrations and investors.'
+          url: https://docs.predictleads.com
+        - id: GET /companies/{company_id_or_domain}/news_events
+          kind: endpoint
+          free: null
+          note: '"1 Credit / Response". Launches and press, dated.'
+          url: https://docs.predictleads.com
+        - id: GET /companies/{company_id_or_domain}/financing_events
+          kind: endpoint
+          free: null
+          note: '"1 Credit / Response". Funding rounds, dated.'
+          url: https://docs.predictleads.com
+        - id: GET /companies/{company_id_or_domain}/job_openings
+          kind: endpoint
+          free: null
+          note: >-
+            "1 Credit / Response". The skill's step 9 "what is next" read;
+            paginate with `page`.
+          url: https://docs.predictleads.com
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        "100 API credits Free / Up to 100 free API calls per month / $0" on
+        predictleads.com/pricing (read 2026-10-30). Beyond it the same page
+        states a "$40 minimum monthly charge" and a per-credit price that
+        starts at $0.04, so paid access is a monthly plan rather than a top-up
+        and min_topup stays null. Responses carry an X-Credits-Used header.
+      free_tier_covers_api: true
+      verified_url: https://predictleads.com/pricing
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls these as predictleads.companies.* through treg; direct,
+      they are the five GET endpoints above under
+      https://predictleads.com/api/v3. PredictLeads needs TWO secret headers at
+      once, which the proxy cannot inject today (it injects element 0 of
+      auth_headers only) -- `skeletonkey apis show predictleads` prints both so
+      a caller can add the second. OAuth2 (authorization code or client
+      credentials) is the documented alternative. Redistribution and terms were
+      not reviewed. Read off PredictLeads' own docs and pricing page on
+      2026-10-30 with no sign-up and no API call.
+    source: https://docs.predictleads.com
+    checked_date: "2026-10-30"
+  - name: dataforseo
+    url: https://docs.dataforseo.com
+    domain: api.dataforseo.com
+    capabilities:
+      - DataForSEO
+      - serp data
+      - google serp
+      - ranked keywords
+      - organic traffic estimate
+      - historical rank overview
+      - backlinks
+      - anchors
+      - seo data
+    access_mode: own-account
+    min_topup: 50
+    billing_unit: per task (plus per item on Labs endpoints)
+    signup_automatable: null
+    base_url: https://api.dataforseo.com/v3
+    auth_header: Authorization
+    auth_format: Basic {key}
+    auth_required: true
+    signup_url: https://app.dataforseo.com/register
+    key_page_url: https://app.dataforseo.com/api-access
+    human_steps:
+      - >-
+        Register, then copy the API login and password from the API Access tab
+        (https://app.dataforseo.com/api-access). The docs note "the API
+        password differs from your account password".
+      - >-
+        The key SkeletonKey holds is the base64 of `login:password` -- the docs'
+        own example is "Authorization: Basic bG9naW46cGFzc3dvcmQ=". Encode the
+        pair once and register that string.
+      - >-
+        Top up at least $50 before any live call: "The minimum account top-up
+        is $50."
+    status: docs-verified
+    offering:
+      summary: >-
+        SERP, keyword, Labs, backlinks, on-page and business-data APIs, billed
+        per task, with JSON array request bodies on every endpoint.
+      categories:
+        - seo
+        - search
+        - analytics
+        - advertising
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        DataForSEO groups its endpoints into ~12 APIs (SERP, Keywords Data,
+        Labs, Backlinks, On-Page, Domain Analytics, Business Data, Reviews,
+        Merchant, App Data, Content Analysis, AI Optimization) and publishes no
+        endpoint total; each API has its own pricing page.
+      free_tier:
+        available: true
+        what: >-
+          "You can sign up for free and use your $1 trial credit available to
+          new accounts for trying our APIs in the Playground section of your
+          DataForSEO Dashboard, via MCP in your preferred AI tool, or through
+          our ready-made templates and integrations" (dataforseo.com/pricing).
+          The same page adds "You can also test API integration for free using
+          the DataForSEO Sandbox. The Sandbox provides sample responses".
+        limits: >-
+          $1, once, for a new account; the Sandbox returns sample data rather
+          than live results. Live use needs a balance: "The minimum account
+          top-up is $50", and "funds added to your DataForSEO account do not
+          expire". DataForSEO states no request-rate figure on these pages.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.dataforseo.com/v3
+        auth: basic
+        auth_header: Authorization
+        auth_format: Basic {key}
+      catalog_url: https://docs.dataforseo.com
+      verified_url: https://docs.dataforseo.com/v3/dataforseo_labs/google/historical_rank_overview/live/
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.dataforseo.com
+        - https://docs.dataforseo.com/v3/auth/
+        - https://docs.dataforseo.com/v3/dataforseo_labs/google/historical_rank_overview/live/
+        - https://docs.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live/
+        - https://docs.dataforseo.com/v3/backlinks/summary/live/
+        - https://docs.dataforseo.com/v3/backlinks/anchors/live/
+        - https://dataforseo.com/pricing
+      highlights:
+        - id: POST /v3/dataforseo_labs/google/historical_rank_overview/live
+          kind: endpoint
+          free: false
+          note: >-
+            Monthly organic + paid traffic estimate. Body is a JSON ARRAY:
+            [{"target","location_code","language_code","date_from"}]. Labs
+            pricing is "$0.012 / task + $0.00012 / item".
+          url: https://docs.dataforseo.com/v3/dataforseo_labs/google/historical_rank_overview/live/
+        - id: POST /v3/dataforseo_labs/google/ranked_keywords/live
+          kind: endpoint
+          free: false
+          note: >-
+            Keywords a domain ranks for, with URL, position and volume;
+            order_by ["ranked_serp_element.serp_item.etv,desc"], limit up to
+            1000. Same Labs rate.
+          url: https://docs.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live/
+        - id: POST /v3/backlinks/summary/live
+          kind: endpoint
+          free: false
+          note: >-
+            Referring domains and referring_links_tld for a target;
+            include_subdomains true. Backlinks API is billed per task + item.
+          url: https://docs.dataforseo.com/v3/backlinks/summary/live/
+        - id: POST /v3/backlinks/anchors/live
+          kind: endpoint
+          free: false
+          note: >-
+            Anchor texts with referring_domains and first_seen -- the skill's
+            product-loop test. order_by ["referring_domains,desc"].
+          url: https://docs.dataforseo.com/v3/backlinks/anchors/live/
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        A one-off $1 trial credit for new accounts, usable in the Dashboard
+        Playground, via MCP or through the ready-made templates, plus a free
+        Sandbox that returns sample responses (dataforseo.com/pricing, read
+        2026-10-30). It is not a recurring allowance and the page does not say
+        it covers direct REST calls, which is why free_tier_covers_api stays
+        null. Live use is pay-as-you-go with "no subscriptions or recurring
+        fees", a $50 minimum top-up and a balance that never expires; Labs
+        endpoints are "$0.012 / task + $0.00012 / item" and SERP "From $0.0006
+        / SERP".
+      free_tier_covers_api: null
+      verified_url: https://dataforseo.com/pricing
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls these as dataforseo.x.* / dataforseo.google.domain.* /
+      dataforseo.web.* through treg; direct, they are the four POST paths above
+      under https://api.dataforseo.com/v3. Every DataForSEO endpoint takes a
+      JSON ARRAY body ([{...}]), and the "live" variants answer immediately at
+      a higher rate than the queued "standard" ones. Results are stored for 30
+      days. Redistribution rules, rate limits and terms were not reviewed. Read
+      off DataForSEO's own docs and pricing page on 2026-10-30 with no sign-up
+      and no API call.
+    source: https://docs.dataforseo.com/v3/auth/
+    checked_date: "2026-10-30"
+
+  - name: akta
+    url: https://docs.akta.pro
+    domain: api.akta.pro
+    capabilities:
+      - Akta
+      - akta.pro
+      - website traffic
+      - traffic by channel
+      - private company data
+      - company news signals
+      - headcount trends
+      - job posts
+      - social posts
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per credit ($0.05 pay-as-you-go)
+    signup_automatable: null
+    base_url: https://api.akta.pro/api/v1
+    auth_header: x-api-key
+    auth_format: "{key}"
+    auth_required: true
+    signup_url: https://playground.akta.pro/signup
+    key_page_url: null
+    human_steps:
+      - >-
+        Sign up at https://playground.akta.pro/signup, then "open API Keys from
+        the left sidebar", name the key and click "Add API key". The docs warn
+        "The API key is shown once."
+      - >-
+        The Website Traffic API the skill wants is plan-gated: "available on
+        Subscription and Enterprise plans only. Requests on the
+        Pay-as-you-go plan will return a 403 error." Arrange that plan before
+        relying on it.
+    status: docs-verified
+    offering:
+      summary: >-
+        Private-company data, news signals and alternative data (traffic,
+        headcount, jobs, social, reviews) on 20M+ companies, billed in credits.
+      categories:
+        - data-enrichment
+        - analytics
+        - finance
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        docs.akta.pro/llms.txt lists the APIs by product (News Signals,
+        Company Data, List Generation, Headcount Trends, Website Traffic, Job
+        Posts, Social Posts, Employee/Product Reviews, plus supporting
+        search/filter endpoints); Akta publishes no endpoint total.
+      free_tier:
+        available: null
+        what: null
+        limits: >-
+          CHECKED, NOT FOUND: akta.pro's home page offers "TRY FOR FREE" and a
+          Playground signup, but neither akta.pro nor
+          docs.akta.pro/getting-started/pricing.md states a free credit
+          allowance or trial size (both read 2026-10-30), so the size of any
+          free access is unknown rather than zero. What the pricing page does
+          state: "Cost per credit" is $0.05 pay-as-you-go, $0.04 on
+          Subscription; Web Traffic costs 1.5 credits per call; "Top-up credits
+          are valid for 12 months"; "Monthly plan credits expire at the end of
+          each billing cycle".
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.akta.pro/api/v1
+        auth: api_key
+        auth_header: x-api-key
+        auth_format: "{key}"
+      catalog_url: https://docs.akta.pro/llms.txt
+      verified_url: https://docs.akta.pro/docs/alternative-data/website-traffic/quick-start.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.akta.pro/llms.txt
+        - https://docs.akta.pro/getting-started/overview.md
+        - https://docs.akta.pro/getting-started/pricing.md
+        - https://docs.akta.pro/docs/alternative-data/website-traffic/quick-start.md
+        - https://akta.pro/
+      highlights:
+        - id: GET /api/v1/company/website-traffic
+          kind: endpoint
+          free: false
+          note: >-
+            The skill's step 3 traffic-by-channel read: engagements,
+            estimated_monthly_visits and traffic_sources. Param `company` (an
+            Akta uuid). 1.5 credits; Subscription/Enterprise only (403 on PAYG).
+          url: https://docs.akta.pro/docs/alternative-data/website-traffic/quick-start.md
+        - id: GET /api/v1/company/search
+          kind: endpoint
+          free: null
+          note: >-
+            Resolve a name, website or uuid to the uuid every other endpoint
+            takes -- needed because the skill passes a domain. Param `query`.
+          url: https://docs.akta.pro/docs/supporting-apis/company-search.md
+    billing:
+      model: payg
+      free_tier_note: null
+      free_tier_covers_api: null
+      verified_url: https://docs.akta.pro/getting-started/pricing.md
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as akta.x.website-traffic through treg and already
+      warns it "needs the team's own Akta key"; direct, it is
+      GET https://api.akta.pro/api/v1/company/website-traffic, which Akta gates
+      to Subscription and Enterprise plans (pay-as-you-go gets a 403). The
+      skill passes {"company":"TARGET"} (a domain) while the documented
+      parameter is an Akta company uuid, so a company/search call comes first.
+      billing.model is payg because that is the plan Akta sells self-serve;
+      free access is undocumented rather than absent (see
+      offering.free_tier.limits). Terms were not reviewed. Read off Akta's own
+      docs on 2026-10-30 with no sign-up and no API call.
+    source: https://docs.akta.pro/docs/alternative-data/website-traffic/quick-start.md
+    checked_date: "2026-10-30"
+  - name: cloro
+    url: https://cloro.dev/docs
+    domain: api.cloro.dev
+    capabilities:
+      - cloro
+      - ai search monitoring
+      - chatgpt answers
+      - perplexity answers
+      - google ai overview
+      - ai citations
+      - brand mentions in ai answers
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per credit
+    signup_automatable: null
+    base_url: https://api.cloro.dev
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    auth_required: true
+    signup_url: https://dashboard.cloro.dev
+    key_page_url: https://dashboard.cloro.dev/api-keys
+    human_steps:
+      - >-
+        Create a key at https://dashboard.cloro.dev/api-keys. The docs say
+        "Keys are self-serve from the dashboard and every account starts on a
+        free tier of 500 monthly credits. One key grants every endpoint; there
+        are no per-key scopes today."
+    status: docs-verified
+    offering:
+      summary: >-
+        One API for what AI assistants and search engines answer: ChatGPT,
+        Perplexity, Gemini, Copilot, AI Mode and Google, with sources parsed.
+      categories:
+        - search
+        - seo
+        - analytics
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        cloro.dev/docs/llms.txt lists one monitor endpoint per provider under
+        /v1/monitor/* plus async/batch twins under /v1/async/*; cloro publishes
+        no endpoint total.
+      free_tier:
+        available: true
+        what: >-
+          "Every account starts on the free tier -- 500 credits, refreshed at
+          the start of each month -- with 1 concurrent request and access to
+          all endpoints and providers" (cloro.dev/docs/guides/billing.md). "No
+          card is required." Recurring bonus credits are offered for a G2
+          review (+500/mo), a backlink (+500/mo) and a Reddit introduction
+          (+200/mo), each lasting "only while the underlying action stays live".
+        limits: >-
+          500 credits/month, 1 concurrent request, credits "expire at the end
+          of each billing cycle and do not roll over". A ChatGPT monitor call
+          costs 5 base credits plus the +2 sync surcharge = 7 credits (9 with
+          any paid include.* flag), so the free month is roughly 70 synchronous
+          ChatGPT prompts. cloro "charges only for results": errors, FAILED
+          tasks and cancellations cost nothing.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.cloro.dev
+        auth: bearer
+        auth_header: Authorization
+        auth_format: Bearer {key}
+      catalog_url: https://cloro.dev/docs/llms.txt
+      verified_url: https://cloro.dev/docs/api-reference/endpoint/monitor-chatgpt.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://cloro.dev/docs/llms.txt
+        - https://cloro.dev/docs/api-reference/endpoint/monitor-chatgpt.md
+        - https://cloro.dev/docs/guides/billing.md
+        - https://cloro.dev/docs/guides/providers.md
+      highlights:
+        - id: POST /v1/monitor/chatgpt
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's step 4 AI-answer read. Body prompt (string or up to 5
+            for a conversation), country, include.*; web search is forced on by
+            default. 5 credits + 2 sync surcharge.
+          url: https://cloro.dev/docs/api-reference/endpoint/monitor-chatgpt.md
+        - id: POST /v1/async/chatgpt
+          kind: endpoint
+          free: null
+          note: >-
+            Same read without the +2 sync surcharge (poll or webhook). Cheaper
+            for the three buyer questions the skill asks per target.
+          url: https://cloro.dev/docs/guides/making-requests/async.md
+        - id: GET /v1/countries
+          kind: endpoint
+          free: null
+          note: >-
+            Which country codes a provider supports -- the skill passes
+            {"country":"US"}.
+          url: https://cloro.dev/docs/api-reference/endpoint/countries.md
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        500 credits a month, refreshed monthly, 1 concurrent request, no card,
+        every endpoint and provider included (cloro.dev/docs/guides/billing.md,
+        read 2026-10-30), plus optional recurring bonus credits for a review, a
+        backlink and a Reddit introduction. Credits do not roll over. Paid
+        plans are monthly subscriptions from Lite at $30/mo; cloro publishes
+        per-plan credit counts on its pricing page, so no single per-call price
+        exists and min_topup stays null.
+      free_tier_covers_api: true
+      verified_url: https://cloro.dev/docs/guides/billing.md
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as cloro.ai-search.chatgpt.scrape through treg;
+      direct, it is POST https://api.cloro.dev/v1/monitor/chatgpt with
+      Authorization: Bearer. Credit cost depends on the flags: the docs' own
+      arithmetic is 5 base + 2 sync = 7 credits, 9 with any of
+      include.rawResponse / searchQueries / ads / shopping, and async skips the
+      surcharge. `legacy: true` is documented as "a temporary workaround" that
+      can stop working without notice. Terms were not reviewed. Read off
+      cloro's own docs on 2026-10-30 with no sign-up and no API call.
+    source: https://cloro.dev/docs/api-reference/endpoint/monitor-chatgpt.md
+    checked_date: "2026-10-30"
+
+  - name: scrapecreators
+    url: https://docs.scrapecreators.com
+    domain: api.scrapecreators.com
+    capabilities:
+      - ScrapeCreators
+      - Scrape Creators
+      - social media scraping
+      - facebook ad library
+      - meta ads
+      - reddit search
+      - youtube channel videos
+      - instagram posts
+      - tiktok profile videos
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per credit (1 credit = 1 request on most endpoints)
+    signup_automatable: null
+    base_url: https://api.scrapecreators.com
+    auth_header: x-api-key
+    auth_format: "{key}"
+    auth_required: true
+    signup_url: https://app.scrapecreators.com
+    key_page_url: https://app.scrapecreators.com
+    requires_card: false
+    human_steps:
+      - >-
+        Sign up at https://app.scrapecreators.com and copy the API key; the
+        docs say "Get started in minutes with our free API key" and the pricing
+        section says "No credit card required".
+      - >-
+        Claiming the bonus credits ("up to 7,000 more by telling us how you
+        found us, starring our GitHub repo, and sharing honest feedback on G2")
+        is a human step and is optional.
+    status: docs-verified
+    offering:
+      summary: >-
+        One REST API for public social data across 38+ platforms, including the
+        Facebook, TikTok, Google and LinkedIn ad libraries.
+      categories:
+        - social
+        - web-scraping
+        - advertising
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        scrapecreators.com states "38+ APIs" and its CLI page "110+ endpoints";
+        the per-platform counts on the home page (TikTok 22, Instagram 20,
+        YouTube 18, Facebook 12, Reddit 8, ...) move as endpoints are added, so
+        no single number is recorded.
+      free_tier:
+        available: true
+        what: >-
+          "Start with 100 free credits. Claim up to 7,000 more." (
+          scrapecreators.com, read 2026-10-30), "$0 / 100 credits / All 38+
+          APIs included / Credits never expire / No credit card required".
+        limits: >-
+          100 credits on signup, 1 credit = 1 request "for most endpoints"
+          ("A few use more, and the exact cost is shown in the docs"). Cached
+          results cost 0 credits; "Scrape Creators does not enforce API rate
+          limits", with a recommendation to stay "below 500 concurrent
+          requests". Credits never expire. Past the free credits the packs are
+          $47 for 25,000 credits ($1.88/1k) and $497 for 500,000 ($0.99/1k).
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.scrapecreators.com
+        auth: api_key
+        auth_header: x-api-key
+        auth_format: "{key}"
+      catalog_url: https://docs.scrapecreators.com/llms.txt
+      verified_url: https://docs.scrapecreators.com/v1/facebook/adLibrary/company/ads.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.scrapecreators.com/llms.txt
+        - https://docs.scrapecreators.com/introduction
+        - https://docs.scrapecreators.com/v1/facebook/adLibrary/company/ads.md
+        - https://docs.scrapecreators.com/v1/youtube/channel-videos.md
+        - https://scrapecreators.com
+      highlights:
+        - id: GET /v1/facebook/adLibrary/search/companies
+          kind: endpoint
+          free: null
+          note: >-
+            Step 5: "Search for companies by name and get their ad library page
+            id". Param query.
+          url: https://docs.scrapecreators.com/v1/facebook/adLibrary/search/companies
+        - id: GET /v1/facebook/adLibrary/company/ads
+          kind: endpoint
+          free: null
+          note: >-
+            All ads a page is running. Params pageId (or company name), status,
+            trim; the response carries credits_charged (1) and
+            credits_remaining.
+          url: https://docs.scrapecreators.com/v1/facebook/adLibrary/company/ads
+        - id: GET /v1/reddit/search
+          kind: endpoint
+          free: null
+          note: >-
+            Step 6 Reddit read: params query, sort, timeframe, trim; page with
+            `after`.
+          url: https://docs.scrapecreators.com/v1/reddit/search
+        - id: GET /v1/youtube/channel-videos
+          kind: endpoint
+          free: null
+          note: >-
+            Step 7 YouTube pull: params handle or channelId, sort
+            (latest|popular), continuationToken, includeExtras.
+          url: https://docs.scrapecreators.com/v1/youtube/channel-videos
+        - id: GET /v2/instagram/user/posts
+          kind: endpoint
+          free: null
+          note: >-
+            Step 7 Instagram pull: param handle, paged with next_max_id. Note
+            the v2 prefix -- v1 exists with a different contract.
+          url: https://docs.scrapecreators.com/v2/instagram/user/posts
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        100 free credits on signup with no credit card, plus up to 7,000 bonus
+        credits for named actions, every API included and "Credits never
+        expire" (scrapecreators.com, read 2026-10-30). Cache hits cost 0
+        credits. Paid credit packs are one-off purchases rather than
+        subscriptions: $47 / 25,000 credits ($1.88 per 1k requests) and $497 /
+        500,000 ($0.99 per 1k). No minimum top-up is stated, so min_topup stays
+        null.
+      free_tier_covers_api: true
+      verified_url: https://scrapecreators.com
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls these as scrapecreators.x.* / scrapecreators.reddit.* /
+      scrapecreators.instagram.* through treg; direct, they are the five paths
+      above under https://api.scrapecreators.com with the x-api-key header.
+      ScrapeCreators also documents agent-driven credit purchases over HTTP 402
+      (Machine Payments Protocol, USDC on Tempo or a Stripe card); SkeletonKey
+      pays in fiat, so that is recorded, not routed to. The vendor describes
+      the data as public-only; its terms, and each platform's own terms, were
+      not reviewed. Read off ScrapeCreators' own docs and pricing page on
+      2026-10-30 with no sign-up and no API call.
+    source: https://docs.scrapecreators.com/llms.txt
+    checked_date: "2026-10-30"
+  - name: serpapi
+    url: https://serpapi.com/search-api
+    domain: serpapi.com
+    capabilities:
+      - SerpApi
+      - google ads transparency center
+      - google ads creatives
+      - serp api
+      - google search results
+      - search engine scraping
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per successful search
+    signup_automatable: null
+    base_url: https://serpapi.com/search
+    auth_header: null
+    auth_format: null
+    auth_required: true
+    signup_url: https://serpapi.com/users/sign_up
+    key_page_url: https://serpapi.com/manage-api-key
+    human_steps:
+      - >-
+        Sign up and copy the key from https://serpapi.com/manage-api-key.
+      - >-
+        SerpApi takes the key in the QUERY STRING (`api_key=...`), not in a
+        header, so the SkeletonKey proxy's header injection does not apply:
+        the caller appends it to the URL.
+    status: docs-verified
+    offering:
+      summary: >-
+        Scraped search-engine results as JSON, one /search endpoint switched by
+        an `engine` parameter, including the Google Ads Transparency Center.
+      categories:
+        - search
+        - seo
+        - advertising
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        SerpApi exposes a single /search endpoint and selects the source with
+        `engine`; the number of engines moves, so no count is recorded.
+      free_tier:
+        available: true
+        what: >-
+          serpapi.com/pricing lists a "Free" plan at "$0" with "250" searches
+          per month and 50 searches/hour of throughput (read 2026-10-30).
+        limits: >-
+          250 searches a month, 50 searches per hour, no Legal Shield /
+          ZeroTrace / priority support. "Only successful searches are counted
+          toward your monthly searches. Cached, errored, and failed searches
+          are not." Paid plans are monthly subscriptions from Starter at
+          $25/mo for 1,000 searches. SerpApi's pricing page states no card
+          requirement for the free plan either way, so requires_card is left
+          unset.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://serpapi.com/search
+        auth: query_param
+        auth_header: null
+        auth_format: null
+      catalog_url: https://serpapi.com/search-api
+      verified_url: https://serpapi.com/google-ads-transparency-center-api
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://serpapi.com/search-api
+        - https://serpapi.com/google-ads-transparency-center-api
+        - https://serpapi.com/pricing
+      highlights:
+        - id: GET /search?engine=google_ads_transparency_center
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's step 5 Google-ads read. Params text or advertiser_id,
+            num (default 40), api_key. Response carries
+            search_information.total_results and an ad_creatives array.
+          url: https://serpapi.com/google-ads-transparency-center-api
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        The Free plan on serpapi.com/pricing: "$0", 250 searches per month, 50
+        searches/hour (read 2026-10-30). Only successful searches count. Paid
+        access is a monthly subscription ("Month-to-month. Cancel anytime."),
+        from $25/mo for 1,000 searches, so there is no top-up and min_topup
+        stays null.
+      free_tier_covers_api: true
+      verified_url: https://serpapi.com/pricing
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as serpapi.google.ads.transparency through treg;
+      direct, it is GET https://serpapi.com/search with
+      engine=google_ads_transparency_center. The credential is a query
+      parameter (`api_key`), which is why auth_header and auth_format are null
+      while auth_required is true -- a header-injecting proxy cannot
+      authenticate this vendor. Terms, and SerpApi's rules on reusing scraped
+      results, were not reviewed. Read off SerpApi's own docs and pricing page
+      on 2026-10-30 with no sign-up and no API call.
+    source: https://serpapi.com/google-ads-transparency-center-api
+    checked_date: "2026-10-30"
+
+  - name: adyntel
+    url: https://docs.adyntel.com
+    domain: api.adyntel.com
+    capabilities:
+      - Adyntel
+      - linkedin ads
+      - linkedin ad library
+      - ad intelligence
+      - meta ad library
+      - google ads library
+      - tiktok ad library
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per request (1 credit)
+    signup_automatable: null
+    base_url: https://api.adyntel.com
+    auth_header: null
+    auth_format: null
+    auth_required: true
+    signup_url: https://app.adyntel.com/signup
+    key_page_url: https://app.adyntel.com/profile
+    requires_card: false
+    human_steps:
+      - >-
+        Sign up at https://app.adyntel.com/signup -- "you can sign up here to
+        receive 50 credits to test it out" -- and copy the API key from the
+        profile page under 'integrations'.
+      - >-
+        Adyntel authenticates on TWO JSON BODY fields, not headers: every call
+        must carry `api_key` AND the account `email`. The proxy injects
+        headers only, so these go in the request body the caller builds.
+    status: docs-verified
+    offering:
+      summary: >-
+        Ad-library intelligence by company domain: which LinkedIn, Meta, Google
+        and TikTok ads a company runs, and their creatives.
+      categories:
+        - advertising
+        - analytics
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        docs.adyntel.com/llms.txt lists one page per ad library (Meta, Meta ad
+        search, LinkedIn, LinkedIn keyword search, Google, Google shopping +
+        status, TikTok, TikTok search, TikTok ad details, paid vs organic
+        keywords) plus an "Existing endpoints" OpenAPI page; no total is
+        published.
+      free_tier:
+        available: true
+        what: >-
+          "Start with 50 free credits so you can test the product. No credit
+          card required." (adyntel.com, read 2026-10-30); the LinkedIn docs
+          page repeats "sign up here to receive 50 credits to test it out".
+        limits: >-
+          50 credits once, 1 credit per request -- the billing FAQ is explicit
+          that charging is per request, not per result: "we charge per
+          request... we charge a credit for every request you send through the
+          API", while the site FAQ adds "You're only charged for successful API
+          calls that return data". Optional flags cost extra credits
+          (impression_data +1, extract_text +1, so both = 3 credits per call),
+          and all_ads bills one credit per page. Paid credits are one-off
+          purchases that "will never expire", or a subscription (~25% cheaper)
+          from $44/mo for 5,000 credits.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.adyntel.com
+        auth: api_key
+        auth_header: null
+        auth_format: null
+      catalog_url: https://docs.adyntel.com/llms.txt
+      verified_url: https://docs.adyntel.com/ad-libraries/linkedin.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.adyntel.com/llms.txt
+        - https://docs.adyntel.com/authorization.md
+        - https://docs.adyntel.com/ad-libraries/linkedin.md
+        - https://docs.adyntel.com/frequently-asked-questions/billing.md
+        - https://adyntel.com/
+      highlights:
+        - id: POST /linkedin
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's step 5 LinkedIn-ads read. Body api_key, email, and
+            company_domain ("company.com format... all prefixes like https://
+            or www. need to be removed") or linkedin_page_id; optional
+            date_filter, impression_data, extract_text, webhook_url,
+            continuation_token.
+          url: https://docs.adyntel.com/ad-libraries/linkedin.md
+        - id: POST /linkedin (continuation_token)
+          kind: endpoint
+          free: null
+          note: >-
+            Paging is the same endpoint re-called with the continuation_token
+            from the previous response; the last page returns null. all_ads
+            automates it but needs a webhook_url and bills a credit per page.
+          url: https://docs.adyntel.com/ad-libraries/linkedin.md
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        "Start with 50 free credits so you can test the product. No credit card
+        required." (adyntel.com, read 2026-10-30). After that, credits are
+        bought one-off and "will never expire"
+        (docs.adyntel.com/frequently-asked-questions/billing.md), or on a
+        subscription from $44/mo for 5,000 credits ($0.00882 per credit) up to
+        $321/mo for 50,000. One credit per request, +1 per extra-credit flag.
+        No minimum top-up is stated, so min_topup stays null.
+      free_tier_covers_api: true
+      verified_url: https://adyntel.com/
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as adyntel.linkedin.search.ads.company through treg
+      with {"company_domain":"TARGET"}; direct, it is
+      POST https://api.adyntel.com/linkedin, whose own body parameter is also
+      company_domain. The credential is NOT a header: Adyntel requires api_key
+      and the account email as JSON body fields, so auth_header/auth_format are
+      null while auth_required is true, and SkeletonKey's header-injecting
+      proxy cannot authenticate it as-is. Terms were not reviewed. Read off
+      Adyntel's own docs and site on 2026-10-30 with no sign-up and no API
+      call.
+    source: https://docs.adyntel.com/ad-libraries/linkedin.md
+    checked_date: "2026-10-30"
+  - name: anyapi
+    url: https://getanyapi.com/llms.txt
+    domain: api.getanyapi.com
+    capabilities:
+      - AnyAPI
+      - getanyapi
+      - x twitter search
+      - x user timeline
+      - youtube search
+      - tiktok ad library
+      - social data
+      - scraping apis behind one key
+    access_mode: intermediary
+    min_topup: null
+    billing_unit: per request (USD, reported as costUsd)
+    signup_automatable: null
+    base_url: https://api.getanyapi.com/v1
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    auth_required: true
+    signup_url: https://getanyapi.com/sign-up
+    key_page_url: null
+    human_steps:
+      - >-
+        Create an account at getanyapi.com and copy the aa_live_ key from the
+        dashboard, or run the documented CLI onboarding
+        (`npx -y anyapi-cli@latest init`), which "mints a free trial key".
+      - >-
+        Top up the USD wallet before relying on it: past the trial budget
+        "calls return HTTP 402 trial_cap_reached".
+    status: docs-verified
+    offering:
+      summary: >-
+        470 scraping and data APIs behind one Bearer key and one USD wallet,
+        called as POST /v1/run/{sku} and priced per request.
+      categories:
+        - web-scraping
+        - social
+        - search
+        - seo
+        - data-enrichment
+        - ecommerce
+      endpoint_count: 470
+      model_count: null
+      count_note: >-
+        getanyapi.com/llms.txt said "Access 470 scraping and data APIs" and the
+        catalog page "470 APIs across 96 platforms" on 2026-10-30; the number
+        moves as SKUs are added, so fetch the catalog for the current one.
+      free_tier:
+        available: true
+        what: >-
+          "Free trial key signup (https://api.getanyapi.com/agent/signup): POST
+          with optional {label} to mint an aa_live_ trial key (shown once) with
+          about $0.05 of requests - no account created, self-expires in 7 days
+          if never upgraded" (getanyapi.com/llms.txt, read 2026-10-30).
+        limits: >-
+          About $0.05 of requests, and the key expires 7 days after minting
+          unless upgraded; "When the trial budget is spent, calls return HTTP
+          402 trial_cap_reached". Quoting a call
+          (POST /v1/apis/{sku}/quote) and re-reading a prior result
+          (GET /v1/results/{id}, ~15 minutes) are free and execute nothing.
+          Paid use is per request with "no subscriptions".
+        requires_key: true
+        requires_account: false
+      connect:
+        base_url: https://api.getanyapi.com/v1
+        auth: bearer
+        auth_header: Authorization
+        auth_format: Bearer {key}
+      catalog_url: https://getanyapi.com/catalog
+      verified_url: https://getanyapi.com/llms.txt
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://getanyapi.com/llms.txt
+        - https://getanyapi.com/catalog.md
+        - https://getanyapi.com/api/x-twitter.md
+        - https://getanyapi.com/api/youtube.md
+        - https://getanyapi.com/api/tiktok.md
+      highlights:
+        - id: POST /v1/run/twitter.search
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's X search (from:FOUNDER, "TARGET min_faves:300"):
+            "full advanced-search syntax... operators like from:, since:,
+            until:, min_faves: work inline". From $0.54 / 1k requests.
+          url: https://getanyapi.com/api/x-twitter/search
+        - id: POST /v1/run/twitter.user_posts
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's X timeline pull: "an X (Twitter) account's profile
+            Posts-tab timeline by handle", cursor paged. From $0.45 / 1k.
+          url: https://getanyapi.com/api/x-twitter/user-posts
+        - id: POST /v1/run/youtube.search
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's step 6 YouTube read: "title, channel, view count,
+            length and publish time". From $0.50 / 1k.
+          url: https://getanyapi.com/api/youtube/search
+        - id: POST /v1/run/tiktok.ad_library_search
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's TikTok ads read: "Search TikTok's public Ads Library by
+            keyword or advertiser (advertiser, title, audience band, run dates,
+            library link, and video)". From $0.80 / 1k.
+          url: https://getanyapi.com/api/tiktok/ad-library-search
+        - id: POST /v1/apis/{sku}/quote
+          kind: endpoint
+          free: true
+          note: >-
+            Prices and validates an exact input before spending: "Free, nothing
+            is executed or charged." Worth calling before each step of the
+            skill's budget cap.
+          url: https://getanyapi.com/llms.txt
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        A trial key worth about $0.05 of requests, minted without creating an
+        account and self-expiring after 7 days
+        (getanyapi.com/llms.txt, read 2026-10-30). Beyond it, "Pay per request
+        in real dollars, no subscriptions", every response reporting its own
+        costUsd; the catalog's own per-SKU floors for the four SKUs this skill
+        uses are $0.45-$0.80 per 1,000 requests. No minimum top-up is stated,
+        so min_topup stays null.
+      free_tier_covers_api: true
+      verified_url: https://getanyapi.com/llms.txt
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      access_mode is intermediary on AnyAPI's own account of itself: "Behind
+      most endpoints the request goes to established providers such as Apify
+      and ScrapeCreators under volume contracts, with the lower price passed
+      through", all behind one key and one wallet. So reaching ScrapeCreators
+      through AnyAPI and reaching it directly are two routes to the same data,
+      and the underlying provider's terms still govern it. The skill calls
+      these as anyapi.x.* / anyapi.youtube.* / anyapi.tiktok.* through treg,
+      which makes treg an intermediary in front of an intermediary. Trial-key
+      minting is an HTTP POST to the vendor and was NOT performed. Terms were
+      not reviewed. Read off AnyAPI's own pages on 2026-10-30 with no sign-up
+      and no API call.
+    source: https://getanyapi.com/llms.txt
+    checked_date: "2026-10-30"
+
+  - name: tikhub
+    url: https://docs.tikhub.io
+    domain: api.tikhub.io
+    capabilities:
+      - TikHub
+      - x twitter media
+      - tweet media
+      - tiktok data
+      - douyin data
+      - instagram data
+      - social media api
+    access_mode: own-account
+    min_topup: 5
+    billing_unit: per request
+    signup_automatable: null
+    base_url: https://api.tikhub.io
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    auth_required: true
+    signup_url: https://tikhub.io
+    key_page_url: null
+    requires_card: false
+    human_steps:
+      - >-
+        Create an account at tikhub.io and generate an API token in the user
+        dashboard; the pricing page says "No credit card required" and that
+        "New accounts get $0.05 in free credit automatically".
+      - >-
+        Top up before relying on paid endpoints: "The minimum top-up is $5",
+        payable by Alipay, PayPal, crypto (USDT) or B2B bank transfer. Note
+        that "paid-only endpoints draw from your paid balance even when free
+        credit remains".
+    status: docs-verified
+    offering:
+      summary: >-
+        Social-platform data API across 16 platforms (TikTok, Douyin, X,
+        Instagram, YouTube and more), billed per request from one balance.
+      categories:
+        - social
+        - web-scraping
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        tikhub.io/pricing says "All 16 platform APIs"; docs.tikhub.io/llms.txt
+        lists hundreds of per-platform endpoints (the Twitter-Web-API group
+        alone has ~25), and TikHub publishes no total.
+      free_tier:
+        available: true
+        what: >-
+          "~50 free requests on sign-up", "No credit card required", and "New
+          accounts get $0.05 in free credit automatically"
+          (tikhub.io/pricing, read 2026-10-30).
+        limits: >-
+          About 50 requests' worth ($0.05 of credit), 10 RPS default rate
+          limit, "All 16 platform APIs" but "Some endpoints require paid
+          credits" -- the free credit pool is restricted and "paid-only
+          endpoints draw from your paid balance even when free credit
+          remains". Paid usage is $0.001-$0.01 per request with daily volume
+          discounts to 50% (0-1,000 requests $0.001, 30,000+ $0.0005), minimum
+          top-up $5, no ceiling.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.tikhub.io
+        auth: bearer
+        auth_header: Authorization
+        auth_format: Bearer {key}
+      catalog_url: https://docs.tikhub.io/llms.txt
+      verified_url: https://docs.tikhub.io/215701677e0.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.tikhub.io
+        - https://docs.tikhub.io/llms.txt
+        - https://docs.tikhub.io/215701677e0.md
+        - https://tikhub.io/pricing
+      highlights:
+        - id: GET /api/v1/twitter/web/fetch_user_media
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's X media pull ("获取用户媒体/Get user media"). Params
+            screen_name (e.g. elonmusk) and cursor, taken from the previous
+            response's next_cursor.
+          url: https://docs.tikhub.io/215701677e0.md
+        - id: GET /api/v1/twitter/web/fetch_user_post
+          kind: endpoint
+          free: null
+          note: >-
+            The same group's user-timeline read, if X posts are pulled from
+            TikHub rather than AnyAPI.
+          url: https://docs.tikhub.io/191321711e0.md
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        "~50 free requests on sign-up", "$0 / No credit card required" and
+        "$0.05 in free credit automatically" on tikhub.io/pricing (read
+        2026-10-30), with a 10 RPS default limit and the caveat that "Some
+        endpoints require paid credits". Then pay-as-you-go at $0.001-$0.01 per
+        request with automatic daily volume discounts, "no subscription and no
+        monthly minimum", and a $5 minimum top-up (recorded in min_topup).
+      free_tier_covers_api: true
+      verified_url: https://tikhub.io/pricing
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as tikhub.x.twitter-web-fetch-user-media through
+      treg with {"screen_name":"handle"}; direct, it is
+      GET https://api.tikhub.io/api/v1/twitter/web/fetch_user_media with the
+      same parameter name. The docs also document the token in a Cookie
+      (`Authorization=Bearer your_token`) as an alternative to the header;
+      SkeletonKey registers the header form. Top-ups are offered in crypto
+      (USDT) among other rails, but the account itself is a normal fiat
+      account, so access_mode stays own-account. Terms were not reviewed. Read
+      off TikHub's own docs and pricing page on 2026-10-30 with no sign-up and
+      no API call.
+    source: https://docs.tikhub.io/215701677e0.md
+    checked_date: "2026-10-30"
+  - name: crawl4ai
+    url: https://docs.crawl4ai.com
+    domain: api.crawl4ai.com
+    capabilities:
+      - Crawl4AI
+      - page to markdown
+      - web scraping
+      - structured extraction
+      - web search
+      - serp as data
+    access_mode: own-account
+    min_topup: null
+    billing_unit: per credit
+    signup_automatable: null
+    base_url: https://api.crawl4ai.com
+    auth_header: Authorization
+    auth_format: Bearer {key}
+    auth_required: true
+    signup_url: https://crawl4ai.com
+    key_page_url: null
+    requires_card: false
+    human_steps:
+      - >-
+        Get a key from crawl4ai.com ("Get a key + 1,000 free credits a month").
+        The free plan is "$0 - no card"; verifying the email is what lifts the
+        no-signup 20 credits to 1,000 a month.
+      - >-
+        The same crawler is MIT-licensed and self-hostable
+        (`pip install -U crawl4ai`), which needs no key at all -- a real
+        alternative to the hosted API for bulk page reads.
+    status: docs-verified
+    offering:
+      summary: >-
+        The hosted Crawl4AI: pages to Markdown, structured extraction, web
+        search, Google SERP as data and sourced answers, behind one Bearer key.
+      categories:
+        - web-scraping
+        - search
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        docs.crawl4ai.com lists /scrape, /extract, /search, /serp, /answer,
+        /scrape/batch and /scrape/jobs plus an MCP endpoint at
+        https://api.crawl4ai.com/mcp; no endpoint total is published.
+      free_tier:
+        available: true
+        what: >-
+          "Free: 1,000 credits every month, 10 a minute, 2 at a time"
+          (docs.crawl4ai.com), and on crawl4ai.com: "Try it now: 20 free
+          credits, no signup. Verify your email for 1,000 free credits every
+          month." The Free plan is listed as "$0 - no card".
+        limits: >-
+          1,000 credits a month, 10 requests a minute, 2 concurrent (20 credits
+          before email verification, with no signup at all). Paid plans lift it
+          to "120 a minute, 10 at a time, from $10 a month"; Starter is $10/mo
+          for 10,000 credits with "Extra credits at $1 per 1,000".
+        requires_key: true
+        requires_account: false
+      connect:
+        base_url: https://api.crawl4ai.com
+        auth: bearer
+        auth_header: Authorization
+        auth_format: Bearer {key}
+      catalog_url: https://docs.crawl4ai.com
+      verified_url: https://docs.crawl4ai.com
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.crawl4ai.com
+        - https://crawl4ai.com
+      highlights:
+        - id: POST /scrape
+          kind: endpoint
+          free: null
+          note: >-
+            A page to Markdown. The closest documented endpoint to the TikTok
+            pull the skill asks Crawl4AI for (see tos_notes) -- it takes a URL,
+            not an account handle.
+          url: https://docs.crawl4ai.com
+        - id: POST /extract
+          kind: endpoint
+          free: null
+          note: >-
+            A page to JSON against a schema -- the documented way to get
+            structured rows (description, cover, plays) out of a profile page.
+          url: https://docs.crawl4ai.com
+        - id: GET /search
+          kind: endpoint
+          free: null
+          note: >-
+            Web search; the docs' own example is
+            `curl "https://api.crawl4ai.com/search?q=web+scraping" -H
+            "Authorization: Bearer sk_live_..."`.
+          url: https://docs.crawl4ai.com
+    billing:
+      model: free_tier+subscription
+      free_tier_note: >-
+        "Free: 1,000 credits every month, 10 a minute, 2 at a time"
+        (docs.crawl4ai.com, read 2026-10-30), with 20 credits usable before
+        signup and no card required. Paid plans are monthly subscriptions
+        ("from $10 a month"; Starter $10/mo for 10,000 credits, extra credits
+        $1 per 1,000), so there is no top-up and min_topup stays null. The
+        library itself remains free and self-hostable: "Always open source,
+        forever."
+      free_tier_covers_api: true
+      verified_url: https://crawl4ai.com
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      GAP, recorded deliberately: the skill calls
+      crawl4ai.tiktok.user.videos {"account":"handle","limit":60}, and Crawl4AI
+      documents NO TikTok endpoint. Its hosted API is /scrape, /extract,
+      /search, /serp, /answer, /scrape/batch and /scrape/jobs (re-read
+      2026-10-30 on docs.crawl4ai.com and crawl4ai.com); that treg tool name
+      is a gateway alias whose backing vendor cannot be confirmed from
+      Crawl4AI's own docs, so the TikTok pull should be treated as unproven
+      against this vendor. The same job is served directly by ScrapeCreators
+      (GET /v3/tiktok/profile/videos) or by Crawl4AI's own /scrape or /extract
+      on a profile URL. Crawl4AI is also MIT-licensed and self-hostable, in
+      which case there is no key and no vendor account. Terms were not
+      reviewed. Read off Crawl4AI's own pages on 2026-10-30 with no sign-up and
+      no API call.
+    source: https://docs.crawl4ai.com
+    checked_date: "2026-10-30"
+
+  - name: harvestapi
+    url: https://docs.harvestapi.io
+    domain: api.harvestapi.io
+    capabilities:
+      - HarvestAPI
+      - linkedin company posts
+      - linkedin posts
+      - linkedin profiles
+      - linkedin jobs
+      - linkedin ads
+      - people and company data
+    access_mode: own-account
+    min_topup: null
+    billing_unit: null
+    signup_automatable: null
+    base_url: https://api.harvestapi.io
+    auth_header: X-API-Key
+    auth_format: "{key}"
+    auth_required: true
+    signup_url: https://harvestapi.io
+    key_page_url: https://harvestapi.io/admin/api-keys
+    human_steps:
+      - >-
+        Log in and create a key at https://harvestapi.io/admin/api-keys, then
+        send it as `X-API-Key: <your-api-key>` on every request.
+      - >-
+        Prices are not published: the public pages say only "Pay-As-You-Go
+        pricing. No Subscriptions." Read the per-request cost in the dashboard
+        before letting an agent spend.
+    status: docs-verified
+    offering:
+      summary: >-
+        Real-time LinkedIn people and company data: profiles, companies, posts,
+        jobs, groups and ads, one X-API-Key header per request.
+      categories:
+        - social
+        - data-enrichment
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        docs.harvestapi.io/llms.txt groups the endpoints by resource (profile,
+        company, post, job, group, ads, search helpers); HarvestAPI publishes
+        no endpoint total.
+      free_tier:
+        available: null
+        what: null
+        limits: >-
+          CHECKED, NOT FOUND: harvestapi.io offers "Try for free" and states
+          "Pay-As-You-Go pricing. No Subscriptions." and "Get 100% of what you
+          paid for, on your schedule", but publishes no credit allowance, trial
+          size or per-request price on any page reachable without a login
+          (harvestapi.io, its #pricing section and docs.harvestapi.io, all read
+          2026-10-30; harvestapi.io/pricing returns 404). So the free access is
+          unknown rather than absent, and so is the price.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.harvestapi.io
+        auth: api_key
+        auth_header: X-API-Key
+        auth_format: "{key}"
+      catalog_url: https://docs.harvestapi.io/llms.txt
+      verified_url: https://docs.harvestapi.io/linkedin-api-reference/company/company-posts.md
+      verified_date: "2026-10-30"
+      source_urls:
+        - https://docs.harvestapi.io
+        - https://docs.harvestapi.io/llms.txt
+        - https://docs.harvestapi.io/guides/quickstart.md
+        - https://docs.harvestapi.io/linkedin-api-reference/company/company-posts.md
+        - https://harvestapi.io/
+      highlights:
+        - id: GET /linkedin/company-posts
+          kind: endpoint
+          free: null
+          note: >-
+            The skill's step 7 LinkedIn pull. Params `company` (URL, universal
+            name or id -- NOT companyUniversalName), scrapePostedLimit
+            ('1h','24h','week','month','3months','6months','year'), page, and
+            paginationToken when the previous page returned one.
+          url: https://docs.harvestapi.io/linkedin-api-reference/company/company-posts.md
+        - id: GET /linkedin/company-search
+          kind: endpoint
+          free: null
+          note: >-
+            Resolve a company to its LinkedIn universal name first; the
+            quickstart's own example is ?search=Google.
+          url: https://docs.harvestapi.io/guides/quickstart.md
+    billing:
+      model: payg
+      free_tier_note: null
+      free_tier_covers_api: null
+      verified_url: https://harvestapi.io/
+      verified_date: "2026-10-30"
+    tos_notes: >-
+      The skill calls this as harvestapi.linkedin.company.posts with
+      {"companyUniversalName":"slug","scrapePostedLimit":"6months","page":1};
+      direct, the endpoint is GET
+      https://api.harvestapi.io/linkedin/company-posts and the first parameter
+      is named `company` (which accepts the universal name), while
+      scrapePostedLimit, page and paginationToken match. HarvestAPI publishes
+      no prices on its public pages, so min_topup, billing_unit and the free
+      tier all stay null with the search recorded in
+      offering.free_tier.limits. The operator is "Aventra Technologies
+      Limited". Terms, and LinkedIn's own terms, were not reviewed. Read off
+      HarvestAPI's own docs on 2026-10-30 with no sign-up and no API call.
+    source: https://docs.harvestapi.io/linkedin-api-reference/company/company-posts.md
+    checked_date: "2026-10-30"
 
   - name: example-intermediary-gateway
     url: https://example.com/gateway
