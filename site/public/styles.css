@@ -550,6 +550,69 @@ section + section { border-top: 1px solid var(--border); }
   line-height: var(--lh-body);
 }
 
+/* ---------- quick start: five steps, read in order ---------- */
+
+.qs-steps { display: grid; gap: var(--s-400); max-width: 46rem; }
+/* grid items default to a content-based minimum width, which would let a
+   long flag-heavy command widen the track past the viewport; this is the
+   same fix .doors uses for the same reason. */
+.qs-steps > * { min-width: 0; }
+.qs-step {
+  position: relative;
+  padding: var(--s-400);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.qs-num {
+  position: absolute;
+  top: var(--s-200);
+  right: var(--s-300);
+  color: var(--border);
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144, 'wght' 300;
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+}
+@supports (-webkit-text-stroke: 1px currentColor) {
+  .qs-num { color: transparent; -webkit-text-stroke: 1px var(--border-strong); }
+}
+.qs-body { position: relative; }
+.qs-body > * + * { margin-top: var(--s-200); }
+.qs-body h3 {
+  padding-right: clamp(40px, 6vw, 64px);
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 72, 'wght' 400;
+  font-size: var(--f-2);
+  line-height: var(--lh-head);
+  letter-spacing: -0.01em;
+}
+.qs-body > p { max-width: 60ch; color: var(--muted); font-size: var(--f--1); line-height: var(--lh-body); }
+.qs-body > p code { font-family: var(--font-mono); font-size: 0.92em; color: var(--text); }
+.qs-body .code { max-width: 100%; }
+.qs-body .snippet-label { display: block; color: var(--meta); font-weight: 400; }
+
+/* a quiet outline tag for anything not shipped yet, easy to grep out later */
+.badge-soon {
+  display: inline-block;
+  margin-left: var(--s-100);
+  padding: var(--s-25) var(--s-75);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-base);
+  color: var(--meta);
+  font-family: var(--font-mono);
+  font-size: var(--f--2);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
 /* ---------- the pull quote: one ink plate across the page ---------- */
 
 .tagline {

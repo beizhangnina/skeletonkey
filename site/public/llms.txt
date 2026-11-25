@@ -4,6 +4,14 @@
 
 Status: verified = pricing and auth read on the vendor site; unverified = not confirmed, no prices shown; sales-only = no public prices; no-public-api = reachable only through an aggregator catalog.
 
+## Quick start
+
+1. Install: `npx -y @dormy/skeletonkey init`. No SkeletonKey account and no server; this sets a local passphrase and registers the MCP server and skill for Claude Code and Codex.
+2. Find an API: browse https://skeletonkey.run/directory/ yourself, or let your agent search the same local index with `find_api("web scraping")`.
+3. Create the vendor account (coming in v0.4): `skeletonkey signup start <vendor>`, finish the captcha/terms/payment yourself in the browser, then `skeletonkey signup complete <vendor> --account <name>` (the key is entered through a hidden input and stored in your vault). Already have a key: `skeletonkey account add <name> --vendor <id> --store-key --domain <d>`.
+4. Use it: calls go through the local proxy, which injects the key at request time. The agent never sees it.
+5. Weekly monitoring (coming in v0.4): `skeletonkey monitor run` sends a system notification on anomalies and writes a redacted report, read back with `skeletonkey monitor report --latest`.
+
 ## /apis.json schema
 
 Top level: `name`, `url`, `generated`, `count`, `counts` (per status), `route_counts` {`total`, `verified`, `by_source`}, `note`, `apis` (array of vendors), `aggregators` (array of gateway profiles).

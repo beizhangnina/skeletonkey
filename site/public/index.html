@@ -24,7 +24,7 @@
 <link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
 <link rel="preload" as="image" href="/img/hero-mobile.webp" media="(max-width: 700px)" fetchpriority="high">
 <link rel="preload" as="image" imagesrcset="/img/hero-960.webp 960w, /img/hero-1536.webp 1536w" imagesizes="100vw" media="(min-width: 701px)" fetchpriority="high">
-<link rel="stylesheet" href="/styles.css?v=5">
+<link rel="stylesheet" href="/styles.css?v=6">
 <script>document.documentElement.classList.add('js');</script>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -208,6 +208,87 @@
     </div>
   </section>
 
+  <section id="quick-start" aria-labelledby="quick-start-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="quick-start-h"><span class="sec-n">04</span>&#8201;&mdash;&#8201;Quick start</h2>
+        <span class="coord">Five steps</span>
+      </div>
+      <ol class="qs-steps">
+
+        <li class="qs-step">
+          <span class="qs-num" aria-hidden="true">1</span>
+          <div class="qs-body">
+            <h3>Install</h3>
+            <p>No SkeletonKey account and no server. You set a local passphrase, and <code>init</code> registers the MCP server and skill for Claude Code and Codex.</p>
+            <div class="code">
+              <pre><code><span class="prompt">$ </span>npx -y @dormy/skeletonkey init</code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+            <p class="note">Not on npm yet. <a href="#faq-install">How to install it today</a>.</p>
+          </div>
+        </li>
+
+        <li class="qs-step">
+          <span class="qs-num" aria-hidden="true">2</span>
+          <div class="qs-body">
+            <h3>Find an API</h3>
+            <p>Browse the <a href="/directory/">directory</a> yourself, or let your agent search the same local index:</p>
+            <div class="code">
+              <pre><code>find_api("web scraping")</code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="qs-step">
+          <span class="qs-num" aria-hidden="true">3</span>
+          <div class="qs-body">
+            <h3>Create the vendor account<span class="badge-soon">coming in v0.4</span></h3>
+            <p>Your agent starts the signup. You finish the captcha, the terms and the payment yourself, in your own browser, then hand it back:</p>
+            <div class="code">
+              <pre><code><span class="prompt">$ </span>skeletonkey signup start &lt;vendor&gt;
+<span class="prompt">$ </span>skeletonkey signup complete &lt;vendor&gt; <span class="nb">--account</span> &lt;name&gt;</code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+            <p class="note">The key is entered through a hidden input straight into your vault &mdash; never into a prompt or a tool result.</p>
+            <p class="snippet-label" id="qs-have-key-label">Already have a key for this vendor?</p>
+            <div class="code">
+              <pre aria-labelledby="qs-have-key-label"><code><span class="prompt">$ </span>skeletonkey account add &lt;name&gt; <span class="nb">--vendor</span> &lt;id&gt; <span class="nb">--store-key</span> <span class="nb">--domain</span> &lt;d&gt;</code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="qs-step">
+          <span class="qs-num" aria-hidden="true">4</span>
+          <div class="qs-body">
+            <h3>Use it</h3>
+            <p>From here your agent just calls the API. Every call goes through the local proxy, which injects the key at request time &mdash; the agent never sees it.</p>
+          </div>
+        </li>
+
+        <li class="qs-step">
+          <span class="qs-num" aria-hidden="true">5</span>
+          <div class="qs-body">
+            <h3>Weekly monitoring<span class="badge-soon">coming in v0.4</span></h3>
+            <p>A scheduled check sends a system notification if it finds an anomaly, and writes a redacted report you can read without exposing a key:</p>
+            <div class="code">
+              <pre><code><span class="prompt">$ </span>skeletonkey monitor run</code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+            <p class="snippet-label" id="qs-report-label">Read the latest report</p>
+            <div class="code">
+              <pre aria-labelledby="qs-report-label"><code><span class="prompt">$ </span>skeletonkey monitor report <span class="nb">--latest</span></code></pre>
+              <button class="copy" type="button" data-copy aria-live="polite">copy</button>
+            </div>
+          </div>
+        </li>
+
+      </ol>
+    </div>
+  </section>
+
   <section class="tagline" aria-labelledby="tagline-h">
     <div class="wrap">
       <span class="tagline-rule" aria-hidden="true"></span>
@@ -218,7 +299,7 @@
   <section id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="sec-head">
-        <h2 class="eyebrow" id="faq-h"><span class="sec-n">04</span>&#8201;&mdash;&#8201;The detail</h2>
+        <h2 class="eyebrow" id="faq-h"><span class="sec-n">05</span>&#8201;&mdash;&#8201;The detail</h2>
         <span class="coord">v0.1 notes</span>
       </div>
       <div class="faq">

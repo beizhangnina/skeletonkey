@@ -641,6 +641,12 @@ json.dump({'name': 'SkeletonKey API index', 'url': f'{SITE}/apis/', 'generated':
 
 L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor\'s own pages, plus {nrt} routes ({vrt} verified) to reach them: direct from the vendor or through one of {len(VISIBLE_AGGS)} aggregator gateways. Full data: {SITE}/apis.json', '',
      'Status: verified = pricing and auth read on the vendor site; unverified = not confirmed, no prices shown; sales-only = no public prices; no-public-api = reachable only through an aggregator catalog.', '',
+     '## Quick start', '',
+     '1. Install: `npx -y @dormy/skeletonkey init`. No SkeletonKey account and no server; this sets a local passphrase and registers the MCP server and skill for Claude Code and Codex.',
+     f'2. Find an API: browse {SITE}/directory/ yourself, or let your agent search the same local index with `find_api("web scraping")`.',
+     '3. Create the vendor account (coming in v0.4): `skeletonkey signup start <vendor>`, finish the captcha/terms/payment yourself in the browser, then `skeletonkey signup complete <vendor> --account <name>` (the key is entered through a hidden input and stored in your vault). Already have a key: `skeletonkey account add <name> --vendor <id> --store-key --domain <d>`.',
+     '4. Use it: calls go through the local proxy, which injects the key at request time. The agent never sees it.',
+     '5. Weekly monitoring (coming in v0.4): `skeletonkey monitor run` sends a system notification on anomalies and writes a redacted report, read back with `skeletonkey monitor report --latest`.', '',
      '## /apis.json schema', '',
      'Top level: `name`, `url`, `generated`, `count`, `counts` (per status), `route_counts` {`total`, `verified`, `by_source`}, `note`, `apis` (array of vendors), `aggregators` (array of gateway profiles).', '',
      'Vendor object: `slug`, `name`, `category`, `status`, `summary`, `checked_date`, `listed_by`, `docs_url`, `page`, `sources`. When status is not no-public-api it also has `base_url`, `auth` {`type`,`header`,`format`} and `signup` {`methods`,`url`,`requires_card`,`requires_phone`,`notes`}. Verified vendors add `billing_model`, `billing_unit`, `free_tier`, `free_tier_note`, `min_topup_usd`, `plans[]` {`name`,`price`,`period_or_unit`,`note`} and `pricing_url`. Every vendor has `routes[]` and `when_to_pick[]`.', '',
