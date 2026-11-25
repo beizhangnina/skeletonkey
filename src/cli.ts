@@ -126,7 +126,11 @@ const originalUnknownOption = (Command.prototype as unknown as UnknownOptionComm
   flag: string,
 ): void {
   const eq = flag.indexOf("=");
-  const sanitized = eq === -1 ? flag : `${flag.slice(0, eq)}=<redacted>`;
+  let sanitized = eq === -1 ? flag : `${flag.slice(0, eq)}=<redacted>`;
+  // A short flag glued to its value (`-kVALUE`) would echo the value too.
+  if (!sanitized.startsWith("--") && sanitized.length > 2 && eq === -1) {
+    sanitized = `${sanitized.slice(0, 2)}<redacted>`;
+  }
   originalUnknownOption.call(this, sanitized);
 };
 

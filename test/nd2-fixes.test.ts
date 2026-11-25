@@ -213,4 +213,10 @@ describe("ND-2 fixes: --email=<value> is rejected and never echoed", () => {
     expect(combined).not.toContain("sk-should-not-be-echoed-anywhere");
     expect(combined).toContain("--key=<redacted>");
   });
+
+  it("a short unknown flag glued to its value (-xVALUE) is not echoed", async () => {
+    const result = await runCli(home, ["account", "list", "-xshortsecretzz"]);
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).not.toContain("shortsecretzz");
+  });
 });
