@@ -9,6 +9,11 @@
   "sales-only": 8,
   "no-public-api": 36
  },
+ "cost_badge_counts": {
+  "green": 49,
+  "red": 6,
+  "gray": 94
+ },
  "hidden_count": 13,
  "route_counts": {
   "total": 428,
@@ -188,7 +193,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public API; the site publishes consumer fuel-price averages and news, not API documentation or signup."
+   "endpoints_note": "No public API; the site publishes consumer fuel-price averages and news, not API documentation or signup.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "accuweather",
@@ -373,10 +381,17 @@
     "starting_price_usd": 2,
     "unit": "per month",
     "pricing_url": null,
-    "notes": "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately."
+    "notes": "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "agentline",
@@ -565,8 +580,12 @@
     "free_tier": true,
     "starting_price_usd": 20,
     "unit": "per month",
-    "pricing_url": null,
-    "notes": "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message."
+    "pricing_url": "https://agentline.cloud/pricing",
+    "notes": "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message.",
+    "api_access_gate": "subscription_required",
+    "min_monthly_usd": 20,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://agentline.cloud/pricing"
    },
    "endpoints": [
     {
@@ -605,7 +624,18 @@
      "docs_url": "https://docs.agentline.cloud/api-reference/billing/get-number-expenditure.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "saperly",
+     "why": "US phone numbers for agents with calling and SMS, prepaid pay-as-you-go; hosted AI voice not verified. https://saperly.com/#pricing",
+     "access_gate": "none",
+     "name": "Saperly",
+     "page": "https://skeletonkey.run/apis/saperly/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "agentmail",
@@ -780,7 +810,11 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Free tier limited to 3 inboxes and 100 emails per day with no credit card required."
+    "notes": "Free tier limited to 3 inboxes and 100 emails per day with no credit card required.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.agentmail.to/welcome"
    },
    "endpoints": [
     {
@@ -819,7 +853,10 @@
      "docs_url": "https://docs.agentmail.to/api-reference/pods/forwarding/get.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "agoda",
@@ -997,7 +1034,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Agoda's developer hub documents partner-only supply and demand APIs; access requires becoming an approved partner, with no self-serve signup."
+   "endpoints_note": "Agoda's developer hub documents partner-only supply and demand APIs; access requires becoming an approved partner, with no self-serve signup.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "ahrefs",
@@ -1279,7 +1319,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.ahrefs.com/en/api/docs/introduction",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "subscription_required",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.ahrefs.com/en/api/docs/introduction"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -1310,7 +1361,32 @@
      "docs_url": "https://docs.ahrefs.com/en/api/reference/management"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "glasser",
+     "why": "Resells Ahrefs' own endpoints per call, no subscription. https://glasser.ai/data-sources/ahrefs",
+     "access_gate": "none",
+     "name": "Glasser",
+     "page": "https://skeletonkey.run/apis/aggregators/glasser/"
+    },
+    {
+     "vendor_id": "treg",
+     "why": "Per-call backlinks, referring domains and authority metrics (same class, not Ahrefs itself). https://treg.to/catalog/web",
+     "access_gate": "none",
+     "name": "treg",
+     "page": "https://skeletonkey.run/apis/aggregators/treg/"
+    },
+    {
+     "vendor_id": "dataforseo",
+     "why": "Keyword and backlink data billed per task; no subscription, $50 minimum top-up. https://dataforseo.com/pricing",
+     "access_gate": "prepaid_min",
+     "name": "DataForSEO",
+     "page": "https://skeletonkey.run/apis/dataforseo/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "akta",
@@ -1527,8 +1603,12 @@
     "free_tier": null,
     "starting_price_usd": null,
     "unit": "credits per API call",
-    "pricing_url": null,
-    "notes": "Usage is metered in credits that vary by endpoint/section; some commands are billed per record."
+    "pricing_url": "https://akta.pro/pricing",
+    "notes": "Usage is metered in credits that vary by endpoint/section; some commands are billed per record.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://akta.pro/pricing"
    },
    "endpoints": [
     {
@@ -1567,7 +1647,10 @@
      "docs_url": "https://docs.akta.pro/docs/company-data/quick-start.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "alibaba-cloud",
@@ -1733,7 +1816,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "alibaba-com",
@@ -1924,7 +2010,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "amazon-bedrock",
@@ -2068,7 +2157,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "anthropic",
@@ -2294,7 +2386,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "anyapi",
@@ -2438,7 +2533,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://getanyapi.com/docs",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://getanyapi.com/docs"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -2476,7 +2582,10 @@
      "docs_url": "https://getanyapi.com/docs/durable-requests"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "apify",
@@ -2723,9 +2832,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.apify.com/api/v2",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.apify.com/api/v2"
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "apollo",
@@ -2942,7 +3065,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.apollo.io/reference/authentication",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -2980,7 +3114,10 @@
      "docs_url": "https://docs.apollo.io/reference/authentication"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "apple-maps",
@@ -3169,7 +3306,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "lmarena",
@@ -3390,7 +3530,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries."
+   "endpoints_note": "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "artificial-analysis",
@@ -3598,7 +3741,11 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Three tiers: Free, Pro, Commercial. Free tier gets 100 requests per 24-hour window; paid tier prices are not stated in the text (Commercial: contact the team)."
+    "notes": "Three tiers: Free, Pro, Commercial. Free tier gets 100 requests per 24-hour window; paid tier prices are not stated in the text (Commercial: contact the team).",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -3637,7 +3784,10 @@
      "docs_url": "https://artificialanalysis.ai/data-api/docs/reference"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "autozone",
@@ -3807,7 +3957,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the only account logins found are internal driver and supplier portals, not public access."
+   "endpoints_note": "No public developer API; the only account logins found are internal driver and supplier portals, not public access.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "aviato",
@@ -3943,7 +4096,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "bid-cars",
@@ -4160,7 +4316,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; signup is for a consumer vehicle-auction account, not developer access."
+   "endpoints_note": "No public developer API; signup is for a consumer vehicle-auction account, not developer access.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "blockrun",
@@ -4429,8 +4588,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "per call",
-    "pricing_url": null,
-    "notes": "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free."
+    "pricing_url": "https://blockrun.ai/pricing",
+    "notes": "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://blockrun.ai/pricing"
    },
    "endpoints": [
     {
@@ -4469,7 +4632,10 @@
      "docs_url": "https://blockrun.ai/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "booking",
@@ -4640,7 +4806,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Booking.com's developer APIs are partner-only, requiring Managed Affiliate Partner status through Partner Centre; no public pricing is documented."
+   "endpoints_note": "Booking.com's developer APIs are partner-only, requiring Managed Affiliate Partner status through Partner Centre; no public pricing is documented.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "brightdata",
@@ -4850,7 +5019,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -4860,7 +5040,10 @@
      "docs_url": "https://docs.brightdata.com/api-reference/media-data-api/media-data-api"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "browserbase",
@@ -5032,8 +5215,12 @@
     "free_tier": true,
     "starting_price_usd": 20,
     "unit": "per month",
-    "pricing_url": null,
-    "notes": "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go."
+    "pricing_url": "https://docs.browserbase.com/account/billing/plans",
+    "notes": "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.browserbase.com/account/billing/plans"
    },
    "endpoints": [
     {
@@ -5065,7 +5252,10 @@
      "docs_url": "https://docs.browserbase.com/reference/api/create-session-recording-downloads.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "builtin",
@@ -5285,7 +5475,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; Built In offers only sales-led employer-brand visibility services, not data access."
+   "endpoints_note": "No public developer API; Built In offers only sales-led employer-brand visibility services, not data access.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "builtwith",
@@ -5574,10 +5767,17 @@
     "starting_price_usd": 0.5,
     "unit": "10 lookups",
     "pricing_url": null,
-    "notes": "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
+    "notes": "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "bytedance",
@@ -5849,9 +6049,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.byteplus.com/en/docs/ModelArk/quick-start",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "capminal",
@@ -5932,7 +6146,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "capterra",
@@ -6148,7 +6365,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public self-serve API is documented by the vendor."
+   "endpoints_note": "No public self-serve API is documented by the vendor.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "carfax",
@@ -6411,7 +6631,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "A partner-only GraphQL API (CARFAX Connect) exists using OAuth 2.0, but it is not self-serve and requires an existing partnership."
+   "endpoints_note": "A partner-only GraphQL API (CARFAX Connect) exists using OAuth 2.0, but it is not self-serve and requires an existing partnership.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "cars-com",
@@ -6581,7 +6804,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the former developer portal now leads only to a sales contact page."
+   "endpoints_note": "No public developer API; the former developer portal now leads only to a sales contact page.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "clay",
@@ -6774,7 +7000,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://developers.clay.com",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://www.clay.com/pricing",
+    "notes": null,
+    "api_access_gate": "contact_sales",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://www.clay.com/pricing"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -6812,7 +7049,39 @@
      "docs_url": "https://developers.clay.com/api-reference/tables/run-a-structured-query-across-one-or-more-tables.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "glasser",
+     "why": "Per-call People Data Labs enrichment with no subscription (same class, not Clay itself). https://glasser.ai/data-sources/pdl",
+     "access_gate": "none",
+     "name": "Glasser",
+     "page": "https://skeletonkey.run/apis/aggregators/glasser/"
+    },
+    {
+     "vendor_id": "treg",
+     "why": "Per-call people and company enrichment shelf (same class, not Clay itself). https://treg.to/catalog/people",
+     "access_gate": "none",
+     "name": "treg",
+     "page": "https://skeletonkey.run/apis/aggregators/treg/"
+    },
+    {
+     "vendor_id": "pdl",
+     "why": "Person and company enrichment API, free account to start. https://docs.peopledatalabs.com/docs/intro",
+     "access_gate": "none",
+     "name": "People Data Labs",
+     "page": "https://skeletonkey.run/apis/pdl/"
+    },
+    {
+     "vendor_id": "datalegion",
+     "why": "Person/company enrichment, prepaid credits, no subscription ($10 min purchase). https://www.datalegion.ai/pricing",
+     "access_gate": "prepaid_min",
+     "name": "Data Legion",
+     "page": "https://skeletonkey.run/apis/datalegion/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "cloro",
@@ -7081,7 +7350,11 @@
     "starting_price_usd": 30,
     "unit": "per month",
     "pricing_url": null,
-    "notes": "Free monthly tier, paid plans from $30/mo, plus published per-request credit costs per provider."
+    "notes": "Free monthly tier, paid plans from $30/mo, plus published per-request credit costs per provider.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://cloro.dev/docs/guides/billing"
    },
    "endpoints": [
     {
@@ -7120,7 +7393,10 @@
      "docs_url": "https://cloro.dev/docs/guides/providers"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "clutch",
@@ -7401,9 +7677,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": null,
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "contactout",
@@ -7526,7 +7816,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "API keys are issued only after booking a sales meeting; no per-call API price is published."
+   "endpoints_note": "API keys are issued only after booking a sales meeting; no per-call API price is published.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "context-dev",
@@ -7724,8 +8017,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "credits (monthly credit allowance per plan)",
-    "pricing_url": null,
-    "notes": "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available."
+    "pricing_url": "https://www.context.dev/pricing",
+    "notes": "Plans carry monthly credit allowances; requests consume credits (a scrape is priced from 1 credit). Paid plans refill monthly; Auto-Topup available.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://www.context.dev/pricing"
    },
    "endpoints": [
     {
@@ -7757,7 +8054,10 @@
      "docs_url": "https://docs.context.dev/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "crunchbase",
@@ -8022,7 +8322,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "API access is available only through the Crunchbase sales team; no price is published."
+   "endpoints_note": "API access is available only through the Crunchbase sales team; no price is published.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "crustdata",
@@ -8157,7 +8460,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "datalegion",
@@ -8399,8 +8705,12 @@
     "free_tier": null,
     "starting_price_usd": null,
     "unit": "credit",
-    "pricing_url": null,
-    "notes": "Credit-based: each returned record costs a credit; count, utility, and report tools are free. Self-serve credits or enterprise contracts."
+    "pricing_url": "https://www.datalegion.ai/pricing",
+    "notes": "Credit-based: each returned record costs a credit; count, utility, and report tools are free. Self-serve credits or enterprise contracts.",
+    "api_access_gate": "prepaid_min",
+    "min_monthly_usd": null,
+    "min_prepay_usd": 10,
+    "gate_source_url": "https://www.datalegion.ai/pricing"
    },
    "endpoints": [
     {
@@ -8439,7 +8749,10 @@
      "docs_url": "https://datalegion.ai/docs/integrations/mcp-server"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "dataforseo",
@@ -8762,8 +9075,12 @@
     "free_tier": null,
     "starting_price_usd": null,
     "unit": null,
-    "pricing_url": null,
-    "notes": "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
+    "pricing_url": "https://dataforseo.com/pricing",
+    "notes": "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text.",
+    "api_access_gate": "prepaid_min",
+    "min_monthly_usd": null,
+    "min_prepay_usd": 50,
+    "gate_source_url": "https://dataforseo.com/pricing"
    },
    "endpoints": [
     {
@@ -8781,7 +9098,10 @@
      "docs_url": "https://docs.dataforseo.com/v3/keywords_data/bing/languages/"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "deepseek",
@@ -8954,7 +9274,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "defillama",
@@ -9173,7 +9496,11 @@
     "starting_price_usd": 300,
     "unit": "per month",
     "pricing_url": null,
-    "notes": "Free API hosts need no key and are rate limited; Pro API requires a key at $300/mo with higher rate limits."
+    "notes": "Free API hosts need no key and are rate limited; Pro API requires a key at $300/mo with higher rate limits.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://api-docs.defillama.com/"
    },
    "endpoints": [
     {
@@ -9205,7 +9532,10 @@
      "docs_url": "https://api-docs.defillama.com/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "ebay",
@@ -9444,9 +9774,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": null,
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "edinet",
@@ -9638,9 +9982,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "edmunds",
@@ -9858,7 +10216,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "The former public API program was retired; access is now limited to select partners, dealers and advertisers through an account executive."
+   "endpoints_note": "The former public API program was retired; access is now limited to select partners, dealers and advertisers through an account executive.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "elevenlabs",
@@ -10097,8 +10458,12 @@
     "free_tier": null,
     "starting_price_usd": null,
     "unit": "credit",
-    "pricing_url": null,
-    "notes": "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available."
+    "pricing_url": "https://elevenlabs.io/pricing/api",
+    "notes": "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://elevenlabs.io/pricing/api"
    },
    "endpoints": [
     {
@@ -10116,7 +10481,10 @@
      "docs_url": "https://elevenlabs.io/docs/api-reference/reception/staff/get"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "emc2ai",
@@ -10282,7 +10650,11 @@
     "starting_price_usd": 0.2,
     "unit": "USDC per request",
     "pricing_url": null,
-    "notes": "Per-request prices: on-chain data $0.20-$0.60, security scans $0.55, AI analysis $1.00, inference $0.35, chart forecast $0.65. Free MCP tools need no account or payment."
+    "notes": "Per-request prices: on-chain data $0.20-$0.60, security scans $0.55, AI analysis $1.00, inference $0.35, chart forecast $0.65. Free MCP tools need no account or payment.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -10321,7 +10693,10 @@
      "docs_url": "https://emc2ai.io/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "exa",
@@ -10586,11 +10961,18 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": null,
-    "pricing_url": null,
-    "notes": "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
+    "pricing_url": "https://exa.ai/docs/admin/pricing",
+    "notes": "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://exa.ai/docs/admin/pricing"
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "financialdatasets",
@@ -10754,7 +11136,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.financialdatasets.ai/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://www.financialdatasets.ai/pricing",
+    "notes": null,
+    "api_access_gate": "prepaid_min",
+    "min_monthly_usd": null,
+    "min_prepay_usd": 20,
+    "gate_source_url": "https://www.financialdatasets.ai/pricing"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -10792,7 +11185,10 @@
      "docs_url": "https://docs.financialdatasets.ai/api/activist-ownership"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "finviz",
@@ -11013,7 +11409,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the vendor's 'APIs' link leads only to its Elite consumer subscription page."
+   "endpoints_note": "No public developer API; the vendor's 'APIs' link leads only to its Elite consumer subscription page.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "firecrawl",
@@ -11291,7 +11690,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.firecrawl.dev",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.firecrawl.dev/introduction"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -11308,7 +11718,10 @@
      "docs_url": "https://docs.firecrawl.dev"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "fishaudio",
@@ -11524,7 +11937,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.fish.audio",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -11562,7 +11986,10 @@
      "docs_url": "https://docs.fish.audio/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "foreplay",
@@ -11723,9 +12150,38 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://public.api.foreplay.co/docs",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://www.foreplay.co/pricing",
+    "notes": null,
+    "api_access_gate": "subscription_required",
+    "min_monthly_usd": 175,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://www.foreplay.co/pricing"
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "glasser",
+     "why": "Resells Foreplay's own ad-library endpoints per call, no subscription. https://glasser.ai/data-sources/foreplay",
+     "access_gate": "none",
+     "name": "Glasser",
+     "page": "https://skeletonkey.run/apis/aggregators/glasser/"
+    },
+    {
+     "vendor_id": "treg",
+     "why": "Per-call Meta Ad Library access (same class; Meta only, not Foreplay's cross-network library). https://treg.to/catalog/meta-ads",
+     "access_gate": "none",
+     "name": "treg",
+     "page": "https://skeletonkey.run/apis/aggregators/treg/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "sfs",
@@ -11845,7 +12301,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key."
+   "endpoints_note": "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "fundable",
@@ -12061,8 +12520,12 @@
     "free_tier": true,
     "starting_price_usd": 0.06,
     "unit": "per credit",
-    "pricing_url": null,
-    "notes": "250 one-time signup credits; purchased credits $0.06 each; Pro is $100/month with 2,000 monthly credits."
+    "pricing_url": "https://docs.tryfundable.ai/usage",
+    "notes": "250 one-time signup credits; purchased credits $0.06 each; Pro is $100/month with 2,000 monthly credits.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.tryfundable.ai/usage"
    },
    "endpoints": [
     {
@@ -12101,7 +12564,10 @@
      "docs_url": "https://docs.tryfundable.ai/api-reference/introduction.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "g2",
@@ -12376,7 +12842,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://documentation.g2.com/docs/g2-api",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -12386,7 +12863,10 @@
      "docs_url": "https://documentation.g2.com/docs/developer-portal"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "google-gemini",
@@ -12621,7 +13101,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "getapp",
@@ -12839,7 +13322,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public self-serve API is documented by the vendor."
+   "endpoints_note": "No public self-serve API is documented by the vendor.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "github",
@@ -13054,7 +13540,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.github.com/en/rest",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.github.com/en/rest"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -13078,7 +13575,10 @@
      "docs_url": "https://docs.github.com/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "gloria",
@@ -13274,9 +13774,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": null,
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "google-maps",
@@ -13530,9 +14044,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://developers.google.com/maps/documentation",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://developers.google.com/maps/billing-and-pricing",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://developers.google.com/maps/billing-and-pricing"
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "google-play",
@@ -13709,7 +14237,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Google publishes no API for third-party app metadata, ratings or reviews; its only APIs are publisher-scoped, for managing one's own app."
+   "endpoints_note": "Google publishes no API for third-party app metadata, ratings or reviews; its only APIs are publisher-scoped, for managing one's own app.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "hackernews",
@@ -13942,9 +14473,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://github.com/HackerNews/API",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "hlrlookup",
@@ -14152,7 +14697,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://www.hlrlookup.com/docs/hlrlookup-docs.html",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -14176,7 +14732,10 @@
      "docs_url": "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "homes-com",
@@ -14345,7 +14904,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product."
+   "endpoints_note": "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "hunter",
@@ -14568,7 +15130,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://hunter.io/api-documentation/v2",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://hunter.io/api-documentation/v2"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -14585,7 +15158,10 @@
      "docs_url": "https://hunter.io/openapi.json"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "idealist",
@@ -14756,7 +15332,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "A Job Posting API exists but is gated to approved US organizations with purchased job credits; production keys are issued only on request."
+   "endpoints_note": "A Job Posting API exists but is gated to approved US organizations with purchased job credits; production keys are issued only on request.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "imdb",
@@ -14928,7 +15507,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Data is offered only through a sales-approved subscription on AWS Data Exchange, covering a GraphQL API and bulk metadata packages; no price is published."
+   "endpoints_note": "Data is offered only through a sales-approved subscription on AWS Data Exchange, covering a GraphQL API and bulk metadata packages; no price is published.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "indeed",
@@ -15194,7 +15776,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "A partner-gated developer platform exists for ATS and job-board partners, but there is no self-serve signup or published API pricing."
+   "endpoints_note": "A partner-gated developer platform exists for ATS and job-board partners, but there is no self-serve signup or published API pricing.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "influencersclub",
@@ -15365,7 +15950,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.influencers.club/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -15403,7 +15999,10 @@
      "docs_url": "https://docs.influencers.club/openapi/usage"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "iqair",
@@ -15544,9 +16143,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://api-docs.iqair.com/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "jd",
@@ -15732,7 +16345,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "justoneapi",
@@ -15868,7 +16484,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "kadec0",
@@ -15989,9 +16608,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://api.kadec0.xyz/docs",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "keenable",
@@ -16168,8 +16801,12 @@
     "free_tier": true,
     "starting_price_usd": 0.01,
     "unit": "per request (x402, USDC on Base)",
-    "pricing_url": null,
-    "notes": "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each."
+    "pricing_url": "https://keenable.ai/pricing",
+    "notes": "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://keenable.ai/pricing"
    },
    "endpoints": [
     {
@@ -16208,7 +16845,10 @@
      "docs_url": "https://docs.keenable.ai/api-reference/monitors/create.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "keepa",
@@ -16431,7 +17071,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://keepa.com/api-docs/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -16441,7 +17092,10 @@
      "docs_url": "https://keepa.com/api-docs/"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "kbb",
@@ -16608,7 +17262,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "A developer portal lists several valuation and VIN APIs, but access runs through a sales contact form, not self-serve signup."
+   "endpoints_note": "A developer portal lists several valuation and VIN APIs, but access runs through a sales contact form, not self-serve signup.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "kling",
@@ -16877,10 +17534,17 @@
     "starting_price_usd": 0.07,
     "unit": "USD per second of generated video (lowest listed per-second rate)",
     "pricing_url": null,
-    "notes": "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD."
+    "notes": "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "kroger",
@@ -17069,9 +17733,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://developer.kroger.com/documentation/public/getting-started/quick-start",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "leadmagic",
@@ -17241,8 +17919,12 @@
     "free_tier": null,
     "starting_price_usd": 99,
     "unit": "per month (credit-based plans)",
-    "pricing_url": null,
-    "notes": "Credit-based; credits deducted only for valid results. Some search endpoints run zero-credit on Professional/Ultimate under fair use; validation costs 0.25 credits per definitive result."
+    "pricing_url": "https://leadmagic.io/pricing",
+    "notes": "Credit-based; credits deducted only for valid results. Some search endpoints run zero-credit on Professional/Ultimate under fair use; validation costs 0.25 credits per definitive result.",
+    "api_access_gate": "subscription_required",
+    "min_monthly_usd": 99,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://leadmagic.io/pricing"
    },
    "endpoints": [
     {
@@ -17281,7 +17963,46 @@
      "docs_url": "https://leadmagic.io/docs/api-reference"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "glasser",
+     "why": "Resells LeadMagic's own endpoints per call, no subscription. https://glasser.ai/data-sources/leadmagic",
+     "access_gate": "none",
+     "name": "Glasser",
+     "page": "https://skeletonkey.run/apis/aggregators/glasser/"
+    },
+    {
+     "vendor_id": "treg",
+     "why": "Lists LeadMagic among its per-call people and contact data providers. https://treg.to/catalog/people",
+     "access_gate": "none",
+     "name": "treg",
+     "page": "https://skeletonkey.run/apis/aggregators/treg/"
+    },
+    {
+     "vendor_id": "prospeo",
+     "why": "Email and phone discovery for B2B prospecting; free API access. https://prospeo.io/api-docs",
+     "access_gate": "none",
+     "name": "Prospeo",
+     "page": "https://skeletonkey.run/apis/prospeo/"
+    },
+    {
+     "vendor_id": "hunter",
+     "why": "Finds and verifies work email addresses; free API key on sign-up. https://hunter.io/api-documentation/v2",
+     "access_gate": "none",
+     "name": "Hunter",
+     "page": "https://skeletonkey.run/apis/hunter/"
+    },
+    {
+     "vendor_id": "datalegion",
+     "why": "Person/company enrichment, prepaid credits, no subscription ($10 min purchase). https://www.datalegion.ai/pricing",
+     "access_gate": "prepaid_min",
+     "name": "Data Legion",
+     "page": "https://skeletonkey.run/apis/datalegion/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "levels-fyi",
@@ -17471,7 +18192,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "linkedin",
@@ -17658,7 +18382,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "litescrape",
@@ -17863,8 +18590,12 @@
     "free_tier": true,
     "starting_price_usd": 10,
     "unit": "per 1,000 requests",
-    "pricing_url": null,
-    "notes": "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls."
+    "pricing_url": "https://litescrape.com/pricing",
+    "notes": "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls.",
+    "api_access_gate": "prepaid_min",
+    "min_monthly_usd": null,
+    "min_prepay_usd": 10,
+    "gate_source_url": "https://litescrape.com/pricing"
    },
    "endpoints": [
     {
@@ -17903,7 +18634,10 @@
      "docs_url": "https://litescrape.com/docs"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "loopnet",
@@ -18119,7 +18853,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public self-serve API is documented by the vendor."
+   "endpoints_note": "No public self-serve API is documented by the vendor.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "lusha",
@@ -18299,7 +19036,11 @@
     "starting_price_usd": null,
     "unit": "credits per billable action",
     "pricing_url": null,
-    "notes": "Account usage response reports a credits balance and per-action credit costs (e.g. api_search, email, phone); no USD prices stated."
+    "notes": "Account usage response reports a credits balance and per-action credit costs (e.g. api_search, email, phone); no USD prices stated.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -18338,7 +19079,10 @@
      "docs_url": "https://docs.lusha.com/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "macaron",
@@ -18406,7 +19150,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "magichour",
@@ -18620,7 +19367,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.magichour.ai/introduction",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://docs.magichour.ai/billing/overview",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.magichour.ai/billing/overview"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -18651,7 +19409,10 @@
      "docs_url": "https://docs.magichour.ai/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "marketbeat",
@@ -18817,7 +19578,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the vendor offers consumer research subscriptions and CSV exports instead."
+   "endpoints_note": "No public developer API; the vendor offers consumer research subscriptions and CSV exports instead.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "marketstack",
@@ -18989,7 +19753,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.apilayer.com/marketstack/docs/api-documentation",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://marketstack.com/pricing",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://marketstack.com/pricing"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -18999,7 +19774,10 @@
      "docs_url": "https://docs.apilayer.com/marketstack/docs/quickstart-guide"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "meijer",
@@ -19170,7 +19948,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Meijer runs API portals, but they are restricted to internal Meijer accounts and are not open to outside developers."
+   "endpoints_note": "Meijer runs API portals, but they are restricted to internal Meijer accounts and are not open to outside developers.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "metixai",
@@ -19346,8 +20127,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "API Credits",
-    "pricing_url": null,
-    "notes": "Billed in API Credits; empty Query Spec searches are free, contact unlock is billed per value returned. No dollar amount is stated in these pages."
+    "pricing_url": "https://platform.metix.ai/docs/credits",
+    "notes": "Billed in API Credits; empty Query Spec searches are free, contact unlock is billed per value returned. No dollar amount is stated in these pages.",
+    "api_access_gate": "prepaid_min",
+    "min_monthly_usd": null,
+    "min_prepay_usd": 10,
+    "gate_source_url": "https://platform.metix.ai/docs/credits"
    },
    "endpoints": [
     {
@@ -19386,7 +20171,10 @@
      "docs_url": "https://platform.metix.ai/docs/api/companies/record"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "microsoft-azure-ai",
@@ -19522,7 +20310,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "minimax",
@@ -19822,7 +20613,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://platform.minimax.io/docs/api-reference/text-chat-openai",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://platform.minimax.io/docs/pricing/overview",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://platform.minimax.io/docs/pricing/overview"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -19832,7 +20634,10 @@
      "docs_url": "https://platform.minimax.io/docs/api-reference/text-chat-openai"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "moonshot-ai",
@@ -20030,7 +20835,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "mrscraper",
@@ -20230,7 +21038,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.mrscraper.com/docs/getting-started/overview",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -20254,7 +21073,10 @@
      "docs_url": "https://docs.mrscraper.com/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "nasdaq",
@@ -20485,7 +21307,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "octen",
@@ -20742,8 +21567,12 @@
     "free_tier": null,
     "starting_price_usd": null,
     "unit": null,
-    "pricing_url": null,
-    "notes": "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages."
+    "pricing_url": "https://octen.ai/pricing",
+    "notes": "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://octen.ai/pricing"
    },
    "endpoints": [
     {
@@ -20782,7 +21611,10 @@
      "docs_url": "https://docs.octen.ai/api-reference/place-search.md"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "openai",
@@ -20990,7 +21822,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "openalex",
@@ -21220,7 +22055,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://help.openalex.org/api/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -21244,7 +22090,10 @@
      "docs_url": "https://help.openalex.org/api/authentication/"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "opoint",
@@ -21377,7 +22226,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "orbit",
@@ -21595,7 +22447,11 @@
     "starting_price_usd": null,
     "unit": "credits per profile",
     "pricing_url": null,
-    "notes": "Credits are consumed for profile work; face search costs 100 credits per profile vs 10 for normal full generation."
+    "notes": "Credits are consumed for profile work; face search costs 100 credits per profile vs 10 for normal full generation.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -21627,7 +22483,10 @@
      "docs_url": "https://docs.orbitsearch.com/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "pdl",
@@ -21832,7 +22691,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.peopledatalabs.com/docs/authentication",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.peopledatalabs.com/docs/intro"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -21849,7 +22719,10 @@
      "docs_url": "https://docs.peopledatalabs.com/docs/subject-request-api"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "ploid",
@@ -22010,7 +22883,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://ploid.com/documentation",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://ploid.com/pricing",
+    "notes": null,
+    "api_access_gate": "subscription_required",
+    "min_monthly_usd": 200,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://ploid.com/pricing"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -22048,7 +22932,39 @@
      "docs_url": "https://ploid.com/documentation/api/social"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "red",
+   "alternatives": [
+    {
+     "vendor_id": "glasser",
+     "why": "Per-call People Data Labs person enrichment, no subscription (same class, not Ploid itself). https://glasser.ai/data-sources/pdl",
+     "access_gate": "none",
+     "name": "Glasser",
+     "page": "https://skeletonkey.run/apis/aggregators/glasser/"
+    },
+    {
+     "vendor_id": "treg",
+     "why": "Per-call people and contact data shelf (same class, not Ploid itself). https://treg.to/catalog/people",
+     "access_gate": "none",
+     "name": "treg",
+     "page": "https://skeletonkey.run/apis/aggregators/treg/"
+    },
+    {
+     "vendor_id": "metixai",
+     "why": "People and company search; buy API credits without a plan ($10 min purchase). https://platform.metix.ai/docs/credits",
+     "access_gate": "prepaid_min",
+     "name": "Metix AI",
+     "page": "https://skeletonkey.run/apis/metixai/"
+    },
+    {
+     "vendor_id": "pdl",
+     "why": "Person datasets for identity resolution and work history; free account. https://docs.peopledatalabs.com/docs/intro",
+     "access_gate": "none",
+     "name": "People Data Labs",
+     "page": "https://skeletonkey.run/apis/pdl/"
+    }
+   ],
+   "alternatives_note": null
   },
   {
    "slug": "predictleads",
@@ -22229,9 +23145,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.predictleads.com/api_endpoints/introduction/authentication",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://predictleads.com/pricing",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://predictleads.com/pricing"
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "producthunt",
@@ -22424,7 +23354,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://api.producthunt.com/v2/docs",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -22448,7 +23389,10 @@
      "docs_url": "https://api.producthunt.com/v2/docs/oauth_client_only_authentication/unauthorized_oauth_oauth_test_invalid_access_to_user-level_content_with_just_an_client_level_token_will_lead_to_errors"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "prospeo",
@@ -22622,7 +23566,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://prospeo.io/api-docs/authentication",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://prospeo.io/api-docs"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -22632,7 +23587,10 @@
      "docs_url": "https://prospeo.io/api-docs/authentication"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "quicknode",
@@ -22832,7 +23790,11 @@
     "starting_price_usd": 49,
     "unit": "per month",
     "pricing_url": null,
-    "notes": "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing."
+    "notes": "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -22857,7 +23819,10 @@
      "docs_url": "https://www.quicknode.com/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "recall",
@@ -23035,7 +24000,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.recall.ai/reference/authentication",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.recall.ai/docs/billing-faq"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -23066,7 +24042,10 @@
      "docs_url": "https://docs.recall.ai/reference/google_login_groups_update"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "rentcast",
@@ -23235,8 +24214,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "API requests per month",
-    "pricing_url": null,
-    "notes": "Free plan of 50 requests/month; paid plans scale with request volume; current pricing listed on the RentCast website, enterprise plans via contact."
+    "pricing_url": "https://developers.rentcast.io/reference/billing-and-pricing",
+    "notes": "Free plan of 50 requests/month; paid plans scale with request volume; current pricing listed on the RentCast website, enterprise plans via contact.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://developers.rentcast.io/reference/billing-and-pricing"
    },
    "endpoints": [
     {
@@ -23275,7 +24258,10 @@
      "docs_url": "https://developers.rentcast.io/reference/rental-listing-long-term-by-id"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "saperly",
@@ -23457,7 +24443,11 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Prepaid balance metered per call and per message via reserve → settle; $5 free signup credit and first number free for 30 days."
+    "notes": "Prepaid balance metered per call and per message via reserve → settle; $5 free signup credit and first number free for 30 days.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://saperly.com/#pricing"
    },
    "endpoints": [
     {
@@ -23496,7 +24486,10 @@
      "docs_url": "https://saperly.com/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "scrapecreators",
@@ -23714,7 +24707,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.scrapecreators.com/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://scrapecreators.com/"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -23738,7 +24742,10 @@
      "docs_url": "https://docs.scrapecreators.com/v1/threads/user/posts"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "search1api",
@@ -24004,7 +25011,11 @@
     "starting_price_usd": null,
     "unit": "credits per request",
     "pricing_url": null,
-    "notes": "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20)."
+    "notes": "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20).",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -24043,7 +25054,10 @@
      "docs_url": "https://s1.dev/docs/guides/choosing-an-endpoint"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "secapi",
@@ -24272,10 +25286,17 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Only indication on the provided pages is a marketplace listing mentioning 'Free trial'; no plan tiers or prices are stated."
+    "notes": "Only indication on the provided pages is a marketplace listing mentioning 'Free trial'; no plan tiers or prices are stated.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "secform4",
@@ -24441,7 +25462,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the vendor offers a web-based filings screener and CSV export instead."
+   "endpoints_note": "No public developer API; the vendor offers a web-based filings screener and CSV export instead.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "segari",
@@ -24559,7 +25583,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; no partner or affiliate program is published either."
+   "endpoints_note": "No public developer API; no partner or affiliate program is published either.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "semrush",
@@ -24861,7 +25888,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://developer.semrush.com/api/basics/get-started/",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -24899,7 +25937,10 @@
      "docs_url": "https://developer.semrush.com/api/v3/projects/position-tracking#organic-landing-pages-report"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "serpapi",
@@ -25162,7 +26203,11 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages."
+    "notes": "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -25180,7 +26225,10 @@
      "docs_url": "https://serpapi.com/llms.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "serper",
@@ -25400,10 +26448,17 @@
     "starting_price_usd": null,
     "unit": "queries",
     "pricing_url": null,
-    "notes": "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
+    "notes": "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://serper.dev/"
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "serpstat",
@@ -25573,9 +26628,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://api-docs.serpstat.com/docs/serpstat-public-api/jenasqbwtxdlr-introduction-to-serpstat-api",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "similarweb",
@@ -25759,7 +26828,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "smolmachine",
@@ -25966,7 +27038,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://smolmachines.com/docs/cloud/api-reference",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://smolmachines.com/pricing",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://smolmachines.com/pricing"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -26004,7 +27087,10 @@
      "docs_url": "https://smolmachines.com/docs/cloud/registry"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "sonilo",
@@ -26153,8 +27239,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": null,
-    "pricing_url": null,
-    "notes": "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
+    "pricing_url": "https://platform.sonilo.com/pricing",
+    "notes": "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://platform.sonilo.com/pricing"
    },
    "endpoints": [
     {
@@ -26193,7 +27283,10 @@
      "docs_url": "https://platform.sonilo.com/docs/api/get-usage"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "xai",
@@ -26344,7 +27437,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "steam",
@@ -26533,9 +27629,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://partner.steamgames.com/doc/webapi",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "stockanalysis",
@@ -26801,7 +27911,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the vendor sells consumer website subscriptions instead."
+   "endpoints_note": "No public developer API; the vendor sells consumer website subscriptions instead.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "strale",
@@ -26972,7 +28085,11 @@
     "starting_price_usd": null,
     "unit": "per call",
     "pricing_url": null,
-    "notes": "Prepaid wallet, charged only when a call succeeds; free tools cost nothing; keyless free tools allow 300 calls a month per IP; hourly spend limit EUR 100 by default; minimum top-up EUR 10.00."
+    "notes": "Prepaid wallet, charged only when a call succeeds; free tools cost nothing; keyless free tools allow 300 calls a month per IP; hourly spend limit EUR 100 by default; minimum top-up EUR 10.00.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://strale.io/"
    },
    "endpoints": [
     {
@@ -27011,7 +28128,10 @@
      "docs_url": "https://strale.dev/docs/api"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "sumble",
@@ -27177,8 +28297,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "credits (per endpoint, per row/attribute)",
-    "pricing_url": null,
-    "notes": "Free plan exists (personal email signups); per-call credit costs vary by endpoint; 402 returned for insufficient credits."
+    "pricing_url": "https://docs.sumble.com/get-started/plans-and-billing",
+    "notes": "Free plan exists (personal email signups); per-call credit costs vary by endpoint; 402 returned for insufficient credits.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.sumble.com/get-started/plans-and-billing"
    },
    "endpoints": [
     {
@@ -27217,7 +28341,10 @@
      "docs_url": "https://docs.sumble.com/api/api"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "surf",
@@ -27392,8 +28519,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "searches per month",
-    "pricing_url": null,
-    "notes": "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
+    "pricing_url": "https://surf-api.com/pricing",
+    "notes": "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://surf-api.com/pricing"
    },
    "endpoints": [
     {
@@ -27432,7 +28563,10 @@
      "docs_url": "https://surf-api.com/docs"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "suzanne",
@@ -27570,7 +28704,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "taobao",
@@ -27807,7 +28944,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "tendata",
@@ -27973,7 +29113,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Access is sales-only; pricing is negotiated per customer, with inquiries handled through a WhatsApp contact number."
+   "endpoints_note": "Access is sales-only; pricing is negotiated per customer, with inquiries handled through a WhatsApp contact number.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "the-companies-api",
@@ -28147,7 +29290,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://www.thecompaniesapi.com/api",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -28185,7 +29339,10 @@
      "docs_url": "https://www.thecompaniesapi.com/api/toggle-companies-in-list"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "theirstack",
@@ -28467,8 +29624,12 @@
     "free_tier": true,
     "starting_price_usd": null,
     "unit": "credits",
-    "pricing_url": null,
-    "notes": "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months."
+    "pricing_url": "https://theirstack.com/en/pricing",
+    "notes": "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://theirstack.com/en/pricing"
    },
    "endpoints": [
     {
@@ -28507,7 +29668,10 @@
      "docs_url": "https://theirstack.com/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "tikhub",
@@ -28755,11 +29919,18 @@
     "free_tier": null,
     "starting_price_usd": 0.025,
     "unit": "per call (batch gift-name lookup endpoint)",
-    "pricing_url": null,
-    "notes": "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
+    "pricing_url": "https://tikhub.io/pricing",
+    "notes": "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://tikhub.io/pricing"
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "tiktok-shop",
@@ -29003,9 +30174,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://partner.tiktokshop.com/docv2/page/tts-developer-guide",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "tinyfish",
@@ -29197,7 +30382,11 @@
     "starting_price_usd": null,
     "unit": null,
     "pricing_url": null,
-    "notes": "Wallet-based: Agent, Browser and Research runs draw from wallet; Search and Fetch free within a daily allowance; agent top-ups range $10.00 to $500.00 USD."
+    "notes": "Wallet-based: Agent, Browser and Research runs draw from wallet; Search and Fetch free within a daily allowance; agent top-ups range $10.00 to $500.00 USD.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.tinyfish.ai/"
    },
    "endpoints": [
     {
@@ -29236,7 +30425,10 @@
      "docs_url": "https://docs.tinyfish.ai/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "topaz",
@@ -29411,7 +30603,11 @@
     "starting_price_usd": null,
     "unit": "credits",
     "pricing_url": "https://developer.topazlabs.com/getting-started/model-pricing",
-    "notes": "Costs vary by model family base rate, output size, and for some video models input resolution/frame rates; Credit Calculator gives estimates."
+    "notes": "Costs vary by model family base rate, output size, and for some video models input resolution/frame rates; Credit Calculator gives estimates.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -29422,7 +30618,10 @@
      "docs_url": "https://developer.topazlabs.com/getting-started/video-quickstart"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "trustpilot",
@@ -29657,7 +30856,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "typesafe",
@@ -29869,7 +31071,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "us-census-bureau",
@@ -30021,10 +31226,17 @@
     "starting_price_usd": 0,
     "unit": null,
     "pricing_url": null,
-    "notes": "Page describes the API as free; no paid tiers, quotas or rate plans are stated in the provided text."
+    "notes": "Page describes the API as free; no paid tiers, quotas or rate plans are stated in the provided text.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://www.census.gov/data/developers.html"
    },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "upwork",
@@ -30214,7 +31426,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "censusdata-xyz",
@@ -30358,7 +31573,11 @@
     "starting_price_usd": null,
     "unit": "queries per day",
     "pricing_url": null,
-    "notes": "Free key via Google sign-in; free tier has a daily query allowance; 429 means daily quota exhausted and resets at midnight UTC."
+    "notes": "Free key via Google sign-in; free tier has a daily query allowance; 429 means daily quota exhausted and resets at midnight UTC.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://censusdata.xyz/"
    },
    "endpoints": [
     {
@@ -30383,7 +31602,10 @@
      "docs_url": "https://censusdata.xyz/skill"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "valyu",
@@ -30560,8 +31782,12 @@
     "free_tier": true,
     "starting_price_usd": 29,
     "unit": "per month for 5,000 credits",
-    "pricing_url": null,
-    "notes": "Usage is charged from one credit balance; 2,000 free monthly credits with a work email; plans start at $29/month for 5,000 credits."
+    "pricing_url": "https://docs.valyu.ai/pricing",
+    "notes": "Usage is charged from one credit balance; 2,000 free monthly credits with a work email; plans start at $29/month for 5,000 credits.",
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.valyu.ai/pricing"
    },
    "endpoints": [
     {
@@ -30600,7 +31826,10 @@
      "docs_url": "https://docs.valyu.ai/llms-full.txt"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "vaquill",
@@ -30876,7 +32105,11 @@
     "starting_price_usd": null,
     "unit": "API credits",
     "pricing_url": null,
-    "notes": "Calls are metered in credits; 1,000 free welcome credits ($10) are granted once per person."
+    "notes": "Calls are metered in credits; 1,000 free welcome credits ($10) are granted once per person.",
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
    },
    "endpoints": [
     {
@@ -30915,7 +32148,10 @@
      "docs_url": "https://www.vaquill.ai/docs/api-guide/session-laws"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "watsons",
@@ -31082,7 +32318,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; an API host exists but only supports the storefront, not public access."
+   "endpoints_note": "No public developer API; an API host exists but only supports the storefront, not public access.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "weather-underground",
@@ -31267,7 +32506,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "web3-career",
@@ -31459,7 +32701,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://web3.career/web3-jobs-api"
+   },
    "endpoints": [
     {
      "method": "GET",
@@ -31469,7 +32722,10 @@
      "docs_url": "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "wechat",
@@ -31707,7 +32963,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "wellfound",
@@ -31926,7 +33185,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API is published; an AI-assistant feature is advertised with no public endpoint or key."
+   "endpoints_note": "No public developer API is published; an AI-assistant feature is advertised with no public endpoint or key.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "x",
@@ -32347,7 +33609,18 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://docs.x.com/x-api/introduction",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": "https://docs.x.com/x-api/getting-started/pricing",
+    "notes": null,
+    "api_access_gate": "none",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": "https://docs.x.com/x-api/getting-started/pricing"
+   },
    "endpoints": [
     {
      "method": "POST",
@@ -32378,7 +33651,10 @@
      "docs_url": "https://docs.x.com/x-api/getting-started/pricing"
     }
    ],
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "green",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "ycombinator",
@@ -32647,7 +33923,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "Y Combinator publishes no API, developer documentation or pricing; its public company directory is not an open data product."
+   "endpoints_note": "Y Combinator publishes no API, developer documentation or pricing; its public company directory is not an open data product.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "yahoo-finance",
@@ -32866,7 +34145,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public finance API; Yahoo's developer site lists only a Fantasy Sports API and sign-in APIs."
+   "endpoints_note": "No public finance API; Yahoo's developer site lists only a Fantasy Sports API and sign-in APIs.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "zhipu-ai",
@@ -33023,7 +34305,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "zepto",
@@ -33208,7 +34493,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "zillow",
@@ -33437,7 +34725,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "zoominfo",
@@ -33617,7 +34908,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "API access requires an existing ZoomInfo subscription through a login-gated developer portal; no self-serve signup or public pricing exists."
+   "endpoints_note": "API access requires an existing ZoomInfo subscription through a login-gated developer portal; no self-serve signup or public pricing exists.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "toutiao",
@@ -33800,7 +35094,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "youku",
@@ -33972,7 +35269,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "No public developer API; the related open platform is a partner-application portal for content and device partnerships, not self-serve access."
+   "endpoints_note": "No public developer API; the related open platform is a partner-application portal for content and device partnerships, not self-serve access.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "douyin-shop",
@@ -34237,9 +35537,23 @@
    "visibility": "listed",
    "visibility_note": null,
    "official_docs_url": "https://op.jinritemai.com/docs/guide-docs/10/23",
-   "pricing": null,
+   "pricing": {
+    "model": null,
+    "free_tier": null,
+    "starting_price_usd": null,
+    "unit": null,
+    "pricing_url": null,
+    "notes": null,
+    "api_access_gate": "unknown",
+    "min_monthly_usd": null,
+    "min_prepay_usd": null,
+    "gate_source_url": null
+   },
    "endpoints": null,
-   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+   "endpoints_note": "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "baidu-qianfan",
@@ -34396,7 +35710,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "douban",
@@ -34565,7 +35882,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": [],
-   "endpoints_note": "The public developer portal has been retired; API keys are only issued through business-development contact."
+   "endpoints_note": "The public developer portal has been retired; API keys are only issued through business-development contact.",
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   },
   {
    "slug": "xianyu",
@@ -34748,7 +36068,10 @@
    "official_docs_url": null,
    "pricing": null,
    "endpoints": null,
-   "endpoints_note": null
+   "endpoints_note": null,
+   "cost_badge": "gray",
+   "alternatives": null,
+   "alternatives_note": null
   }
  ],
  "aggregators": [
