@@ -84,6 +84,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://hunter.io/api-documentation/v2"
+      free_usage_source_url: "https://hunter.io/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/discover"
@@ -133,6 +135,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://prospeo.io/api-docs"
+      free_usage_source_url: "https://prospeo.io/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/enrich-person"

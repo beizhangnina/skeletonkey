@@ -30,6 +30,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://getanyapi.com/docs"
+      free_usage_source_url: "https://getanyapi.com/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/run/{sku}"
@@ -94,6 +96,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.apify.com/api/v2"
+      free_usage_source_url: "https://apify.com/pricing"
+      cost_label: "FREE"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     cost_badge: "green"
     usage_api:
@@ -133,6 +137,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
+      free_usage_source_url: "https://docs.brightdata.com/general/account/billing-and-pricing/free-tier"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/dca/trigger_hp"
@@ -177,6 +183,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://www.context.dev/pricing"
+      cost_label: "SUBS"
     endpoints:
       - method: "POST"
         path: "/web/scrape"
@@ -236,6 +243,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.firecrawl.dev/introduction"
+      free_usage_source_url: "https://www.firecrawl.dev/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v2/scrape"
@@ -344,6 +353,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.tinyfish.ai/"
+      free_usage_source_url: "https://tinyfish.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/automation/run-sse"

@@ -141,6 +141,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://theirstack.com/en/pricing"
+      free_usage_source_url: "https://theirstack.com/en/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/jobs/search"
@@ -230,6 +232,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://web3.career/web3-jobs-api"
+      free_usage_source_url: "https://web3.career/web3-jobs-api"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/api/v1"

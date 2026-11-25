@@ -74,6 +74,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: 20
       gate_source_url: "https://www.financialdatasets.ai/pricing"
+      cost_label: "PAYG"
     endpoints:
       - method: "GET"
         path: "/activist-ownership"
@@ -192,6 +193,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://marketstack.com/pricing"
+      free_usage_source_url: "https://marketstack.com/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/v2/tickers/AAPL"

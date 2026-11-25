@@ -74,6 +74,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://elevenlabs.io/pricing/api"
+      cost_label: "SUBS"
     endpoints:
       - method: "GET"
         path: "/v1/reception/staff"
@@ -123,6 +124,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+      free_usage_source_url: "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/tts"
@@ -226,6 +229,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.magichour.ai/billing/overview"
+      free_usage_source_url: "https://docs.magichour.ai/billing/overview"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/ai-image-generator"
@@ -285,6 +290,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://platform.minimax.io/docs/pricing/overview"
+      cost_label: "PAYG"
     endpoints:
       - method: "POST"
         path: "/v1/chat/completions"
@@ -329,6 +335,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://platform.sonilo.com/pricing"
+      free_usage_source_url: "https://platform.sonilo.com/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/text-to-music"

@@ -119,6 +119,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://scrapecreators.com/"
+      free_usage_source_url: "https://scrapecreators.com/#pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "GET"
         path: "/v1/spotify/podcast/episodes"
@@ -173,6 +175,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://tikhub.io/pricing"
+      free_usage_source_url: "https://tikhub.io/pricing"
+      cost_label: "FREE"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     cost_badge: "green"
     usage_api:
@@ -237,6 +241,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://docs.x.com/x-api/getting-started/pricing"
+      cost_label: "PAYG"
     endpoints:
       - method: "POST"
         path: "/2/tweets/search/stream/rules"

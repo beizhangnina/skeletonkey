@@ -35,6 +35,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://exa.ai/docs/admin/pricing"
+      free_usage_source_url: "https://exa.ai/docs/admin/pricing"
+      cost_label: "FREE"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     cost_badge: "green"
     usage_api:
@@ -104,6 +106,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://keenable.ai/pricing"
+      free_usage_source_url: "https://keenable.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/v1/search"
@@ -173,6 +177,7 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: 10
       gate_source_url: "https://litescrape.com/pricing"
+      cost_label: "PAYG"
     endpoints:
       - method: "GET"
         path: "/api/reddit/subreddit-posts"
@@ -237,6 +242,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://octen.ai/pricing"
+      free_usage_source_url: "https://octen.ai/pricing"
+      cost_label: "FREE"
     endpoints:
       - method: "POST"
         path: "/pulse-search"
@@ -414,6 +421,8 @@ apis:
       min_monthly_usd: null
       min_prepay_usd: null
       gate_source_url: "https://serper.dev/"
+      free_usage_source_url: "https://serper.dev/"
+      cost_label: "FREE"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     cost_badge: "green"
     usage_api:

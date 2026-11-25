@@ -125,6 +125,10 @@ PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
 # byte-identical to before ND-12 (no explicit nulls -- PM decision on ND-10).
 PRICING_GATE_KEYS = ['api_access_gate', 'min_monthly_usd', 'min_prepay_usd',
                      'gate_source_url']
+# ND-18b: `free_usage_source_url` (hand-filled) and `cost_label` (derived),
+# nested in `pricing`, emitted after PRICING_GATE_KEYS and ONLY when present
+# -- same "no explicit nulls" rule as the gate keys above.
+PRICING_LABEL_KEYS = ['free_usage_source_url', 'cost_label']
 ENDPOINT_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
 
 # The two ND-12 hand-filled top-level fields (../README.md "ND-12 pricing
@@ -237,7 +241,10 @@ def emit_row(e):
     newline): the base ORDER fields, always; then whichever of the five ND-8
     structured fields (official_docs_url, auth, pricing, endpoints,
     endpoints_note -- see ../README.md) are present as a key on `e`, in their
-    defined order; then whichever of the two ND-12 pricing-gate fields
+    defined order -- `pricing`'s own nested keys are PRICING_KEYS, then
+    whichever of PRICING_GATE_KEYS (ND-12) are present, then whichever of
+    PRICING_LABEL_KEYS (`free_usage_source_url`, `cost_label` -- ND-18b) are
+    present; then whichever of the two ND-12 pricing-gate fields
     (alternatives, alternatives_note) are present, in their defined order;
     then any OTHER key on `e` that is not in ORDER, in the order it appears
     on `e` -- a hand-filled field this module has no fixed shape for
@@ -245,6 +252,8 @@ def emit_row(e):
     written yet, ...), serialised generically by `_emit_entry`. `cost_badge`
     is handled separately: it is computed, never hand-filled (see
     merge_preserved and main()), but still only emitted when present on `e`.
+    `pricing.cost_label` is likewise computed (see main()), but only ever
+    emitted via PRICING_LABEL_KEYS above when present on `e['pricing']`.
 
     A field absent from `e` is skipped entirely -- never written as
     `field: null` -- so a row carrying none of them emits exactly what
@@ -285,6 +294,8 @@ def emit_row(e):
             lines.extend(_mapping_lines(pricing, PRICING_KEYS, 6))
             lines.extend(_mapping_lines(
                 pricing, [k for k in PRICING_GATE_KEYS if k in pricing], 6))
+            lines.extend(_mapping_lines(
+                pricing, [k for k in PRICING_LABEL_KEYS if k in pricing], 6))
 
     if 'endpoints' in e:
         eps = e['endpoints']
@@ -353,10 +364,16 @@ def merge_preserved(new_row, old_row):
     absent) untouched. build.py never invents a value for one of these
     fields itself -- only `old_row` or curated.py can.
 
-    `cost_badge` is the one exception: like an ORDER field, it is never
-    pulled from `old_row` here, because it is computed (by main(), from the
-    merged row's own `pricing`) rather than hand-filled -- see ../README.md
-    "ND-12 pricing gate".
+    `cost_badge` is the one top-level exception: like an ORDER field, it is
+    never pulled from `old_row` here, because it is computed (by main(),
+    from the merged row's own `pricing`) rather than hand-filled -- see
+    ../README.md "ND-12 pricing gate". `pricing.cost_label` (ND-18b) is
+    computed the same way, but it lives NESTED inside `pricing`, which this
+    function still merges wholesale like any other hand-filled key -- a
+    stale `cost_label` riding along inside old_row['pricing'] is overwritten
+    by main() right after this function returns, never left in place. Only
+    `pricing.free_usage_source_url` (hand-filled) is meant to survive that
+    merge.
     """
     merged = dict(new_row)
     old_row = old_row or {}
@@ -534,6 +551,21 @@ def main():
                 merged['cost_badge'] = validate.derive_cost_badge(pricing)
             else:
                 merged.pop('cost_badge', None)
+            # ND-18b: `pricing.cost_label` is likewise computed AFTER
+            # merge_preserved, from the merged pricing block -- which by then
+            # already carries any hand-filled `free_usage_source_url` pulled
+            # off the old shard (merge_preserved has no exception for
+            # `pricing` itself, only for `cost_badge`). Never hand-filled,
+            # and never left at a stale value from the old shard: `pricing`
+            # is copied before mutating so `e`'s own dict is untouched.
+            if isinstance(pricing, dict):
+                pricing = dict(pricing)
+                merged['pricing'] = pricing
+                cost_label = validate.derive_cost_label(pricing)
+                if cost_label is not None:
+                    pricing['cost_label'] = cost_label
+                else:
+                    pricing.pop('cost_label', None)
             lines.extend(emit_row(merged).split('\n'))
         open(path, 'w').write('\n'.join(lines) + '\n')
 
