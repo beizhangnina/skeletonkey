@@ -14,7 +14,7 @@ import path from "node:path";
 import YAML from "yaml";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { upsertAccount, type AccountMeta } from "../src/accounts/store.js";
-import { configPath } from "../src/paths.js";
+import { configPath, monitorStatePath } from "../src/paths.js";
 import { writeConfig } from "../src/config.js";
 import { upsertKey } from "../src/keys.js";
 import { CHECKERS, defaultTransport } from "../src/monitor/checkers.js";
@@ -412,18 +412,82 @@ const APIFY_ENTRY_FOR_CONFIG_TEST = {
 };
 
 /**
- * Cross-origin redirect: two local 127.0.0.1 servers. Server A ("official")
- * answers every request with a 302 to server B ("attacker"), a different
- * origin (different port). Calls `CHECKERS[vendor].run` directly with the
- * real `defaultTransport` (real `fetch`, local-only) so the test observes
- * exactly what `fetch` itself does on a cross-origin redirect -- no stub.
+ * Cross-origin redirect (PM decision after 577a64f: a cross-host redirect is a
+ * hard `error`, and whatever the other host answers is never parsed as usage).
+ *
+ * Two local 127.0.0.1-only servers, real `fetch` via `defaultTransport`:
+ * - server A plays the vendor's official host. The run uses the real
+ *   `runMonitor` with the official `usage_api.path`; a thin transport wrapper
+ *   rewrites only the official origin to server A, then hands off to the real
+ *   `defaultTransport`, so redirect handling is exactly production's.
+ * - server A answers every request with a 302 to server B (a different
+ *   origin: `localhost:<portB>`), the "attacker".
+ * - server B answers with a body that IS a valid usage payload for the vendor,
+ *   so if the run parsed it, usage would come back non-null.
+ *
+ * For each of the 6 checkers this asserts: status `error` (an alert), no usage
+ * data, no `usage_anomaly`, exit code 78, and server B either got no request or
+ * got one carrying the key nowhere (URL incl. URL-encoded form, any header such
+ * as Authorization / x-api-key, or body). No real vendor is contacted.
  */
-describe("ND-6 egress: cross-origin redirect (real fetch, 127.0.0.1 only)", () => {
+const REDIRECT_VENDORS: {
+  vendor: string;
+  path: string;
+  method: string;
+  /** A body server B returns that this vendor's parser WOULD accept as usage. */
+  usageBody: unknown;
+}[] = [
+  {
+    vendor: "apify",
+    path: "https://api.apify.com/v2/users/me/usage/monthly",
+    method: "GET",
+    usageBody: { data: { monthlyUsageUsd: 999, usageCycle: { startAt: "2026-11-01", endAt: "2026-12-01" } } },
+  },
+  {
+    vendor: "serpapi",
+    path: "https://serpapi.com/account.json",
+    method: "GET",
+    usageBody: { this_month_usage: 999, searches_per_month: 1000, plan_searches_left: 1 },
+  },
+  {
+    vendor: "firecrawl",
+    path: "https://api.firecrawl.dev/v2/team/credit-usage",
+    method: "GET",
+    usageBody: { data: { remainingCredits: 1, planCredits: 1000 } },
+  },
+  {
+    vendor: "apollo",
+    path: "https://api.apollo.io/api/v1/usage_stats/credit_usage_stats",
+    method: "POST",
+    usageBody: { used_credits: 999, available_credits: 1 },
+  },
+  {
+    vendor: "exa",
+    path: "https://admin-api.exa.ai/team-management/credits",
+    method: "GET",
+    usageBody: { credits_used: 999, credits_limit: 1000, credits_remaining: 1 },
+  },
+  {
+    vendor: "github",
+    path: "https://api.github.com/rate_limit",
+    method: "GET",
+    usageBody: { rate: { limit: 5000, remaining: 1, used: 4999 } },
+  },
+];
+
+describe("ND-6 egress: cross-host redirect is a hard error (real fetch, 127.0.0.1 only)", () => {
   let serverA: http.Server;
   let serverB: http.Server;
   let portA: number;
   let portB: number;
+  /** What server B answers with; set per test to the vendor's valid usage body. */
+  let serverBBody = "{}";
+  /** Server A's mode: cross-origin 302 to B, or same-origin 302 to its own /final. */
+  let serverAMode: "cross" | "same" = "cross";
   let serverBRequests: { url: string; headers: http.IncomingHttpHeaders; body: string }[] = [];
+  let home: string;
+  let savedFetch: typeof globalThis.fetch;
+  let foreignFetch = false;
 
   beforeAll(async () => {
     serverB = http.createServer((req, res) => {
@@ -432,7 +496,7 @@ describe("ND-6 egress: cross-origin redirect (real fetch, 127.0.0.1 only)", () =
       req.on("end", () => {
         serverBRequests.push({ url: req.url ?? "", headers: req.headers, body });
         res.writeHead(200, { "content-type": "application/json" });
-        res.end("{}");
+        res.end(serverBBody);
       });
     });
     await new Promise<void>((resolve) => serverB.listen(0, "127.0.0.1", resolve));
@@ -440,7 +504,14 @@ describe("ND-6 egress: cross-origin redirect (real fetch, 127.0.0.1 only)", () =
 
     serverA = http.createServer((req, res) => {
       req.resume();
-      res.writeHead(302, { Location: `http://127.0.0.1:${portB}/steal` });
+      if (serverAMode === "same" && (req.url ?? "").startsWith("/final")) {
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(serverBBody);
+        return;
+      }
+      const location =
+        serverAMode === "cross" ? `http://localhost:${portB}/steal` : `http://127.0.0.1:${portA}/final`;
+      res.writeHead(302, { Location: location });
       res.end();
     });
     await new Promise<void>((resolve) => serverA.listen(0, "127.0.0.1", resolve));
@@ -454,87 +525,109 @@ describe("ND-6 egress: cross-origin redirect (real fetch, 127.0.0.1 only)", () =
 
   beforeEach(() => {
     serverBRequests = [];
+    serverAMode = "cross";
+    serverBBody = "{}";
+    foreignFetch = false;
+    home = makeHome();
+    writeConfig({ email: "dev@example.test", backend: "file", created: "2026-11-01T00:00:00.000Z" }, home);
+    // Real fetch, but only to our two local servers: anything else fails loudly.
+    savedFetch = globalThis.fetch;
+    const realFetch = savedFetch;
+    globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
+      const target = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
+      if (target.hostname !== "127.0.0.1" && target.hostname !== "localhost") {
+        foreignFetch = true;
+        throw new Error(`non-local fetch forbidden in tests: ${target.host}`);
+      }
+      return realFetch(input, init);
+    }) as typeof globalThis.fetch;
   });
 
-  function canaryLeaked(): boolean {
-    return serverBRequests.some((req) => {
-      const haystack = [req.url, JSON.stringify(req.headers), req.body].join(" ");
-      return haystack.includes(CANARY) || haystack.includes(CANARY_SERVICE);
+  afterEach(() => {
+    globalThis.fetch = savedFetch;
+    removeHome(home);
+    expect(foreignFetch).toBe(false);
+  });
+
+  /** Every place a key could ride: URL (raw + URL-encoded), every header, the body. */
+  function keyReachedServerB(secrets: string[]): string[] {
+    const hits: string[] = [];
+    for (const req of serverBRequests) {
+      for (const secret of secrets) {
+        const forms = [secret, encodeURIComponent(secret)];
+        if (forms.some((form) => req.url.includes(form))) hits.push(`url:${req.url}`);
+        for (const [name, value] of Object.entries(req.headers)) {
+          const text = Array.isArray(value) ? value.join(",") : String(value ?? "");
+          if (forms.some((form) => text.includes(form))) hits.push(`header:${name}`);
+        }
+        if (forms.some((form) => req.body.includes(form))) hits.push("body");
+      }
+    }
+    return hits;
+  }
+
+  /** Official origin -> server A; everything else (i.e. redirect targets) untouched. */
+  function viaServerA(officialPath: string): HttpTransport {
+    const officialOrigin = new URL(officialPath).origin;
+    return async (url, init) => {
+      const rewritten = url.startsWith(officialOrigin)
+        ? `http://127.0.0.1:${portA}${url.slice(officialOrigin.length)}`
+        : url;
+      return defaultTransport(rewritten, init);
+    };
+  }
+
+  async function runFor(spec: (typeof REDIRECT_VENDORS)[number]) {
+    const key = `${CANARY}-${spec.vendor}`;
+    const serviceKey = `${CANARY_SERVICE}-${spec.vendor}`;
+    const apisFile = writeApisFixture(home, [
+      apiEntry({ name: spec.vendor, usage_api: usageApi({ path: spec.path, method: spec.method }) }),
+    ]);
+    await setupAccount(home, {
+      name: `${spec.vendor}-main`,
+      vendor: spec.vendor,
+      secret: key,
+      ...(spec.vendor === "exa" ? { serviceSecret: serviceKey } : {}),
+    });
+    serverBBody = JSON.stringify(spec.usageBody);
+    const result = await runMonitor({
+      home,
+      apisFile,
+      notify: false,
+      transport: viaServerA(spec.path),
+      now: () => new Date("2026-11-24T12:00:00.000Z"),
+    });
+    return { result, secrets: [key, serviceKey] };
+  }
+
+  for (const spec of REDIRECT_VENDORS) {
+    it(`${spec.vendor}: cross-host 302 -> server B gets no request, or one without the key (URL/headers/body)`, async () => {
+      const { secrets } = await runFor(spec);
+      expect(keyReachedServerB(secrets)).toEqual([]);
+    });
+
+    // PM decision after 577a64f: cross-host redirect = hard error, never parsed as usage.
+    it(`${spec.vendor}: cross-host 302 -> status error (alert), usage not parsed, no usage_anomaly`, async () => {
+      const { result } = await runFor(spec);
+      const account = result.accounts[0];
+      expect(account?.status).toBe("error");
+      expect(account?.isAlert).toBe(true);
+      expect(result.exitCode).toBe(78);
+      expect(account?.usage).toBeNull();
+      expect(result.accounts.some((a) => a.status === "usage_anomaly")).toBe(false);
+      expect(result.reportText).not.toMatch(/used=999|used=4999|remaining=1\b/);
+      const state = JSON.parse(fs.readFileSync(monitorStatePath(home), "utf8")) as {
+        accounts: Record<string, { last_usage: unknown }>;
+      };
+      expect(state.accounts[`${spec.vendor}-main`]?.last_usage ?? null).toBeNull();
     });
   }
 
-  it("apify: Authorization: Bearer header is not forwarded cross-origin", async () => {
-    await CHECKERS["apify"]?.run({
-      url: `http://127.0.0.1:${portA}/v2/users/me/usage/monthly`,
-      method: "GET",
-      key: CANARY,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
-  });
-
-  it("firecrawl: Authorization: Bearer header is not forwarded cross-origin", async () => {
-    await CHECKERS["firecrawl"]?.run({
-      url: `http://127.0.0.1:${portA}/v2/team/credit-usage`,
-      method: "GET",
-      key: CANARY,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
-  });
-
-  it("github: Authorization: Bearer header is not forwarded cross-origin", async () => {
-    await CHECKERS["github"]?.run({
-      url: `http://127.0.0.1:${portA}/rate_limit`,
-      method: "GET",
-      key: CANARY,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
-  });
-
-  it("serpapi: the key is a query param on the ORIGINAL url, so it cannot reach server B's different path", async () => {
-    await CHECKERS["serpapi"]?.run({
-      url: `http://127.0.0.1:${portA}/account.json`,
-      method: "GET",
-      key: CANARY,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
-  });
-
-  // ND-6 FINDING: apollo's x-api-key header is a custom header, not
-  // `Authorization` -- the Fetch spec's cross-origin-redirect header
-  // stripping only names `Authorization`/`Proxy-Authorization`/`Cookie`/
-  // `WWW-Authenticate`. If this fails, `fetch` forwarded x-api-key straight
-  // to the attacker's server on the 302.
-  it("apollo: x-api-key header is not forwarded cross-origin", async () => {
-    await CHECKERS["apollo"]?.run({
-      url: `http://127.0.0.1:${portA}/api/v1/usage_stats/credit_usage_stats`,
-      method: "POST",
-      key: CANARY,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
-  });
-
-  // ND-6 FINDING: same as apollo -- exa's service key rides on a custom
-  // x-api-key header, which the Fetch spec does not strip on a cross-origin
-  // redirect.
-  it("exa: x-api-key (service key) header is not forwarded cross-origin", async () => {
-    await CHECKERS["exa"]?.run({
-      url: `http://127.0.0.1:${portA}/team-management/credits`,
-      method: "GET",
-      key: "unused-main-key",
-      serviceKey: CANARY_SERVICE,
-      transport: defaultTransport,
-    });
-    expect(serverBRequests.length).toBeGreaterThan(0);
-    expect(canaryLeaked()).toBe(false);
+  it("same-origin redirect on the official host is still followed and parsed (no over-blocking)", async () => {
+    serverAMode = "same";
+    const { result } = await runFor(REDIRECT_VENDORS[0]!);
+    expect(result.accounts[0]?.status).toBe("ok");
+    expect(result.accounts[0]?.usage?.used).toBe(999);
+    expect(serverBRequests).toHaveLength(0);
   });
 });
