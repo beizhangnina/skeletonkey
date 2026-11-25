@@ -61,22 +61,13 @@ OVERLAY_KEYS = [
 # The index's own `kyc_or_captcha` text for these 4 ids names the research
 # tooling used to check the signup page (Jina, curl, WebFetch), not a fact
 # about the vendor. Rewritten here (2026-11-24, Bei) to a neutral description
-# of what the page actually shows, using only facts already in the index
-# text, so a re-export doesn't bring the tool names back.
+# of what the page shows (bot check / captcha facts only, no description of
+# how it was checked), using only facts already in the index text, so a re-export doesn't bring the tool names back.
 KYC_OR_CAPTCHA_OVERRIDE = {
-    'bid-cars': 'Signup page is behind a bot/security verification challenge; '
-                'the signup form itself was still visible despite the challenge.',
-    'cars-com': 'www.cars.com runs a Cloudflare bot check that blocks plain HTTP '
-                'requests; the homepage is reachable with full browser rendering. '
-                'No captcha requirement documented for signup.',
-    'stockanalysis': "Pages are behind a Cloudflare 'Just a moment...' challenge "
-                      'that blocks plain HTTP requests (HTTP 403); full browser '
-                      'rendering reaches the pages. No captcha requirement '
-                      'documented for signup.',
-    'clutch': "clutch.co web pages sit behind a Cloudflare 'Just a moment...' "
-              'challenge that blocks plain HTTP requests and full browser '
-              'rendering alike; a separate bot.clutch.co/mcp endpoint is not '
-              'challenged.',
+    'bid-cars': 'Signup page shows a bot/security verification challenge; the signup form is visible behind it.',
+    'cars-com': 'The website is behind a Cloudflare bot check. No captcha requirement is documented for signup.',
+    'stockanalysis': 'The website is behind a Cloudflare bot check. No captcha requirement is documented for signup.',
+    'clutch': 'The website is behind a Cloudflare bot check; the separate bot.clutch.co/mcp endpoint is not.',
 }
 
 
