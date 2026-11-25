@@ -18,6 +18,11 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/edinet"
     checked_date: 2026-10-24
+    official_docs_url: "https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html"
+    auth: null
+    pricing: null
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "financialdatasets"
     name: "Financial Datasets"
     capability: "US public-company fundamentals: statements, metrics, prices, earnings, filings and news."
@@ -35,6 +40,39 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/financialdatasets"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.financialdatasets.ai/"
+    auth:
+      type: "api_key"
+      header: "X-API-KEY"
+      format: "X-API-KEY: <API_KEY>"
+      docs_url: "https://docs.financialdatasets.ai/llms.txt"
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/activist-ownership"
+        summary: "Returns activist investor stakes in US public companies from SEC Schedule 13D filings; filter by ticker or filer_cik, optionally with full amendment history."
+        returns: "JSON with an activist_owners array (ticker, filer_cik, percent_of_class, voting/dispositive power, filing_date, is_latest, etc.) and next_page_url."
+        docs_url: "https://docs.financialdatasets.ai/api/activist-ownership"
+      - method: "GET"
+        path: "/insider-trades/sale-notices"
+        summary: "Returns SEC Form 144 notices of proposed insider stock sales, updated within minutes of each filing."
+        returns: "JSON with a sale_notices array (ticker, issuer, name, securities, acquisitions, sales_past_3_months, filing_url) and next_page_url."
+        docs_url: "https://docs.financialdatasets.ai/api/insider-sale-notices"
+      - method: "GET"
+        path: "/ipos"
+        summary: "Returns SEC IPO registration filings (S-1, S-1/A, F-1, F-1/A, 424B4, 424B1) minutes after SEC acceptance."
+        returns: "JSON with an ipos array (company_name, form_type, ticker, exchange, expected_offering_price, price range, status, financials) and next_page_url."
+        docs_url: "https://docs.financialdatasets.ai/api/ipos"
+      - method: "GET"
+        path: "/activist-ownership/tickers/"
+        summary: "Lists the companies that have activist stakes recorded on the activist ownership endpoint."
+        returns: "A list of companies with activist stakes."
+        docs_url: "https://docs.financialdatasets.ai/api/activist-ownership"
+      - method: "GET"
+        path: "/activist-ownership/filers/"
+        summary: "Looks up activist filers and their CIKs by owner name (prefix, case-insensitive), paged with limit."
+        returns: "Matches for the name prefix plus a total count of all matches alongside the returned page."
+        docs_url: "https://docs.financialdatasets.ai/api/activist-ownership"
   - id: "finviz"
     name: "Finviz"
     capability: "Equity screening, sector performance, insider trades and news sentiment."

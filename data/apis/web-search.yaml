@@ -18,6 +18,21 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/exa"
     checked_date: 2026-10-24
+    official_docs_url: "https://exa.ai/docs"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://exa.ai/llms-full.txt"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://exa.ai/llms.txt"
+      notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "justoneapi"
     name: "JustOneAPI"
     capability: "Single search surface across Chinese news and social platforms."

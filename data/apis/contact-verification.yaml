@@ -18,6 +18,25 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/hlrlookup"
     checked_date: 2026-10-24
+    official_docs_url: "https://www.hlrlookup.com/docs/hlrlookup-docs.html"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/apiv2/hlr"
+        summary: "Live HLR lookup for one number or a batch of up to 80; returns number type, live status, original/current network, porting info and optional extras."
+        returns: "A results array with per-number objects containing live_status, telephone_number_type, network details, is_ported, credits_spent and uuid."
+        docs_url: "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
+      - method: "POST"
+        path: "/apiv2/mnp"
+        summary: "Mobile Number Portability lookup; same request/response shape as /apiv2/hlr but omits telephone_number_type for country code 1 (NANP) numbers."
+        returns: "An MNP results array in the same shape as the HLR endpoint, with telephone_number_type omitted for NANP numbers."
+        docs_url: "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
+      - method: "POST"
+        path: "/apiv2/validate"
+        summary: "Format-only validation of one or more numbers without a live HLR lookup; returns number type, issuing network details and formatted output."
+        returns: "A subset of the HLR response; live_status, current_network, is_ported, ported_date, landline_status, sms_email, mms_email and cache fields are omitted."
+        docs_url: "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
   - id: "hunter"
     name: "Hunter"
     capability: "Finds and verifies professional email addresses for a domain or a named person."
@@ -35,6 +54,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/hunter"
     checked_date: 2026-10-24
+    official_docs_url: "https://hunter.io/api-documentation/v2"
+    auth: null
+    pricing: null
+    endpoints:
+      - method: "POST"
+        path: "/discover"
+        summary: "Search companies using structured filters or a natural-language query; the call is free and returns up to 100 companies per page."
+        returns: "Matching companies (discover_response), paginated via limit/offset on paid plans."
+        docs_url: "https://hunter.io/openapi.json"
+      - method: "GET"
+        path: "/domain-search"
+        summary: "Find the email addresses published for a given domain (or company name), filterable by type, department, seniority, provenance, and more."
+        returns: "Email addresses and public sources for the domain, plus X-Credits-Used / X-Credits-Unit cost headers."
+        docs_url: "https://hunter.io/openapi.json"
   - id: "prospeo"
     name: "Prospeo"
     capability: "Email and phone discovery for B2B prospecting, including LinkedIn profile lookups."

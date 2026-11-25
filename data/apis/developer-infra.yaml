@@ -69,6 +69,29 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/github"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.github.com/en/rest"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.github.com/en/rest/migrations/users"
+    pricing: null
+    endpoints:
+      - method: "GET"
+        path: "/user/migrations"
+        summary: "List every migration the authenticated account owner has started."
+        returns: null
+        docs_url: "https://docs.github.com/en/rest/migrations/users"
+      - method: "GET"
+        path: "/api/article/body"
+        summary: "Fetch the rendered content of a docs page as markdown, via the pathname query parameter."
+        returns: "Full rendered content of a docs page as markdown."
+        docs_url: "https://docs.github.com/llms.txt"
+      - method: "GET"
+        path: "/api/search/v1"
+        summary: "Search across all documentation content by query, language, and version."
+        returns: "Search results across all docs content."
+        docs_url: "https://docs.github.com/llms.txt"
   - id: "kadec0"
     name: "kadec0"
     capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API."
