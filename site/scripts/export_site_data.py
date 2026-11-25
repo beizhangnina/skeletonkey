@@ -58,6 +58,27 @@ OVERLAY_KEYS = [
     'docs_url', 'min_topup', 'billing_unit', 'free_tier',
 ]
 
+# The index's own `kyc_or_captcha` text for these 4 ids names the research
+# tooling used to check the signup page (Jina, curl, WebFetch), not a fact
+# about the vendor. Rewritten here (2026-11-24, Bei) to a neutral description
+# of what the page actually shows, using only facts already in the index
+# text, so a re-export doesn't bring the tool names back.
+KYC_OR_CAPTCHA_OVERRIDE = {
+    'bid-cars': 'Signup page is behind a bot/security verification challenge; '
+                'the signup form itself was still visible despite the challenge.',
+    'cars-com': 'www.cars.com runs a Cloudflare bot check that blocks plain HTTP '
+                'requests; the homepage is reachable with full browser rendering. '
+                'No captcha requirement documented for signup.',
+    'stockanalysis': "Pages are behind a Cloudflare 'Just a moment...' challenge "
+                      'that blocks plain HTTP requests (HTTP 403); full browser '
+                      'rendering reaches the pages. No captcha requirement '
+                      'documented for signup.',
+    'clutch': "clutch.co web pages sit behind a Cloudflare 'Just a moment...' "
+              'challenge that blocks plain HTTP requests and full browser '
+              'rendering alike; a separate bot.clutch.co/mcp endpoint is not '
+              'challenged.',
+}
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -69,7 +90,14 @@ def main():
     doc = yaml.safe_load(open(index_path))
     entries = doc.get('entries') or []
 
-    vendors = {e['id']: {k: e.get(k) for k in OVERLAY_KEYS} for e in entries}
+    vendors = {
+        e['id']: {
+            k: (KYC_OR_CAPTCHA_OVERRIDE[e['id']] if k == 'kyc_or_captcha' and e['id'] in KYC_OR_CAPTCHA_OVERRIDE
+                else e.get(k))
+            for k in OVERLAY_KEYS
+        }
+        for e in entries
+    }
     overlay = {'checked': doc.get('checked_date'), 'vendors': vendors}
     json.dump(overlay, open(os.path.join(SITE_DATA, 'vendor-research.json'), 'w'),
                indent=1, ensure_ascii=False, default=str)
