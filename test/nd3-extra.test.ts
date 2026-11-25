@@ -112,7 +112,7 @@ describe("ND-3 extra: legacy AutoSignupExecutor", () => {
 describe("ND-3 extra: every MCP tool with a locked or corrupted vault", () => {
   let home: string;
   const env = { SKELETONKEY_PASSPHRASE: CANARY_PASS };
-  const toolArgs = (alias: string): Record<string, Record<string, unknown>> => ({
+  const knownToolArgs = (alias: string): Record<string, Record<string, unknown>> => ({
     find_api: { capability: "web scraping" },
     list_keys: {},
     list_accounts: {},
@@ -132,6 +132,7 @@ describe("ND-3 extra: every MCP tool with a locked or corrupted vault", () => {
     register_key: { alias: "new-key-nd3x", platform: "Canary", domain: "api.canary.test" },
     ledger: { limit: 10 },
     disable: { alias, reason: "sweep" },
+    monitor_status: {},
   });
 
   beforeEach(async () => {
@@ -148,12 +149,16 @@ describe("ND-3 extra: every MCP tool with a locked or corrupted vault", () => {
 
   async function sweepAllTools(label: string): Promise<void> {
     const ctx: McpContext = { home, allowTtyPrompt: false };
-    const args = toolArgs("apify-main");
-    expect(Object.keys(args).sort()).toEqual(SKELETONKEY_TOOLS.map((t) => t.name).sort());
+    // Driven by the registered tool list, not by the known-args map: a tool
+    // with no mapping is still called (with {}), never skipped.
+    const known = knownToolArgs("apify-main");
+    const covered: string[] = [];
+    expect(SKELETONKEY_TOOLS.length).toBeGreaterThan(0);
     for (const tool of SKELETONKEY_TOOLS) {
+      covered.push(tool.name);
       let text: string;
       try {
-        text = JSON.stringify(await callSkeletonKeyTool(tool.name, args[tool.name] ?? {}, ctx));
+        text = JSON.stringify(await callSkeletonKeyTool(tool.name, known[tool.name] ?? {}, ctx));
       } catch (error) {
         // A thrown error reaching the MCP layer is itself a finding; record it in the label.
         assertClean(`${label}:tool:${tool.name} (threw)`, String(error));
@@ -161,14 +166,17 @@ describe("ND-3 extra: every MCP tool with a locked or corrupted vault", () => {
       }
       assertClean(`${label}:tool:${tool.name}`, text);
     }
+    expect(covered.sort()).toEqual(SKELETONKEY_TOOLS.map((t) => t.name).sort());
+    expect(covered.length).toBe(SKELETONKEY_TOOLS.length);
+    console.log(`nd3-extra ${label}: covered ${covered.length} tools: ${covered.join(", ")}`);
   }
 
-  it("wrong passphrase: all 14 tools leak nothing", async () => {
+  it("wrong passphrase: every registered MCP tool leaks nothing", async () => {
     process.env.SKELETONKEY_PASSPHRASE = WRONG_PASS;
     await sweepAllTools("wrong-pass");
   });
 
-  it("corrupted vault.enc.json: all tools leak nothing", async () => {
+  it("corrupted vault.enc.json: every registered MCP tool leaks nothing", async () => {
     const p = path.join(home, "vault.enc.json");
     fs.writeFileSync(p, fs.readFileSync(p, "utf8").slice(0, 80));
     process.env.SKELETONKEY_PASSPHRASE = CANARY_PASS;
