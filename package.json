@@ -1,6 +1,6 @@
 {
   "name": "@dormy/skeletonkey",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local-only vault, injecting proxy, trusted runner, and MCP server for your personal API keys.",
   "license": "MIT",
   "repository": {
@@ -34,8 +34,10 @@
     "skills/**/SKILL.md",
     "docs/init-wizard.md",
     "docs/signup.md",
+    "docs/monitor.md",
     "docs/v0.1-acceptance.md",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {

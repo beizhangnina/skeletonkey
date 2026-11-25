@@ -2069,7 +2069,7 @@ export async function startMcpServer(ctx: McpContext): Promise<McpServerHandle> 
   const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
 
   const server = new McpServer(
-    { name: "skeletonkey", version: "0.3.0" },
+    { name: "skeletonkey", version: "0.4.0" },
     { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
   );
 
