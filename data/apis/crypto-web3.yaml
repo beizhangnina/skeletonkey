@@ -26,6 +26,10 @@ apis:
       unit: "per call"
       pricing_url: null
       notes: "Paid per call in USDC over x402; the exact price is returned in the 402 before paying. Some models and endpoints (e.g. /v1/models, crypto/FX prices, DEX quotes) are free."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://blockrun.ai/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/chat/completions"
@@ -52,6 +56,7 @@ apis:
         summary: "Searches the live web and news and returns a summarized answer with citations."
         returns: "A summarized, cited search answer, priced $0.081 per call."
         docs_url: "https://blockrun.ai/llms.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -110,6 +115,10 @@ apis:
       unit: "per month"
       pricing_url: null
       notes: "Free API hosts need no key and are rate limited; Pro API requires a key at $300/mo with higher rate limits."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://api-docs.defillama.com/"
     endpoints:
       - method: "GET"
         path: "/protocols"
@@ -131,6 +140,7 @@ apis:
         summary: "Lists all DEXes with summaries of their volumes and dataType history data; Pro path is /api/overview/dexs."
         returns: "All DEXes along with summaries of their volumes and dataType history data."
         docs_url: "https://api-docs.defillama.com/llms.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -164,6 +174,10 @@ apis:
       unit: "USDC per request"
       pricing_url: null
       notes: "Per-request prices: on-chain data $0.20-$0.60, security scans $0.55, AI analysis $1.00, inference $0.35, chart forecast $0.65. Free MCP tools need no account or payment."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/api/einstein/v1/forecast/accuracy"
@@ -190,6 +204,7 @@ apis:
         summary: "A2A 0.3 JSON-RPC transport (message/send, tasks/get, tasks/cancel) for invoking Einstein skills, payable per call via x402."
         returns: "JSON-RPC result or a Task in 'working' state (HTTP 202) for slow skills, pollable or delivered to a callbackUrl."
         docs_url: "https://emc2ai.io/llms.txt"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -223,6 +238,10 @@ apis:
       unit: "per month"
       pricing_url: null
       notes: "Free trial $0/mo with 10M API credits for 1 month; paid tiers start at Build $49/mo (or $34/mo annually); Enterprise is custom pricing."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/{your-token}/"
@@ -239,6 +258,7 @@ apis:
         summary: "Admin API call that creates an RPC endpoint on any chain using the QN_* key returned by the agent subscription call."
         returns: "An RPC endpoint (creation result) on any supported chain."
         docs_url: "https://www.quicknode.com/llms.txt"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -272,6 +292,10 @@ apis:
       unit: "searches per month"
       pricing_url: null
       notes: "Free plan listed at 250 searches/month and 100 requests/hour; paid plans (Hobby, Starter, Pro, Business) listed by quota only, no prices shown on this page."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://surf-api.com/pricing"
     endpoints:
       - method: "GET"
         path: "/search.json"
@@ -298,6 +322,7 @@ apis:
         summary: "List the search engines that are available on the API."
         returns: "List of available engines."
         docs_url: "https://surf-api.com/docs"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

@@ -303,19 +303,28 @@ property on every loaded entry, so a consumer never has to call
 
 ### `data/apis/scripts/derive_cost_badge.py`
 
-A standalone script that rewrites/inserts `cost_badge` lines directly in the
-shard YAML text, for exactly the reason `build.py` cannot be run in a clean
-clone: `raw/` is not committed (see "Layout" above). It never touches
-anything but `cost_badge` lines, is idempotent (a second run changes
-nothing), and supports `--check` (reports what would change, without
-writing, exit 1 if anything would):
+A standalone script that rewrites/inserts/removes `cost_badge` lines
+directly in the shard YAML text, for exactly the reason `build.py` cannot be
+run in a clean clone: `raw/` is not committed (see "Layout" above). It
+mirrors `build.py`'s own rule exactly: a row only gets a `cost_badge` when
+its `pricing` block carries an `api_access_gate` key (a row with none gets
+NO `cost_badge` line, and a stale one is removed), and on a gated row the
+line lands right after the last ND-8/ND-12 structured block present
+(`official_docs_url`, `auth`, `pricing`, `endpoints`, `endpoints_note`,
+`alternatives`, `alternatives_note`), exactly where `emit_row` would put it.
+It never touches anything but `cost_badge` lines, is idempotent (a second
+run changes nothing), and supports `--check` (reports what would change,
+without writing, exit 1 if anything would):
 
 ```
 python3 data/apis/scripts/derive_cost_badge.py [--check] [dir]
 ```
 
-No shard row carries `pricing`, `alternatives` or `alternatives_note` yet --
-same reason as the ND-8 fields above. `build.py` preserves all three (and
+91 shard rows (the non-LLM rows in ND-12 scope) carry the four `pricing.*`
+gate keys, hand-filled from each vendor's own pricing pages and docs only --
+`unknown` wherever the page did not settle it; the 6 red rows also carry
+`alternatives` (see `handoffs/ND-12-backend.md` for counts and reasons).
+`build.py` preserves all of them (and
 the four new `pricing.*` keys) across a rebuild exactly as it does the five
 ND-8 fields, emitting `alternatives` then `alternatives_note` right after
 them -- see "Preserving hand-filled fields" below, which already covers

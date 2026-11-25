@@ -19,6 +19,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/ahrefs"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.ahrefs.com/en/api/docs/introduction"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "subscription_required"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.ahrefs.com/en/api/docs/introduction"
     endpoints:
       - method: "GET"
         path: "/site-explorer/backlinks-stats"
@@ -40,6 +51,14 @@ apis:
         summary: "Management endpoint that lists projects, under base URL https://api.ahrefs.com/v3/management."
         returns: null
         docs_url: "https://docs.ahrefs.com/en/api/reference/management"
+    alternatives:
+      - vendor_id: "treg"
+        why: "Per-call prepaid gateway; lists SEO and backlinks (category-level match, Ahrefs-equivalent data not verified)."
+        access_gate: "none"
+      - vendor_id: "dataforseo"
+        why: "Keyword and backlink data billed per task; no subscription, $50 minimum top-up."
+        access_gate: "prepaid_min"
+    cost_badge: "red"
     usage_api:
       available: true
       method: "GET"
@@ -78,6 +97,10 @@ apis:
       unit: "per month"
       pricing_url: null
       notes: "Free monthly tier, paid plans from $30/mo, plus published per-request credit costs per provider."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://cloro.dev/docs/guides/billing"
     endpoints:
       - method: "POST"
         path: "/v1/monitor/chatgpt"
@@ -104,6 +127,7 @@ apis:
         summary: "Lists the US state codes available for state-level targeting, filtered by country."
         returns: "The full list of state codes (50 states + DC)."
         docs_url: "https://cloro.dev/docs/guides/providers"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -137,6 +161,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
+      api_access_gate: "prepaid_min"
+      min_monthly_usd: null
+      min_prepay_usd: 50
+      gate_source_url: "https://dataforseo.com/pricing"
     endpoints:
       - method: "POST"
         path: "/v3/app_data/google/app_listings/search/live"
@@ -148,6 +176,7 @@ apis:
         summary: "Get the list of languages supported by the Bing Ads API for Keywords Data."
         returns: "JSON with a tasks array whose result lists language_name and language_code (ISO 639-1) values."
         docs_url: "https://docs.dataforseo.com/v3/keywords_data/bing/languages/"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -174,7 +203,23 @@ apis:
     source_url: "https://glasser.ai/data-sources/foreplay"
     checked_date: 2026-10-24
     official_docs_url: "https://public.api.foreplay.co/docs"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "subscription_required"
+      min_monthly_usd: 175
+      min_prepay_usd: null
+      gate_source_url: "https://www.foreplay.co/pricing"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    alternatives:
+      - vendor_id: "treg"
+        why: "Per-call prepaid gateway; lists ad libraries (category-level match, Foreplay-equivalent coverage not verified)."
+        access_gate: "none"
+    cost_badge: "red"
     usage_api:
       available: null
       method: null
@@ -201,6 +246,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/semrush"
     checked_date: 2026-10-24
     official_docs_url: "https://developer.semrush.com/api/basics/get-started/"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/analytics/ta/api/v3/summary"
@@ -227,6 +283,7 @@ apis:
         summary: "Base URL for Position Tracking report requests (organic/adwords overview, positions, competitors, visibility index, landing pages)."
         returns: "Report data about rankings, visibility and competitor performance for the campaign (v3, deprecated)."
         docs_url: "https://developer.semrush.com/api/v3/projects/position-tracking#organic-landing-pages-report"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -253,7 +310,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/serpstat"
     checked_date: 2026-10-24
     official_docs_url: "https://api-docs.serpstat.com/docs/serpstat-public-api/jenasqbwtxdlr-introduction-to-serpstat-api"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

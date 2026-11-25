@@ -31,6 +31,10 @@ apis:
       unit: "queries per day"
       pricing_url: null
       notes: "Free key via Google sign-in; free tier has a daily query allowance; 429 means daily quota exhausted and resets at midnight UTC."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://censusdata.xyz/"
     endpoints:
       - method: "GET"
         path: "/health"
@@ -47,6 +51,7 @@ apis:
         summary: "Discover Census variables by keyword."
         returns: "Matching variables, descriptions, and suggested natural-language queries."
         docs_url: "https://censusdata.xyz/skill"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -107,7 +112,12 @@ apis:
       unit: null
       pricing_url: null
       notes: "Page describes the API as free; no paid tiers, quotas or rate plans are stated in the provided text."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://www.census.gov/data/developers.html"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

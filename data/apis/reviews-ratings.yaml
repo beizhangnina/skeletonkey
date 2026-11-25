@@ -45,6 +45,18 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/clutch"
     checked_date: 2026-10-24
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -71,12 +83,24 @@ apis:
     source_url: "https://glasser.ai/data-sources/g2"
     checked_date: 2026-10-24
     official_docs_url: "https://documentation.g2.com/docs/g2-api"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/api/v2/products"
         summary: "Test endpoint referenced in the Developer Portal for verifying token or OAuth setup."
         returns: "Product data from G2."
         docs_url: "https://documentation.g2.com/docs/developer-portal"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

@@ -26,6 +26,10 @@ apis:
       unit: "per call"
       pricing_url: null
       notes: "Prepaid wallet, charged only when a call succeeds; free tools cost nothing; keyless free tools allow 300 calls a month per IP; hourly spend limit EUR 100 by default; minimum top-up EUR 10.00."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://strale.io/"
     endpoints:
       - method: "POST"
         path: "/v1/do"
@@ -52,6 +56,7 @@ apis:
         summary: "Runs a bundled check (several tools as one call at one price); body takes inputs and an optional max_price_cents, and a key is required."
         returns: "result.status (completed, partial or failed), result.steps keyed by tool, result.errors and result.gated; charged in full unless every step failed."
         docs_url: "https://strale.dev/docs/api"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -90,6 +95,10 @@ apis:
       unit: "API credits"
       pricing_url: null
       notes: "Calls are metered in credits; 1,000 free welcome credits ($10) are granted once per person."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/us/statutes/coverage"
@@ -116,6 +125,7 @@ apis:
         summary: "Returns one state session law with identity, dates, outcome, sources and affected code sections."
         returns: "The law record, including dates, enactment outcome and source links."
         docs_url: "https://www.vaquill.ai/docs/api-guide/session-laws"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

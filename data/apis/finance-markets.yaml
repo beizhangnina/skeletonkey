@@ -19,7 +19,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/edinet"
     checked_date: 2026-10-24
     official_docs_url: "https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -51,6 +63,17 @@ apis:
       header: "X-API-KEY"
       format: "<API_KEY>"
       docs_url: "https://docs.financialdatasets.ai/llms.txt"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "prepaid_min"
+      min_monthly_usd: null
+      min_prepay_usd: 20
+      gate_source_url: "https://www.financialdatasets.ai/pricing"
     endpoints:
       - method: "GET"
         path: "/activist-ownership"
@@ -77,6 +100,7 @@ apis:
         summary: "Looks up activist filers and their CIKs by owner name (prefix, case-insensitive), paged with limit."
         returns: "Matches for the name prefix plus a total count of all matches alongside the returned page."
         docs_url: "https://docs.financialdatasets.ai/api/activist-ownership"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -157,12 +181,24 @@ apis:
     source_url: "https://glasser.ai/data-sources/marketstack"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.apilayer.com/marketstack/docs/api-documentation"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://marketstack.com/pricing"
     endpoints:
       - method: "GET"
         path: "/v2/tickers/AAPL"
         summary: "Looks up detailed information for a single stock ticker symbol passed in the URL path, with pagination options."
         returns: "Ticker information record for the requested symbol."
         docs_url: "https://docs.apilayer.com/marketstack/docs/quickstart-guide"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -221,7 +257,12 @@ apis:
       unit: null
       pricing_url: null
       notes: "Only indication on the provided pages is a marketplace listing mentioning 'Free trial'; no plan tiers or prices are stated."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

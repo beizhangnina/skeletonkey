@@ -44,7 +44,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/google-maps"
     checked_date: 2026-10-24
     official_docs_url: "https://developers.google.com/maps/documentation"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://developers.google.com/maps/billing-and-pricing"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

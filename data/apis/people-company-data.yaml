@@ -31,6 +31,10 @@ apis:
       unit: "credits per API call"
       pricing_url: null
       notes: "Usage is metered in credits that vary by endpoint/section; some commands are billed per record."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://akta.pro/pricing"
     endpoints:
       - method: "GET"
         path: "/api/v1/news"
@@ -57,6 +61,7 @@ apis:
         summary: "Enrich a company by UUID or website, requesting one or more data sections such as firmographic."
         returns: "JSON with data.uuid, the requested section objects (e.g. firmographic), and credits_consumed."
         docs_url: "https://docs.akta.pro/docs/company-data/quick-start.md"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -88,6 +93,17 @@ apis:
       header: "x-api-key"
       format: "<API_KEY>"
       docs_url: "https://docs.apollo.io/reference/authentication"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/accounts/search"
@@ -114,6 +130,7 @@ apis:
         summary: "Get the current user profile to confirm which user your API key acts as."
         returns: "A user profile whose id is the acting user, matching owner fields such as object_owner_id."
         docs_url: "https://docs.apollo.io/reference/authentication"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "POST"
@@ -177,7 +194,12 @@ apis:
       unit: "10 lookups"
       pricing_url: null
       notes: "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -209,6 +231,17 @@ apis:
       header: "clay-api-key"
       format: "<API_KEY>"
       docs_url: "https://developers.clay.com/public-api/authentication.md"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "contact_sales"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://www.clay.com/pricing"
     endpoints:
       - method: "GET"
         path: "/me"
@@ -235,6 +268,17 @@ apis:
         summary: "Runs a structured query against Clay table data and returns records with field metadata, paginated by cursor."
         returns: "Records with field metadata plus a cursor for the next page; scans are least-recently-updated-first."
         docs_url: "https://developers.clay.com/api-reference/tables/run-a-structured-query-across-one-or-more-tables.md"
+    alternatives:
+      - vendor_id: "treg"
+        why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, Clay-equivalent coverage not verified)."
+        access_gate: "none"
+      - vendor_id: "pdl"
+        why: "Person and company enrichment API with a free account to start."
+        access_gate: "none"
+      - vendor_id: "datalegion"
+        why: "Person and company enrichment from an email or domain; prepaid credits, no subscription ($10 minimum purchase)."
+        access_gate: "prepaid_min"
+    cost_badge: "red"
     usage_api:
       available: null
       method: null
@@ -352,6 +396,10 @@ apis:
       unit: "credit"
       pricing_url: null
       notes: "Credit-based: each returned record costs a credit; count, utility, and report tools are free. Self-serve credits or enterprise contracts."
+      api_access_gate: "prepaid_min"
+      min_monthly_usd: null
+      min_prepay_usd: 10
+      gate_source_url: "https://www.datalegion.ai/pricing"
     endpoints:
       - method: "POST"
         path: "/person/enrich"
@@ -378,6 +426,7 @@ apis:
         summary: "Normalize emails, phones, names, domains, and other fields."
         returns: "Cleaned values for each submitted field, alongside the original values."
         docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -411,6 +460,10 @@ apis:
       unit: "per credit"
       pricing_url: null
       notes: "250 one-time signup credits; purchased credits $0.06 each; Pro is $100/month with 2,000 monthly credits."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.tryfundable.ai/usage"
     endpoints:
       - method: "POST"
         path: "/companies"
@@ -437,6 +490,7 @@ apis:
         summary: "Retrieve the authenticated account's current monthly and purchased credit balances; free and does not accept a user ID."
         returns: "Credit balance information for the account tied to the API key."
         docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -470,6 +524,10 @@ apis:
       unit: "per month (credit-based plans)"
       pricing_url: null
       notes: "Credit-based; credits deducted only for valid results. Some search endpoints run zero-credit on Professional/Ultimate under fair use; validation costs 0.25 credits per definitive result."
+      api_access_gate: "subscription_required"
+      min_monthly_usd: 99
+      min_prepay_usd: null
+      gate_source_url: "https://leadmagic.io/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/people/email-validation"
@@ -496,6 +554,20 @@ apis:
         summary: "People search for base profile discovery at companies or across an ICP; contact values require separate enrichment."
         returns: "Base profile records (contact values not included); paged by signed cursor"
         docs_url: "https://leadmagic.io/docs/api-reference"
+    alternatives:
+      - vendor_id: "treg"
+        why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, coverage not verified)."
+        access_gate: "none"
+      - vendor_id: "prospeo"
+        why: "Email and phone discovery for B2B prospecting; free API access for all users."
+        access_gate: "none"
+      - vendor_id: "hunter"
+        why: "Finds and verifies professional email addresses; free API key on sign-up."
+        access_gate: "none"
+      - vendor_id: "datalegion"
+        why: "Person and company enrichment; prepaid credits, no subscription ($10 minimum purchase)."
+        access_gate: "prepaid_min"
+    cost_badge: "red"
     usage_api:
       available: null
       method: null
@@ -529,6 +601,10 @@ apis:
       unit: "credits per billable action"
       pricing_url: null
       notes: "Account usage response reports a credits balance and per-action credit costs (e.g. api_search, email, phone); no USD prices stated."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/v3/contacts/search"
@@ -555,6 +631,7 @@ apis:
         summary: "Lists every Lusha data column that can be added to a contacts table (22 columns), with no request body or parameters."
         returns: "Column entries with category, displayName, columnKey, and type; free, no credits charged."
         docs_url: "https://docs.lusha.com/llms-full.txt"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -593,6 +670,10 @@ apis:
       unit: "API Credits"
       pricing_url: null
       notes: "Billed in API Credits; empty Query Spec searches are free, contact unlock is billed per value returned. No dollar amount is stated in these pages."
+      api_access_gate: "prepaid_min"
+      min_monthly_usd: null
+      min_prepay_usd: 10
+      gate_source_url: "https://platform.metix.ai/docs/credits"
     endpoints:
       - method: "POST"
         path: "/v1/people-search"
@@ -619,6 +700,7 @@ apis:
         summary: "Fetch company records, including headquarters, funding round and stock listings, for up to 100 company IDs."
         returns: "Company record fields such as name, size, industry, headquarters, funding and listings."
         docs_url: "https://platform.metix.ai/docs/api/companies/record"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -657,6 +739,10 @@ apis:
       unit: "credits per profile"
       pricing_url: null
       notes: "Credits are consumed for profile work; face search costs 100 credits per profile vs 10 for normal full generation."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/v3/search"
@@ -678,6 +764,7 @@ apis:
         summary: "Create an Orbit workspace and API key for an agent without dashboard sign-in."
         returns: "API key, scopes, signup credits, sign-up URL, and organization_id."
         docs_url: "https://docs.orbitsearch.com/llms-full.txt"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -704,6 +791,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/pdl"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.peopledatalabs.com/docs/authentication"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.peopledatalabs.com/docs/intro"
     endpoints:
       - method: "GET"
         path: "/v5/person/enrich"
@@ -715,6 +813,7 @@ apis:
         summary: "Subject Request API endpoint that lets customers fetch a list of opted-out consumer IDs."
         returns: "A stream of lines listing opted out IDs (fetched with stream=True)."
         docs_url: "https://docs.peopledatalabs.com/docs/subject-request-api"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -741,6 +840,17 @@ apis:
     source_url: "https://monid.ai/tools/ploid"
     checked_date: 2026-10-24
     official_docs_url: "https://ploid.com/documentation"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "subscription_required"
+      min_monthly_usd: 200
+      min_prepay_usd: null
+      gate_source_url: "https://ploid.com/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/person"
@@ -767,6 +877,17 @@ apis:
         summary: "Read a public LinkedIn profile by URL without caller-provided cookies, proxies, or provider keys."
         returns: "Public LinkedIn profile data for the requested URL, drawn from the documented public LinkedIn read operations."
         docs_url: "https://ploid.com/documentation/api/social"
+    alternatives:
+      - vendor_id: "treg"
+        why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, coverage not verified)."
+        access_gate: "none"
+      - vendor_id: "metixai"
+        why: "People, job and company search over a profile index; buy API credits without a plan ($10 minimum purchase)."
+        access_gate: "prepaid_min"
+      - vendor_id: "pdl"
+        why: "Person datasets for identity resolution and work history; free account to start."
+        access_gate: "none"
+    cost_badge: "red"
     usage_api:
       available: null
       method: null
@@ -793,7 +914,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/predictleads"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.predictleads.com/api_endpoints/introduction/authentication"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://predictleads.com/pricing"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -820,6 +953,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/producthunt"
     checked_date: 2026-10-24
     official_docs_url: "https://api.producthunt.com/v2/docs"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/v2/oauth/authorize"
@@ -836,6 +980,7 @@ apis:
         summary: "GraphQL access using a client-level token for public fields; user-level fields such as isVoted return default values (false)."
         returns: "JSON GraphQL response where user-scoped fields fall back to defaults and viewer is null."
         docs_url: "https://api.producthunt.com/v2/docs/oauth_client_only_authentication/unauthorized_oauth_oauth_test_invalid_access_to_user-level_content_with_just_an_client_level_token_will_lead_to_errors"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -874,6 +1019,10 @@ apis:
       unit: "credits (per endpoint, per row/attribute)"
       pricing_url: null
       notes: "Free plan exists (personal email signups); per-call credit costs vary by endpoint; 402 returned for insufficient credits."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.sumble.com/get-started/plans-and-billing"
     endpoints:
       - method: "POST"
         path: "/v9/organizations"
@@ -900,6 +1049,7 @@ apis:
         summary: "Submit a general support request programmatically; free of charge and replies are sent to your account email."
         returns: "Support request handling; both support endpoints are free."
         docs_url: "https://docs.sumble.com/api/api"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -926,6 +1076,17 @@ apis:
     source_url: "https://monid.ai/tools/the-companies-api"
     checked_date: 2026-10-24
     official_docs_url: "https://www.thecompaniesapi.com/api"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/v2/companies/:domain"
@@ -952,6 +1113,7 @@ apis:
         summary: "Add (attach) or remove (detach) up to 1,000 companies in a list using their domains or company IDs."
         returns: "The updated list object, including analytics such as companiesCount."
         docs_url: "https://www.thecompaniesapi.com/api/toggle-companies-in-list"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"

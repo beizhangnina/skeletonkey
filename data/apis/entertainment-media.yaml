@@ -73,7 +73,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/steam"
     checked_date: 2026-10-24
     official_docs_url: "https://partner.steamgames.com/doc/webapi"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

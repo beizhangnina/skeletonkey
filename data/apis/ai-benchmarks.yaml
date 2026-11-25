@@ -31,6 +31,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Three tiers: Free, Pro, Commercial. Free tier gets 100 requests per 24-hour window; paid tier prices are not stated in the text (Commercial: contact the team)."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/api/v2/language/models/free"
@@ -57,6 +61,7 @@ apis:
         summary: "Get the coding agents leaderboard with Coding Agent Index scores, cost, time and token usage."
         returns: null
         docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

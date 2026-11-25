@@ -137,6 +137,10 @@ apis:
       unit: "credits"
       pricing_url: null
       notes: "API and webhooks: 1 credit per job, 3 per company. Credits are only spent when data is returned, and paid credits last 12 months."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://theirstack.com/en/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/jobs/search"
@@ -163,6 +167,7 @@ apis:
         summary: "List industries and their IDs with job and company counts, and search them by name; use IDs in search filters."
         returns: "A data array of industries with job and company counts plus metadata containing total_results."
         docs_url: "https://theirstack.com/llms-full.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -214,12 +219,24 @@ apis:
     source_url: "https://monid.ai/tools/web3-career"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://web3.career/web3-jobs-api"
     endpoints:
       - method: "GET"
         path: "/api/v1"
         summary: "Returns the latest Web3 job listings as JSON, with optional filters for tag, country, remote status, result limit, and whether to include descriptions."
         returns: "A top-level JSON array of mixed types; job objects sit in a nested array found as the first element that is itself an array."
         docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

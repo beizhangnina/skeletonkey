@@ -31,7 +31,12 @@ apis:
       unit: null
       pricing_url: null
       notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://exa.ai/docs/admin/pricing"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -95,6 +100,10 @@ apis:
       unit: "per request (x402, USDC on Base)"
       pricing_url: null
       notes: "Keyless calls are free; an API key includes a free monthly allowance; x402 calls cost $0.01 each."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://keenable.ai/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/search"
@@ -121,6 +130,7 @@ apis:
         summary: "Create a monitor that watches a topic for new pages or watches one page for changes."
         returns: "The created monitor; on creation, the response includes the webhook signing secret."
         docs_url: "https://docs.keenable.ai/api-reference/monitors/create.md"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -159,6 +169,10 @@ apis:
       unit: "per 1,000 requests"
       pricing_url: null
       notes: "Flat $0.15 per 1,000 requests; prepay credits from $10 lasting six months; failed requests not billed; free key with 5 calls."
+      api_access_gate: "prepaid_min"
+      min_monthly_usd: null
+      min_prepay_usd: 10
+      gate_source_url: "https://litescrape.com/pricing"
     endpoints:
       - method: "GET"
         path: "/api/reddit/subreddit-posts"
@@ -185,6 +199,7 @@ apis:
         summary: "Returns Google search results for a query, including the AI Overview and People also ask sections."
         returns: "Google search results including AI Overview and People also ask."
         docs_url: "https://litescrape.com/docs"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -218,6 +233,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Pay-as-you-go API billing, with an optional Search Plan or QPS Plan; no prices or free-tier terms appear on the provided pages."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://octen.ai/pricing"
     endpoints:
       - method: "POST"
         path: "/pulse-search"
@@ -244,6 +263,7 @@ apis:
         summary: "Searches for places matching a query and returns each as a place card with address, coordinates, contact details, opening status, rating."
         returns: "Place cards plus optional web results and query/location metadata."
         docs_url: "https://docs.octen.ai/api-reference/place-search.md"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -277,6 +297,10 @@ apis:
       unit: "credits per request"
       pricing_url: null
       notes: "Requests are billed in credits at per-endpoint rates; some endpoints list their credit cost explicitly (screenshot 2, ask 5, deepcrawl 20)."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/search"
@@ -303,6 +327,7 @@ apis:
         summary: "Asynchronously crawls many pages of one site, scoped with include_paths/exclude_paths and capped with max_pages."
         returns: "202 Accepted with a taskId; poll GET /deepcrawl/status/{taskId} until finished (JSON or ZIP output)."
         docs_url: "https://s1.dev/docs/guides/choosing-an-endpoint"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -336,6 +361,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Plan-based, month-to-month contract, cancel anytime; usage is tracked in searches and extra credits. Actual plan prices are not stated on these pages."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/search"
@@ -347,6 +376,7 @@ apis:
         summary: "Markdown variant of the search request used to get token-efficient Markdown output instead of JSON."
         returns: "Search results rendered as clean Markdown for LLMs and AI agents."
         docs_url: "https://serpapi.com/llms.txt"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -380,7 +410,12 @@ apis:
       unit: "queries"
       pricing_url: null
       notes: "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://serper.dev/"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

@@ -26,7 +26,12 @@ apis:
       unit: "per month"
       pricing_url: null
       notes: "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -53,7 +58,19 @@ apis:
     source_url: "https://monid.ai/tools/iqair"
     checked_date: 2026-10-24
     official_docs_url: "https://api-docs.iqair.com/"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
