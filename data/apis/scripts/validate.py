@@ -6,21 +6,25 @@ Checks, per entry:
   * enum membership for access_mode / signup / signup_automatable / auth_type
   * checked_date is a real ISO date (YYYY-MM-DD)
   * ids unique across every shard, and slug-shaped
-  * seen_in is a non-empty subset of {glasser, monid, flatkey}
+  * seen_in is a non-empty subset of {glasser, monid, flatkey, vendor-direct}
+  * the optional `access_modes` list, for a vendor documenting more than one way
+    in, whose first element must equal access_mode
   * category matches the filename the entry lives in
   * provider_url / docs_url / source_url are http(s) URLs when not null
   * min_topup / billing_unit / free_tier are null or of a sane type
   * the optional `offering` block: a one-line summary, service categories from a
     closed list, approximate counts, what is free, how to connect, the vendor's
     own catalog URL, and at most HIGHLIGHTS_MAX highlighted models/endpoints
+  * the optional `usage_api` block: whether the vendor documents an API to
+    check your own usage/spend/quota, and the method/path/docs_url for it
   * the optional structured core fields (ND-8): `official_docs_url`, `auth`,
     `pricing`, `endpoints` and `endpoints_note` -- the vendor's own docs URL,
     how its endpoint is credentialed, what it charges, and a capped list of
     its documented endpoints
 
-`offering` and the ND-8 fields are OPTIONAL on every row: a shard written
-before they existed validates unchanged. They mirror the blocks src/apis.ts
-enforces for apis.yaml, field for field, so one schema covers both files.
+`offering`, `usage_api` and the ND-8 fields are OPTIONAL on every row: a shard
+written before they existed validates unchanged. They mirror the blocks
+src/apis.ts enforces for apis.yaml, field for field, so one schema covers both files.
 
 Exit code 0 = pass, 1 = fail.  Usage: python3 validate.py [dir]
 """
@@ -37,9 +41,45 @@ REQUIRED = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
             'source_url', 'checked_date']
 
 # Keys a row MAY carry. Everything here is optional and null-when-unknown, so
-# adding one to a shard cannot invalidate the rows that do not have it.
-OPTIONAL = ['offering', 'official_docs_url', 'auth', 'pricing', 'endpoints',
-            'endpoints_note', 'alternatives', 'alternatives_note', 'cost_badge']
+# adding one to a shard cannot invalidate the rows that do not have it. This is
+# the list the "unexpected key" check reads: a row carrying none of them is
+# exactly as valid as it was before any of them existed.
+OPTIONAL = ['offering', 'access_modes', 'official_docs_url', 'auth', 'pricing',
+            'endpoints', 'endpoints_note', 'alternatives', 'alternatives_note',
+            'cost_badge', 'collection_scope', 'visibility', 'visibility_note',
+            'usage_api']
+
+# ---- catalog scope (Bei, 2026-11-24) ----------------------------------------
+# Kept byte-identical in meaning to src/apis.ts (COLLECTION_SCOPES, VISIBILITIES,
+# VISIBILITY_NOTE_MAX, TOOL_SCOPE_CATEGORIES). test/collection-scope.test.ts
+# asserts the two lists have not drifted apart.
+COLLECTION_SCOPES = ['tool', 'data', 'aggregator', 'llm']
+VISIBILITIES = ['listed', 'hidden']
+VISIBILITY_NOTE_MAX = 300
+TOOL_SCOPE_CATEGORIES = {
+    'generative-media', 'web-search', 'web-scraping', 'seo-marketing',
+    'developer-infra', 'communications', 'contact-verification',
+}
+
+
+def effective_collection_scope(category, collection_scope=None):
+    """Mirrors src/apis.ts effectiveCollectionScope for a shard row (always has
+    a category, so the access_mode fallback there never applies here)."""
+    if collection_scope:
+        return collection_scope
+    if category == 'llm-models':
+        return 'llm'
+    if category in TOOL_SCOPE_CATEGORIES:
+        return 'tool'
+    return 'data'
+
+
+def effective_visibility(category, collection_scope=None, visibility=None):
+    """Mirrors src/apis.ts effectiveVisibility for a shard row."""
+    if visibility:
+        return visibility
+    return 'hidden' if effective_collection_scope(category, collection_scope) == 'llm' else 'listed'
+
 
 ENUMS = {
     # `keyless` = the vendor documents no credential at all; `wallet-x402` = the
@@ -51,7 +91,12 @@ ENUMS = {
     'signup_automatable': {'yes', 'partial', 'no', 'unknown'},
     'auth_type': {'api_key', 'oauth', 'none', 'unknown'},
 }
-SOURCES = {'glasser', 'monid', 'flatkey'}
+# Where a row's facts came from. The three aggregator catalogs build.py reads,
+# plus `vendor-direct` for a row read off the VENDOR's own pages with no
+# aggregator in the loop (build.py emits it for curated.VENDOR_DIRECT ids; the
+# TypeScript side calls the same set SHARD_SEEN_IN_SOURCES in src/apis.ts).
+SOURCES = {'glasser', 'monid', 'flatkey', 'vendor-direct'}
+VENDOR_DIRECT = 'vendor-direct'
 SLUG = re.compile(r'^[a-z0-9][a-z0-9.-]*$')
 URL = re.compile(r'^https?://\S+$')
 
@@ -81,6 +126,14 @@ FREE_TIER_KEYS = ['available', 'what', 'limits', 'requires_key',
 CONNECT_KEYS = ['base_url', 'auth', 'auth_header', 'auth_format']
 HIGHLIGHT_ROW_KEYS = ['id', 'kind', 'free', 'note', 'url']
 HEADER_NAME = re.compile(r'^[^\s:]+$')
+
+# ---- the optional `usage_api` block -----------------------------------------
+# Whether the vendor documents an API to check your OWN usage/spend/quota,
+# separate from the product API the rest of the row describes. Kept
+# byte-identical in meaning to src/apis.ts's `validateUsageApi`.
+USAGE_API_KEYS = ['available', 'method', 'path', 'docs_url', 'limits', 'notes',
+                  'checked_date']
+USAGE_API_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
 # ---- the structured core fields (ND-8) --------------------------------------
 # Kept byte-identical in meaning to src/apis.ts (AUTH_TYPES, PRICING_MODELS,
@@ -349,6 +402,41 @@ def iso_date(v):
     return len(v) == 10
 
 
+def check_access_modes(errs, where, e):
+    """The optional `access_modes` list: every way in the vendor documents.
+
+    Element 0 must equal `access_mode`, the single field every reader uses --
+    mirrors validateAccessModes() in src/apis.ts, including the message.
+    """
+    modes = e.get('access_modes')
+    if modes is None:
+        return
+    allowed = ENUMS['access_mode']
+    if not isinstance(modes, list):
+        errs.append('%s.access_modes: expected a list or null' % where)
+        return
+    if not modes:
+        errs.append('%s.access_modes: expected a non-empty list or null '
+                    '(null means access_mode is the whole story)' % where)
+        return
+    if len(modes) > len(allowed):
+        errs.append('%s.access_modes: expected at most %d modes, got %d'
+                    % (where, len(allowed), len(modes)))
+    seen = set()
+    for i, m in enumerate(modes):
+        if m not in allowed:
+            errs.append('%s.access_modes[%d]: expected one of %s'
+                        % (where, i, sorted(allowed)))
+            continue
+        if m in seen:
+            errs.append('%s.access_modes[%d]: duplicate mode %r' % (where, i, m))
+        seen.add(m)
+    if modes[0] != e.get('access_mode'):
+        errs.append('%s.access_modes[0]: must match access_mode %r -- the primary '
+                    'mode is the one SkeletonKey actually uses'
+                    % (where, e.get('access_mode')))
+
+
 def check_offering(errs, where, off):
     """The optional `offering` block: Layer 1 facts + the Layer 2 sample.
 
@@ -522,6 +610,85 @@ def check_offering(errs, where, off):
         text(errs, rat, 'note', row.get('note'))
         if row.get('url') is not None and not is_url(row.get('url')):
             errs.append('%s.url: expected an http(s) URL or null' % rat)
+
+
+def check_usage_api(errs, where, ua):
+    """The optional `usage_api` block: does the vendor expose an API to check
+    your OWN usage/spend/quota, separate from the product API the rest of the
+    row describes. Mirrors src/apis.ts's `validateUsageApi`, field for field:
+      * `available` and `checked_date` are required keys.
+      * `method`/`path` are required, non-null, when available is true.
+      * `docs_url` is required, non-null, whenever available is true or false.
+    """
+    at = '%s.usage_api' % where
+    if ua is None:
+        return
+    if not isinstance(ua, dict):
+        errs.append('%s: expected a mapping or null' % at)
+        return
+    for k in ua:
+        if k not in USAGE_API_KEYS:
+            errs.append('%s.%s: unknown field' % (at, k))
+
+    if 'available' not in ua:
+        errs.append('%s.available: missing (use null if unknown)' % at)
+    available = ua.get('available')
+    flag(errs, at, 'available', available)
+
+    method = ua.get('method')
+    if method is not None and method not in USAGE_API_METHODS:
+        errs.append('%s.method: expected one of %s or null'
+                    % (at, ' | '.join(USAGE_API_METHODS)))
+    text(errs, at, 'path', ua.get('path'))
+    text(errs, at, 'limits', ua.get('limits'))
+    text(errs, at, 'notes', ua.get('notes'))
+
+    docs_url = ua.get('docs_url')
+    if docs_url is not None and not is_url(docs_url):
+        errs.append('%s.docs_url: expected an http(s) URL or null' % at)
+
+    if available is True:
+        if not isinstance(method, str) or not method.strip():
+            errs.append('%s.method: required when available is true'
+                        ' (how is it called?)' % at)
+        path = ua.get('path')
+        if not isinstance(path, str) or not path.strip():
+            errs.append('%s.path: required when available is true'
+                        ' (what is the endpoint?)' % at)
+    if available is True or available is False:
+        if not isinstance(docs_url, str) or not docs_url.strip():
+            errs.append('%s.docs_url: required when available is true or false'
+                        ' (where was this verified?)' % at)
+
+    if 'checked_date' not in ua:
+        errs.append('%s.checked_date: missing (when was this checked?)' % at)
+    else:
+        checked = ua.get('checked_date')
+        if not iso_date(checked):
+            errs.append('%s.checked_date: expected an ISO date (YYYY-MM-DD)' % at)
+
+
+def check_collection(errs, where, e):
+    """The optional `collection_scope` / `visibility` / `visibility_note` fields.
+
+    `visibility: hidden` is deliberately NOT required to carry a note -- same
+    rule as the TS validator.
+    """
+    scope = e.get('collection_scope')
+    if scope is not None and scope not in COLLECTION_SCOPES:
+        errs.append('%s.collection_scope: must be one of %s' % (where, ', '.join(COLLECTION_SCOPES)))
+    visibility = e.get('visibility')
+    if visibility is not None and visibility not in VISIBILITIES:
+        errs.append('%s.visibility: must be one of %s' % (where, ', '.join(VISIBILITIES)))
+    note = e.get('visibility_note')
+    if note is not None:
+        if not isinstance(note, str) or not note.strip():
+            errs.append('%s.visibility_note: expected a non-empty string or null' % where)
+        elif '\n' in note or '\r' in note:
+            errs.append('%s.visibility_note: expected a single line (no line breaks)' % where)
+        elif len(note) > VISIBILITY_NOTE_MAX:
+            errs.append('%s.visibility_note: expected at most %d characters, got %d'
+                        % (where, VISIBILITY_NOTE_MAX, len(note)))
 
 
 def check_structured_fields(errs, where, e, known_vendor_ids):
@@ -900,9 +1067,16 @@ def main(root):
             if e.get('billing_unit') is not None and not isinstance(e['billing_unit'], str):
                 errs.append('%s: billing_unit must be a string or null' % where)
 
+            check_access_modes(errs, where, e)
+
             if 'offering' in e:
                 check_offering(errs, where, e['offering'])
             check_structured_fields(errs, where, e, known_ids)
+
+            check_collection(errs, where, e)
+
+            if 'usage_api' in e:
+                check_usage_api(errs, where, e['usage_api'])
 
             d = e.get('checked_date')
             d = d.isoformat() if isinstance(d, datetime.date) else d

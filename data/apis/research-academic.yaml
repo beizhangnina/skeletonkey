@@ -18,6 +18,31 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/openalex"
     checked_date: 2026-10-24
+    official_docs_url: "https://help.openalex.org/api/"
+    endpoints:
+      - method: "GET"
+        path: "/works"
+        summary: "List, filter, search, sort, group, or page through works; returns JSON entity results."
+        returns: "JSON envelope with meta and results array."
+        docs_url: "https://help.openalex.org/api/"
+      - method: "POST"
+        path: "/"
+        summary: "Send a long query as OQL in a JSON body to avoid GET URL length limits."
+        returns: "The same results as the equivalent GET request."
+        docs_url: "https://help.openalex.org/api/searching/"
+      - method: "POST"
+        path: "/api-keys"
+        summary: "Request a free API key for a user by email; the key activates after the emailed link is clicked."
+        returns: "JSON with api_key, pending activation status, email, and daily budget details."
+        docs_url: "https://help.openalex.org/api/authentication/"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://help.openalex.org/api/authentication/#getting-a-key-for-your-user"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "valyu"
     name: "Valyu"
     capability: "Structured search across financial, pharmaceutical and clinical-trial reference datasets."
@@ -35,3 +60,50 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/valyu"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.valyu.ai/home"
+    auth:
+      type: "api_key"
+      header: "x-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://docs.valyu.ai/api-reference/overview.md"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: 29
+      unit: "per month for 5,000 credits"
+      pricing_url: null
+      notes: "Usage is charged from one credit balance; 2,000 free monthly credits with a work email; plans start at $29/month for 5,000 credits."
+    endpoints:
+      - method: "POST"
+        path: "/v1/search"
+        summary: "Search web and specialist datasets; returns ranked results with source URLs and extracted content."
+        returns: "Ranked results with title, url, content, source, publication_date and metadata; latency in seconds."
+        docs_url: "https://docs.valyu.ai/llms-full.txt"
+      - method: "POST"
+        path: "/v1/contents"
+        summary: "Extract clean content from URLs you already have, with optional summary or JSON extraction."
+        returns: "Clean markdown per URL, optional summary or JSON extraction; latency in seconds."
+        docs_url: "https://docs.valyu.ai/llms-full.txt"
+      - method: "POST"
+        path: "/v1/deepresearch/tasks"
+        summary: "Create an asynchronous research task from a brief, with modes from instant to max."
+        returns: "Task ID for polling; final output can include a cited markdown report, sources, deliverable files and cost."
+        docs_url: "https://docs.valyu.ai/llms-full.txt"
+      - method: "GET"
+        path: "/v1/deepresearch/tasks/{id}/status"
+        summary: "Poll a DeepResearch task until it completes or fails and collect its results."
+        returns: "Task status, and when complete, cited markdown report, sources, deliverables files and cost."
+        docs_url: "https://docs.valyu.ai/llms-full.txt"
+      - method: "GET"
+        path: "/v1/datasources"
+        summary: "Discover available datasets and their source IDs for search scoping."
+        returns: "Catalogue of data sources with source IDs; latency in seconds."
+        docs_url: "https://docs.valyu.ai/llms-full.txt"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

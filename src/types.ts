@@ -69,6 +69,20 @@ export interface GatewayConfig {
   fallback_bind?: string;
 }
 
+/**
+ * Thresholds `skeletonkey monitor run` (ND-5) judges an anomaly against. Every
+ * field is optional; a config with no `monitor:` section gets the safe
+ * defaults documented in `src/monitor/thresholds.ts`.
+ */
+export interface MonitorConfig {
+  /** Official usage delta must exceed ledger-implied usage by more than this multiple. */
+  anomaly_multiplier?: number;
+  /** ...or exceed ledger-implied usage by more than this many units, whichever bound is higher. */
+  anomaly_absolute_threshold?: number;
+  /** Flag a weekly drop in `remaining` bigger than this percentage. */
+  remaining_drop_pct_threshold?: number;
+}
+
 export interface Config {
   /** Dedicated email used to sign up for API accounts and to label vault items. */
   email: string;
@@ -79,6 +93,7 @@ export interface Config {
   bw_folder?: string;
   proxy?: ProxyConfig;
   gateway?: GatewayConfig;
+  monitor?: MonitorConfig;
   created: string;
 }
 
@@ -107,6 +122,21 @@ export interface KeyMeta {
    * vendor you reach over plain HTTP on purpose -- a key goes into that header.
    */
   scheme?: UpstreamScheme;
+  /**
+   * Undefined/`"header"` (the default): the proxy injects `header`/`format`.
+   * `"env-only"`: the vendor authenticates some other way (e.g. a query
+   * parameter, like SerpApi's `api_key=`), so the proxy never injects a
+   * header for this key -- only `skeletonkey run --env NAME=vault://<alias>`
+   * reaches the raw secret.
+   */
+  injection?: KeyInjection;
+}
+
+export const KEY_INJECTIONS = ["header", "env-only"] as const;
+export type KeyInjection = (typeof KEY_INJECTIONS)[number];
+
+export function isKeyInjection(value: string): value is KeyInjection {
+  return (KEY_INJECTIONS as readonly string[]).includes(value);
 }
 
 export interface KeysFile {

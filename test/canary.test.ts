@@ -34,10 +34,22 @@ const CANARIES = {
   card_cvv: "321",
   bw_session: "FAKE-canary-BWSESSION-0xC0FFEE33",
   popup_value: "FAKE-canary-TYPED-0xC0FFEE44",
+  // A T6 login entry: a username is PII and a secret of the same class as the
+  // password, so it is swept the same way.
+  login_username: "FAKE-canary-USER-0xC0FFEE55",
+  login_password: "FAKE-canary-LOGINPW-0xC0FFEE66",
 };
 
 /** Fragments that would betray a leak even if something truncated the value. */
-const FRAGMENTS = ["0xC0FFEE11", "0xC0FFEE22", "0xC0FFEE33", "0xC0FFEE44", "sk-test-FAKE-canary"];
+const FRAGMENTS = [
+  "0xC0FFEE11",
+  "0xC0FFEE22",
+  "0xC0FFEE33",
+  "0xC0FFEE44",
+  "0xC0FFEE55",
+  "0xC0FFEE66",
+  "sk-test-FAKE-canary",
+];
 
 const APIS_YAML = path.join(REPO_ROOT, "apis.yaml");
 const ALIAS = "voyage-personal";
@@ -77,6 +89,25 @@ interface Harness {
 async function setUp(): Promise<Harness> {
   const home = makeHome();
   await initWithKey(home, { alias: ALIAS, secret: CANARIES.api_key, domain: DOMAIN });
+  const surfaces: { name: string; text: string }[] = [];
+  // A T6 login entry, stored the way a user stores one: the username on the
+  // command line, the password on stdin.
+  const login = await runCli(
+    home,
+    [
+      "vault",
+      "add",
+      "github-login",
+      "--type",
+      "login",
+      "--stdin",
+      "--username",
+      CANARIES.login_username,
+    ],
+    CANARIES.login_password,
+  );
+  if (login.code !== 0) throw new Error(`vault add failed: ${login.stderr}`);
+  surfaces.push({ name: "cli:vault add", text: `${login.stdout}\n${login.stderr}` });
   const logs: string[] = [];
   const runner = await startRunner({
     home,
@@ -97,7 +128,7 @@ async function setUp(): Promise<Harness> {
     allowTtyPrompt: false,
     runner: new RunnerClient(runner.url, runner.token),
   };
-  return { home, runner, ctx, logs, surfaces: [] };
+  return { home, runner, ctx, logs, surfaces };
 }
 
 describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () => {
@@ -115,6 +146,9 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
     // --- sanity: the canaries really are in play ------------------------
     expect(fs.readFileSync(path.join(h.home, "dev-vault.json"), "utf8")).toContain(
       CANARIES.api_key,
+    );
+    expect(fs.readFileSync(path.join(h.home, "dev-vault.json"), "utf8")).toContain(
+      CANARIES.login_password,
     );
 
     // --- push the secrets through the real paths ------------------------
@@ -178,6 +212,8 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
     const toolArgs: Record<string, Record<string, unknown>> = {
       find_api: { capability: "embeddings" },
       list_keys: {},
+      list_accounts: {},
+      signup_status: {},
       key_status: { alias: ALIAS },
       request_access: { platform: "Voyage AI", reason: "embed", est_budget: 4 },
       access_status: { request_id: requestId },
@@ -194,6 +230,7 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
       register_key: { alias: "new-key", platform: "Apify", domain: "api.apify.com" },
       ledger: { alias: ALIAS, limit: 50 },
       disable: { alias: ALIAS, reason: "sweep" },
+      monitor_status: {},
     };
     expect(Object.keys(toolArgs).sort()).toEqual(
       SKELETONKEY_TOOLS.map((tool) => tool.name).sort(),
@@ -201,6 +238,7 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
 
     const surfaces: { name: string; text: string }[] = [
       { name: "request_access (fresh)", text: JSON.stringify(created) },
+      ...h.surfaces,
     ];
     for (const tool of SKELETONKEY_TOOLS) {
       const result = await callSkeletonKeyTool(tool.name, toolArgs[tool.name] ?? {}, h.ctx);
@@ -256,6 +294,10 @@ describe("HARD RULE: no secret reaches the agent, the logs, or the ledger", () =
       ["requests"],
       ["policy", "show"],
       ["key-status-does-not-exist"],
+      ["vault", "list"],
+      ["vault", "list", "--json"],
+      ["vault", "show", "github-login"],
+      ["vault", "show", "github-login", "--json"],
     ]) {
       const result = await runCli(h.home, argv);
       surfaces.push({ name: `cli:${argv.join(" ")}`, text: `${result.stdout}\n${result.stderr}` });

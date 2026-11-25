@@ -23,6 +23,8 @@ const SHARD_DIR = path.join(REPO_ROOT, "data", "apis");
 const TOOL_ARGS: Record<string, Record<string, unknown>> = {
   find_api: { capability: "embeddings" },
   list_keys: {},
+  list_accounts: {},
+  signup_status: {},
   key_status: { alias: ALIAS },
   request_access: { platform: "Voyage AI", reason: "embed a corpus", est_budget: 5 },
   access_status: { request_id: "req_0000000000000000" },
@@ -31,6 +33,7 @@ const TOOL_ARGS: Record<string, Record<string, unknown>> = {
   register_key: { alias: "new-key", platform: "Apify", domain: "api.apify.com" },
   ledger: { alias: ALIAS, limit: 50 },
   disable: { alias: ALIAS, reason: "test" },
+  monitor_status: {},
   discover_api: { capability: "CVE lookup", vendor: "NVD" },
   propose_entry: {
     name: "probe-vendor",
@@ -72,6 +75,8 @@ describe("skeletonkey MCP server", () => {
     expect(SKELETONKEY_TOOL_NAMES).toEqual([
       "find_api",
       "list_keys",
+      "list_accounts",
+      "signup_status",
       "key_status",
       "request_access",
       "access_status",
@@ -82,6 +87,7 @@ describe("skeletonkey MCP server", () => {
       "register_key",
       "ledger",
       "disable",
+      "monitor_status",
     ]);
   });
 
@@ -439,9 +445,14 @@ describe("skeletonkey MCP server", () => {
     const parsed = JSON.parse(text(result)) as {
       index_counts: { shards: number };
       match_count: number;
+      matches: { name: string; index_origin: string }[];
     };
     expect(parsed.index_counts.shards).toBe(0);
-    expect(parsed.match_count).toBe(0);
+    // With the shards off, the shard-only provider is gone. apis.yaml now has
+    // a technographics row of its own (predictleads: PredictLeads' technology
+    // detections), so the assertion is "nothing from a shard", not "nothing".
+    expect(parsed.matches.map((match) => match.name)).not.toContain("builtwith");
+    for (const match of parsed.matches) expect(match.index_origin).toBe("apis.yaml");
   });
 
   it("request_access hands back the vendor's auth facts and ready-made register_key args", async () => {

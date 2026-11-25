@@ -20,6 +20,7 @@ import {
   AGGREGATOR_NAMES,
   BILLING_MODELS,
   CONNECT_AUTH_KINDS,
+  effectiveVisibility,
   HIGHLIGHTS_MAX,
   OFFERING_SUMMARY_MAX,
   SERVICE_CATEGORIES,
@@ -53,8 +54,11 @@ import {
   setDisabled,
   upsertKey,
 } from "./keys.js";
+import { accountSummary, readAccounts } from "./accounts/store.js";
+import { listSignupVendors, signupStatusRows } from "./signup/cli.js";
 import { openLedger, type LedgerSummary } from "./ledger.js";
-import { keysPath } from "./paths.js";
+import { readMonitorState } from "./monitor/state.js";
+import { accountsPath, keysPath, monitorStatePath } from "./paths.js";
 import { promptHiddenOnTty } from "./prompt.js";
 import { createVault } from "./vault/index.js";
 import { upstreamSchemeFor } from "./proxy.js";
@@ -795,7 +799,9 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       "data/apis/*.yaml, merged. Returns how each one is paid for (verified billing model), " +
       "which aggregators resell it and at what published per-call price, a recommended " +
       "{route, reason}, how it authenticates, and whether SkeletonKey already holds a key. " +
-      "Prices are null when unknown -- null never means free. On a miss, call discover_api.",
+      "Prices are null when unknown -- null never means free. Hidden rows (e.g. LLM APIs set " +
+      "aside from the catalog) are left out unless include_hidden is true. On a miss, call " +
+      "discover_api.",
     readOnly: true,
     inputSchema: {
       capability: z
@@ -812,20 +818,31 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           "Warn about rows whose facts were verified longer ago than this (default 90, or " +
             "SKELETONKEY_STALE_DAYS).",
         ),
+      include_hidden: z
+        .boolean()
+        .optional()
+        .describe(
+          "Include rows hidden from listings by default (e.g. LLM APIs set aside from the " +
+            "catalog 2026-11-24). Default false.",
+        ),
     },
     async handler(args, ctx) {
       const capability = required(args, "capability");
       const rawLimit = typeof args["limit"] === "number" ? args["limit"] : 25;
       const limit = Math.min(200, Math.max(1, Math.trunc(rawLimit)));
       const maxAgeDays = staleWindow(ctx, args);
+      const includeHidden = args["include_hidden"] === true;
       // Flip any discovered row that a real 2xx call has since proven.
       const promotion = promote(ctx);
       const index = apiIndex(ctx);
       const keys = readKeys(ctx.home).keys;
+      const searchable = includeHidden
+        ? index.entries
+        : index.entries.filter((entry) => effectiveVisibility(entry) !== "hidden");
       // Whole-word matching, scored: strongest evidence first, and ties keep
       // index order, which puts apis.yaml rows (the ones that know the auth
       // header) ahead of generated shard rows.
-      const ranked = rankByCapability(index.entries, capability);
+      const ranked = rankByCapability(searchable, capability);
       const terms = queryTokens(capability);
       const matches = ranked.map((row) => row.entry);
       const shown = ranked.slice(0, limit);
@@ -834,6 +851,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       ).length;
       return {
         capability,
+        include_hidden: includeHidden,
         search_terms: terms.tokens,
         ignored_terms: terms.ignored,
         ...(terms.tokens.length === 0
@@ -872,6 +890,9 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             domain: entry.domain ?? null,
             capabilities: entry.capabilities ?? [],
             access_mode: entry.access_mode,
+            // Only when the vendor documents more than one way in; access_mode
+            // above stays the one SkeletonKey uses.
+            access_modes: entry.access_modes ?? null,
             min_topup_usd: entry.min_topup,
             billing_unit: entry.billing_unit,
             signup_automatable: entry.signup_automatable,
@@ -894,10 +915,14 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             ...(entry.category === undefined ? {} : { index_category: entry.category }),
             ...(entry.vendor_url === undefined ? {} : { vendor_url: entry.vendor_url }),
             key_in_skeletonkey: key ? { alias: key.alias, disabled: key.disabled } : null,
+            visibility: effectiveVisibility(entry),
           };
         }),
         reminders: [
           "min_topup_usd: null means nobody has checked the price. Do not guess one.",
+          "include_hidden: false (the default) leaves out rows hidden from listings, e.g. LLM APIs " +
+            "set aside from the catalog 2026-11-24. Pass include_hidden: true to see them -- hidden " +
+            "is never deleted.",
           "billing.model: null means nobody checked how the vendor charges. It never means free.",
           "aggregators[].per_call_price_usd: null means that aggregator publishes no comparable " +
             "per-call price, not that the call is free. A price always comes with price_verified_url.",
@@ -947,6 +972,64 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           last_used: key.last_used ?? lastUsed.get(key.alias) ?? null,
         })),
         note: "Call the API through the proxy; there is no tool that reveals a key.",
+      };
+    },
+  },
+
+  {
+    name: "list_accounts",
+    title: "List vendor accounts (metadata only)",
+    description:
+      "List every vendor account SkeletonKey knows about: its name, vendor id, when it was " +
+      "registered, a masked email hint, which vault entries (if any) hold its key and/or login, " +
+      "and whether it is disabled. Agents get vault:// references only -- there is no tool that " +
+      "returns an email, a password, or a key.",
+    readOnly: true,
+    inputSchema: {},
+    async handler(_args, ctx) {
+      const accounts = readAccounts(ctx.home).accounts;
+      return {
+        count: accounts.length,
+        metadata_files: [accountsPath(ctx.home)],
+        accounts: accounts.map((account) => accountSummary(account)),
+        note:
+          "Metadata only. There is no tool that returns a username, a password, or a key. Use the " +
+          "refs with `skeletonkey run --env NAME=<ref> -- <cmd>`.",
+      };
+    },
+  },
+
+  {
+    name: "signup_status",
+    title: "Signup sessions and vendor handoff info (read-only)",
+    description:
+      "List ND-2 signup sessions (id, vendor, account, state, reason, timestamps -- never a " +
+      "secret), optionally filtered to one vendor, plus that vendor's official URLs and the " +
+      "human_steps it still needs. This tool cannot submit a key, start a browser, or complete a " +
+      "signup -- there is no such tool. A human runs `skeletonkey signup start <vendor>` and " +
+      "`skeletonkey signup complete <vendor>` themselves; this tool only reports what already " +
+      "happened.",
+    readOnly: true,
+    inputSchema: {
+      vendor: z.string().optional().describe("Filter to one first-wave vendor id, e.g. apify."),
+    },
+    async handler(args, ctx) {
+      const vendor = str(args, "vendor");
+      const vendors = listSignupVendors();
+      const playbook = vendor === undefined ? null : vendors.find((v) => v.vendor === vendor.toLowerCase()) ?? null;
+      if (vendor !== undefined && playbook === null) {
+        return {
+          vendor,
+          found: false,
+          hint: `Unknown vendor. First-wave vendors: ${vendors.map((v) => v.vendor).join(", ")}.`,
+        };
+      }
+      return {
+        sessions: signupStatusRows(vendor, ctx.home),
+        vendor_info: playbook,
+        note:
+          "Read-only. No tool here can submit a key or complete a signup; a human runs " +
+          "`skeletonkey signup complete <vendor>` after creating the key themselves.",
       };
     },
   },
@@ -1125,6 +1208,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
               url: entry.url,
               domain: entry.domain ?? null,
               access_mode: entry.access_mode,
+              access_modes: entry.access_modes ?? null,
               min_topup_usd: entry.min_topup,
               billing_unit: entry.billing_unit,
               signup_automatable: entry.signup_automatable,
@@ -1406,6 +1490,14 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             "vendor documents no credential at all; `wallet-x402` when the only way to pay is a " +
             "crypto wallet (recorded as a fact; SkeletonKey pays in fiat only).",
         ),
+      access_modes: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Only when the vendor documents MORE than one way in (a key AND a keyless x402 wallet " +
+            "challenge). Element 0 must equal access_mode -- the mode SkeletonKey actually uses, " +
+            "which is never wallet-x402 while a fiat path exists.",
+        ),
       status: z
         .string()
         .optional()
@@ -1429,14 +1521,18 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         .array(
           z.object({
             header: z.string(),
-            format: z.string(),
+            format: z.string().nullable().optional(),
             note: z.string().nullable().optional(),
+            secret: z.boolean().nullable().optional(),
           }),
         )
         .optional()
         .describe(
-          "Every credential header, when the vendor documents more than one. Element 0 must match " +
-            "auth_header/auth_format -- that is the one the proxy injects.",
+          "Every header the vendor's docs require, when there is more than one. Element 0 must " +
+            "match auth_header/auth_format -- that is the one the proxy injects. Pass " +
+            "`secret: false` for a required header that is NOT a credential (a caller id, an API " +
+            "version): its `format` is then the literal value, or null when the vendor documents " +
+            "none, and the caller supplies it.",
         ),
       base_url: z.string().optional().describe("Base URL requests go to."),
       signup_url: z.string().optional().describe("Where signup starts (often not the docs root)."),
@@ -1850,6 +1946,29 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       };
     },
   },
+
+  {
+    name: "monitor_status",
+    title: "Last weekly monitor status (metadata only)",
+    description:
+      "The last-known status for every account from `skeletonkey monitor run`'s state file: " +
+      "status (ok/invalid_key/usage_anomaly/no_usage_api/parse_error/error), when it last ran, and the last " +
+      "normalized usage numbers. Read-only: it never runs a new check and never returns a secret.",
+    readOnly: true,
+    inputSchema: {},
+    async handler(_args, ctx) {
+      const state = readMonitorState(ctx.home);
+      const accounts = Object.entries(state.accounts).map(([name, row]) => ({ name, ...row }));
+      return {
+        state_file: monitorStatePath(ctx.home),
+        count: accounts.length,
+        accounts,
+        note:
+          "Metadata only, from the last `skeletonkey monitor run`. This tool never contacts a " +
+          "vendor itself -- run `skeletonkey monitor run` to refresh it.",
+      };
+    },
+  },
 ];
 
 /** Tool names, handy for tests that assert full coverage. */
@@ -1927,7 +2046,16 @@ research with your own tools, and write what you found with propose_entry. Rows 
 write are status: unverified until a call through the proxy returns 2xx.
 
 Never ask a human to tell you a key, and never write one to chat, a file, or an
-environment variable.`;
+environment variable.
+
+list_accounts() lists the vendor accounts a human has registered (name, vendor, a masked
+email hint, disabled or not) and gives you vault:// references only -- never an email, a
+password, or a key.
+
+monitor_status() reports the last-known status (ok/invalid_key/usage_anomaly/no_usage_api/
+parse_error/error) from \`skeletonkey monitor run\`'s weekly check of each account's official
+usage API. It never runs a new check and never contacts a vendor -- a human runs \`skeletonkey monitor
+run\` (or schedules it themselves; this tool never installs a schedule).`;
 
 export interface McpServerHandle {
   /** Resolves when the transport closes. */
@@ -1941,7 +2069,7 @@ export async function startMcpServer(ctx: McpContext): Promise<McpServerHandle> 
   const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
 
   const server = new McpServer(
-    { name: "skeletonkey", version: "0.3.0" },
+    { name: "skeletonkey", version: "0.4.0" },
     { capabilities: { tools: {} }, instructions: INSTRUCTIONS },
   );
 

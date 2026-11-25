@@ -25,7 +25,7 @@ const MIN_SECRET_LENGTH = 4;
 const JSON_LITERALS = new Set(["null", "true", "false", "undefined", "none", "unknown"]);
 
 /** Luhn check, so a long order number is not reported as a card. */
-function luhnValid(digits: string): boolean {
+export function luhnValid(digits: string): boolean {
   if (digits.length < 13 || digits.length > 19) return false;
   let sum = 0;
   let double = false;
@@ -76,6 +76,15 @@ const SHAPE_RULES: { name: string; pattern: RegExp; replace: (match: string, ...
         : `${label}${separator}${quote}${REDACTED}${quote}`,
   },
   {
+    // A key carried as a bare URL path segment rather than `label=value`, so the
+    // "labelled" rule above (which requires a `:`/`=` separator) never sees it:
+    // defillama-style `.../usage/<KEY>` and semrush-style `.../limits/key/<KEY>`.
+    // No vendor checker ships for either, but the shape is caught anyway.
+    name: "url-path-key",
+    pattern: /(\/(?:usage|limits\/key)\/)([A-Za-z0-9][A-Za-z0-9._-]{11,})(?=[/?#]|$)/gi,
+    replace: (_match, prefix: string) => `${prefix}${REDACTED}`,
+  },
+  {
     // A bare 13-19 digit run that passes Luhn: a card number, with or without
     // spaces/dashes between groups.
     name: "card",
@@ -116,6 +125,20 @@ export class Redactor {
     return this;
   }
 
+  /**
+   * Registers one value exactly as given: no trimming, no minimum length.
+   *
+   * This is what the injection path uses. A secret that is about to be put in
+   * a child's environment must be caught byte for byte, even when it is three
+   * characters long or has a trailing space.
+   */
+  addExact(secret: string | null | undefined): this {
+    if (typeof secret !== "string") return this;
+    if (secret.length === 0) return this;
+    this.secrets.add(secret);
+    return this;
+  }
+
   addAll(secrets: Iterable<string>): this {
     for (const secret of secrets) this.add(secret);
     return this;
@@ -124,6 +147,17 @@ export class Redactor {
   /** How many values are registered. Never the values themselves. */
   get size(): number {
     return this.secrets.size;
+  }
+
+  /**
+   * The registered values, longest first.
+   *
+   * The streaming redactor needs the values themselves to decide where a
+   * chunk boundary may fall, so it asks for them here. Nothing else should:
+   * this list is a secret.
+   */
+  knownValues(): string[] {
+    return [...this.secrets].sort((a, b) => b.length - a.length);
   }
 
   forget(): void {

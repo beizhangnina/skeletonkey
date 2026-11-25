@@ -188,6 +188,62 @@ skeletonkey init
 Use a writable npm global prefix rather than `sudo`: `npm config set prefix
 ~/.npm-global`, then put `~/.npm-global/bin` on `PATH`.
 
+### Quick start: five steps (v0.4)
+
+No SkeletonKey account and no SkeletonKey server: everything below runs on
+your machine, and no key is ever shown to an agent.
+
+1. **Install and set up.** Sets a local passphrase-protected vault and
+   registers the MCP server and skill with Claude Code and Codex.
+
+   ```bash
+   npx -y @dormy/skeletonkey init
+   ```
+
+2. **Find an API.** Browse [skeletonkey.run](https://skeletonkey.run), ask your
+   agent (it calls the `find_api` MCP tool), or search the bundled index:
+
+   ```bash
+   skeletonkey apis show "web scraping"
+   ```
+
+3. **Get a vendor account and bind its key.** `signup start` opens the
+   vendor's own signup page and lists the steps only you can do (captcha,
+   terms, payment); `signup complete` reads the key from a hidden prompt and
+   stores it in the vault. Already have a key? Use `account add --store-key`.
+
+   ```bash
+   skeletonkey signup start apify
+   # ... finish signup and create the key in your browser ...
+   skeletonkey signup complete apify
+   # or, for a key you already have:
+   skeletonkey account add apify-main --vendor apify --store-key --domain api.apify.com
+   ```
+
+4. **Use it without the agent ever seeing it.** Either call through the local
+   proxy, which injects the key per request, or run a command with the key in
+   its environment and its output redacted:
+
+   ```bash
+   skeletonkey proxy --port 8787
+   curl http://127.0.0.1:8787/api.apify.com/v2/users/me
+   # or
+   skeletonkey run --env APIFY_TOKEN=vault://apify-main -- <your command>
+   ```
+
+5. **Check weekly.** Compares each account's official usage API with the local
+   ledger and flags invalid keys; alerts are a local OS notification plus a
+   redacted report on this machine (no email). SkeletonKey never installs a
+   schedule; `monitor install-help` prints cron/launchd/systemd snippets.
+
+   ```bash
+   skeletonkey monitor run
+   skeletonkey monitor report --latest
+   ```
+
+See [Signup (ND-2)](#signup-nd-2), [Accounts (ND-1)](#accounts-nd-1) and
+[Weekly monitor (ND-5)](#weekly-monitor-nd-5) for every flag and exit code.
+
 ### Register the MCP server by hand
 
 `skeletonkey init` and `skeletonkey register` write both of these for you, after
@@ -225,7 +281,7 @@ npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runne
 To install exactly what would be published, without publishing anything:
 
 ```bash
-npm pack && npm install -g ./dormy-skeletonkey-0.3.0.tgz
+npm pack && npm install -g ./dormy-skeletonkey-0.4.0.tgz
 ```
 
 `npm pack` rebuilds `dist/` first. The tarball carries compiled JavaScript and
@@ -662,13 +718,14 @@ its body into your `AGENTS.md`, or point to it from there.
 | --- | --- |
 | `find_api(capability, limit?, max_age_days?)` | Matching index entries from `apis.yaml`, your local discovered rows, **and** the generated provider shards in `data/apis/*.yaml`, **best match first**: what the vendor offers (`offering`: summary, categories, size, free tier, how to connect, its own catalog URL, up to 15 highlighted models/endpoints), the verified `billing` model, which aggregators resell it and at what per-call price, a `{route, reason}` recommendation, how it authenticates, a `freshness` block, and whether you already hold a key. Unknown prices are `null`. Also reports `search_terms` / `ignored_terms`, so a query that matched nothing shows *why*. |
 | `list_keys()` | Every key's alias, platform, domain, injected header name, header *template*, created/last-used, disabled state. |
+| `signup_status(vendor?)` | ND-2 signup sessions (id, vendor, account, state, reason, timestamps — never a secret), and, for one vendor, its official URLs and remaining human steps. Read-only: there is no tool that can submit a key or complete a signup. |
 | `key_status(alias)` | The above for one key, plus call count, bytes, and recorded spend from the ledger. |
 | `access_status(request_id)` | The status of one request: `pending_approval`, `approved`, `ready`, `needs_human` (with a reason such as `no_playbook` or `captcha`), `denied`, `cancelled`, `voided`. After an approved aggregator route it also carries `routed_via`, `routed_cost_usd`, `routed_http_status` and `routed_result` (the aggregator's answer). Opaque ids, statuses and that answer only — no key, no card, no OTP, no screenshot, no page text. |
 | `cancel_request(request_id, reason?)` | Cancels a request the agent raised, and closes any Secure Input Popup waiting on it. Agents may cancel; only a human approves. |
 | `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
 | `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
 | `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
-| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `auth_required` and `auth_headers` too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
+| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `access_modes`, `auth_required` and `auth_headers` (including `secret: false` for a required non-credential header) too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
 | `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
 | `ledger(alias?)` | Recent calls and a spend summary. `cost_usd: null` means unknown, not zero. |
 | `disable(alias)` | Stops injection **and** makes the proxy refuse calls to that domain locally with `403 {"error": "key_disabled"}`. The secret stays in the vault; only a human can re-enable it. |
@@ -826,6 +883,9 @@ editing the config and restarting.
 | `skeletonkey list` | Shows all keys, their domains, upstream scheme, state, and last use. `--json`. |
 | `skeletonkey idle --days N` | Keys with no recorded use in N days (never-used keys always appear). `--json`. |
 | `skeletonkey disable <alias>` / `enable <alias>` | Toggles injection. The secret stays in the vault. |
+| `skeletonkey account add <name> --vendor <id>` | Registers a vendor account (metadata in `accounts.yaml`, never a secret). `--registered`, `--email-stdin` (masked hint only; plaintext `--email <value>` is refused), `--key-alias`, `--store-key --domain <d> [...]`, `--store-login [--url <u>]`, `--stdin`, `--yes`. See [Accounts (ND-1)](#accounts-nd-1). |
+| `skeletonkey account list` / `show <name>` / `disable <name>` / `enable <name>` | Lists, shows, or toggles one account and the vault entries it points at. `list`: `--json`, `--active`. `show`: `--json`. |
+| `skeletonkey signup list` / `start <vendor>` / `status [<vendor>]` / `complete <vendor>` / `abandon <vendor>` | On-demand signup for the six first-wave vendors: a guided human handoff, then bind the key via the ND-1 account path. See [Signup (ND-2)](#signup-nd-2). |
 | `skeletonkey disable --all` | **Kill switch.** Disables every key, voids pending approvals, closes any Secure Input Popup, and makes the proxy answer `403 {"error":"kill_switch"}` locally. Cleared by `skeletonkey resume`. |
 | `skeletonkey proxy` | Runs the injecting proxy. `--port`, `--bind` (or `--host`), `--gateway`, `--token`, `--allow-all-interfaces`, `--insecure-no-token`, `--upstream-scheme http\|https` (forces the scheme for every host; by default it is decided per host). |
 | `skeletonkey mcp` | Runs the stdio MCP server for agents. No tool can return a secret, and every response is passed through the redactor. |
@@ -894,6 +954,25 @@ and neither is one whose only documented way to pay is a crypto wallet (x402 /
 MPP). SkeletonKey pays in fiat only, so `wallet-x402` is recorded as a fact
 about the vendor and is never routed to.
 
+Some vendors document **more than one** way in — glim.sh sells an API key after
+a top-up *and* answers a keyless x402 challenge; AStock's reads need no key
+while its integrator endpoints do. Those rows carry an optional
+`access_modes:` list, and `access_mode` stays the primary:
+
+```yaml
+access_mode: own-account        # the one SkeletonKey actually uses
+access_modes:
+  - own-account                 # element 0 must equal access_mode
+  - wallet-x402                 # recorded as a fact; never routed to
+```
+
+Element 0 is pinned to `access_mode` for the same reason `auth_headers[0]` is
+pinned to `auth_header`: every reader (CLI, MCP, routing) reads the single
+field, so a list that disagreed with it would be a second, silent answer to the
+same question. `null`/absent means `access_mode` is the whole story, so every
+row written before the list existed is unchanged. `skeletonkey apis show`
+prints it as `own-account (also wallet-x402)`.
+
 ### What a vendor offers: `offering`
 
 Two layers, both optional, every field null-when-unknown — so adding the block
@@ -958,10 +1037,36 @@ Two fields sit alongside `auth_header` / `auth_format`:
   all, `true` when one is needed, `null` when nobody checked. Before it,
   `auth_header: null` had to mean both "needs no key" and "we never looked".
   A row may not claim `false` while naming a header.
-- **`auth_headers`** — a list of `{header, format, note}` for the vendors that
-  document more than one credential header. Each `format` must contain `{key}`,
-  at most 5, names unique, and element 0 must match `auth_header` /
-  `auth_format` when those are set, because that is the one the proxy injects.
+- **`auth_headers`** — a list of `{header, format, note, secret}` for the
+  vendors whose docs require more than one header: at most 5, names unique, and
+  element 0 must match `auth_header` / `auth_format` when those are set,
+  because that is the one the proxy injects.
+
+`secret` defaults to `true` — a credential, whose `format` must contain
+`{key}`. Pass `secret: false` for a header that is **required but is not a
+credential**; its `format` is then the literal value the vendor documents, or
+`null` when the vendor documents none, and the caller sends it. askRoger's
+reference demands three headers, only two of which are secrets:
+
+```yaml
+auth_required: true
+auth_header: api-key            # the one the proxy injects
+auth_format: "{key}"
+auth_headers:
+  - header: api-key
+    format: "{key}"
+  - header: Authorization
+    format: "Bearer {key}"      # a second credential, held by the caller
+  - header: source
+    format: null                # docs enumerate no accepted value
+    secret: false               # required, but not a secret
+    note: "The caller sends it."
+```
+
+Because `secret: false` headers are not credentials, they do **not** contradict
+`auth_required: false` — a keyless API may still require an API-version header.
+A `secret: false` element 0 is refused: the proxy injects element 0, so it has
+to be the credential.
 
 ### How `find_api` matches a capability
 
@@ -1102,6 +1207,12 @@ generated shards: the shards record `seen_in: [glasser, monid]` per provider, so
 a hand-written row that displaced a shard row keeps what the catalogs knew
 (carriage only — the shards publish no prices, so `per_call_price` stays `null`).
 
+`seen_in` also accepts **`vendor-direct`**, for a shard row read off the
+vendor's own pages with no aggregator in the loop. Such a row gets
+`aggregators: null` rather than three `carries: false` entries: no catalog was
+searched for it, so `false` would be a negative nobody established. See
+`data/apis/README.md` for how to add one.
+
 ### Keeping verified prices honest: `stale-check`
 
 A `verified_url` is a promise that somebody read a number off that page on a
@@ -1215,18 +1326,232 @@ Two rules, enforced by tests:
 
 Both rules are enforced across the whole merged index, not just `apis.yaml`.
 
-The entries shipped in this repo are all marked `example: true`, including the
-three that back the scenarios in
+Two kinds of row ship in this repo, and nothing in between.
+
+Seven are marked `example: true`, including the three that back the scenarios in
 [docs/v0.1-acceptance.md](docs/v0.1-acceptance.md) (`example-x-twitter-api`,
 `example-apify-scraping`, `example-voyage-embeddings`). They exist to show the
 shape of the file and to give `find_api` something to match. **They are not real
 offers and contain no verified prices.**
 
+The other fourteen are **vendor-direct** rows, read off each vendor's own pages
+with no sign-up and no API call: `nvidia-nim` and `treg`, plus the twelve
+vendors the treg `rea-growth` skill calls (`tinyfish`, `predictleads`,
+`dataforseo`, `akta`, `cloro`, `scrapecreators`, `serpapi`, `adyntel`,
+`anyapi`, `tikhub`, `crawl4ai`, `harvestapi`). Each names its `source` and the
+`checked_date` it was read, and the twelve also carry
+`status: docs-verified` — the vendor's own docs showed the endpoint *and* how it
+authenticates, and no call has been made. Nine of the twelve also appear in the
+generated shards; the hand-written row wins the merge and inherits what the
+catalogs knew about carriage.
+
+## Accounts (ND-1)
+
+An **account** is one record for a vendor account you registered: who it is
+with, when you registered it, and which vault entries (if any) hold its
+secrets. It is metadata, strictly separate from the secrets it points at — the
+account layer never stores an email, a password, or a key, only masked hints
+and `vault://` references. The secret is injected into a process only at the
+moment you ask for it, with
+`skeletonkey run --env NAME=vault://<entry>[.<field>] -- <command>`
+(`skeletonkey vault --help` and `skeletonkey run --help` document the entry
+model and the run command this builds on) — nothing here reads a value and
+nothing here hands one to an agent.
+
+### `skeletonkey account add <name>`
+
+```
+skeletonkey account add <name> --vendor <id>
+  [--registered YYYY-MM-DD] [--email-stdin]
+  [--key-alias <alias>]
+  [--store-key --domain <d> [--platform <p>] [--header <h>] [--format "Bearer {key}"]]
+  [--store-login [--url <https://...>]]
+  [--stdin] [--yes]
+```
+
+- `--vendor <id>` — the vendor's index id (e.g. `apify`), matching
+  `^[a-z0-9][a-z0-9._-]{0,63}$`. If the id is not in the bundled index
+  (`apis.yaml` plus the generated `data/apis/*.yaml` shards), the command
+  prints a one-line warning on stderr and still records the account.
+- `--registered <date>` — defaults to today's local date; must be a real
+  calendar date.
+- The account email never goes on the command line — anything there lands in
+  shell history and the process list. A plaintext `--email <value>` (with or
+  without a value) is refused with a usage error (exit 64) and writes
+  nothing. Instead:
+  - On a terminal: a hidden prompt, not echoed —
+    `Account email (not echoed, Enter to skip): `. Empty input means no email.
+  - Off a terminal, pass `--email-stdin` and put the email on stdin as a
+    single line. If you also need to send a secret on stdin (`--store-key` or
+    `--store-login` with `--stdin`), stdin carries **two** lines instead: the
+    email on the first, the secret on the second — stdin only has room for one
+    value otherwise, so this is the one way to supply both without either
+    ever appearing in argv.
+  - Off a terminal without `--email-stdin`, there is no email (as before).
+  - Only a **masked hint** (`b**********@gmail.com`) is ever written to
+    `accounts.yaml`. With `--store-login`, the same address becomes the
+    login's username, stored as a secret in the vault — never in metadata.
+- `--key-alias <alias>` — on its own, links an *existing* `api_key` vault
+  entry (it must already exist, or the command fails). With `--store-key`, it
+  names the *new* entry instead (default: the account name).
+- `--store-key` — stores a fresh API key (hidden prompt on a terminal, or
+  `--stdin`) the same way `skeletonkey vault add --type api_key` does, and
+  links it as `key_alias`.
+- `--store-login` — stores a fresh login (hidden, confirmed password prompt,
+  or `--stdin`) the same way `skeletonkey vault add --type login` does, named
+  `<name>-login`, and links it as `login_entry`. Needs an email, from the
+  prompt or `--email-stdin`.
+- `--store-key` and `--store-login` together with plain `--stdin` (no
+  `--email-stdin`) is refused: stdin carries exactly one secret, so run two
+  commands (or use a terminal) instead.
+- A name already in `accounts.yaml` is refused unless `--yes` is passed. A
+  failure partway through an `add` — after a secret was already written —
+  rolls that secret back on a best-effort basis; nothing is left half-stored,
+  and no value is ever echoed in an error message.
+
+Output never contains a value, only the references an agent may be given:
+
+```
+Registered account "apify-main" (vendor: apify).
+Metadata recorded in ~/.skeletonkey/accounts.yaml (never contains secret values).
+Give an agent only these references: vault://apify-main (api key)
+Use them with: skeletonkey run --env NAME=<ref> -- <your command>
+```
+
+### `skeletonkey account list` / `show` / `disable` / `enable`
+
+- `account list [--json] [--active]` — `NAME | VENDOR | REGISTERED | EMAIL |
+  KEY ALIAS | STATE`. `--active` hides disabled accounts. `--json` is the same
+  metadata plus `refs` — guaranteed free of any value.
+- `account show <name> [--json]` — one account's metadata, its `refs`, and an
+  example `skeletonkey run` command. Missing name → exit 66.
+- `account disable <name>` / `account enable <name>` — flips `disabled` on the
+  account **and** on whatever it points at (the `api_key` in `keys.yaml`, the
+  `login` in `entries.yaml`), so `skeletonkey run` refuses them
+  (`entry_disabled`, exit 71) and the proxy stops injecting the key.
+  Idempotent, and a missing name is exit 66.
+
+### `accounts.yaml`
+
+Mode `0600`, like `keys.yaml` and `entries.yaml`:
+
+```yaml
+# SkeletonKey account metadata -- NO SECRET VALUES ARE STORED HERE.
+version: 1
+accounts:
+  - name: apify-main
+    vendor: apify
+    registered: "2026-01-15"
+    email_hint: b**********@gmail.com
+    key_alias: apify-main
+    login_entry: null
+    created: 2026-01-15T12:00:00.000Z
+    disabled: false
+    disabled_at: null
+```
+
+Unknown fields are ignored and a malformed row is skipped rather than failing
+the whole file, the same tolerant style as `entries.yaml` and `keys.yaml`. A
+missing `accounts.yaml` means zero accounts, not an error.
+
+### Backends and exit codes
+
+Accounts work with any vault backend. v1 is tested end to end against
+`encrypted-file`, and against `keychain` via a fixture `secret-tool` on a box
+with no real OS keyring (`test/accounts-keychain.test.ts` — explicitly **not**
+a real OS keyring). `account *` reuses the `vault */run` exit-code table in
+full (`src/exit-codes.ts`): `usage` (64) for a bad flag or vendor id,
+`entry_not_found` (66) for a missing account or a missing `--key-alias`
+target, `name_taken` (75) for a duplicate add without `--yes`,
+`backend_refused` (77) for the plaintext `file` backend without
+`SKELETONKEY_ALLOW_TEST_BACKEND=1`, and `entry_disabled` (71) when `run` is
+pointed at something an `account disable` turned off. `vault_locked` (68)
+when the vault cannot be decrypted (wrong `SKELETONKEY_PASSPHRASE` or a
+modified file), and `card_number_rejected` (76) when the secret read for
+`--store-key` / `signup complete` is a 13-19 digit Luhn-valid number (spaces
+and dashes allowed): nothing is stored, `signup complete` leaves the session
+`needs_human`, and no digit of the value is printed.
+
+### MCP: `list_accounts`
+
+The MCP server exposes a read-only `list_accounts` tool: the same metadata as
+`account list --json`, plus `refs`. There is no tool that returns an email, a
+password, or a key — an agent gets a `vault://` reference and runs
+`skeletonkey run --env NAME=<ref> -- <command>` itself, or hands that exact
+command to a human.
+
+## Signup (ND-2)
+
+`skeletonkey signup` lets a human start registering one of six first-wave
+vendors — `apify`, `serpapi`, `firecrawl`, `exa`, `github`, `apollo` — and
+binds the resulting key into the account vault above once they have it. None
+of the six has a bundled browser driver, so it is always a guided human
+handoff today; see [docs/signup.md](docs/signup.md) for the full vendor
+table, the driver seam trusted host code can use later,
+and why `serpapi`'s key (a query parameter, not a header) is stored with
+`injection: "env-only"`.
+
+```bash
+skeletonkey signup list                     # the six vendors and their official URLs
+skeletonkey signup start apify              # opens the signup page, records a session,
+                                             #   and prints the steps -- status: needs_human
+# ... sign up and create the key in the browser yourself ...
+skeletonkey signup complete apify           # hidden prompt for the key; binds it into the vault
+#   vault://apify-main
+#   skeletonkey run --env APIFY_TOKEN=vault://apify-main -- <your command>
+skeletonkey signup status                   # every session and its state
+```
+
+`start` never claims success — its status line always says `status:
+needs_human` when (as today) no driver automated anything, and `--json`
+reports `{"status":"needs_human","reason":"no_driver",...}`. `complete` is the
+only command that ever touches the key, through the same hidden-prompt /
+`--stdin` / `--email-stdin` contract `account add` uses, and it prints only a
+`vault://` reference and the exact `skeletonkey run --env <ENV>=<ref> --
+<cmd>` example — never the key. The read-only MCP tool `signup_status` mirrors
+`signup status` plus one vendor's handoff info; there is no tool that can
+submit a key or complete a signup.
+
+## Weekly monitor (ND-5)
+
+`skeletonkey monitor run` checks every active [account](#accounts-nd-1)
+against its vendor's **own** usage API (Apify, SerpApi, Firecrawl, Apollo,
+Exa, and GitHub ship first), flags a usage anomaly against the local ledger
+or a sudden 401, and writes a redacted weekly Markdown report. Full detail —
+thresholds, file formats, exit codes, and what it deliberately does not
+check (login/billing anomalies, since no first-wave vendor's official API
+exposes them) — lives in [`docs/monitor.md`](docs/monitor.md).
+
+```
+skeletonkey monitor run [--account <name>] [--json] [--no-notify]
+  [--report-dir <dir>] [--since <YYYY-MM-DD>] [--offline]
+skeletonkey monitor report [--latest] [--json]
+skeletonkey monitor install-help
+```
+
+- Writes `~/.skeletonkey/monitor/state.json` (mode `0600`, no secrets) and
+  `~/.skeletonkey/monitor/reports/weekly-YYYY-MM-DD.md` (mode `0600`), and
+  sends **one** OS notification (via the same `Notifier` the runner uses)
+  when anything needs a human — `--no-notify` skips it.
+- A key is sent only to the one official host its checker hardcodes, read
+  from the vault inside this process and never printed, logged, or put in
+  the report, the notification, or an error message. A vendor whose usage
+  API is unverified, or verified but uncovered by a checker, is reported as
+  `cannot auto-compare usage: ...` rather than guessed at.
+- `monitor run` exits `78` (`monitor_alert`, see `src/exit-codes.ts`) when
+  any account comes back `invalid_key`, `usage_anomaly`, `parse_error`, or
+  `error`; `0` otherwise.
+- **SkeletonKey never installs a schedule.** `monitor install-help` prints
+  crontab / systemd-timer / launchd snippets to copy in yourself.
+- MCP: a read-only `monitor_status` tool reports the last-known status from
+  `state.json` without ever running a new check.
+
 ## Roadmap
 
 Phases, following the PRD:
 
-- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@dormy/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
+- **v0.4 (this release) — accounts, guided signup, weekly monitor.** The local account vault (`account`), guided human-handoff signup for six first-wave vendors (`signup`), the weekly usage check (`monitor`), `usage_api` facts in the index, and the five-step quick start above. See [CHANGELOG.md](CHANGELOG.md).
+- **v0.3 — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@dormy/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
 - **v0.5 — automated signup.** Bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
 - **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger (the per-vendor cap re-check before submit already landed in v0.3), and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
 - **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.

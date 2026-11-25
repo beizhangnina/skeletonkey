@@ -6,6 +6,7 @@ import {
   resolveBackendId,
   type Config,
   type GatewayConfig,
+  type MonitorConfig,
   type ProxyConfig,
 } from "./types.js";
 
@@ -62,6 +63,8 @@ export function readConfig(home = skeletonKeyHome()): Config {
   if (proxy) config.proxy = proxy;
   const gateway = coerceGateway(raw["gateway"]);
   if (gateway) config.gateway = gateway;
+  const monitor = coerceMonitor(raw["monitor"]);
+  if (monitor) config.monitor = monitor;
   return config;
 }
 
@@ -79,6 +82,28 @@ function coerceProxy(value: unknown): ProxyConfig | null {
   return Object.keys(out).length > 0 ? out : null;
 }
 
+function coerceMonitor(value: unknown): MonitorConfig | null {
+  const raw = section(value);
+  if (!raw) return null;
+  const out: MonitorConfig = {};
+  if (typeof raw["anomaly_multiplier"] === "number" && Number.isFinite(raw["anomaly_multiplier"])) {
+    out.anomaly_multiplier = raw["anomaly_multiplier"];
+  }
+  if (
+    typeof raw["anomaly_absolute_threshold"] === "number" &&
+    Number.isFinite(raw["anomaly_absolute_threshold"])
+  ) {
+    out.anomaly_absolute_threshold = raw["anomaly_absolute_threshold"];
+  }
+  if (
+    typeof raw["remaining_drop_pct_threshold"] === "number" &&
+    Number.isFinite(raw["remaining_drop_pct_threshold"])
+  ) {
+    out.remaining_drop_pct_threshold = raw["remaining_drop_pct_threshold"];
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 function coerceGateway(value: unknown): GatewayConfig | null {
   const raw = section(value);
   if (!raw) return null;
@@ -90,3 +115,4 @@ function coerceGateway(value: unknown): GatewayConfig | null {
   if (typeof raw["fallback_bind"] === "string") out.fallback_bind = raw["fallback_bind"];
   return Object.keys(out).length > 0 ? out : null;
 }
+

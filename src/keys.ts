@@ -2,7 +2,7 @@ import fs from "node:fs";
 import YAML from "yaml";
 import { ensureHome } from "./config.js";
 import { skeletonKeyHome, keysPath } from "./paths.js";
-import { isUpstreamScheme, type KeyMeta, type KeysFile } from "./types.js";
+import { isKeyInjection, isUpstreamScheme, type KeyMeta, type KeysFile } from "./types.js";
 
 const HEADER = `# SkeletonKey metadata index -- NO SECRET VALUES ARE STORED HERE.
 # Secrets live in the configured vault (Bitwarden, 1Password, OS keychain, or the
@@ -49,6 +49,16 @@ export function setDisabled(alias: string, disabled: boolean, home = skeletonKey
   key.disabled = disabled;
   writeKeys(data, home);
   return key;
+}
+
+/** Drops a key from the metadata index. The vault record is the caller's job. */
+export function removeKey(alias: string, home = skeletonKeyHome()): boolean {
+  const data = readKeys(home);
+  const index = data.keys.findIndex((k) => k.alias === alias);
+  if (index < 0) return false;
+  data.keys.splice(index, 1);
+  writeKeys(data, home);
+  return true;
 }
 
 export function touchLastUsed(alias: string, when: string, home = skeletonKeyHome()): void {
@@ -100,6 +110,9 @@ function coerceKey(raw: unknown): KeyMeta {
     // guessed: downgrading an upstream to http would send the key in clear.
     ...(typeof obj["scheme"] === "string" && isUpstreamScheme(obj["scheme"].trim().toLowerCase())
       ? { scheme: obj["scheme"].trim().toLowerCase() as KeyMeta["scheme"] }
+      : {}),
+    ...(typeof obj["injection"] === "string" && isKeyInjection(obj["injection"].trim().toLowerCase())
+      ? { injection: obj["injection"].trim().toLowerCase() as KeyMeta["injection"] }
       : {}),
   };
 }

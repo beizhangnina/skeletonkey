@@ -19,8 +19,20 @@ import validate
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, '..', 'raw')
-OUT = os.path.join(HERE, '..')
+# The committed shard directory. A rebuild reads hand-filled extras from here
+# (see merge_preserved) even when it writes somewhere else.
+SHARDS = os.path.join(HERE, '..')
+# Where the shards are written. Overridable so a test can build into a temp
+# directory instead of overwriting the committed shards; unset in normal use.
+OUT = os.environ.get('SKELETONKEY_BUILD_OUT') or SHARDS
 CHECKED = '2026-10-24'
+
+# Catalog scope (Bei, 2026-11-24): llm-models rows are set aside -- hidden from
+# listings by default, not deleted -- same meaning as src/apis.ts
+# effectiveCollectionScope/effectiveVisibility and validate.py's mirror of it.
+LLM_VISIBILITY_NOTE = ('LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). '
+                       'Hidden from listings by default, not deleted; recoverable via --all or '
+                       'visibility: listed.')
 
 def r(p): return json.load(open(os.path.join(RAW, p)))
 
@@ -86,6 +98,9 @@ NAMES = {  # display names for entries that only exist as a flatkey facet label
  'bytedance': 'ByteDance', 'openai': 'OpenAI', 'sfs': 'Simple FS',
 }
 
+# The `seen_in` source a vendor-direct row carries (see curated.VENDOR_DIRECT).
+VENDOR_DIRECT = 'vendor-direct'
+
 # ---- row emission ------------------------------------------------------------
 ORDER = ['id', 'name', 'capability', 'category', 'provider_url', 'docs_url',
          'access_mode', 'signup', 'signup_automatable', 'min_topup',
@@ -98,8 +113,12 @@ STRUCTURED_FIELDS = ['official_docs_url', 'auth', 'pricing', 'endpoints',
                       'endpoints_note']
 AUTH_KEYS = ['type', 'header', 'format', 'docs_url']
 PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
-                'pricing_url', 'notes', 'api_access_gate', 'min_monthly_usd',
-                'min_prepay_usd', 'gate_source_url']
+                'pricing_url', 'notes']
+# ND-12 pricing-gate keys nested in `pricing`. Emitted after PRICING_KEYS and
+# ONLY when present on the row: a pricing block nobody gate-checked rebuilds
+# byte-identical to before ND-12 (no explicit nulls -- PM decision on ND-10).
+PRICING_GATE_KEYS = ['api_access_gate', 'min_monthly_usd', 'min_prepay_usd',
+                     'gate_source_url']
 ENDPOINT_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
 
 # The two ND-12 hand-filled top-level fields (../README.md "ND-12 pricing
@@ -258,6 +277,8 @@ def emit_row(e):
         else:
             lines.append('    pricing:')
             lines.extend(_mapping_lines(pricing, PRICING_KEYS, 6))
+            lines.extend(_mapping_lines(
+                pricing, [k for k in PRICING_GATE_KEYS if k in pricing], 6))
 
     if 'endpoints' in e:
         eps = e['endpoints']
@@ -415,17 +436,27 @@ def main():
             return 'https://monid.ai/tools'
         return 'https://flatkey.ai/models'
 
-    stale = sorted(set(curated.P) - set(rec))
+    # A vendor-direct id has no raw catalog record by definition -- its facts
+    # came off the vendor's own pages -- so it is exempt from the sync check
+    # below rather than a reason to fail the build.
+    direct_only = set(curated.VENDOR_DIRECT) - set(rec)
+    stale = sorted(set(curated.P) - set(rec) - direct_only)
     if stale:
         raise SystemExit('curated table out of sync: no raw record for %s' % stale)
+    undeclared = sorted(direct_only - set(curated.P))
+    if undeclared:
+        raise SystemExit('VENDOR_DIRECT ids missing from the curated P table: %s' % undeclared)
     uncurated = sorted(set(rec) - set(curated.P))
     if uncurated:
         print('note: %d catalog slug(s) not in the curated table, skipped: %s'
               % (len(uncurated), uncurated))
 
+    EMPTY = {'seen': set(), 'name': None, 'url': None, 'docs': None}
+
     entries = []
-    for pid in sorted(set(rec) & set(curated.P)):
-        x = rec[pid]
+    for pid in sorted((set(rec) | direct_only) & set(curated.P)):
+        direct = pid in direct_only
+        x = EMPTY if direct else rec[pid]
         cat, cap, purl, durl, mode, signup, auth = curated.P[pid]
         tos = curated.TOS[mode] + curated.TOS_EXTRA.get(pid, '')
         row = {
@@ -442,11 +473,20 @@ def main():
             'billing_unit': None,
             'free_tier': None,
             'auth_type': auth,
-            'seen_in': sorted(x['seen']),
+            # A vendor-direct row says so, and its source_url is the vendor's
+            # own page -- never an aggregator's tool page.
+            'seen_in': [VENDOR_DIRECT] if direct else sorted(x['seen']),
             'tos_notes': tos,
-            'source_url': source_url(pid, x),
+            'source_url': curated.VENDOR_DIRECT[pid] if direct else source_url(pid, x),
             'checked_date': CHECKED,
         }
+        # ND-7: every llm-models row is set aside. Emitted after the base
+        # fields as ordinary extras; a hand-filled value on the existing shard
+        # row (e.g. `visibility: listed`) still wins via merge_preserved().
+        if cat == 'llm-models':
+            row['collection_scope'] = 'llm'
+            row['visibility'] = 'hidden'
+            row['visibility_note'] = LLM_VISIBILITY_NOTE
         # The three aggregator catalogs do not publish a vendor's own docs
         # URL, auth/pricing specifics, endpoint catalog or any other
         # hand-filled extra, so the only way a freshly built row carries one
@@ -465,7 +505,12 @@ def main():
 
     for cat in sorted(by_cat):
         path = os.path.join(OUT, '%s.yaml' % cat)
+        # Preserve hand-filled extras from the shard being overwritten, or --
+        # when building into SKELETONKEY_BUILD_OUT for the first time -- from
+        # the committed shard, so a temp build matches an in-place one.
         existing = load_existing_rows(path)
+        if not existing and os.path.abspath(OUT) != os.path.abspath(SHARDS):
+            existing = load_existing_rows(os.path.join(SHARDS, '%s.yaml' % cat))
         lines = ['# SkeletonKey API index - category: %s' % cat,
                  '# Generated by scripts/build.py from data/apis/raw/. Do not hand-edit.',
                  'apis:']
@@ -475,7 +520,14 @@ def main():
             # fields have already been merged back onto -- never hand-filled
             # itself, and never pulled from the old shard (see
             # merge_preserved's `cost_badge` exception).
-            merged['cost_badge'] = validate.derive_cost_badge(merged.get('pricing'))
+            # Only on rows that carry a gate verdict (any value, unknown
+            # included): a row ND-12 never looked at stays byte-identical and
+            # loaders derive `gray` for it (src/apis.ts IndexEntry.costBadge).
+            pricing = merged.get('pricing')
+            if isinstance(pricing, dict) and 'api_access_gate' in pricing:
+                merged['cost_badge'] = validate.derive_cost_badge(pricing)
+            else:
+                merged.pop('cost_badge', None)
             lines.extend(emit_row(merged).split('\n'))
         open(path, 'w').write('\n'.join(lines) + '\n')
 
@@ -486,6 +538,7 @@ def main():
        'monid': sum(1 for e in entries if 'monid' in e['seen_in']),
        'flatkey': sum(1 for e in entries if 'flatkey' in e['seen_in']),
      },
+     'vendor_direct_providers': sum(1 for e in entries if VENDOR_DIRECT in e['seen_in']),
      'per_category': dict(sorted(collections.Counter(e['category'] for e in entries).items())),
      'per_access_mode': dict(sorted(collections.Counter(e['access_mode'] for e in entries).items())),
      'per_signup': dict(sorted(collections.Counter(e['signup'] for e in entries).items())),
@@ -499,7 +552,9 @@ def main():
        'flatkey_models': len(r('flatkey_models_extracted.json')),
      },
     }
-    json.dump(stats, open(os.path.join(OUT, 'raw', 'build_stats.json'), 'w'), indent=1)
+    stats_dir = os.path.join(OUT, 'raw')
+    os.makedirs(stats_dir, exist_ok=True)
+    json.dump(stats, open(os.path.join(stats_dir, 'build_stats.json'), 'w'), indent=1)
     print(json.dumps(stats, indent=1))
 
 

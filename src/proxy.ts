@@ -232,7 +232,9 @@ export async function startProxy(options: ProxyOptions): Promise<ProxyHandle> {
     headers["host"] = targetUrl.host;
 
     let injected = false;
-    if (key) {
+    if (key && key.injection === "env-only") {
+      log(`! ${key.alias} is env-only (no header to inject); forwarding without one`);
+    } else if (key) {
       const secret = await secretFor(key.alias);
       if (secret === null) {
         log(`! no secret in vault for alias=${key.alias}; forwarding without header`);
