@@ -18,6 +18,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apple-maps"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://developer.apple.com/maps/"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "google-maps"
     name: "Google Maps"
     capability: "Place data and contributor reviews from Google's mapping platform."
@@ -37,3 +45,11 @@ apis:
     checked_date: 2026-10-24
     official_docs_url: "https://developers.google.com/maps/documentation"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://developers.google.com/maps/billing-and-pricing/reporting-and-monitoring"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

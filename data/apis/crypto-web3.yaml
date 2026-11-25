@@ -52,6 +52,14 @@ apis:
         summary: "Searches the live web and news and returns a summarized answer with citations."
         returns: "A summarized, cited search answer, priced $0.081 per call."
         docs_url: "https://blockrun.ai/llms.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/v1/usage"
+      docs_url: "https://user.blockrun.ai"
+      limits: null
+      notes: "按请求列出用量与费用；另有 GET /v1/usage/summary"
+      checked_date: 2026-11-24
   - id: "capminal"
     name: "Capminal"
     capability: "AI-assisted deep research reports on crypto tokens."
@@ -69,6 +77,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "defillama"
     name: "DefiLlama"
     capability: "DeFi analytics: TVL by protocol and chain, token prices, stablecoins, yields, fees, volumes and unlocks."
@@ -115,6 +131,14 @@ apis:
         summary: "Lists all DEXes with summaries of their volumes and dataType history data; Pro path is /api/overview/dexs."
         returns: "All DEXes along with summaries of their volumes and dataType history data."
         docs_url: "https://api-docs.defillama.com/llms.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://pro-api.llama.fi/usage/{YOUR_API_KEY}"
+      docs_url: "https://api-docs.defillama.com/llms-pro.txt"
+      limits: "Pro API key；key 放在 URL 路径末尾"
+      notes: "返回 creditsLeft；key 在 URL 里，日志/报错必须脱敏 URL"
+      checked_date: 2026-11-24
   - id: "emc2ai"
     name: "EMC2 AI"
     capability: "Token holder-distribution and concentration-risk checks."
@@ -166,6 +190,14 @@ apis:
         summary: "A2A 0.3 JSON-RPC transport (message/send, tasks/get, tasks/cancel) for invoking Einstein skills, payable per call via x402."
         returns: "JSON-RPC result or a Task in 'working' state (HTTP 202) for slow skills, pollable or delivered to a callbackUrl."
         docs_url: "https://emc2ai.io/llms.txt"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://emc2ai.io/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "quicknode"
     name: "QuickNode"
     capability: "Blockchain RPC and indexer endpoints across chains."
@@ -207,6 +239,14 @@ apis:
         summary: "Admin API call that creates an RPC endpoint on any chain using the QN_* key returned by the agent subscription call."
         returns: "An RPC endpoint (creation result) on any supported chain."
         docs_url: "https://www.quicknode.com/llms.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.quicknode.com/v0/usage/rpc"
+      docs_url: "https://www.quicknode.com/docs/admin-api"
+      limits: "Admin API key（x-api-key）"
+      notes: "Admin API 用量"
+      checked_date: 2026-11-24
   - id: "surf"
     name: "Surf"
     capability: "Crypto market, derivatives, on-chain, wallet, prediction-market and VC research data."
@@ -258,3 +298,11 @@ apis:
         summary: "List the search engines that are available on the API."
         returns: "List of available engines."
         docs_url: "https://surf-api.com/docs"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

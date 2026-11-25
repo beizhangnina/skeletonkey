@@ -35,6 +35,14 @@ apis:
         summary: "Format-only validation of one or more numbers without a live HLR lookup; returns number type, issuing network details and formatted output."
         returns: "A subset of the HLR response; live_status, current_network, is_ported, ported_date, landline_status, sms_email, mms_email and cache fields are omitted."
         docs_url: "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://hlrlookup.com/api/balance/"
+      docs_url: "https://www.hlrlookup.com/knowledge/v1/balance-requests-over-api"
+      limits: "Free request; requires apikey and password authentication"
+      notes: null
+      checked_date: 2026-11-24
   - id: "hunter"
     name: "Hunter"
     capability: "Finds and verifies professional email addresses for a domain or a named person."
@@ -64,6 +72,14 @@ apis:
         summary: "Find the email addresses published for a given domain (or company name), filterable by type, department, seniority, provenance, and more."
         returns: "Email addresses and public sources for the domain, plus X-Credits-Used / X-Credits-Unit cost headers."
         docs_url: "https://hunter.io/openapi.json"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.hunter.io/v2/account"
+      docs_url: "https://hunter.io/api-documentation"
+      limits: "api_key 参数"
+      notes: "账户信息与剩余请求；另有 GET /v2/account-stats"
+      checked_date: 2026-11-24
   - id: "prospeo"
     name: "Prospeo"
     capability: "Email and phone discovery for B2B prospecting, including LinkedIn profile lookups."
@@ -88,3 +104,11 @@ apis:
         summary: "Enrich a person from supplied data such as name and company website, optionally requesting a verified email or mobile."
         returns: "JSON with an error flag and person/company objects, including job history, email, mobile and location details."
         docs_url: "https://prospeo.io/api-docs/authentication"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.prospeo.io/account-information"
+      docs_url: "https://prospeo.io/api-docs/account-information"
+      limits: "该端点免费使用；需 X-KEY 认证，仍受账户速率限制"
+      notes: null
+      checked_date: 2026-11-24

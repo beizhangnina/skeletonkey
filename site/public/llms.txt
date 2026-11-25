@@ -1,8 +1,16 @@
 # SkeletonKey API index
 
-> 162 APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor's own pages, plus 448 routes (374 verified) to reach them: direct from the vendor or through one of 12 aggregator gateways. Full data: https://skeletonkey.run/apis.json
+> 149 APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor's own pages, plus 428 routes (356 verified) to reach them: direct from the vendor or through one of 12 aggregator gateways. Full data: https://skeletonkey.run/apis.json
 
 Status: verified = pricing and auth read on the vendor site; unverified = not confirmed, no prices shown; sales-only = no public prices; no-public-api = reachable only through an aggregator catalog.
+
+## Quick start
+
+1. Install: `npx -y @dormy/skeletonkey init`. No SkeletonKey account and no server; this sets a local passphrase and registers the MCP server and skill for Claude Code and Codex.
+2. Find an API: browse https://skeletonkey.run/directory/ yourself, or let your agent search the same local index with `find_api("web scraping")`.
+3. Create the vendor account (coming in v0.4): `skeletonkey signup start <vendor>`, finish the captcha/terms/payment yourself in the browser, then `skeletonkey signup complete <vendor> --account <name>` (the key is entered through a hidden input and stored in your vault). Already have a key: `skeletonkey account add <name> --vendor <id> --store-key --domain <d>`.
+4. Use it: calls go through the local proxy, which injects the key at request time. The agent never sees it.
+5. Weekly monitoring (coming in v0.4): `skeletonkey monitor run` sends a system notification on anomalies and writes a redacted report, read back with `skeletonkey monitor report --latest`.
 
 ## /apis.json schema
 
@@ -41,7 +49,7 @@ Aggregator object (`aggregators[]`): `slug`, `name`, `url`, `what_it_is`, `api_b
 - [APILayer](https://skeletonkey.run/apis/aggregators/apilayer/): verified, 0 vendors routed. A first-party suite of data APIs (aviation, finance, geolocation, email validation, news, weather, scraping) sold under one account and one key, rather than a…
 - [Eden AI](https://skeletonkey.run/apis/aggregators/eden-ai/): verified, 0 vendors routed. An AI gateway that routes to many LLM and specialist-model vendors (OCR, speech, vision, translation) through one OpenAI-compatible endpoint, key and credit…
 - [Flatkey](https://skeletonkey.run/apis/aggregators/flatkey/): verified, 0 vendors routed. An OpenAI-compatible router that resells hosted LLMs from many model vendors alongside a catalog of pay-per-call tools, all behind one key and one prepaid…
-- [OpenRouter](https://skeletonkey.run/apis/aggregators/openrouter/): verified, 0 vendors routed. An LLM router that fronts hundreds of models from many inference providers behind one OpenAI-compatible endpoint and key, adding fallbacks, routing and cost…
+- [treg](https://skeletonkey.run/apis/aggregators/treg/): verified, 0 vendors routed. A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid…
 - [x402scan](https://skeletonkey.run/apis/aggregators/x402scan/): unverified, 0 vendors routed. A third-party explorer and analytics dashboard for x402 traffic that also presents itself as a marketplace of paid agent-callable services. Listed here as a…
 - [Zyla API Hub](https://skeletonkey.run/apis/aggregators/zyla-api-hub/): verified, 0 vendors routed. An API marketplace that proxies a large catalog of data, finance, weather, validation and AI APIs through one gateway and one key. Agents can reach the whole…
 
@@ -146,21 +154,6 @@ Aggregator object (`aggregators[]`): `slug`, `name`, `url`, `what_it_is`, `api_b
 ## legal-compliance
 - [Strale API](https://skeletonkey.run/apis/strale/): verified. Single pay-per-call API that runs pre-tested 'capabilities' for agents - IBAN/VAT/company lookups, sanctions and compliance checks, web scraping and document extraction - plus bundled multi-step 'solutions', reachable over REST, MCP, A2A and x402, with an audit record per call.
 - [Vaquill AI](https://skeletonkey.run/apis/vaquill/): verified. Self-serve API over US primary law - statutes, regulations, constitutions, court rules, executive orders and agency material - with citation resolution, hybrid search, full text and a link to the official source on every section.
-
-## llm-models
-- [Alibaba Cloud (Model Studio)](https://skeletonkey.run/apis/alibaba-cloud/): verified. Alibaba Cloud Model Studio serves the Qwen and Wan model families over OpenAI-compatible and Anthropic-compatible REST endpoints: text generation, vision and omni-modal understanding, image/video/3D generation, speech and music, embeddings and rerank, plus batch inference, fine-tuning and dedicated deployment.
-- [Amazon Bedrock](https://skeletonkey.run/apis/amazon-bedrock/): verified. Fully managed AWS service that serves foundation models from many providers (Anthropic, AI21, Cohere, DeepSeek, Google, Meta and others) behind one API, plus agents, guardrails, knowledge bases and fine-tuning.
-- [Anthropic Claude API](https://skeletonkey.run/apis/anthropic/): verified. First-party REST API for the Claude model family (messages, tool use, long context, files, skills) plus managed agent sessions and batch processing.
-- [DeepSeek API](https://skeletonkey.run/apis/deepseek/): verified. First-party OpenAI-compatible API for DeepSeek's text and reasoning models, plus server-side Search and Fetch tools.
-- [Gemini API](https://skeletonkey.run/apis/google-gemini/): verified. Google's hosted API for the Gemini model family plus Imagen, Veo and Gemma: text, image, audio and video generation and understanding, embeddings, live/streaming sessions, and grounding with Google Search and Maps.
-- [Macaron](https://skeletonkey.run/apis/macaron/): no-public-api. Consumer personal-AI-agent app: it profiles the user, keeps a long-term 'Deep Memory' of them, and runs small personal projects such as life and study planning, wardrobe help and novel reading.
-- [Microsoft Azure AI](https://skeletonkey.run/apis/microsoft-azure-ai/): unverified. Hosts generative AI models and tools for building applications through Azure OpenAI and Microsoft Foundry services.
-- [Moonshot AI](https://skeletonkey.run/apis/moonshot-ai/): verified. Provides Kimi language and multimodal models through APIs for chat, coding, reasoning, and tool-driven workflows.
-- [OpenAI API](https://skeletonkey.run/apis/openai/): verified. First-party API for OpenAI's GPT model family, covering text and code generation, reasoning, images, audio/realtime voice and built-in tools such as web and file search.
-- [SpaceXSI API (xAI / Grok)](https://skeletonkey.run/apis/xai/): verified. First-party API for the Grok model family: text and code generation, image and video generation, speech-to-text/text-to-speech and live web search, served over an OpenAI-compatible interface.
-- [TypeSafe](https://skeletonkey.run/apis/typesafe/): verified. Serves Jev, a 'System One' model that takes a block of state plus a set of typed questions and returns each answer as a structured decision - boolean/noul, choice or score - with a calibrated probability, through a single POST /v1/systemone endpoint.
-- [Z.AI](https://skeletonkey.run/apis/zhipu-ai/): verified. Pay-as-you-go API for the GLM model family - text, reasoning, vision, OCR, image, video, audio and agent endpoints - with an OpenAI-compatible interface, plus a separate GLM Coding Plan subscription for coding agents.
-- [百度千帆](https://skeletonkey.run/apis/baidu-qianfan/): verified. Baidu AI Cloud's Qianfan platform hosts ERNIE plus third-party models (DeepSeek, Qwen, GLM, Kimi, InternVL) behind an OpenAI-compatible REST API, and adds fine-tuning, datasets, knowledge bases and Agent building.
 
 ## maps-local
 - [Apple Maps](https://skeletonkey.run/apis/apple-maps/): unverified. Apple's Maps Server API: a REST service for geocoding and reverse geocoding, place search and autocomplete, directions and ETAs, and place/place-photo lookups, intended to be called from your server instead of from MapKit on-device.

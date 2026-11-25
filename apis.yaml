@@ -491,6 +491,12 @@ entries:
       SOURCE CAVEAT there.
     source: https://build.nvidia.com/llms.txt
     checked_date: "2026-10-28"
+    collection_scope: llm
+    visibility: hidden
+    visibility_note: >-
+      LLM API; set aside from the tool/data/aggregator catalog 2026-11-24
+      (Bei). Hidden from listings by default, not deleted; recoverable via
+      --all or visibility: listed.
 
   - name: treg
     url: https://treg.to/
@@ -528,8 +534,8 @@ entries:
         once the one-off $1.00 credit is used.
     offering:
       summary: >-
-        OpenRouter but for agent tools instead of models: one token and one base
-        URL reach 4,000+ third-party tool endpoints, billed per call.
+        Third-party intermediary catalog/gateway: one token resells metered,
+        per-call access to 4,000+ third-party tool endpoints it does not own.
       categories:
         - search
         - web-scraping
@@ -633,6 +639,16 @@ entries:
       off treg's own pages on 2026-10-28, with no sign-up.
     source: https://treg.to/llms.txt
     checked_date: "2026-10-28"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/billing"
+      docs_url: "https://treg.to/docs"
+      limits: "需 x-treg-org 头（org 级 token）"
+      notes: "中转站；文档另列 GET /billing/history；本页未写明 base URL"
+      checked_date: 2026-11-24
+    collection_scope: aggregator
+    visibility: listed
 
   # --- The 12 vendors the treg `rea-growth` skill calls ---------------------
   # Read off each VENDOR's own docs on 2026-10-30, with no sign-up and no API

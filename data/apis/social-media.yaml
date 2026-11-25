@@ -45,6 +45,14 @@ apis:
         summary: "Get current social-listening limits and active subscription counts."
         returns: "Current social-listening limits and active subscription counts for the client's scope."
         docs_url: "https://docs.influencers.club/openapi/usage"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/public/v1/accounts/credits/"
+      docs_url: "https://docs.influencers.club/openapi/account-credits-and-usage/account_credits_usage_retrieve.md"
+      limits: "Bearer auth (Authorization: Bearer YOUR_API_KEY); endpoint itself costs 0 credits"
+      notes: null
+      checked_date: 2026-11-24
   - id: "linkedin"
     name: "LinkedIn"
     capability: "Professional-network data: company followers, groups, comment reactions and replies."
@@ -62,6 +70,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules. First-party API access is partner-gated; scraped access is contrary to LinkedIn's terms."
     source_url: "https://glasser.ai/data-sources/linkedin"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "scrapecreators"
     name: "ScrapeCreators"
     capability: "Public data from social platforms, ad libraries and app stores, one request per query."
@@ -96,6 +112,14 @@ apis:
         summary: "Get a user's public Threads posts, limited to roughly the latest 20–30 posts."
         returns: "Returns a user's public Threads posts."
         docs_url: "https://docs.scrapecreators.com/v1/threads/user/posts"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.scrapecreators.com/v1/account/credit-balance"
+      docs_url: "https://scrapecreators.com/scrape-creators/endpoints/get-credit-balance"
+      limits: null
+      notes: null
+      checked_date: 2026-11-24
   - id: "tikhub"
     name: "TikHub"
     capability: "Unified REST access to TikTok, Douyin, Xiaohongshu, Weibo, WeChat and other global and Chinese platforms."
@@ -122,6 +146,14 @@ apis:
       pricing_url: null
       notes: "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.tikhub.io/api/v1/tikhub/user/get_user_daily_usage"
+      docs_url: "https://docs.tikhub.io/186826051e0.md"
+      limits: "请求头携带 API Key"
+      notes: "账户每日使用情况"
+      checked_date: 2026-11-24
   - id: "wechat"
     name: "WeChat"
     capability: "WeChat search index trends, Mini Program search and Channels creator marketplace data."
@@ -139,6 +171,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/wechat"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "x"
     name: "X"
     capability: "Posts, threads, verified followers and community moderation data from X."
@@ -178,3 +218,11 @@ apis:
         summary: "Retrieve usage data to track Post consumption against budget and generate usage reports."
         returns: "Daily Post consumption counts."
         docs_url: "https://docs.x.com/x-api/getting-started/pricing"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.x.com/2/usage/credits"
+      docs_url: "https://docs.x.com/x-api/usage/get-usage-credits"
+      limits: null
+      notes: null
+      checked_date: 2026-11-24

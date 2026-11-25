@@ -20,6 +20,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Every www.homes.com URL — home page, robots.txt, /developers, /api, /pricing — returns an Akamai 'Access Denied' 403 to non-browser clients, both directly and through a reader proxy, so nothing on the main domain could be read t"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "loopnet"
     name: "LoopNet"
     capability: "Commercial real-estate listings, listing detail and broker profiles."
@@ -39,6 +47,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Live homepage now accessible and confirms commercial property marketplace; saved generic developer/API/pricing pages were denied, and signup retry was also denied. No documented public self-serve API, auth, or API prices found."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "rentcast"
     name: "RentCast"
     capability: "US property records, owner detail, value and rent estimates, listings and market statistics."
@@ -90,6 +106,14 @@ apis:
         summary: "Returns a single long-term rental listing matching an internal property/listing id obtained from /properties, /avm or /listings endpoints."
         returns: "Listing record with listed rent, listing date, status, listing contacts and property attributes."
         docs_url: "https://developers.rentcast.io/reference/rental-listing-long-term-by-id"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://developers.rentcast.io/reference/billing-and-pricing"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "zillow"
     name: "Zillow"
     capability: "US residential listings, valuation estimates, agent profiles and mortgage rates."
@@ -107,3 +131,11 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/zillow"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

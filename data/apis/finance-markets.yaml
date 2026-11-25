@@ -20,6 +20,14 @@ apis:
     checked_date: 2026-10-24
     official_docs_url: "https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "financialdatasets"
     name: "Financial Datasets"
     capability: "US public-company fundamentals: statements, metrics, prices, earnings, filings and news."
@@ -69,6 +77,14 @@ apis:
         summary: "Looks up activist filers and their CIKs by owner name (prefix, case-insensitive), paged with limit."
         returns: "Matches for the name prefix plus a total count of all matches alongside the returned page."
         docs_url: "https://docs.financialdatasets.ai/api/activist-ownership"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.financialdatasets.ai/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "finviz"
     name: "Finviz"
     capability: "Equity screening, sector performance, insider trades and news sentiment."
@@ -88,6 +104,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); finviz.com/apis is not API documentation — it serves the 'Finviz Elite' subscription page (the footer 'APIs' link points there, and /elite returns the same content). The only API-shaped endpoint the vendor exposes is the footer'"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "marketbeat"
     name: "MarketBeat"
     capability: "Analyst ratings, price targets, earnings, insider trades and institutional ownership."
@@ -107,6 +131,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Reviewed saved pages and live homepage plus All Access signup/pricing page. Found consumer research subscriptions and CSV exports, but no documented developer API, API auth, or API prices. Consumer subscription prices are exclud"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "marketstack"
     name: "marketstack"
     capability: "Stock market reference and historical price data, including corporate actions."
@@ -131,6 +163,14 @@ apis:
         summary: "Looks up detailed information for a single stock ticker symbol passed in the URL path, with pagination options."
         returns: "Ticker information record for the requested symbol."
         docs_url: "https://docs.apilayer.com/marketstack/docs/quickstart-guide"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://marketstack.com/billing-overages-documentation"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "nasdaq"
     name: "Nasdaq"
     capability: "Market data: quotes, financials, earnings calendars, dividends, option chains and screeners."
@@ -148,6 +188,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/nasdaq"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "secapi"
     name: "SEC API"
     capability: "SEC EDGAR filings as JSON: full-text search, extracted sections, financials, insider and 13F data."
@@ -174,6 +222,14 @@ apis:
       pricing_url: null
       notes: "Only indication on the provided pages is a marketplace listing mentioning 'Free trial'; no plan tiers or prices are stated."
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://sec-api.io"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "secform4"
     name: "SecForm4"
     capability: "Insider buy/sell activity, 13D/13G filings and institutional holdings parsed from SEC filings."
@@ -193,6 +249,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer API: /developers and /pricing 404, and /api returns the site CMS's generic {\"errors\":[{\"title\":\"Resource not found\",\"code\":404}]} rather than any product endpoint. The homepage and navigation offer only web screener"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "stockanalysis"
     name: "Stock Analysis"
     capability: "Stock overviews, statistics, IPO calendar and pre-market movers."
@@ -212,6 +276,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Got past the Cloudflare block that stopped the earlier pass (curl and r.jina.ai still 403; WebFetch renders the pages). The Pro page shows 'Pro' at '$8.25 a month when billed annually' or '$9.99 a month' and 'Unlimited' at '$16."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://stockanalysis.com/help/accounts-and-billing/"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "yahoo-finance"
     name: "Yahoo Finance"
     capability: "Quotes, OHLCV history, company profiles and market news."
@@ -231,3 +303,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live. developer.yahoo.com/api lists exactly three things - 'Get started using our APIs with OAuth', 'Yahoo Fantasy Sports API' and 'Sign In With Yahoo' - and no finance API. finance.yahoo.com/developers returns 404 an"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://finance.yahoo.com"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

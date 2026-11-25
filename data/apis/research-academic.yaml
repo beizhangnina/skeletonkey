@@ -35,6 +35,14 @@ apis:
         summary: "Request a free API key for a user by email; the key activates after the emailed link is clicked."
         returns: "JSON with api_key, pending activation status, email, and daily budget details."
         docs_url: "https://help.openalex.org/api/authentication/"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://help.openalex.org/api/authentication/#getting-a-key-for-your-user"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "valyu"
     name: "Valyu"
     capability: "Structured search across financial, pharmaceutical and clinical-trial reference datasets."
@@ -91,3 +99,11 @@ apis:
         summary: "Discover available datasets and their source IDs for search scoping."
         returns: "Catalogue of data sources with source IDs; latency in seconds."
         docs_url: "https://docs.valyu.ai/llms-full.txt"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

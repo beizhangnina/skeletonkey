@@ -20,6 +20,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); developer.agoda.com does exist (it 302s to /supply, a ReadMe-hosted hub; the same content is mirrored at agoda-enterprise-group.readme.io) and documents real APIs, but there is no self-serve access and no published pricing, so n"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "booking"
     name: "Booking.com"
     capability: "Guest review data for individual hotels, including score, stay length and stated positives/negatives."
@@ -39,3 +47,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Auth is now confirmed from the Demand API authentication guide: every request carries both 'Authorization: Bearer <key>' (an API key token generated in Partner Centre) and 'X-Affiliate-Id: <aid>', over HTTPS. Only the sandbox ho"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://developers.booking.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

@@ -57,6 +57,14 @@ apis:
         summary: "Enrich a company by UUID or website, requesting one or more data sections such as firmographic."
         returns: "JSON with data.uuid, the requested section objects (e.g. firmographic), and credits_consumed."
         docs_url: "https://docs.akta.pro/docs/company-data/quick-start.md"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.akta.pro/docs/developer-tools/cli/credits"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "apollo"
     name: "Apollo"
     capability: "B2B sales intelligence: people and company search, bulk enrichment, job postings and company news."
@@ -106,6 +114,14 @@ apis:
         summary: "Get the current user profile to confirm which user your API key acts as."
         returns: "A user profile whose id is the acting user, matching owner fields such as object_owner_id."
         docs_url: "https://docs.apollo.io/reference/authentication"
+    usage_api:
+      available: true
+      method: "POST"
+      path: "https://api.apollo.io/api/v1/usage_stats/credit_usage_stats"
+      docs_url: "https://docs.apollo.io/reference/view-credit-usage-stats"
+      limits: "需 API key 或 Master API key，OAuth scope credit_usage_stats_read；文档标注 0 credits"
+      notes: null
+      checked_date: 2026-11-24
   - id: "aviato"
     name: "Aviato"
     capability: "Private-company and founder database used for startup research."
@@ -123,6 +139,14 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/aviato"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "builtwith"
     name: "BuiltWith"
     capability: "Technographics: the analytics, hosting and framework stack detected behind a website."
@@ -154,6 +178,14 @@ apis:
       pricing_url: null
       notes: "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "clay"
     name: "Clay"
     capability: "GTM data platform: cross-entity people and company search plus managed enrichment waterfalls."
@@ -203,6 +235,14 @@ apis:
         summary: "Runs a structured query against Clay table data and returns records with field metadata, paginated by cursor."
         returns: "Records with field metadata plus a cursor for the next page; scans are least-recently-updated-first."
         docs_url: "https://developers.clay.com/api-reference/tables/run-a-structured-query-across-one-or-more-tables.md"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://university.clay.com/docs/credit-usage"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "contactout"
     name: "ContactOut"
     capability: "Resolves LinkedIn profiles into verified work and personal email addresses and phone numbers."
@@ -222,6 +262,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); API auth confirmed live in the API Reference: 'ContactOut expects the API key to be included in all API requests to the server in a header that looks like the following: token : <YOUR_API_TOKEN>' (the shell sample also sends 'au"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://contactout.com/enterprise-users"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "crunchbase"
     name: "Crunchbase"
     capability: "Company, investor and funding-round records including key people and investor portfolios."
@@ -241,6 +289,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Auth and base URL confirmed on the live docs: 'Include your API key with every request. The recommended method is the X-cb-user-key request header'; 'The API base URL is: https://api.crunchbase.com/v4/data/'. The key is also acc"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "crustdata"
     name: "Crustdata"
     capability: "Live company and people data with hiring, headcount and growth time series."
@@ -258,6 +314,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/crustdata"
     checked_date: 2026-10-24
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.crustdata.com/account/credits"
+      docs_url: "https://docs.crustdata.com/api-reference/account-apis/get-account-credit-balance.md"
+      limits: "Free, consumes no credits; rate limited to 300 requests per minute; requires x-api-version: 2025-11-01 header (returns 400 without it); Bearer API key identifies the account."
+      notes: null
+      checked_date: 2026-11-24
   - id: "datalegion"
     name: "Data Legion"
     capability: "Person and company enrichment from an identifier such as an email or domain."
@@ -314,6 +378,14 @@ apis:
         summary: "Normalize emails, phones, names, domains, and other fields."
         returns: "Cleaned values for each submitted field, alongside the original values."
         docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.datalegion.ai/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "fundable"
     name: "Fundable"
     capability: "Near-real-time startup funding rounds, funded-company detail and investor/angel profiles."
@@ -365,6 +437,14 @@ apis:
         summary: "Retrieve the authenticated account's current monthly and purchased credit balances; free and does not accept a user ID."
         returns: "Credit balance information for the account tied to the API key."
         docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/credits"
+      docs_url: "https://docs.tryfundable.ai/api-reference/credits/balance.md"
+      limits: "Free; consumes no credits; does not accept a user ID; rate limit 200 requests per minute"
+      notes: null
+      checked_date: 2026-11-24
   - id: "leadmagic"
     name: "LeadMagic"
     capability: "B2B email, mobile and company enrichment with per-record validation."
@@ -416,6 +496,14 @@ apis:
         summary: "People search for base profile discovery at companies or across an ICP; contact values require separate enrichment."
         returns: "Base profile records (contact values not included); paged by signed cursor"
         docs_url: "https://leadmagic.io/docs/api-reference"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://leadmagic.io/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "lusha"
     name: "Lusha"
     capability: "B2B contact and company enrichment including direct dials and firmographics."
@@ -467,6 +555,14 @@ apis:
         summary: "Lists every Lusha data column that can be added to a contacts table (22 columns), with no request body or parameters."
         returns: "Column entries with category, displayName, columnKey, and type; free, no credits charged."
         docs_url: "https://docs.lusha.com/llms-full.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.lusha.com/v3/account/usage"
+      docs_url: "https://docs.lusha.com/api-reference/account/get-account-usage"
+      limits: "Rate limit: This endpoint is limited to 5 requests per minute. (api_key header required)"
+      notes: null
+      checked_date: 2026-11-24
   - id: "metixai"
     name: "Metix AI"
     capability: "People, job and company search over a large profile index with email and phone unlock."
@@ -523,6 +619,14 @@ apis:
         summary: "Fetch company records, including headquarters, funding round and stock listings, for up to 100 company IDs."
         returns: "Company record fields such as name, size, industry, headquarters, funding and listings."
         docs_url: "https://platform.metix.ai/docs/api/companies/record"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "orbit"
     name: "Orbit"
     capability: "Builds a source-backed person profile from a name, email, phone, address or social handle."
@@ -574,6 +678,14 @@ apis:
         summary: "Create an Orbit workspace and API key for an agent without dashboard sign-in."
         returns: "API key, scopes, signup credits, sign-up URL, and organization_id."
         docs_url: "https://docs.orbitsearch.com/llms-full.txt"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "pdl"
     name: "People Data Labs"
     capability: "Person and company datasets for identity resolution, work history and firmographic enrichment."
@@ -603,6 +715,14 @@ apis:
         summary: "Subject Request API endpoint that lets customers fetch a list of opted-out consumer IDs."
         returns: "A stream of lines listing opted out IDs (fetched with stream=True)."
         docs_url: "https://docs.peopledatalabs.com/docs/subject-request-api"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.peopledatalabs.com/support/billing/check-credit-usage.md"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "ploid"
     name: "Ploid"
     capability: "Plain-language search over a refreshed professional-profile index, with person enrichment."
@@ -647,6 +767,14 @@ apis:
         summary: "Read a public LinkedIn profile by URL without caller-provided cookies, proxies, or provider keys."
         returns: "Public LinkedIn profile data for the requested URL, drawn from the documented public LinkedIn read operations."
         docs_url: "https://ploid.com/documentation/api/social"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "predictleads"
     name: "PredictLeads"
     capability: "Company event signals: funding, hiring, product launches, partnerships and job postings."
@@ -666,6 +794,14 @@ apis:
     checked_date: 2026-10-24
     official_docs_url: "https://docs.predictleads.com/api_endpoints/introduction/authentication"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://predictleads.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "producthunt"
     name: "Product Hunt"
     capability: "Product launch pages and launch history from a startup launch community."
@@ -700,6 +836,14 @@ apis:
         summary: "GraphQL access using a client-level token for public fields; user-level fields such as isVoted return default values (false)."
         returns: "JSON GraphQL response where user-scoped fields fall back to defaults and viewer is null."
         docs_url: "https://api.producthunt.com/v2/docs/oauth_client_only_authentication/unauthorized_oauth_oauth_test_invalid_access_to_user-level_content_with_just_an_client_level_token_will_lead_to_errors"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.producthunt.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "sumble"
     name: "Sumble"
     capability: "Team-level org structure and hiring activity mined from job postings."
@@ -756,6 +900,14 @@ apis:
         summary: "Submit a general support request programmatically; free of charge and replies are sent to your account email."
         returns: "Support request handling; both support endpoints are free."
         docs_url: "https://docs.sumble.com/api/api"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://docs.sumble.com/get-started/credits.md"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "the-companies-api"
     name: "The Companies API"
     capability: "Firmographic company data: domain enrichment, company search, industries and email patterns."
@@ -800,6 +952,14 @@ apis:
         summary: "Add (attach) or remove (detach) up to 1,000 companies in a list using their domains or company IDs."
         returns: "The updated list object, including analytics such as companiesCount."
         docs_url: "https://www.thecompaniesapi.com/api/toggle-companies-in-list"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.thecompaniesapi.com/v2/team/:teamId"
+      docs_url: "https://www.thecompaniesapi.com/api/fetch-team"
+      limits: "Free"
+      notes: null
+      checked_date: 2026-11-24
   - id: "ycombinator"
     name: "Y Combinator"
     capability: "Public accelerator directory: companies by batch, founders, partners and startup jobs."
@@ -819,6 +979,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Re-checked live: Y Combinator publishes no API, no developer docs and no pricing on its own domains. The homepage confirms the business ('Four times a year we invest $500k in a select group of startups'); /apply is a founder app"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.ycombinator.com"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "zoominfo"
     name: "ZoomInfo"
     capability: "B2B contact and company intelligence over a large professional directory."
@@ -838,3 +1006,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); docs.zoominfo.com now 301s to docs.gtm.ai (ZoomInfo's GTM developer docs; the page footer is '(c) 2026 ZoomInfo Technologies LLC'), so the docs URLs recorded here are the ones that actually resolve. Auth confirmed on the Authent"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.zoominfo.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

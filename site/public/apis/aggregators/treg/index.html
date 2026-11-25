@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>treg — aggregator gateway — SkeletonKey</title>
+<meta name="description" content="A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid ba">
+<link rel="canonical" href="https://skeletonkey.run/apis/aggregators/treg/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skeletonkey.run/apis/aggregators/treg/">
+<meta property="og:site_name" content="SkeletonKey">
+<meta property="og:title" content="treg — aggregator gateway — SkeletonKey">
+<meta property="og:description" content="A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid ba">
+<meta property="og:image" content="https://skeletonkey.run/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The skeletonkey wordmark with a brass key mark on warm cream paper.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F1ECE2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110C" media="(prefers-color-scheme: dark)">
+<link rel="preload" href="/fonts/fraunces.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/manrope.woff2?v=4" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=7">
+<link rel="stylesheet" href="/apis/apis.css?v=3">
+<link rel="alternate" type="application/json" href="/apis.json">
+</head>
+<body class="apis-page">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="wordmark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <!-- href is the no-JS fallback; DIRECTORY_URL in /directory/config.js is
+         what this link actually follows, and the one place to change it. -->
+    <a class="head-link head-directory" href="/directory/" data-directory-link>Directory</a>
+    <a class="head-link head-apis" href="/apis/">API index</a>
+    <a class="head-link" href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
+  </div>
+</header>
+<main id="main" class="apis-main"><div class="wrap">
+<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> <a href="/apis/aggregators/">Aggregators</a></nav>
+<h1 class="ap-title">treg</h1>
+<p class="ap-meta"><span class="ap-badge ap-verified">Verified</span> <span>Checked 2026-10-28</span></p>
+<p class="ap-lede">A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid balance. SkeletonKey lists it as a catalog entry, not as a recommended access layer: hold your own vendor accounts and keys where you can, rather than routing everything through one gateway key.</p>
+<section class="ap-card ap-caution"><h2>Before you route through this</h2><p>SkeletonKey lists aggregator gateways as directory entries, not as a recommended access layer. A gateway holds one key that stands in for many vendors; keeping your own account and key with each vendor keeps you in control of your own data, limits and billing. <a href="/#install">Register locally with SkeletonKey</a> instead where you can &mdash; the details below are what we read on this gateway's own pages, for reference.</p></section>
+<section class="ap-card"><h2>Connect</h2><dl class="ap-dl"><dt>Site</dt><dd><a href="https://treg.to/" rel="noopener">https://treg.to/</a></dd><dt>API base URL</dt><dd><code>https://treg.to</code></dd><dt>Auth</dt><dd><code>X-Treg-Token: {key}</code></dd><dt>Docs</dt><dd><a href="https://treg.to/integrate.md" rel="noopener">https://treg.to/integrate.md</a></dd><dt>Catalog size claimed</dt><dd>4,000+ tools across 119 providers (treg.to/catalog: &quot;4,064 endpoints across 113 platforms and 119 providers&quot;, read 2026-10-28)</dd></dl></section>
+<section class="ap-card"><h2>Sign up</h2><dl class="ap-dl"><dt>Methods</dt><dd>github, google, email</dd><dt>Signup page</dt><dd><a href="https://treg.to/" rel="noopener">https://treg.to/</a></dd><dt>Card required</dt><dd>—</dd><dt>Free credit or trial</dt><dd>a new verified account gets a one-time free credit of $1.00.</dd></dl></section>
+<section class="ap-card"><h2>Billing</h2><dl class="ap-dl"><dt>Payment model</dt><dd>prepaid_credits, payg</dd><dt>How it bills</dt><dd>Metered per call from a prepaid balance, at cost with 0% markup stated; a new verified account gets a one-time free credit of $1.00. treg publishes no single per-call price across its catalog.</dd><dt>Payment methods</dt><dd>—</dd><dt>Fees stated</dt><dd>States 0% markup: calls are billed &quot;at cost&quot; from the prepaid balance (treg&#x27;s own skill.md, read 2026-10-28).</dd><dt>Rate limits</dt><dd>None published</dd><dt>Pricing page</dt><dd><a href="https://treg.to/skill.md" rel="noopener">https://treg.to/skill.md</a></dd></dl></section>
+<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the 149 vendors in our index were checked against this gateway.</p></section>
+<section class="ap-card"><h2>Sources</h2><ul class="ap-src"><li><a href="https://treg.to/llms.txt" rel="noopener nofollow">https://treg.to/llms.txt</a></li><li><a href="https://treg.to/skill.md" rel="noopener nofollow">https://treg.to/skill.md</a></li><li><a href="https://treg.to/integrate.md" rel="noopener nofollow">https://treg.to/integrate.md</a></li><li><a href="https://treg.to/catalog" rel="noopener nofollow">https://treg.to/catalog</a></li></ul></section>
+</div></main>
+<footer class="site-foot">
+  <div class="wrap">
+    <a class="foot-mark" href="/" aria-label="skeletonkey, home">
+      <svg viewBox="0 0 184 28" width="184" height="28" fill="none" aria-hidden="true">
+        <g class="glyph" transform="translate(0 4)" stroke="#E8B04B" stroke-width="2.5" stroke-linecap="square">
+          <circle cx="8" cy="12" r="4.5"/>
+          <path d="M12.5 12H21.5"/>
+          <path d="M16.75 12.5V16.75"/>
+          <path d="M20.5 12.5V16.75"/>
+        </g>
+        <text x="32" y="21" fill="currentColor" font-family="'JetBrains Mono',ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace" font-size="19" font-weight="500" letter-spacing="-0.3">skeletonkey</text>
+      </svg>
+    </a>
+    <div class="foot-bar">
+      <p class="foot-meta"><span class="ver">skeletonkey v0.3</span><span class="ver">MIT license</span></p>
+      <nav class="foot-nav" aria-label="Footer">
+        <a href="https://github.com/beizhangnina/skeletonkey/blob/main/LICENSE" rel="noopener">Read the license</a>
+        <a href="https://github.com/beizhangnina/skeletonkey" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

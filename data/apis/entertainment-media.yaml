@@ -20,6 +20,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer portal exists any more: developers.douban.com and open.douban.com do not resolve at all, and www.douban.com/developers and /api return nothing. The legacy API host is still up - GET https://api.douban.com/v2/movie/t"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "imdb"
     name: "IMDb"
     capability: "Film and TV title data: charts, box office, release dates, trivia and review summaries."
@@ -39,6 +47,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); developer.imdb.com now 301-redirects to data.imdb.com, the current developer site. Products: 'New IMDb API' (GraphQL) plus bulk data, in IMDb Ratings, Essential Metadata and Box Office Mojo packages with Meters/User Reviews/Pare"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://data.imdb.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "steam"
     name: "Steam"
     capability: "PC game store pages: price, review summary, release date and genres."
@@ -58,6 +74,14 @@ apis:
     checked_date: 2026-10-24
     official_docs_url: "https://partner.steamgames.com/doc/webapi"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://partner.steamgames.com/doc/webapi"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "youku"
     name: "Youku"
     capability: "Video and uploader pages from a Chinese streaming platform."
@@ -77,3 +101,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); youku.com/api, /developers and /pricing all return 404. The only open-platform presence is open.youku.com, which presents itself as the Youku OTT open platform (内容合作 content partnership, 能力开放 capability opening, 优酷AI, and indust"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

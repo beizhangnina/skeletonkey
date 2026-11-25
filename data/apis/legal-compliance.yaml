@@ -52,6 +52,14 @@ apis:
         summary: "Runs a bundled check (several tools as one call at one price); body takes inputs and an optional max_price_cents, and a key is required."
         returns: "result.status (completed, partial or failed), result.steps keyed by tool, result.errors and result.gated; charged in full unless every step failed."
         docs_url: "https://strale.dev/docs/api"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://strale.io/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "vaquill"
     name: "Vaquill"
     capability: "US primary law: statutes, regulations, section text, citations and cross-state equivalents."
@@ -108,3 +116,11 @@ apis:
         summary: "Returns one state session law with identity, dates, outcome, sources and affected code sections."
         returns: "The law record, including dates, enactment outcome and source links."
         docs_url: "https://www.vaquill.ai/docs/api-guide/session-laws"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.vaquill.ai/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

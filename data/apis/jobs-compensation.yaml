@@ -20,6 +20,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live: builtin.com/api, builtin.com/developers and builtin.com/pricing all return real 404s (not SPA shells), and there is no developer portal, API reference or API pricing anywhere on the vendor's domains. The employe"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "idealist"
     name: "Idealist"
     capability: "Nonprofit and social-impact jobs, internships, volunteer roles and organisation profiles."
@@ -39,6 +47,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Auth confirmed verbatim in the Job Posting API docs: 'You must use the API key as the username for Basic HTTP authentication. Use an empty string for the password', with a Python sample using BASE_URL = 'https://www.idealist.org"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.idealist.org/es/ayuda/paquetes-de-creditos-para-publicar-avisos-empleo-pasantias-practicas"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "indeed"
     name: "Indeed"
     capability: "Job detail, company profiles and salary insights from a large job aggregator."
@@ -58,6 +74,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Indeed's developer documentation could not be read: https://docs.indeed.com/, every /docs.indeed.com/* page, https://www.indeed.com/developers, https://developer.indeed.com (redirects to partners.indeed.com), https://partners.in"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "levels-fyi"
     name: "Levels.fyi"
     capability: "Crowd-reported tech compensation by company and level, plus benefits and visa salary filings."
@@ -75,6 +99,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/levels-fyi"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.levels.fyi/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "theirstack"
     name: "TheirStack"
     capability: "Job postings filtered by title, country and recency, used as a hiring signal."
@@ -131,6 +163,14 @@ apis:
         summary: "List industries and their IDs with job and company counts, and search them by name; use IDs in search filters."
         returns: "A data array of industries with job and company counts plus metadata containing total_results."
         docs_url: "https://theirstack.com/llms-full.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/v0/billing/credit-balance"
+      docs_url: "https://theirstack.com/en/docs/api-reference/billing/get_billing_credit_balance_v0.md"
+      limits: null
+      notes: "团队当前剩余 credits"
+      checked_date: 2026-11-24
   - id: "upwork"
     name: "Upwork"
     capability: "Freelance job search on a large contract-work marketplace."
@@ -148,6 +188,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/upwork"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.upwork.com/llms.txt"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "web3-career"
     name: "Web3 Career"
     capability: "Crypto and web3 job listings with salary data and remote filters."
@@ -172,6 +220,14 @@ apis:
         summary: "Returns the latest Web3 job listings as JSON, with optional filters for tag, country, remote status, result limit, and whether to include descriptions."
         returns: "A top-level JSON array of mixed types; job objects sit in a nested array found as the first element that is itself an array."
         docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://web3.career"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "wellfound"
     name: "Wellfound"
     capability: "Startup job listings, trending roles and startup company profiles."
@@ -191,3 +247,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No public developer API or documentation: /api, /mcp and /.well-known/mcp.json all 404, and /developers redirects to the marketing /hire page. The Reach Starter tier advertises 'Use Reach with your AI assistant', but no endpoint"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://wellfound.com"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

@@ -57,6 +57,14 @@ apis:
         summary: "Get the coding agents leaderboard with Coding Agent Index scores, cost, time and token usage."
         returns: null
         docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "lmarena"
     name: "LMArena"
     capability: "Crowd-voted head-to-head model leaderboards across text, code, vision, image and video."
@@ -76,3 +84,11 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); lmarena.ai now 301-redirects to arena.ai. No developer API exists on the vendor's own pages: /api, /docs, /developers and /pricing all render the generic app shell, and robots.txt lists only consumer routes (/chat, /leaderboard,"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24

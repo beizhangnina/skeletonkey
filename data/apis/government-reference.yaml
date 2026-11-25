@@ -47,6 +47,14 @@ apis:
         summary: "Discover Census variables by keyword."
         returns: "Matching variables, descriptions, and suggested natural-language queries."
         docs_url: "https://censusdata.xyz/skill"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://censusdata.xyz"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24
   - id: "tendata"
     name: "Tendata"
     capability: "Shipment-level customs import/export records with importer, exporter, HS code and volume detail."
@@ -66,6 +74,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Confirmed sales-only from Tendata's own pages, including two the earlier pass missed. Pricing FAQ on the homepage: 'Tendata offers flexible plans based on your specific needs. Contact us via WhatsApp to get a personalized quote."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "us-census-bureau"
     name: "US Census Bureau"
     capability: "Official US Census variables and table queries."
@@ -92,3 +108,11 @@ apis:
       pricing_url: null
       notes: "Page describes the API as free; no paid tiers, quotas or rate plans are stated in the provided text."
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://www.census.gov/data/developers/guidance/api-user-guide.html"
+      limits: null
+      notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
+      checked_date: 2026-11-24

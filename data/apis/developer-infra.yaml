@@ -52,6 +52,14 @@ apis:
         summary: "Request one downloadable MP4 per recorded page of a session; assembly is asynchronous and re-posting re-enqueues and retries pages."
         returns: "202 with a downloads array of RecordingDownload objects (pageId, status); GET polling returns per-page status and download URLs."
         docs_url: "https://docs.browserbase.com/reference/api/create-session-recording-downloads.md"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.browserbase.com/v1/projects/{id}/usage"
+      docs_url: "https://docs.browserbase.com/reference/api/get-project-usage"
+      limits: "Requires X-BB-API-Key header (Browserbase API key)"
+      notes: null
+      checked_date: 2026-11-24
   - id: "github"
     name: "GitHub"
     capability: "Issue and pull-request search plus issue comments over public repositories."
@@ -91,6 +99,14 @@ apis:
         summary: "Search across all documentation content by query, language, and version."
         returns: "Search results across all docs content."
         docs_url: "https://docs.github.com/llms.txt"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.github.com/rate_limit"
+      docs_url: "https://docs.github.com/en/rest/rate-limit/rate-limit"
+      limits: "仅速率配额；调用不计入 REST 速率限制"
+      notes: "部分能：账单用量 GET /users/{username}/settings/billing/usage 等（https://docs.github.com/en/rest/billing/usage）仅适用于 enhanced billing platform 账户，组织级需管理员权限"
+      checked_date: 2026-11-24
   - id: "kadec0"
     name: "kadec0"
     capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API."
@@ -110,6 +126,14 @@ apis:
     checked_date: 2026-10-24
     official_docs_url: "https://api.kadec0.xyz/docs"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "sfs"
     name: "Simple FS"
     capability: "Remote per-workspace file system for agents with unix-style verbs and signed share URLs."
@@ -129,6 +153,14 @@ apis:
     checked_date: 2026-10-24
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); API access is real and fully documented but not self-serve. The Redocly API docs say: 'Please reach out to your account manager to begin the process of setting up API access. API keys are issued by FreightSimple once access is a"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "smolmachine"
     name: "Smol Machines"
     capability: "Persistent Linux microVM sandboxes for agents, created from a container image."
@@ -173,3 +205,11 @@ apis:
         summary: "Store a pull credential for an external registry host (such as ghcr.io or Docker Hub) so cloud machines can pull private images."
         returns: "Credential record; the password is never returned and the list shows only the username."
         docs_url: "https://smolmachines.com/docs/cloud/registry"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/v1/account"
+      docs_url: "https://smolmachines.com/docs/guides/skills/cloud-usage"
+      limits: "A machine:* key reaches GET /v1/account (200); GET /v1/usage needs admin or usage:read; GET /v1/billing/meters needs admin"
+      notes: null
+      checked_date: 2026-11-24
