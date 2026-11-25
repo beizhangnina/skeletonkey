@@ -855,6 +855,7 @@ apis:
     tos_notes: "x"
     source_url: "https://monid.ai/tools/no-pricing"
     checked_date: 2026-11-24
+    cost_badge: "gray"
   - id: "has-pricing"
     name: "Has Pricing"
     capability: "c"
@@ -912,8 +913,16 @@ apis:
     const applied = runDeriveBadge([dir]);
     expect(applied.code).toBe(0);
     const updated = fs.readFileSync(file, "utf8");
-    expect(updated).toMatch(/no-pricing"[\s\S]*cost_badge: "gray"/);
-    expect(updated).toMatch(/gate_source_url: "https:\/\/vendor\.test\/pricing"\n\s*cost_badge: "red"/);
+    // no-pricing carries no pricing.api_access_gate, so its stale cost_badge
+    // is removed outright -- no cost_badge line survives on that row.
+    const noPricingBlock = updated.slice(
+      updated.indexOf('id: "no-pricing"'),
+      updated.indexOf('id: "has-pricing"'),
+    );
+    expect(noPricingBlock).not.toMatch(/cost_badge/);
+    // has-pricing is gated, so it gets cost_badge placed right after its
+    // last structured block (alternatives_note), matching emit_row's order.
+    expect(updated).toMatch(/alternatives_note: null\n\s*cost_badge: "red"/);
 
     // Idempotent: a second run makes no changes and --check now exits 0.
     const before = fs.readFileSync(file, "utf8");
@@ -928,7 +937,7 @@ apis:
     expect(validated).toMatch(/OK: all entries valid/);
   });
 
-  it("inserts cost_badge right after the pricing block when one exists, else as the last key", () => {
+  it("inserts cost_badge right after the last structured block present (alternatives_note), not right after pricing", () => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), "skeletonkey-derive-badge-pos-"));
     const file = path.join(dir, "llm-models.yaml");
     fs.writeFileSync(file, fixtureShard);
@@ -936,11 +945,60 @@ apis:
     const text = fs.readFileSync(file, "utf8");
     const hasPricingRow = text.indexOf('  - id: "has-pricing"');
     const hasPricingBlock = text.slice(hasPricingRow);
-    const altIdx = hasPricingBlock.indexOf("alternatives:");
+    const altNoteIdx = hasPricingBlock.indexOf("alternatives_note:");
     const badgeIdx = hasPricingBlock.indexOf("cost_badge:");
-    // cost_badge sits right after the pricing block (before alternatives), not at the very end.
-    expect(altIdx).toBeGreaterThan(0);
-    expect(badgeIdx).toBeGreaterThan(0);
-    expect(badgeIdx).toBeLessThan(altIdx);
+    // cost_badge sits right after alternatives_note (the last structured
+    // block on this row), not right after pricing.
+    expect(altNoteIdx).toBeGreaterThan(0);
+    expect(badgeIdx).toBeGreaterThan(altNoteIdx);
+  });
+
+  function runPyScript(code: string): string {
+    const scriptsDir = path.dirname(VALIDATE_PY);
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "skeletonkey-derive-badge-emit-"));
+    try {
+      const script = `import sys\nsys.path.insert(0, ${JSON.stringify(scriptsDir)})\n${code}`;
+      const file = path.join(tmp, "run.py");
+      fs.writeFileSync(file, script);
+      return execFileSync("python3", [file], { encoding: "utf8" });
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  }
+
+  it("stays in sync with build.py's own emit_row output for a gated row with alternatives and usage_api", () => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), "skeletonkey-derive-badge-emit-"));
+    const file = path.join(dir, "llm-models.yaml");
+
+    const rowText = runPyScript(`
+import build
+
+row = {
+    "id": "emit-gate-vendor", "name": "Emit Gate Vendor", "capability": "c",
+    "category": "llm-models", "provider_url": None, "docs_url": None,
+    "access_mode": "own-account", "signup": "self-serve", "signup_automatable": "unknown",
+    "min_topup": None, "billing_unit": None, "free_tier": None, "auth_type": "api_key",
+    "seen_in": ["monid"], "tos_notes": "x",
+    "source_url": "https://monid.ai/tools/emit-gate-vendor", "checked_date": "2026-11-24",
+    "pricing": {
+        "model": "subscription", "free_tier": None, "starting_price_usd": None, "unit": None,
+        "pricing_url": "https://vendor.test/pricing", "notes": None,
+        "api_access_gate": "subscription_required", "min_monthly_usd": 10,
+        "min_prepay_usd": None, "gate_source_url": "https://vendor.test/pricing",
+    },
+    "alternatives": [{"vendor_id": "treg", "why": "Pay-as-you-go gateway.", "access_gate": "none"}],
+    "alternatives_note": None,
+    "cost_badge": "red",
+    "usage_api": {"available": False, "method": None, "path": None, "docs_url": None,
+                  "limits": None, "notes": None, "checked_date": None},
+}
+print(build.emit_row(row))
+`);
+
+    fs.writeFileSync(file, `# generated for a test\napis:\n${rowText}\n`);
+
+    const check = runDeriveBadge(["--check", dir]);
+    expect(check.code).toBe(0);
+    expect(check.out).toMatch(/OK: cost_badge in sync/);
   });
 });

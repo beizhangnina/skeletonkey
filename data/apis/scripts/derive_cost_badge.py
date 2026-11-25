@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
-"""Rewrites/inserts `cost_badge` lines in shard YAML files in place, at the
-text level -- no raw/ required.
+"""Rewrites/inserts/removes `cost_badge` lines in shard YAML files in place,
+at the text level -- no raw/ required.
 
 build.py already recomputes `cost_badge` on every row it regenerates (see
 its README section "ND-12 pricing gate"), but build.py cannot run in a clean
 clone: `data/apis/raw/` is not committed (see ../README.md "Layout"). This
-script reaches the same result -- `cost_badge` in sync with
-`pricing.api_access_gate` -- by editing the shard text directly, touching
-only `cost_badge` lines and leaving everything else byte-for-byte untouched.
+script reaches the same result by editing the shard text directly, touching
+only `cost_badge` lines and leaving everything else byte-for-byte untouched:
 
-For each row, the line is placed right after the row's `pricing:` block, or
-as the last key of the row when it has no `pricing` block. An existing
-`cost_badge` line already holding the right value is left alone, so a second
-run makes no changes (idempotent).
+  - A row only gets a `cost_badge` line when its `pricing` block carries an
+    `api_access_gate` key (any value, `unknown` included). A row with no
+    such key gets NO `cost_badge` line -- a stale one left over from before
+    is removed, not merely left wrong.
+  - On a gated row, the line is placed exactly where build.py's `emit_row`
+    puts it: right after the last of the ND-8/ND-12 structured blocks
+    present on the row (`official_docs_url`, `auth`, `pricing`, `endpoints`,
+    `endpoints_note`, `alternatives`, `alternatives_note`), before any other
+    extra key.
+
+An existing `cost_badge` line already holding the right value (or already
+absent, on a non-gated row) is left alone, so a second run makes no changes
+(idempotent).
 
 Usage:
     python3 derive_cost_badge.py [--check] [dir]
@@ -27,7 +35,11 @@ import validate
 
 ID_RE = re.compile(r'^  - id: "([^"]*)"')
 COST_BADGE_RE = re.compile(r'^    cost_badge:\s*(.*)$')
-PRICING_RE = re.compile(r'^    pricing:(.*)$')
+# The ND-8/ND-12 structured blocks, in the order emit_row emits them -- see
+# build.py's STRUCTURED_FIELDS / PRICING_GATE_FIELDS and ../README.md.
+STRUCTURED_FIELD_RE = re.compile(
+    r'^    (official_docs_url|auth|pricing|endpoints|endpoints_note'
+    r'|alternatives|alternatives_note):(.*)$')
 
 
 def row_spans(lines):
@@ -42,40 +54,60 @@ def row_spans(lines):
     return spans
 
 
-def pricing_block_end(lines, start, end):
-    """Index right after the row's `pricing:` block (one-line `pricing: null`
-    counts as the whole block), or None when the row has no `pricing` key."""
-    for i in range(start, end):
-        m = PRICING_RE.match(lines[i])
+def structured_blocks_end(lines, start, end):
+    """Index right after the last ND-8/ND-12 structured block present on the
+    row (a one-line field, e.g. `pricing: null`, counts as its own whole
+    block), or None when the row has none of them -- matching the order
+    `emit_row` emits them in, so a newly inserted `cost_badge` lands exactly
+    where a build.py rebuild would put it."""
+    last = None
+    i = start
+    while i < end:
+        m = STRUCTURED_FIELD_RE.match(lines[i])
         if not m:
+            i += 1
             continue
-        if m.group(1).strip():
-            return i + 1
+        if m.group(2).strip():
+            last = i + 1
+            i += 1
+            continue
         j = i + 1
         while j < end and (lines[j].startswith('      ') or not lines[j].strip()):
             j += 1
-        return j
-    return None
+        last = j
+        i = j
+    return last
 
 
 def process(lines, rows):
     """Rewrites `lines` (a list, mutated in place) so every row's
-    `cost_badge` matches `validate.derive_cost_badge(row['pricing'])`.
-    Returns the ids actually changed (inserted or corrected)."""
+    `cost_badge` matches build.py's rule: present and equal to
+    `validate.derive_cost_badge(row['pricing'])` when `row['pricing']` is a
+    mapping containing an `api_access_gate` key, absent otherwise. Returns
+    the ids actually changed (inserted, corrected, or removed)."""
     changed = []
-    # Walk from the end: inserting a line shifts every later index, and
-    # spans were computed once up front from the original (unmutated) text.
+    # Walk from the end: inserting/removing a line shifts every later index,
+    # and spans were computed once up front from the original (unmutated)
+    # text.
     for start, end, pid in reversed(row_spans(lines)):
         row = rows.get(pid)
         if row is None:
             continue
-        expected = validate.derive_cost_badge(row.get('pricing'))
+        pricing = row.get('pricing')
+        gated = isinstance(pricing, dict) and 'api_access_gate' in pricing
+        expected = validate.derive_cost_badge(pricing) if gated else None
 
         existing_idx = None
         for i in range(start, end):
             if COST_BADGE_RE.match(lines[i]):
                 existing_idx = i
                 break
+
+        if expected is None:
+            if existing_idx is not None:
+                del lines[existing_idx]
+                changed.append(pid)
+            continue
 
         if existing_idx is not None:
             current = COST_BADGE_RE.match(lines[existing_idx]).group(1).strip().strip('"')
@@ -85,7 +117,7 @@ def process(lines, rows):
             changed.append(pid)
             continue
 
-        insert_at = pricing_block_end(lines, start, end)
+        insert_at = structured_blocks_end(lines, start, end)
         if insert_at is None:
             insert_at = end
         # `end` may be end-of-file, where the trailing `\n` split leaves a
