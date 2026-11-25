@@ -188,6 +188,62 @@ skeletonkey init
 Use a writable npm global prefix rather than `sudo`: `npm config set prefix
 ~/.npm-global`, then put `~/.npm-global/bin` on `PATH`.
 
+### Quick start: five steps (v0.4)
+
+No SkeletonKey account and no SkeletonKey server: everything below runs on
+your machine, and no key is ever shown to an agent.
+
+1. **Install and set up.** Sets a local passphrase-protected vault and
+   registers the MCP server and skill with Claude Code and Codex.
+
+   ```bash
+   npx -y @dormy/skeletonkey init
+   ```
+
+2. **Find an API.** Browse [skeletonkey.run](https://skeletonkey.run), ask your
+   agent (it calls the `find_api` MCP tool), or search the bundled index:
+
+   ```bash
+   skeletonkey apis show "web scraping"
+   ```
+
+3. **Get a vendor account and bind its key.** `signup start` opens the
+   vendor's own signup page and lists the steps only you can do (captcha,
+   terms, payment); `signup complete` reads the key from a hidden prompt and
+   stores it in the vault. Already have a key? Use `account add --store-key`.
+
+   ```bash
+   skeletonkey signup start apify
+   # ... finish signup and create the key in your browser ...
+   skeletonkey signup complete apify
+   # or, for a key you already have:
+   skeletonkey account add apify-main --vendor apify --store-key --domain api.apify.com
+   ```
+
+4. **Use it without the agent ever seeing it.** Either call through the local
+   proxy, which injects the key per request, or run a command with the key in
+   its environment and its output redacted:
+
+   ```bash
+   skeletonkey proxy --port 8787
+   curl http://127.0.0.1:8787/api.apify.com/v2/users/me
+   # or
+   skeletonkey run --env APIFY_TOKEN=vault://apify-main -- <your command>
+   ```
+
+5. **Check weekly.** Compares each account's official usage API with the local
+   ledger and flags invalid keys; alerts are a local OS notification plus a
+   redacted report on this machine (no email). SkeletonKey never installs a
+   schedule; `monitor install-help` prints cron/launchd/systemd snippets.
+
+   ```bash
+   skeletonkey monitor run
+   skeletonkey monitor report --latest
+   ```
+
+See [Signup (ND-2)](#signup-nd-2), [Accounts (ND-1)](#accounts-nd-1) and
+[Weekly monitor (ND-5)](#weekly-monitor-nd-5) for every flag and exit code.
+
 ### Register the MCP server by hand
 
 `skeletonkey init` and `skeletonkey register` write both of these for you, after
@@ -225,7 +281,7 @@ npm link            # optional: puts `skeletonkey`, `skk` and `skeletonkey-runne
 To install exactly what would be published, without publishing anything:
 
 ```bash
-npm pack && npm install -g ./dormy-skeletonkey-0.3.0.tgz
+npm pack && npm install -g ./dormy-skeletonkey-0.4.0.tgz
 ```
 
 `npm pack` rebuilds `dist/` first. The tarball carries compiled JavaScript and
@@ -1494,7 +1550,8 @@ skeletonkey monitor install-help
 
 Phases, following the PRD:
 
-- **v0.3 (this release) — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@dormy/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
+- **v0.4 (this release) — accounts, guided signup, weekly monitor.** The local account vault (`account`), guided human-handoff signup for six first-wave vendors (`signup`), the weekly usage check (`monitor`), `usage_api` facts in the index, and the five-step quick start above. See [CHANGELOG.md](CHANGELOG.md).
+- **v0.3 — zero-knowledge foundation.** Trusted runner, async approvals, the secret resolution ladder with the Secure Input Popup, the domain allowlist, `policy.yaml`, the kill switch across proxy and runner, redaction everywhere, `init` auto-registration for Claude Code and Codex, guided Bitwarden account detection with vendor lookup by the bound email, the interactive [`init` wizard](#the-init-wizard), and the first npm release as `@dormy/skeletonkey`. See [What v0.3 adds](#what-v03-adds).
 - **v0.5 — automated signup.** Bind an inbox and extract OTPs; a Playwright runner with playbooks for Apify, TikHub, Apollo and DropLeads, preferring OAuth or a passkey over a password; key capture straight into `bw`; a computer-use guided handoff for captcha and phone checks, logged, with the aggregator fallback offered only on approval.
 - **v1.0 — payments and the budget wallet.** Card autofill from Bitwarden, pre-approval and top-up rules, receipt parsing into the ledger (the per-vendor cap re-check before submit already landed in v0.3), and a `automation: allowed|human|unknown` ToS matrix in `apis.yaml`. Fiat only; one card, no virtual cards.
 - **Hosted (post-v1, gated).** Not scheduled, and nothing decided: a hosted MCP, an optional cloud runner, and anything resembling a prepaid balance all wait on legal review.

@@ -53,7 +53,7 @@ try {
     assert.ok(file.size > 0, `Empty file in the package: ${file.path}`);
   }
   assert.deepEqual(paths, dry.files.map(file => file.path).sort());
-  const allowed = /^(?:package\.json|README\.md|LICENSE|apis\.yaml|dist\/(?:[\w-]+\/)*[\w-]+\.(?:js|d\.ts)|data\/apis\/[\w-]+\.yaml|data\/apis\/README\.md|data\/discovered\.example\.yaml|skills\/[\w-]+\/SKILL\.md|docs\/[\w.-]+\.md)$/;
+  const allowed = /^(?:package\.json|README\.md|CHANGELOG\.md|LICENSE|apis\.yaml|dist\/(?:[\w-]+\/)*[\w-]+\.(?:js|d\.ts)|data\/apis\/[\w-]+\.yaml|data\/apis\/README\.md|data\/discovered\.example\.yaml|skills\/[\w-]+\/SKILL\.md|docs\/[\w.-]+\.md)$/;
   for (const file of paths) assert.ok(allowed.test(file), `Unexpected package file: ${file}`);
   // Refused whatever the allow-list says, so a later loosening cannot ship
   // these by accident: raw catalog downloads, the catalog build scripts, the

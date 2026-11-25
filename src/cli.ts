@@ -146,7 +146,7 @@ export function buildProgram(): Command {
       "Local-only vault for your personal API keys, with a header-injecting proxy.\n" +
         "Set SKELETONKEY_HOME to point every command at a different directory.",
     )
-    .version("0.3.0")
+    .version("0.4.0")
     .showHelpAfterError();
 
   program
