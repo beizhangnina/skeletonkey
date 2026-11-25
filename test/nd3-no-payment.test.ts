@@ -5,8 +5,9 @@
  * account code or in any MCP tool's input schema; a `payment` driver step
  * always lands on needs_human with run() called exactly once and nothing
  * written; `HumanHandoffPaymentSubmitter` always hands off to the human; and
- * (a known gap, recorded as `it.fails`) a card-number-shaped string is
- * currently accepted as if it were an ordinary API key or signup secret.
+ * a card-number-shaped string offered as an API key or signup secret is
+ * refused with exit 76 (card_number_rejected), never stored, never echoed
+ * (ND-3-bug-card-number-accepted-as-key, fixed in nd-2-signup@5b80ae4).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -17,6 +18,7 @@ import { cmdSignupStart } from "../src/signup/cli.js";
 import type { Nd2SignupDriver } from "../src/signup/drive.js";
 import { readSignups } from "../src/signup/sessions.js";
 import { HumanHandoffPaymentSubmitter, type PaymentSubmitContext } from "../src/payments.js";
+import { decryptSecrets } from "../src/vault/encrypted-file.js";
 import { makeHome, removeHome, runCli } from "./helpers/env.js";
 
 const FORBIDDEN_IDENTIFIER = /card[_-]?number|cardNumber|\bcvv\b|\bcvc\b|expiry|billing[_-]?address|payment[_-]?method/i;
@@ -179,52 +181,65 @@ describe("ND-3: no payment instrument handling anywhere in signup/account code o
       removeHome(home);
     }
 
-    // BUG ND-3-bug-card-number-accepted-as-key: a 16-digit card number is
-    // currently accepted and bound as an ordinary signup key, with no check
-    // that it looks like a payment instrument rather than an API key.
-    it.fails("signup complete apify --stdin with a bare 16-digit card number is rejected, not bound", async () => {
+    // ND-3-bug-card-number-accepted-as-key, fixed in nd-2-signup@5b80ae4:
+    // a card-number-shaped secret is refused with exit 76 (card_number_rejected),
+    // never written to the vault, and never echoed.
+    const DECOY_KEY = "sk-nd3-decoy-key-0a1b2c3d4e5f";
+
+    /** Decrypts vault.enc.json in-process (never printed) and returns alias -> secret. */
+    function vaultSecrets(): Record<string, string> {
+      const file = JSON.parse(fs.readFileSync(path.join(home, "vault.enc.json"), "utf8"));
+      return decryptSecrets(file, env.SKELETONKEY_PASSPHRASE!);
+    }
+
+    async function expectCardRejected(argv: string[], stdin: string, account: string): Promise<void> {
+      // A decoy key first, so the encrypted vault really exists and can be inspected.
+      const decoy = await runCli(home, ["signup", "complete", "exa", "--stdin"], DECOY_KEY, env);
+      expect(decoy.code, decoy.stderr).toBe(0);
+
+      const result = await runCli(home, argv, stdin, env);
+      expect(result.code, result.stderr).toBe(76);
+      const out = `${result.stdout}\n${result.stderr}`;
+      expect(out).not.toContain(stdin.trim());
+      expect(out).not.toContain(CARD_DIGITS);
+
+      expect(findAccount(account, home)).toBeUndefined();
+      const secrets = vaultSecrets();
+      expect(Object.values(secrets)).toContain(DECOY_KEY); // the vault was readable
+      for (const [alias, value] of Object.entries(secrets)) {
+        expect(alias.startsWith(account), `vault has an entry for ${account}`).toBe(false);
+        expect(value.replace(/[ -]/g, ""), `vault entry ${alias} holds the card number`).not.toBe(CARD_DIGITS);
+      }
+    }
+
+    const CARD_DIGITS = "4242424242424242";
+
+    it("signup complete apify --stdin with a bare 16-digit card number -> exit 76, nothing stored, not echoed", async () => {
       await setUp();
       try {
-        const result = await runCli(home, ["signup", "complete", "apify", "--stdin"], "4242424242424242", env);
-        expect(result.code).not.toBe(0);
-        expect(findAccount("apify-main", home)).toBeUndefined();
+        await expectCardRejected(["signup", "complete", "apify", "--stdin"], "4242424242424242", "apify-main");
       } finally {
         tearDown();
       }
     });
 
-    // BUG ND-3-bug-card-number-accepted-as-key: same gap, spaced card format.
-    it.fails(
-      "signup complete apify --stdin with a spaced 16-digit card number is rejected, not bound",
-      async () => {
-        await setUp();
-        try {
-          const result = await runCli(
-            home,
-            ["signup", "complete", "apify", "--stdin"],
-            "4242 4242 4242 4242",
-            env,
-          );
-          expect(result.code).not.toBe(0);
-          expect(findAccount("apify-main", home)).toBeUndefined();
-        } finally {
-          tearDown();
-        }
-      },
-    );
-
-    // BUG ND-3-bug-card-number-accepted-as-key: same gap via `account add`.
-    it.fails("account add --store-key --stdin with a bare 16-digit card number is rejected, not stored", async () => {
+    it("signup complete apify --stdin with a spaced 16-digit card number -> exit 76, nothing stored, not echoed", async () => {
       await setUp();
       try {
-        const result = await runCli(
-          home,
+        await expectCardRejected(["signup", "complete", "apify", "--stdin"], "4242 4242 4242 4242", "apify-main");
+      } finally {
+        tearDown();
+      }
+    });
+
+    it("account add --store-key --stdin with a bare 16-digit card number -> exit 76, nothing stored, not echoed", async () => {
+      await setUp();
+      try {
+        await expectCardRejected(
           ["account", "add", "c1", "--vendor", "apify", "--store-key", "--domain", "api.apify.com", "--stdin"],
           "4242424242424242",
-          env,
+          "c1",
         );
-        expect(result.code).not.toBe(0);
-        expect(findAccount("c1", home)).toBeUndefined();
       } finally {
         tearDown();
       }

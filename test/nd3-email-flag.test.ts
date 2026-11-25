@@ -6,11 +6,10 @@
  * on `signup start`/`signup complete` (which never registered the flag at
  * all, so commander itself rejects it as unknown).
  *
- * One known gap is recorded here rather than hidden: commander's own
- * "unknown option" error echoes the raw token it was given, so
- * `--email=<value>` on `signup start`/`signup complete` leaks the value into
- * stderr. Those two cases are `it.fails` with a `// BUG` comment instead of
- * a weakened assertion.
+ * `--email=<value>` on `signup start`/`signup complete` used to leak the value
+ * through commander's "unknown option" error (ND-3-bug-email-equals-echo).
+ * Fixed in nd-2-signup@5b80ae4; those cases are now plain `it`, plus a check
+ * that no unknown `--flag=<value>` is ever echoed.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -177,8 +176,8 @@ describe("ND-3: plaintext --email is rejected, not echoed, and writes nothing", 
       assertNothingWritten(home);
     });
 
-    // BUG ND-3-bug-email-equals-echo: commander echoes unknown option value
-    it.fails("signup complete apify --email=<value> --stdin", async () => {
+    // ND-3-bug-email-equals-echo, fixed in nd-2-signup@5b80ae4.
+    it("signup complete apify --email=<value> --stdin", async () => {
       const result = await runCli(
         home,
         ["signup", "complete", "apify", `--email=${CANARY_EMAIL}`, "--stdin"],
@@ -190,11 +189,26 @@ describe("ND-3: plaintext --email is rejected, not echoed, and writes nothing", 
       assertNothingWritten(home);
     });
 
-    // BUG ND-3-bug-email-equals-echo: commander echoes unknown option value
-    it.fails("signup start apify --email=<value>", async () => {
+    // ND-3-bug-email-equals-echo, fixed in nd-2-signup@5b80ae4.
+    it("signup start apify --email=<value>", async () => {
       const result = await runCli(home, ["signup", "start", "apify", `--email=${CANARY_EMAIL}`]);
       expect(result.code).not.toBe(0);
       assertNoEcho("signup start --email=<value>", `${result.stdout}\n${result.stderr}`);
+      assertNothingWritten(home);
+    });
+
+    it("an unknown --flag=<value> (e.g. a mistyped --key=sk-...) is never echoed", async () => {
+      const secret = "sk-nd3-UNKNOWN-FLAG-VALUE-7c2e91";
+      for (const argv of [
+        ["signup", "complete", "apify", `--key=${secret}`, "--stdin"],
+        ["account", "add", "u1", "--vendor", "apify", `--api-key=${secret}`],
+      ]) {
+        const result = await runCli(home, argv, "sk-nd3-should-never-be-read");
+        expect(result.code).not.toBe(0);
+        const out = `${result.stdout}\n${result.stderr}`;
+        expect(out, argv.join(" ")).not.toContain(secret);
+        expect(out, argv.join(" ")).not.toContain("7c2e91");
+      }
       assertNothingWritten(home);
     });
   });

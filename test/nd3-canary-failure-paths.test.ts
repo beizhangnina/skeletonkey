@@ -159,7 +159,7 @@ describe("ND-3: failure paths leak nothing and leave no half-written state", () 
       wrongEnv,
     );
     exitCodes["signup complete (wrong pass)"] = wrongComplete.code;
-    expect(wrongComplete.code).not.toBe(0);
+    expect(wrongComplete.code, wrongComplete.stderr).toBe(68); // vault_locked (fixed in 5b80ae4)
     record("wrong-pass:signup complete firecrawl", wrongComplete);
 
     const wrongAdd = await runCli(
@@ -179,7 +179,7 @@ describe("ND-3: failure paths leak nothing and leave no half-written state", () 
       wrongEnv,
     );
     exitCodes["account add --store-key (wrong pass)"] = wrongAdd.code;
-    expect(wrongAdd.code).not.toBe(0);
+    expect(wrongAdd.code, wrongAdd.stderr).toBe(68); // vault_locked (fixed in 5b80ae4)
     record("wrong-pass:account add --store-key", wrongAdd);
 
     const wrongShow = await runCli(home, ["account", "show", ACCOUNT], undefined, wrongEnv);
@@ -199,7 +199,7 @@ describe("ND-3: failure paths leak nothing and leave no half-written state", () 
       wrongEnv,
     );
     exitCodes["run (wrong pass)"] = wrongRun.code;
-    expect(wrongRun.code).not.toBe(0);
+    expect(wrongRun.code, wrongRun.stderr).toBe(68); // vault_locked
     record("wrong-pass:run", wrongRun);
 
     const wrongStatus = await runCli(home, ["signup", "status", "--json"], undefined, wrongEnv);
