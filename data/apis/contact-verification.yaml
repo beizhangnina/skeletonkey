@@ -19,6 +19,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/hlrlookup"
     checked_date: 2026-10-25
     official_docs_url: "https://www.hlrlookup.com/docs/hlrlookup-docs.html"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/apiv2/hlr"
@@ -35,6 +46,7 @@ apis:
         summary: "Format-only validation of one or more numbers without a live HLR lookup; returns number type, issuing network details and formatted output."
         returns: "A subset of the HLR response; live_status, current_network, is_ported, ported_date, landline_status, sms_email, mms_email and cache fields are omitted."
         docs_url: "https://www.hlrlookup.com/hlr-api-v2.openapi.json"
+    cost_badge: "gray"
     usage_api:
       available: true
       method: "GET"
@@ -61,6 +73,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/hunter"
     checked_date: 2026-10-25
     official_docs_url: "https://hunter.io/api-documentation/v2"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://hunter.io/api-documentation/v2"
     endpoints:
       - method: "POST"
         path: "/discover"
@@ -72,6 +95,7 @@ apis:
         summary: "Find the email addresses published for a given domain (or company name), filterable by type, department, seniority, provenance, and more."
         returns: "Email addresses and public sources for the domain, plus X-Credits-Used / X-Credits-Unit cost headers."
         docs_url: "https://hunter.io/openapi.json"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -98,12 +122,24 @@ apis:
     source_url: "https://glasser.ai/data-sources/prospeo"
     checked_date: 2026-10-25
     official_docs_url: "https://prospeo.io/api-docs/authentication"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://prospeo.io/api-docs"
     endpoints:
       - method: "POST"
         path: "/enrich-person"
         summary: "Enrich a person from supplied data such as name and company website, optionally requesting a verified email or mobile."
         returns: "JSON with an error flag and person/company objects, including job history, email, mobile and location details."
         docs_url: "https://prospeo.io/api-docs/authentication"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"

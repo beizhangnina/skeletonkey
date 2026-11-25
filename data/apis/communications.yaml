@@ -29,8 +29,12 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: null
+      pricing_url: "https://agentline.cloud/pricing"
       notes: "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message."
+      api_access_gate: "subscription_required"
+      min_monthly_usd: 20
+      min_prepay_usd: null
+      gate_source_url: "https://agentline.cloud/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/agents"
@@ -57,6 +61,11 @@ apis:
         summary: "List phone number provisioning charges, paginated by limit and offset."
         returns: "Cost of each phone number bought, including the number, country, and current status."
         docs_url: "https://docs.agentline.cloud/api-reference/billing/get-number-expenditure.md"
+    alternatives:
+      - vendor_id: "saperly"
+        why: "US phone numbers for agents with calling and SMS, prepaid pay-as-you-go; hosted AI voice not verified. https://saperly.com/#pricing"
+        access_gate: "none"
+    cost_badge: "red"
     usage_api:
       available: true
       method: "GET"
@@ -95,6 +104,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Free tier limited to 3 inboxes and 100 emails per day with no credit card required."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.agentmail.to/welcome"
     endpoints:
       - method: "POST"
         path: "/v0/agent/sign-up"
@@ -121,6 +134,7 @@ apis:
         summary: "Retrieves the forwarding destinations configured at the pod level, which its inboxes inherit when they set none."
         returns: "200 with destinations (nullable string list) and unverified addresses; 403/404 errors."
         docs_url: "https://docs.agentmail.to/api-reference/pods/forwarding/get.md"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -147,6 +161,17 @@ apis:
     source_url: "https://monid.ai/tools/recall"
     checked_date: 2026-10-25
     official_docs_url: "https://docs.recall.ai/reference/authentication"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.recall.ai/docs/billing-faq"
     endpoints:
       - method: "POST"
         path: "/api/v1/calendar/user/disconnect/"
@@ -168,6 +193,7 @@ apis:
         summary: "Updates an existing Google Login Group; requires name and login_mode (always or only_if_required)."
         returns: "200 response; the response body schema is not shown on the page."
         docs_url: "https://docs.recall.ai/reference/google_login_groups_update"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -201,6 +227,10 @@ apis:
       unit: null
       pricing_url: null
       notes: "Prepaid balance metered per call and per message via reserve → settle; $5 free signup credit and first number free for 30 days."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://saperly.com/#pricing"
     endpoints:
       - method: "POST"
         path: "/connections"
@@ -227,6 +257,7 @@ apis:
         summary: "Send an SMS from one of your numbers to a recipient, over compliant registered routes."
         returns: "The sent message object (e.g. the message record returned by messaging.send)."
         docs_url: "https://saperly.com/llms.txt"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

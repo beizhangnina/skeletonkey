@@ -19,6 +19,17 @@ apis:
     source_url: "https://glasser.ai/data-sources/openalex"
     checked_date: 2026-10-25
     official_docs_url: "https://help.openalex.org/api/"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/works"
@@ -35,6 +46,7 @@ apis:
         summary: "Request a free API key for a user by email; the key activates after the emailed link is clicked."
         returns: "JSON with api_key, pending activation status, email, and daily budget details."
         docs_url: "https://help.openalex.org/api/authentication/"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -71,8 +83,12 @@ apis:
       free_tier: true
       starting_price_usd: 29
       unit: "per month for 5,000 credits"
-      pricing_url: null
+      pricing_url: "https://docs.valyu.ai/pricing"
       notes: "Usage is charged from one credit balance; 2,000 free monthly credits with a work email; plans start at $29/month for 5,000 credits."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.valyu.ai/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/search"
@@ -99,6 +115,7 @@ apis:
         summary: "Discover available datasets and their source IDs for search scoping."
         returns: "Catalogue of data sources with source IDs; latency in seconds."
         docs_url: "https://docs.valyu.ai/llms-full.txt"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null

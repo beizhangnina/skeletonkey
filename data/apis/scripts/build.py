@@ -120,7 +120,17 @@ STRUCTURED_FIELDS = ['official_docs_url', 'auth', 'pricing', 'endpoints',
 AUTH_KEYS = ['type', 'header', 'format', 'docs_url']
 PRICING_KEYS = ['model', 'free_tier', 'starting_price_usd', 'unit',
                 'pricing_url', 'notes']
+# ND-12 pricing-gate keys nested in `pricing`. Emitted after PRICING_KEYS and
+# ONLY when present on the row: a pricing block nobody gate-checked rebuilds
+# byte-identical to before ND-12 (no explicit nulls -- PM decision on ND-10).
+PRICING_GATE_KEYS = ['api_access_gate', 'min_monthly_usd', 'min_prepay_usd',
+                     'gate_source_url']
 ENDPOINT_KEYS = ['method', 'path', 'summary', 'returns', 'docs_url']
+
+# The two ND-12 hand-filled top-level fields (../README.md "ND-12 pricing
+# gate"), emitted right after the five ND-8 fields above, in this order.
+PRICING_GATE_FIELDS = ['alternatives', 'alternatives_note']
+ALTERNATIVE_KEYS = ['vendor_id', 'why', 'access_gate']
 
 
 def q(v):
@@ -227,10 +237,14 @@ def emit_row(e):
     newline): the base ORDER fields, always; then whichever of the five ND-8
     structured fields (official_docs_url, auth, pricing, endpoints,
     endpoints_note -- see ../README.md) are present as a key on `e`, in their
-    defined order; then any OTHER key on `e` that is not in ORDER, in the
-    order it appears on `e` -- a hand-filled field this module has no fixed
-    shape for (`usage_api`, `offering`, `collection_scope`, a future key
-    nobody has written yet, ...), serialised generically by `_emit_entry`.
+    defined order; then whichever of the two ND-12 pricing-gate fields
+    (alternatives, alternatives_note) are present, in their defined order;
+    then any OTHER key on `e` that is not in ORDER, in the order it appears
+    on `e` -- a hand-filled field this module has no fixed shape for
+    (`usage_api`, `offering`, `collection_scope`, a future key nobody has
+    written yet, ...), serialised generically by `_emit_entry`. `cost_badge`
+    is handled separately: it is computed, never hand-filled (see
+    merge_preserved and main()), but still only emitted when present on `e`.
 
     A field absent from `e` is skipped entirely -- never written as
     `field: null` -- so a row carrying none of them emits exactly what
@@ -269,6 +283,8 @@ def emit_row(e):
         else:
             lines.append('    pricing:')
             lines.extend(_mapping_lines(pricing, PRICING_KEYS, 6))
+            lines.extend(_mapping_lines(
+                pricing, [k for k in PRICING_GATE_KEYS if k in pricing], 6))
 
     if 'endpoints' in e:
         eps = e['endpoints']
@@ -288,8 +304,29 @@ def emit_row(e):
     if 'endpoints_note' in e:
         lines.append('    endpoints_note: %s' % yval(e['endpoints_note']))
 
+    if 'alternatives' in e:
+        alts = e['alternatives']
+        if alts is None:
+            lines.append('    alternatives: null')
+        elif not alts:
+            lines.append('    alternatives: []')
+        else:
+            lines.append('    alternatives:')
+            for row in alts:
+                first_alt = True
+                for k in ALTERNATIVE_KEYS:
+                    pad = '      - ' if first_alt else '        '
+                    first_alt = False
+                    lines.append('%s%s: %s' % (pad, k, yval(row.get(k))))
+
+    if 'alternatives_note' in e:
+        lines.append('    alternatives_note: %s' % yval(e['alternatives_note']))
+
+    if 'cost_badge' in e:
+        lines.append('    cost_badge: %s' % yval(e['cost_badge']))
+
     for k, v in e.items():
-        if k in ORDER or k in STRUCTURED_FIELDS:
+        if k in ORDER or k in STRUCTURED_FIELDS or k in PRICING_GATE_FIELDS or k == 'cost_badge':
             continue
         lines.extend(_emit_entry('    ', k, v))
 
@@ -315,11 +352,16 @@ def merge_preserved(new_row, old_row):
     null or absent on `old_row` leaves `new_row`'s value (curated-sourced or
     absent) untouched. build.py never invents a value for one of these
     fields itself -- only `old_row` or curated.py can.
+
+    `cost_badge` is the one exception: like an ORDER field, it is never
+    pulled from `old_row` here, because it is computed (by main(), from the
+    merged row's own `pricing`) rather than hand-filled -- see ../README.md
+    "ND-12 pricing gate".
     """
     merged = dict(new_row)
     old_row = old_row or {}
     for key, value in old_row.items():
-        if key in ORDER:
+        if key in ORDER or key == 'cost_badge':
             continue
         if value is not None:
             merged[key] = value
@@ -480,6 +522,18 @@ def main():
                  'apis:']
         for e in sorted(by_cat[cat], key=lambda x: x['id']):
             merged = merge_preserved(e, existing.get(e['id']))
+            # Computed AFTER merge_preserved, from the pricing hand-filled
+            # fields have already been merged back onto -- never hand-filled
+            # itself, and never pulled from the old shard (see
+            # merge_preserved's `cost_badge` exception).
+            # Only on rows that carry a gate verdict (any value, unknown
+            # included): a row ND-12 never looked at stays byte-identical and
+            # loaders derive `gray` for it (src/apis.ts IndexEntry.costBadge).
+            pricing = merged.get('pricing')
+            if isinstance(pricing, dict) and 'api_access_gate' in pricing:
+                merged['cost_badge'] = validate.derive_cost_badge(pricing)
+            else:
+                merged.pop('cost_badge', None)
             lines.extend(emit_row(merged).split('\n'))
         open(path, 'w').write('\n'.join(lines) + '\n')
 

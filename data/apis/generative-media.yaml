@@ -19,7 +19,19 @@ apis:
     source_url: "https://monid.ai/tools/bytedance"
     checked_date: 2026-10-26
     official_docs_url: "https://docs.byteplus.com/en/docs/ModelArk/quick-start"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -56,8 +68,12 @@ apis:
       free_tier: null
       starting_price_usd: null
       unit: "credit"
-      pricing_url: null
+      pricing_url: "https://elevenlabs.io/pricing/api"
       notes: "Credits reset monthly; text-to-speech costs one credit per character; Pay As You Go prepaid balance available."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://elevenlabs.io/pricing/api"
     endpoints:
       - method: "GET"
         path: "/v1/reception/staff"
@@ -69,6 +85,7 @@ apis:
         summary: "Get a specific staff member by ID."
         returns: "Staff member object including name, id, groups, contact details, working hours, and timestamps."
         docs_url: "https://elevenlabs.io/docs/api-reference/reception/staff/get"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -95,6 +112,17 @@ apis:
     source_url: "https://monid.ai/tools/fishaudio"
     checked_date: 2026-10-25
     official_docs_url: "https://docs.fish.audio"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.fish.audio/developer-guide/models-pricing/pricing-and-rate-limits"
     endpoints:
       - method: "POST"
         path: "/v1/tts"
@@ -121,6 +149,7 @@ apis:
         summary: "Upload a custom background-sound audio clip for a voice agent, sent as multipart/form-data."
         returns: "Clip object with _id, name, duration_seconds, size_bytes, created_at."
         docs_url: "https://docs.fish.audio/llms-full.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -154,7 +183,12 @@ apis:
       unit: "USD per second of generated video (lowest listed per-second rate)"
       pricing_url: null
       notes: "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -181,6 +215,17 @@ apis:
     source_url: "https://monid.ai/tools/magichour"
     checked_date: 2026-10-25
     official_docs_url: "https://docs.magichour.ai/introduction"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://docs.magichour.ai/billing/overview"
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.magichour.ai/billing/overview"
     endpoints:
       - method: "POST"
         path: "/v1/ai-image-generator"
@@ -202,6 +247,7 @@ apis:
         summary: "Generate music from a description, with optional custom lyrics or instrumental-only output."
         returns: "A project ID; poll GET /v1/audio-projects/{id} for status and downloads."
         docs_url: "https://docs.magichour.ai/llms-full.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -228,12 +274,24 @@ apis:
     source_url: "https://monid.ai/tools/minimax"
     checked_date: 2026-10-25
     official_docs_url: "https://platform.minimax.io/docs/api-reference/text-chat-openai"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://platform.minimax.io/docs/pricing/overview"
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://platform.minimax.io/docs/pricing/overview"
     endpoints:
       - method: "POST"
         path: "/v1/chat/completions"
         summary: "OpenAI-compatible chat completion endpoint that generates model replies, with streaming or non-streaming output."
         returns: "Chat completion object with id, choices, created, model, object, usage, sensitivity flags and base_resp error status."
         docs_url: "https://platform.minimax.io/docs/api-reference/text-chat-openai"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -265,8 +323,12 @@ apis:
       free_tier: true
       starting_price_usd: null
       unit: null
-      pricing_url: null
+      pricing_url: "https://platform.sonilo.com/pricing"
       notes: "Free trials first (\"17 free trials (1-2 per endpoint)\"), then billed from a prepaid balance by output duration at each product's per-second rate; no monthly subscription required."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://platform.sonilo.com/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/text-to-music"
@@ -293,6 +355,7 @@ apis:
         summary: "Retrieve credit usage for the account, with a summary plus daily breakdown over a lookback window."
         returns: "JSON with summary totals (requests, duration, cost, period) and a per-day daily breakdown."
         docs_url: "https://platform.sonilo.com/docs/api/get-usage"
+    cost_badge: "green"
     usage_api:
       available: null
       method: null
@@ -351,12 +414,17 @@ apis:
       unit: "credits"
       pricing_url: "https://developer.topazlabs.com/getting-started/model-pricing"
       notes: "Costs vary by model family base rate, output size, and for some video models input resolution/frame rates; Credit Calculator gives estimates."
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "POST"
         path: "/video/"
         summary: "Create a video enhancement request specifying source video details, output parameters, and the filters/models to apply."
         returns: "A request object containing a requestId used for the subsequent accept, upload, complete, and status calls."
         docs_url: "https://developer.topazlabs.com/getting-started/video-quickstart"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null

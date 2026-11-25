@@ -29,8 +29,12 @@ apis:
       free_tier: true
       starting_price_usd: 20
       unit: "per month"
-      pricing_url: null
+      pricing_url: "https://docs.browserbase.com/account/billing/plans"
       notes: "Free $0 (1 browser hr/mo, 3 concurrent, 7-day retention); Developer $20/mo; Startup $99/mo; Scale custom. Overage billed pay-as-you-go."
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.browserbase.com/account/billing/plans"
     endpoints:
       - method: "POST"
         path: "/v1/agents"
@@ -52,6 +56,7 @@ apis:
         summary: "Request one downloadable MP4 per recorded page of a session; assembly is asynchronous and re-posting re-enqueues and retries pages."
         returns: "202 with a downloads array of RecordingDownload objects (pageId, status); GET polling returns per-page status and download URLs."
         docs_url: "https://docs.browserbase.com/reference/api/create-session-recording-downloads.md"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -83,6 +88,17 @@ apis:
       header: "Authorization"
       format: "Bearer <API_KEY>"
       docs_url: "https://docs.github.com/en/rest/migrations/users"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://docs.github.com/en/rest"
     endpoints:
       - method: "GET"
         path: "/user/migrations"
@@ -99,6 +115,7 @@ apis:
         summary: "Search across all documentation content by query, language, and version."
         returns: "Search results across all docs content."
         docs_url: "https://docs.github.com/llms.txt"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"
@@ -125,7 +142,19 @@ apis:
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-25
     official_docs_url: "https://api.kadec0.xyz/docs"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -179,6 +208,17 @@ apis:
     source_url: "https://monid.ai/tools/smolmachine"
     checked_date: 2026-10-25
     official_docs_url: "https://smolmachines.com/docs/cloud/api-reference"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: "https://smolmachines.com/pricing"
+      notes: null
+      api_access_gate: "none"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: "https://smolmachines.com/pricing"
     endpoints:
       - method: "POST"
         path: "/v1/machines"
@@ -205,6 +245,7 @@ apis:
         summary: "Store a pull credential for an external registry host (such as ghcr.io or Docker Hub) so cloud machines can pull private images."
         returns: "Credential record; the password is never returned and the list shows only the username."
         docs_url: "https://smolmachines.com/docs/cloud/registry"
+    cost_badge: "green"
     usage_api:
       available: true
       method: "GET"

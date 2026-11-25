@@ -71,7 +71,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/douyin-shop"
     checked_date: 2026-10-25
     official_docs_url: "https://op.jinritemai.com/docs/guide-docs/10/23"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -97,6 +109,18 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/ebay"
     checked_date: 2026-10-25
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -148,12 +172,24 @@ apis:
     source_url: "https://glasser.ai/data-sources/keepa"
     checked_date: 2026-10-25
     official_docs_url: "https://keepa.com/api-docs/"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints:
       - method: "GET"
         path: "/product"
         summary: "Retrieve product data and price history by ASIN or product code."
         returns: "Products, including price history, for the requested ASINs or product codes."
         docs_url: "https://keepa.com/api-docs/"
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -180,7 +216,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/kroger"
     checked_date: 2026-10-25
     official_docs_url: "https://developer.kroger.com/documentation/public/getting-started/quick-start"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
@@ -286,7 +334,19 @@ apis:
     source_url: "https://glasser.ai/data-sources/tiktok-shop"
     checked_date: 2026-10-26
     official_docs_url: "https://partner.tiktokshop.com/docv2/page/tts-developer-guide"
+    pricing:
+      model: null
+      free_tier: null
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: null
+      api_access_gate: "unknown"
+      min_monthly_usd: null
+      min_prepay_usd: null
+      gate_source_url: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    cost_badge: "gray"
     usage_api:
       available: null
       method: null
