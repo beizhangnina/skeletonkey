@@ -439,9 +439,14 @@ describe("skeletonkey MCP server", () => {
     const parsed = JSON.parse(text(result)) as {
       index_counts: { shards: number };
       match_count: number;
+      matches: { name: string; index_origin: string }[];
     };
     expect(parsed.index_counts.shards).toBe(0);
-    expect(parsed.match_count).toBe(0);
+    // With the shards off, the shard-only provider is gone. apis.yaml now has
+    // a technographics row of its own (predictleads: PredictLeads' technology
+    // detections), so the assertion is "nothing from a shard", not "nothing".
+    expect(parsed.matches.map((match) => match.name)).not.toContain("builtwith");
+    for (const match of parsed.matches) expect(match.index_origin).toBe("apis.yaml");
   });
 
   it("request_access hands back the vendor's auth facts and ready-made register_key args", async () => {

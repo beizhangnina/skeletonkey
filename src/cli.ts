@@ -1390,6 +1390,7 @@ function cmdApisShow(query: string | undefined, options: ApisShowOptions): void 
             name: entry.name,
             origin: entry.origin,
             access_mode: entry.access_mode,
+            access_modes: entry.access_modes ?? null,
             url: entry.url,
             domain: entry.domain ?? null,
             auth_required: entry.auth_required ?? null,
@@ -1448,14 +1449,49 @@ function wrapped(label: string, value: string, width = 96): string[] {
   return lines.map((text, index) => (index === 0 ? head + text : indent + text));
 }
 
+/** Prints the one-line `usage_api` summary. Nothing when the field is absent. */
+function printUsageApi(entry: IndexEntry): void {
+  if (!("usage_api" in entry)) return;
+  const usage = entry.usage_api ?? null;
+  if (usage === null || usage.available === null) {
+    console.log("  usage API: not verified");
+  } else if (usage.available === true) {
+    console.log(`  usage API: ${usage.method ?? "?"} ${usage.path ?? "?"} (docs: ${usage.docs_url ?? "unknown"})`);
+  } else {
+    console.log(`  usage API: none per docs (docs: ${usage.docs_url ?? "unknown"})`);
+  }
+}
+
 /** One entry as a labelled block. Keeps nested offering fields readable. */
 function printOffering(entry: IndexEntry): void {
   const line = (label: string, value: string): void => {
     for (const text of wrapped(label, value)) console.log(text);
   };
   const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
+  // Extra access modes are printed next to the primary one rather than instead
+  // of it: the primary is what SkeletonKey will actually use.
+  const alsoModes = (entry.access_modes ?? []).filter((mode) => mode !== entry.access_mode);
+  const modes = `${entry.access_mode ?? "access unknown"}${
+    alsoModes.length === 0 ? "" : ` (also ${alsoModes.join(", ")})`
+  }`;
   console.log("");
-  console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+  console.log(`${entry.name}  [${origin}, ${modes}]`);
+  printUsageApi(entry);
+
+  // A vendor that requires more than one header: an agent that sends only the
+  // injected one gets a 400 it cannot explain.
+  const headers = entry.auth_headers ?? [];
+  if (headers.length > 1) {
+    line(
+      "headers",
+      `${headers.length} required by the vendor's docs -- SkeletonKey injects the first; you send the rest`,
+    );
+    for (const item of headers) {
+      const value = item.secret === false ? (item.format ?? "value not documented") : (item.format ?? "{key}");
+      const kind = item.secret === false ? "not a secret" : "credential";
+      console.log(`    - ${item.header}: ${value}  [${kind}]${item.note === null || item.note === undefined ? "" : ` -- ${item.note}`}`);
+    }
+  }
 
   const offering = entry.offering ?? null;
   if (offering === null) {

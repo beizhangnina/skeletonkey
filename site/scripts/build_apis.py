@@ -298,6 +298,7 @@ def public(r):
 ALL_ROWS = sorted((public(r) for r in doc['entries'] if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())
 rows = [x for x in ALL_ROWS if x['visibility'] != 'hidden']
 hidden_rows = [x for x in ALL_ROWS if x['visibility'] == 'hidden']
+HIDDEN_SLUGS = {x['slug'] for x in hidden_rows}
 
 # ---------- aggregator profiles ----------
 # Unfiltered on purpose: an aggregator's own "vendors routed through it" count
@@ -459,6 +460,16 @@ def endpoints_section(x):
         body = f'<div class="ap-scroll"><table class="ap-table"><thead><tr>{hdr}</tr></thead><tbody>{rows_}</tbody></table></div>'
     return head + body + '</section>'
 
+def shelved_notice(scope, note):
+    """ND-9b: a visible flag on a hidden page's own body, saying why it's set
+    aside -- the page is otherwise rendered exactly as a listed one (hidden is
+    not deleted, so the facts below it still load)."""
+    reason = note or ('SkeletonKey currently sets LLM-model APIs aside from its default catalog while it focuses on tool and data APIs for agents.'
+                       if scope == 'llm' else 'This entry is currently set aside from the default catalog.')
+    return (f'<section class="ap-card ap-shelved" id="shelved"><h2>Shelved</h2>'
+            f'<p>{E(reason)} The page stays up and the data is kept here -- it is just left out of the API index, '
+            f'search, llms.txt and sitemap by default.</p></section>')
+
 def register_section(x):
     """Guidance (ND-9): registration happens on the person's own machine,
     through their own SkeletonKey install -- this website never collects,
@@ -476,8 +487,10 @@ def register_section(x):
     return f'<section class="ap-card ap-register" id="register"><h2>Register locally with SkeletonKey</h2><p>{body}</p></section>'
 
 def vendor_body(x):
+    meta = badge(x['status']) + (' <span class="ap-badge ap-shelved-badge">Shelved</span>' if x['visibility'] == 'hidden' else '')
     b = [f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> {E(x["category"])}</nav>',
-         f'<h1 class="ap-title">{E(x["name"])}</h1>', f'<p class="ap-meta">{badge(x["status"])} <span>Checked {E(x["checked_date"])}</span></p>']
+         f'<h1 class="ap-title">{E(x["name"])}</h1>', f'<p class="ap-meta">{meta} <span>Checked {E(x["checked_date"])}</span></p>']
+    if x['visibility'] == 'hidden': b.append(shelved_notice(x.get('collection_scope'), x.get('visibility_note')))
     if x.get('summary'): b.append(f'<p class="ap-lede">{E(x["summary"])}</p>')
     # ND-9: structured endpoint/docs data and the local-registration guidance
     # go first, so they are visible without scrolling into Routes.
@@ -521,9 +534,11 @@ def vendor_body(x):
     return '\n'.join(c for c in b if c)
 
 def agg_body(a):
+    meta = vbadge(a['verified']) + (' <span class="ap-badge ap-shelved-badge">Shelved</span>' if a['visibility'] == 'hidden' else '')
     b = [f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> <a href="/apis/aggregators/">Aggregators</a></nav>',
          f'<h1 class="ap-title">{E(a["name"])}</h1>',
-         f'<p class="ap-meta">{vbadge(a["verified"])} <span>Checked {E(a["checked_date"])}</span></p>']
+         f'<p class="ap-meta">{meta} <span>Checked {E(a["checked_date"])}</span></p>']
+    if a['visibility'] == 'hidden': b.append(shelved_notice(a.get('collection_scope'), a.get('visibility_note')))
     if a['what_it_is']: b.append(f'<p class="ap-lede">{E(a["what_it_is"])}</p>')
     # ND-9: a directory entry, not a recommended way to connect -- said up
     # front on every aggregator page, not only the ones whose own `what_it_is`
@@ -560,13 +575,22 @@ def agg_body(a):
              f'<dt>Rate limits</dt><dd>{E(a["rate_limits"] or "None published")}</dd>'
              f'<dt>Pricing page</dt><dd>{"<a href=\""+E(a["pricing_url"])+"\" rel=\"noopener\">"+E(a["pricing_url"])+"</a>" if a.get("pricing_url") else "—"}</dd></dl></section>')
     if a['vendors']:
-        li = ''.join(f'<li><a href="/apis/{E(v["slug"])}/"><span class="ap-name">{E(v["name"])}</span>{vbadge(v["verified"])}'
-                     f'<span class="ap-cat">{E(v["category"])}</span>'
-                     f'<span class="ap-sum">{E(v["price_text"] or "No price confirmed")}'
-                     f'{" · e.g. "+E(v["example_endpoint"]) if v.get("example_endpoint") else ""}</span></a></li>' for v in a['vendors'])
-        b.append(f'<h2 class="ap-h2">Vendors routed through {E(a["name"])} ({a["vendor_count"]})</h2>'
-                 f'<p class="ap-note">Prices are the cheapest listing we read on this gateway for that vendor on {E(a["checked_date"])}. Open a vendor page for the side-by-side route table.</p>'
-                 f'<ul class="ap-list">{li}</ul>')
+        # ND-9b: hidden LLM vendors are left off this list by default (listing
+        # surface, same rule as the /apis/ index) -- noted as a count, not deleted;
+        # their routes and apis.json's own vendor_count still carry them unfiltered.
+        visible_v = [v for v in a['vendors'] if v['slug'] not in HIDDEN_SLUGS]
+        hidden_n = len(a['vendors']) - len(visible_v)
+        hidden_note = f' {hidden_n} more hidden LLM vendor{"" if hidden_n == 1 else "s"} routed here {"is" if hidden_n == 1 else "are"} not shown by default.' if hidden_n else ''
+        if visible_v:
+            li = ''.join(f'<li><a href="/apis/{E(v["slug"])}/"><span class="ap-name">{E(v["name"])}</span>{vbadge(v["verified"])}'
+                         f'<span class="ap-cat">{E(v["category"])}</span>'
+                         f'<span class="ap-sum">{E(v["price_text"] or "No price confirmed")}'
+                         f'{" · e.g. "+E(v["example_endpoint"]) if v.get("example_endpoint") else ""}</span></a></li>' for v in visible_v)
+            b.append(f'<h2 class="ap-h2">Vendors routed through {E(a["name"])} ({len(visible_v)})</h2>'
+                     f'<p class="ap-note">Prices are the cheapest listing we read on this gateway for that vendor on {E(a["checked_date"])}. Open a vendor page for the side-by-side route table.{hidden_note}</p>'
+                     f'<ul class="ap-list">{li}</ul>')
+        else:
+            b.append(f'<section class="ap-card"><h2>Vendors routed through it</h2><p>{hidden_n} vendor{"" if hidden_n == 1 else "s"} routed here are hidden LLM entries, not shown by default.</p></section>')
     else:
         b.append(f'<section class="ap-card"><h2>Vendors routed through it</h2><p>None of the {len(rows)} vendors in our index were checked against this gateway.</p></section>')
     if a['sources']: b.append('<section class="ap-card"><h2>Sources</h2><ul class="ap-src">' + ''.join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(u)}</a></li>' for u in a['sources']) + '</ul></section>')
@@ -593,15 +617,16 @@ out = os.path.join(PUB, 'apis'); shutil.rmtree(out, ignore_errors=True); os.make
 shutil.copy(os.path.join(ROOT, 'scripts', 'apis.css'), os.path.join(out, 'apis.css'))
 # Every vendor's own page is generated, hidden or not: a direct URL keeps
 # working, which is what makes "hidden" recoverable rather than deleted.
+NOINDEX = '<meta name="robots" content="noindex">\n'
 for x in ALL_ROWS:
     os.makedirs(os.path.join(out, x['slug']))
-    open(os.path.join(out, x['slug'], 'index.html'), 'w').write(page(f'{x["name"]} API — SkeletonKey API index', (x.get('summary') or x['name'])[:155], f'/apis/{x["slug"]}/', vendor_body(x)))
+    open(os.path.join(out, x['slug'], 'index.html'), 'w').write(page(f'{x["name"]} API — SkeletonKey API index', (x.get('summary') or x['name'])[:155], f'/apis/{x["slug"]}/', vendor_body(x), extra_head=NOINDEX if x['visibility'] == 'hidden' else ''))
 os.makedirs(os.path.join(out, 'aggregators'))
 open(os.path.join(out, 'aggregators', 'index.html'), 'w').write(page('Aggregator gateways — SkeletonKey API index', f'{len(VISIBLE_AGGS)} API aggregator gateways compared on signup, payment, vendor key and coverage.', '/apis/aggregators/', agg_index_body(VISIBLE_AGGS)))
 for a in aggs:
     os.makedirs(os.path.join(out, 'aggregators', a['slug']))
     open(os.path.join(out, 'aggregators', a['slug'], 'index.html'), 'w').write(
-        page(f'{a["name"]} — aggregator gateway — SkeletonKey', (a['what_it_is'] or a['name'])[:155], f'/apis/aggregators/{a["slug"]}/', agg_body(a)))
+        page(f'{a["name"]} — aggregator gateway — SkeletonKey', (a['what_it_is'] or a['name'])[:155], f'/apis/aggregators/{a["slug"]}/', agg_body(a), extra_head=NOINDEX if a['visibility'] == 'hidden' else ''))
 
 cats = sorted({x['category'] for x in rows})
 cnt = {s: sum(x['status'] == s for x in rows) for s in LABEL}
