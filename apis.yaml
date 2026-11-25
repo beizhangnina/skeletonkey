@@ -650,6 +650,112 @@ entries:
     collection_scope: aggregator
     visibility: listed
 
+  - name: glasser
+    url: https://glasser.ai/
+    domain: api.glasser.ai
+    capabilities:
+      - agent tool gateway
+      - person and company enrichment
+      - contact lookup
+      - social media data
+      - seo keywords and backlinks
+      - web, news, maps and shopping search
+      - company financials and sec filings
+    access_mode: intermediary
+    min_topup: null
+    billing_unit: per call
+    signup_automatable: null
+    base_url: https://api.glasser.ai
+    auth_header: Authorization
+    auth_format: "Bearer {key}"
+    auth_required: true
+    signup_url: https://glasser.ai/
+    key_page_url: null
+    human_steps:
+      - >-
+        Sign in to Glasser and create a Key in the console; Glasser's docs say
+        never to paste a Key into chat, so a human mints it and SkeletonKey
+        stores it.
+      - >-
+        Add funds on the console Balance page (https://app.glasser.ai/balance)
+        before relying on it: every Run is paid from the Workspace balance.
+    offering:
+      summary: >-
+        Third-party intermediary broker: one Key resells per-call access to paid
+        third-party API endpoints it does not own, at each endpoint's published
+        price, with no per-vendor account and no subscription.
+      categories:
+        - data-enrichment
+        - social
+        - seo
+        - search
+        - finance
+        - web-scraping
+      endpoint_count: null
+      model_count: null
+      count_note: >-
+        Glasser's SKILL.md (https://glasser.ai/SKILL.md, read 2026-11-25) states
+        "2,000+ paid endpoints across 80+ providers behind one Key"; its sitemap
+        listed 104 provider pages under https://glasser.ai/data-sources/ the same
+        day. No exact endpoint count is published, so endpoint_count stays null.
+      free_tier:
+        available: true
+        what: >-
+          https://glasser.ai/docs/how-it-works.md: "Every new Workspace starts with
+          a signup Grant." and "A Grant is free balance: it does not expire and
+          spends like any other balance."
+        limits: >-
+          The Grant amount is not stated on the docs page ("the console shows the
+          current amounts and limits"), so it is unknown here. Runs then spend the
+          prepaid balance.
+        requires_key: true
+        requires_account: true
+      connect:
+        base_url: https://api.glasser.ai
+        auth: api_key
+        auth_header: Authorization
+        auth_format: "Bearer {key}"
+      catalog_url: https://glasser.ai/data-sources
+      verified_url: https://glasser.ai/docs/api-reference/overview.md
+      verified_date: "2026-11-25"
+      source_urls:
+        - https://glasser.ai/llms.txt
+        - https://glasser.ai/SKILL.md
+        - https://glasser.ai/pricing
+        - https://glasser.ai/docs/how-it-works.md
+        - https://glasser.ai/docs/api-reference/overview.md
+      highlights: null
+    billing:
+      model: free_tier+payg
+      free_tier_note: >-
+        https://glasser.ai/pricing: "Add funds to your Workspace balance. Pay for
+        each Run, with no subscription." and "Each Endpoint has its own pricing
+        and billing conditions." New Workspaces get a signup Grant of free
+        balance (amount not published on the docs page). No minimum top-up is
+        stated, so min_topup stays null.
+      free_tier_covers_api: true
+      verified_url: https://glasser.ai/pricing
+      verified_date: "2026-11-25"
+    tos_notes: >-
+      Glasser is an intermediary: it buys provider access wholesale and resells
+      each endpoint per call, so the provider's own terms still govern the data
+      returned. Its docs describe the base URL as https://api.glasser.ai with the
+      Key sent as "Authorization: Bearer". Read off Glasser's own docs and pricing
+      pages on 2026-11-25 with no sign-up and no API call (api.* hosts were not
+      requested).
+    source: https://glasser.ai/llms.txt
+    checked_date: "2026-11-25"
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: "https://glasser.ai/docs/how-it-works.md"
+      limits: null
+      notes: "文档提到 balance 查询（CLI `glasser balance`），本次没有从 HTTP 文档逐条核实路径和限制，留 null"
+      checked_date: 2026-11-25
+    collection_scope: aggregator
+    visibility: listed
+
   # --- The 12 vendors the treg `rea-growth` skill calls ---------------------
   # Read off each VENDOR's own docs on 2026-10-30, with no sign-up and no API
   # call. The ids, paths and headers below are the vendor's own; the

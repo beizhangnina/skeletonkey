@@ -52,6 +52,9 @@ apis:
         returns: null
         docs_url: "https://docs.ahrefs.com/en/api/reference/management"
     alternatives:
+      - vendor_id: "glasser"
+        why: "Resells Ahrefs' own endpoints per call, no subscription. https://glasser.ai/data-sources/ahrefs"
+        access_gate: "none"
       - vendor_id: "treg"
         why: "Per-call prepaid gateway; lists SEO and backlinks (category-level match, Ahrefs-equivalent data not verified)."
         access_gate: "none"
@@ -216,6 +219,9 @@ apis:
       gate_source_url: "https://www.foreplay.co/pricing"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     alternatives:
+      - vendor_id: "glasser"
+        why: "Resells Foreplay's own ad-library endpoints per call, no subscription. https://glasser.ai/data-sources/foreplay"
+        access_gate: "none"
       - vendor_id: "treg"
         why: "Per-call prepaid gateway; lists ad libraries (category-level match, Foreplay-equivalent coverage not verified)."
         access_gate: "none"

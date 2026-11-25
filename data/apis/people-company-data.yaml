@@ -269,6 +269,9 @@ apis:
         returns: "Records with field metadata plus a cursor for the next page; scans are least-recently-updated-first."
         docs_url: "https://developers.clay.com/api-reference/tables/run-a-structured-query-across-one-or-more-tables.md"
     alternatives:
+      - vendor_id: "glasser"
+        why: "Per-call People Data Labs enrichment with no subscription (same class, not Clay itself). https://glasser.ai/data-sources/pdl"
+        access_gate: "none"
       - vendor_id: "treg"
         why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, Clay-equivalent coverage not verified)."
         access_gate: "none"
@@ -555,6 +558,9 @@ apis:
         returns: "Base profile records (contact values not included); paged by signed cursor"
         docs_url: "https://leadmagic.io/docs/api-reference"
     alternatives:
+      - vendor_id: "glasser"
+        why: "Resells LeadMagic's own endpoints per call, no subscription. https://glasser.ai/data-sources/leadmagic"
+        access_gate: "none"
       - vendor_id: "treg"
         why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, coverage not verified)."
         access_gate: "none"
@@ -878,6 +884,9 @@ apis:
         returns: "Public LinkedIn profile data for the requested URL, drawn from the documented public LinkedIn read operations."
         docs_url: "https://ploid.com/documentation/api/social"
     alternatives:
+      - vendor_id: "glasser"
+        why: "Per-call People Data Labs person enrichment, no subscription (same class, not Ploid itself). https://glasser.ai/data-sources/pdl"
+        access_gate: "none"
       - vendor_id: "treg"
         why: "Per-call prepaid gateway; lists people and company enrichment (category-level match, coverage not verified)."
         access_gate: "none"
