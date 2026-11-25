@@ -13,7 +13,8 @@
 import { SkeletonKeyError } from "../exit-codes.js";
 import { noopOpener, type UrlOpener } from "../open-url.js";
 import { skeletonKeyHome } from "../paths.js";
-import { addAccount } from "../accounts/cli.js";
+import { addAccount, rejectPlaintextEmailFlag } from "../accounts/cli.js";
+import { isPaymentShapedRejection, PAYMENT_SHAPED_REJECTION_REASON } from "../secret-intake.js";
 import { findAccount, todayLocalDate, upsertAccount, type AccountMeta } from "../accounts/store.js";
 import { findKey, normalizeDomain, upsertKey } from "../keys.js";
 import { openEntryStore } from "../vault/entry-store.js";
@@ -125,6 +126,11 @@ export interface SignupStartOptions {
   account?: string;
   noOpen: boolean;
   json: boolean;
+  /**
+   * Set only when the removed `--email <value>` flag was passed; see
+   * `rejectPlaintextEmailFlag` in `src/accounts/cli.ts`.
+   */
+  email?: string | boolean;
   /** Test/trusted-host seam only. Never set from a CLI flag or agent input. */
   driverFor?: (vendor: string) => Nd2SignupDriver | undefined;
   openUrl?: UrlOpener;
@@ -150,6 +156,7 @@ export async function cmdSignupStart(
   options: SignupStartOptions,
   home = skeletonKeyHome(),
 ): Promise<void> {
+  rejectPlaintextEmailFlag(options.email);
   const vendor = vendorArg.trim().toLowerCase();
   const playbook = requireVendor(vendor);
   const account = options.account ?? defaultAccountName(vendor);
@@ -277,6 +284,11 @@ export function signupStatusRows(vendor: string | undefined, home = skeletonKeyH
 export interface SignupCompleteOptions {
   account?: string;
   registered?: string;
+  /**
+   * Set only when the removed `--email <value>` flag was passed; see
+   * `rejectPlaintextEmailFlag` in `src/accounts/cli.ts`.
+   */
+  email?: string | boolean;
   emailStdin: boolean;
   stdin: boolean;
   yes: boolean;
@@ -287,11 +299,14 @@ export async function cmdSignupComplete(
   options: SignupCompleteOptions,
   home = skeletonKeyHome(),
 ): Promise<void> {
+  rejectPlaintextEmailFlag(options.email);
   const vendor = vendorArg.trim().toLowerCase();
   const playbook = requireVendor(vendor);
   const account = options.account ?? defaultAccountName(vendor);
 
-  const meta = await addAccount(
+  let meta: AccountMeta;
+  try {
+    meta = await addAccount(
     account,
     {
       vendor,
@@ -309,6 +324,24 @@ export async function cmdSignupComplete(
     },
     home,
   );
+  } catch (err) {
+    // A payment-card-shaped "key" is refused (nothing stored); the session is
+    // put back in needs_human so the agent sees a person must supply the
+    // real API key. The reason never carries the value or any of its digits.
+    if (isPaymentShapedRejection(err)) {
+      touchSession(
+        vendor,
+        account,
+        {
+          state: "needs_human",
+          reason: PAYMENT_SHAPED_REJECTION_REASON,
+          steps: ["Paste the API key the vendor issued; SkeletonKey never stores payment data."],
+        },
+        home,
+      );
+    }
+    throw err;
+  }
 
   touchSession(vendor, account, { state: "bound", reason: "complete", steps: [] }, home);
 
