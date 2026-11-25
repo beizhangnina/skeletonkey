@@ -67,6 +67,23 @@ export const AGGREGATOR_NAMES = ["monid", "glasser", "flatkey"] as const;
 export type AggregatorName = (typeof AGGREGATOR_NAMES)[number];
 
 /**
+ * `seen_in` on a generated shard row: which catalog the row's facts came from.
+ *
+ * The three aggregator names mean "this provider appeared in that catalog".
+ * `vendor-direct` means the row was read off the VENDOR's own pages with no
+ * aggregator in the loop, so no aggregator carriage was established at all --
+ * `shardEntry` leaves `aggregators` null for such a row rather than claiming
+ * three verified negatives nobody checked.
+ *
+ * Mirrored by SOURCES in data/apis/scripts/validate.py and by the vendor-direct
+ * branch in data/apis/scripts/build.py; test/offering.test.ts asserts the lists
+ * have not drifted apart.
+ */
+export const VENDOR_DIRECT_SOURCE = "vendor-direct";
+export const SHARD_SEEN_IN_SOURCES = [...AGGREGATOR_NAMES, VENDOR_DIRECT_SOURCE] as const;
+export type ShardSeenIn = (typeof SHARD_SEEN_IN_SOURCES)[number];
+
+/**
  * What a row counts as in the catalog (Bei, 2026-11-24): tool and data APIs
  * plus the intermediaries ("aggregators") that resell them are collected.
  * LLM APIs are set aside -- still in the index, just hidden by default.
@@ -365,16 +382,36 @@ export interface VendorOffering {
   highlights: OfferingHighlight[] | null;
 }
 
-/** One extra credential header, for vendors that document more than one. */
+/**
+ * One header the vendor's docs require on every request, for vendors that
+ * document more than one.
+ *
+ * Most are credentials (`secret: true`, the default): a template with `{key}`
+ * in it, and SkeletonKey holds the value. Some are required but are not secrets
+ * at all -- askRoger's docs demand `source` alongside its two credentials -- and
+ * those carry `secret: false`. Recording them is the difference between an
+ * agent being able to build a working request and an agent getting a 400 it
+ * cannot explain.
+ */
 export interface AuthHeaderSpec {
   header: string;
-  /** Value template containing `{key}`. */
-  format: string;
+  /**
+   * Value template containing `{key}` when `secret` is true. For a non-secret
+   * header it is the literal value the vendor documents, or null when the
+   * vendor requires the header but publishes no accepted values.
+   */
+  format: string | null;
   /** Which credential this one carries, when the vendor names several. */
   note?: string | null;
+  /**
+   * False = a required header that is NOT a credential, so SkeletonKey has
+   * nothing to inject and the caller supplies it. Absent/null = true, which is
+   * what every row written before this field existed means.
+   */
+  secret?: boolean | null;
 }
 
-/** A vendor may document at most this many credential headers before it is a smell. */
+/** A vendor may document at most this many request headers before it is a smell. */
 export const AUTH_HEADERS_MAX = 5;
 
 /**
@@ -447,6 +484,11 @@ export interface ApiEndpoint {
   docs_url: string | null;
 }
 
+/** True unless the row explicitly says this header carries no secret. */
+export function isSecretAuthHeader(spec: { secret?: boolean | null }): boolean {
+  return spec.secret !== false;
+}
+
 export interface ApiEntry {
   name: string;
   /**
@@ -456,6 +498,18 @@ export interface ApiEntry {
   url: string | null;
   /** Null only for an index shard row whose access path was never determined. */
   access_mode: AccessMode | null;
+  /**
+   * Every access mode the vendor documents, for the vendors that document more
+   * than one -- glim.sh sells an API key AND answers a keyless x402 wallet
+   * challenge, and recording only the first loses the second.
+   *
+   * `access_mode` stays the primary: when this list is present its first
+   * element must equal it, because every reader in this repo (CLI, MCP,
+   * routing) reads the single field. SkeletonKey pays in fiat, so a
+   * wallet-x402 mode is a fact about the vendor and never the primary when a
+   * fiat path exists. Null/absent = the single `access_mode` is the whole story.
+   */
+  access_modes?: AccessMode[] | null;
   /** Minimum top-up in USD, or null when unknown. Never guess a price. */
   min_topup: number | null;
   /** e.g. "per 1M input tokens", "per request". Null when unknown. */
@@ -607,6 +661,7 @@ const OPTIONAL_FIELDS = [
   "example",
   "capabilities",
   "domain",
+  "access_modes",
   "auth_header",
   "auth_format",
   "base_url",
@@ -792,6 +847,7 @@ export function validateApis(input: unknown): ValidationResult {
       }
     }
 
+    validateAccessModes(errors, at, entry);
     validateAuthHeaders(errors, at, entry);
     validateBilling(errors, at, entry["billing"]);
     validateAggregators(errors, at, entry["aggregators"]);
@@ -815,6 +871,13 @@ export function validateApis(input: unknown): ValidationResult {
         name: name as string,
         url: url as string,
         access_mode: mode as AccessMode,
+        ...("access_modes" in entry
+          ? {
+              access_modes: Array.isArray(entry["access_modes"])
+                ? (entry["access_modes"] as AccessMode[])
+                : null,
+            }
+          : {}),
         min_topup: typeof minTopup === "number" ? minTopup : null,
         billing_unit: typeof entry["billing_unit"] === "string" ? (entry["billing_unit"] as string) : null,
         signup_automatable: typeof automatable === "boolean" ? automatable : null,
@@ -896,6 +959,50 @@ function isHttpUrl(value: string): boolean {
 }
 
 /**
+ * Validates `access_modes`, the list for a vendor that documents more than one
+ * way in.
+ *
+ * Element 0 must equal `access_mode` for the same reason `auth_headers[0]` must
+ * equal `auth_header`: every reader in this repo reads the single field, so the
+ * single field has to stay the one SkeletonKey actually uses. A list that
+ * disagreed with it would be a second, silent answer to the same question.
+ */
+function validateAccessModes(errors: string[], at: string, entry: Record<string, unknown>): void {
+  const list = entry["access_modes"];
+  if (list === null || list === undefined) return;
+  const field = `${at}.access_modes`;
+  if (!Array.isArray(list)) {
+    errors.push(`${field}: expected a list or null`);
+    return;
+  }
+  if (list.length === 0) {
+    errors.push(
+      `${field}: expected a non-empty list or null (null means access_mode is the whole story)`,
+    );
+    return;
+  }
+  if (list.length > ACCESS_MODES.length) {
+    errors.push(`${field}: expected at most ${ACCESS_MODES.length} modes, got ${list.length}`);
+  }
+  const seen = new Set<string>();
+  list.forEach((item, index) => {
+    if (typeof item !== "string" || !(ACCESS_MODES as readonly string[]).includes(item)) {
+      errors.push(`${field}[${index}]: expected one of ${ACCESS_MODES.join(" | ")}`);
+      return;
+    }
+    if (seen.has(item)) errors.push(`${field}[${index}]: duplicate mode ${JSON.stringify(item)}`);
+    seen.add(item);
+  });
+  const primary = entry["access_mode"];
+  if (typeof primary === "string" && typeof list[0] === "string" && list[0] !== primary) {
+    errors.push(
+      `${field}[0]: must match access_mode ${JSON.stringify(primary)} -- ` +
+        "the primary mode is the one SkeletonKey actually uses",
+    );
+  }
+}
+
+/**
  * Validates `auth_required` against the auth fields, and `auth_headers`.
  *
  * The load-bearing rule is the contradiction: a row may not say the vendor
@@ -903,6 +1010,12 @@ function isHttpUrl(value: string): boolean {
  * One of the two is wrong, and silently picking a winner is how a key ends up
  * never being sent -- or a keyless API ends up waiting for a key forever.
  */
+/** `secret` on a raw `auth_headers[]` row, defaulting to true when absent. */
+function isSecretHeaderRow(raw: unknown): boolean {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) return false;
+  return (raw as Record<string, unknown>)["secret"] !== false;
+}
+
 function validateAuthHeaders(errors: string[], at: string, entry: Record<string, unknown>): void {
   const required = entry["auth_required"];
   const header = entry["auth_header"];
@@ -919,8 +1032,10 @@ function validateAuthHeaders(errors: string[], at: string, entry: Record<string,
     if (typeof format === "string" && format.trim() !== "") {
       errors.push(`${at}.auth_required: false contradicts auth_format being set`);
     }
-    if (Array.isArray(list) && list.length > 0) {
-      errors.push(`${at}.auth_required: false contradicts auth_headers having entries`);
+    // Only the credential headers contradict it: a keyless API is allowed to
+    // require a non-secret header (an API version, a caller id).
+    if (Array.isArray(list) && list.some((item) => isSecretHeaderRow(item))) {
+      errors.push(`${at}.auth_required: false contradicts auth_headers having a credential header`);
     }
   }
 
@@ -945,9 +1060,12 @@ function validateAuthHeaders(errors: string[], at: string, entry: Record<string,
       return;
     }
     const item = raw as Record<string, unknown>;
-    const known = new Set(["header", "format", "note"]);
+    const known = new Set(["header", "format", "note", "secret"]);
     for (const key of Object.keys(item)) {
       if (!known.has(key)) errors.push(`${row}.${key}: unknown field`);
+    }
+    if (item["secret"] !== undefined && item["secret"] !== null && typeof item["secret"] !== "boolean") {
+      errors.push(`${row}.secret: expected a boolean or null`);
     }
     const name = item["header"];
     if (typeof name !== "string" || name.trim() === "") {
@@ -960,10 +1078,23 @@ function validateAuthHeaders(errors: string[], at: string, entry: Record<string,
       seen.add(name.toLowerCase());
     }
     const template = item["format"];
-    if (typeof template !== "string" || template.trim() === "") {
-      errors.push(`${row}.format: expected a non-empty template`);
-    } else if (!template.includes("{key}")) {
-      errors.push(`${row}.format: must contain the {key} placeholder`);
+    if (isSecretHeaderRow(item)) {
+      if (typeof template !== "string" || template.trim() === "") {
+        errors.push(`${row}.format: expected a non-empty template`);
+      } else if (!template.includes("{key}")) {
+        errors.push(`${row}.format: must contain the {key} placeholder`);
+      }
+    } else if (template !== null && template !== undefined) {
+      // A non-secret header holds a literal value, so `{key}` in it would make
+      // the proxy look for a credential there is none of.
+      if (typeof template !== "string" || template.trim() === "") {
+        errors.push(`${row}.format: expected a non-empty literal value or null`);
+      } else if (template.includes("{key}")) {
+        errors.push(
+          `${row}.format: secret: false means the value is not a credential, ` +
+            "so it must not contain the {key} placeholder",
+        );
+      }
     }
     requireStringOrNull(errors, row, "note", item["note"]);
   });
@@ -971,7 +1102,14 @@ function validateAuthHeaders(errors: string[], at: string, entry: Record<string,
   // The proxy and `register_key` read one header. Keeping element 0 equal to the
   // primary pair means they read the RIGHT one rather than a list they ignore.
   const first = list[0] as Record<string, unknown> | undefined;
-  if (first !== undefined && typeof first === "object" && !Array.isArray(first)) {
+  if (first !== undefined && first !== null && typeof first === "object" && !Array.isArray(first)) {
+    if (typeof header === "string" && header.trim() !== "" && !isSecretHeaderRow(first)) {
+      errors.push(
+        `${field}[0].secret: element 0 is the credential the proxy injects into ` +
+          `auth_header ${JSON.stringify(header)}, so it cannot be secret: false -- ` +
+          "list the non-secret headers after it",
+      );
+    }
     if (typeof header === "string" && typeof first["header"] === "string" && first["header"] !== header) {
       errors.push(
         `${field}[0].header: must match auth_header ${JSON.stringify(header)} -- ` +
@@ -1896,8 +2034,9 @@ function optionalAuthFields(entry: Record<string, unknown>): Partial<ApiEntry> {
     out["auth_headers"] = Array.isArray(entry["auth_headers"])
       ? (entry["auth_headers"] as Record<string, unknown>[]).map((item) => ({
           header: String(item["header"]),
-          format: String(item["format"]),
+          format: typeof item["format"] === "string" ? (item["format"] as string) : null,
           note: typeof item["note"] === "string" ? (item["note"] as string) : null,
+          secret: item["secret"] === false ? false : true,
         }))
       : null;
   }
@@ -2039,6 +2178,16 @@ function shardUrl(value: unknown): string | null {
  * Nothing is invented here -- "unknown" becomes `null`, and no auth header is
  * synthesised from `auth_type` because `api_key` does not say *which* header.
  */
+/** A shard row's optional `access_modes`, or null when it has none worth keeping. */
+function shardAccessModes(raw: unknown): AccessMode[] | null {
+  if (!Array.isArray(raw)) return null;
+  const modes = raw.filter(
+    (item): item is AccessMode =>
+      typeof item === "string" && (ACCESS_MODES as readonly string[]).includes(item),
+  );
+  return modes.length === 0 ? null : modes;
+}
+
 function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: string } {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return { error: `${file}: expected a mapping in apis[]` };
@@ -2067,16 +2216,23 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
   const seenIn = Array.isArray(row["seen_in"])
     ? (row["seen_in"] as unknown[]).filter((item): item is string => typeof item === "string")
     : [];
-  const aggregators: AggregatorCarriage[] = AGGREGATOR_NAMES.map((name) => ({
-    name,
-    carries: seenIn.includes(name),
-    per_call_price: null,
-    price_verified_url: null,
-    price_note: seenIn.includes(name)
-      ? `Carriage from the generated index (seen_in). ${name} publishes its own resale price; ` +
-        "nobody has read it, so per_call_price is null (unknown, not free)."
-      : null,
-  }));
+  // ...unless the row is vendor-direct: its facts came off the vendor's own
+  // pages, so no aggregator catalog was searched and `carries: false` would be
+  // a negative nobody established. Null is the honest answer there.
+  const vendorDirect =
+    seenIn.includes(VENDOR_DIRECT_SOURCE) && !AGGREGATOR_NAMES.some((name) => seenIn.includes(name));
+  const aggregators: AggregatorCarriage[] | null = vendorDirect
+    ? null
+    : AGGREGATOR_NAMES.map((name) => ({
+        name,
+        carries: seenIn.includes(name),
+        per_call_price: null,
+        price_verified_url: null,
+        price_note: seenIn.includes(name)
+          ? `Carriage from the generated index (seen_in). ${name} publishes its own resale price; ` +
+            "nobody has read it, so per_call_price is null (unknown, not free)."
+          : null,
+      }));
 
   // The only thing auth_type is allowed to produce is a warning for a human:
   // an OAuth vendor may have no static header for the proxy to inject at all.
@@ -2118,6 +2274,7 @@ function shardEntry(raw: unknown, file: string): { entry?: IndexEntry; error?: s
       name: id,
       url: shardUrl(row["docs_url"]) ?? shardUrl(row["provider_url"]),
       access_mode: (ACCESS_MODES as readonly string[]).includes(mode) ? (mode as AccessMode) : null,
+      access_modes: shardAccessModes(row["access_modes"]),
       min_topup: typeof row["min_topup"] === "number" ? row["min_topup"] : null,
       billing_unit: typeof row["billing_unit"] === "string" ? row["billing_unit"] : null,
       signup_automatable: automatable === "yes" ? true : automatable === "no" ? false : null,
