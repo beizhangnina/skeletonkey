@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/anyapi"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://getanyapi.com/docs"
     endpoints:
       - method: "POST"
@@ -58,7 +58,7 @@ apis:
     capability: "Marketplace of hosted scraper programs ('actors') that turn public sites into structured JSON on demand."
     category: "web-scraping"
     provider_url: "https://apify.com"
-    docs_url: "https://docs.apify.com"
+    docs_url: "https://docs.apify.com/api/v2"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -69,7 +69,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apify"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.apify.com/api/v2"
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
@@ -85,7 +85,7 @@ apis:
     capability: "Large-scale structured datasets and scraping infrastructure covering commerce, social and property sites."
     category: "web-scraping"
     provider_url: "https://brightdata.com"
-    docs_url: "https://docs.brightdata.com"
+    docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -96,7 +96,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/brightdata"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
     endpoints:
       - method: "POST"
@@ -128,7 +128,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/context-dev"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.context.dev/"
     pricing:
       model: "subscription"
@@ -182,7 +182,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/firecrawl"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.firecrawl.dev"
     endpoints:
       - method: "POST"
@@ -219,7 +219,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/mrscraper"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.mrscraper.com/docs/getting-started/overview"
     auth:
       type: "api_key"
@@ -255,7 +255,7 @@ apis:
     capability: "Browser-rendered search and multi-URL extraction plus an AI browser agent that navigates from instructions."
     category: "web-scraping"
     provider_url: "https://tinyfish.ai"
-    docs_url: "https://docs.tinyfish.ai"
+    docs_url: "https://docs.tinyfish.ai/"
     access_mode: "own-account"
     signup: "unknown"
     signup_automatable: "unknown"
@@ -266,7 +266,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/tinyfish"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.tinyfish.ai/"
     pricing:
       model: "prepaid_credits"

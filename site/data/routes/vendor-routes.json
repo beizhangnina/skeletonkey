@@ -1,0 +1,3450 @@
+{
+ "artificial-analysis": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/artificial-analysis",
+   "endpoints": 7,
+   "example_endpoint": "Artificial Analysis LLM Providers Leaderboard",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's page listed 7 published endpoints for this provider, with four of them, including the LLM providers leaderboard, at the floor price of $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/artificial-analysis",
+   "endpoints": null,
+   "example_endpoint": "/search_models",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint panel for this page showed nothing, but the page's own how-to section listed artificial-analysis endpoints with per-call prices, the cheapest being $0.01 for /search_models, /get_model_detail, /get_model_providers and /get_llm_providers_leaderboard, each tagged '0 markup'."
+  }
+ ],
+ "lmarena": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/lmarena",
+   "endpoints": 11,
+   "example_endpoint": "/list_available_models",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 11 published endpoints as LMArena cards, the cheapest being LMArena Available Models (/list_available_models) at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/lmarena",
+   "endpoints": null,
+   "example_endpoint": "/get_code_leaderboard",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the how-to guide showed the row \"lmarena /get_code_leaderboard $0.01 0 markup\"."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/jungle_synthesizer/lmarena-llm-leaderboard-scraper",
+   "endpoints": null,
+   "example_endpoint": "jungle_synthesizer/lmarena-llm-leaderboard-scraper",
+   "price_usd": 0.5,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.50 / 1,000 record scrapeds",
+   "verified": true,
+   "verified_note": "Apify Actor page for the LMArena LLM Leaderboard Scraper showed a pricing badge of from $0.50 / 1,000 record scrapeds."
+  }
+ ],
+ "aaa-gas-prices": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/aaa-gas-prices",
+   "endpoints": 13,
+   "example_endpoint": "AAA EV Charging Prices",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$ 0.011 per call",
+   "verified": true,
+   "verified_note": "The Glasser page lists AAA Gas Prices with 13 endpoints and a pay-as-you-go table; eleven sit at $0.011 per call (including the EV charging one) and two at $0.022, so $0.011 is the floor."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/aaa-gas-prices",
+   "endpoints": 13,
+   "example_endpoint": "/search_news_articles",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.0100 per call",
+   "verified": true,
+   "verified_note": "Monid renders this catalog client-side (plain HTML says \"No endpoints here yet\"), but the rendered page lists 13 AAA endpoints, twelve of them at $0.0100 per call including /search_news_articles."
+  }
+ ],
+ "bid-cars": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/bid-cars",
+   "endpoints": 10,
+   "example_endpoint": "/get_vehicle_by_lot",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's bid.cars page listed 10 published endpoints, with Auction Lot By Number (/get_vehicle_by_lot) and seven others at $0.011 per call and Lot Full Details at $0.022."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/bid-cars",
+   "endpoints": null,
+   "example_endpoint": "/search_listings",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists six bid.cars endpoints priced $0.01-$0.02 per call with '0 markup', the cheapest being /search_listings, /get_vehicle_by_vin and /search_by_keyword at $0.01."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/lexis-solutions/bid-cars-scraper",
+   "endpoints": null,
+   "example_endpoint": "bid.cars lot/VIN scraping run",
+   "price_usd": 6.8,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $6.80 / 1,000 results",
+   "verified": true,
+   "verified_note": "The Apify Store actor page for this bid.cars scraper (52 users, ~3.5k runs) showed a pay-per-result price of $6.80 per 1,000 results."
+  }
+ ],
+ "carfax": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/carfax",
+   "endpoints": 11,
+   "example_endpoint": "Carfax Car Model Owner Reviews",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Header read '11 published endpoints' and all eleven Carfax endpoints were listed at the same flat $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/carfax",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown. Narrative how-to text further down the page did quote \"$0.01\" against several named carfax endpoints, but that is prose, not a listed catalog price."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/lexis-solutions/carfax-com",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 6.85,
+   "price_unit": "per 1k results",
+   "price_text": "from $6.85 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-installed Carfax Actor in the store search (231 users, ~12.3k runs, 5.0 rating); its Pricing block showed the per-1,000-results rate."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/VinHub/api/vinhub/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 500,000 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 500,000 / Month",
+   "verified": true,
+   "verified_note": "Third-party VIN reseller listing that advertises Carfax reports; the only plan on its pricing tab was a free Basic tier with a 500,000 request monthly cap."
+  }
+ ],
+ "cars-com": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/cars-com",
+   "endpoints": 3,
+   "example_endpoint": "/get_dealer_inventory",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Cars.com page listed 3 published endpoints and the Dealer Inventory row was the cheapest of them at $0.011 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/fatihtahta/cars-com-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.7,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.70 / 1,000 vehicle listings",
+   "verified": true,
+   "verified_note": "A widely used third-party Cars.com Actor (about 22.5k runs) whose store page shows a pay-per-result headline of $0.70 per thousand listings."
+  }
+ ],
+ "edmunds": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/edmunds",
+   "endpoints": 3,
+   "example_endpoint": "Edmunds Car Inventory Search",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Page lists Edmunds with three pay-as-you-go endpoints, all at the same $0.011 per-call rate."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/edmunds",
+   "endpoints": null,
+   "example_endpoint": "/search_inventory",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "edmunds /search_inventory $0.01 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Monid shows no /get_vehicle_details endpoint anywhere on the page."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/shahidirfan/Edmunds-Car-Scraper",
+   "endpoints": null,
+   "example_endpoint": "shahidirfan/Edmunds-Car-Scraper",
+   "price_usd": 1.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Third-party Actor scraping Edmunds listings, pay-per-event; small user count (single digits) rather than official."
+  }
+ ],
+ "kbb": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/kbb",
+   "endpoints": 6,
+   "example_endpoint": "Kelley Blue Book Expert Rating",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Kelley Blue Book page loaded today showing 6 published endpoints, every one of them priced at $0.011 per call, so that is both the cheapest and the only rate."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/kbb",
+   "endpoints": null,
+   "example_endpoint": "/get_car_ratings",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "The Monid kbb page's endpoint section says 'No endpoints here yet', but a how-to guide table on the same page runs 'kbb /get_car_ratings' at $0.01 with '0 markup'."
+  }
+ ],
+ "agentline": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/agentline",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid serves a page titled 'Agentline APIs — Monid', but it says 'No endpoints here yet' and the only priced endpoints shown on it belong to other providers (agentmail, saperly)."
+  }
+ ],
+ "agentmail": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/agentmail",
+   "endpoints": null,
+   "example_endpoint": "/create-allow-block-entries",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the guide showed the row \"agentmail /create-allow-block-entries $0.00 0 markup\"."
+  }
+ ],
+ "recall": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/recall",
+   "endpoints": 1,
+   "example_endpoint": "/meetings/record",
+   "price_usd": 0.5,
+   "price_unit": "per hour of audio",
+   "price_text": "$0.5–$0.65 per hour of audio",
+   "verified": true,
+   "verified_note": "One endpoint on the page, /meetings/record, described as sending a bot into a Zoom/Meet/Teams/Webex call, priced as a range starting at $0.5 per hour of audio rather than a flat per-call figure."
+  }
+ ],
+ "saperly": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/saperly",
+   "endpoints": null,
+   "example_endpoint": "/list-numbers",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists six Saperly endpoints with prices: /list-numbers, /list-voices and /calls/{id}/transcript at $0.00, /send-messages $0.02, /place-calls $0.26 and /provision-numbers $1.00."
+  }
+ ],
+ "hlrlookup": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/hlrlookup",
+   "endpoints": 2,
+   "example_endpoint": "HLR Lookup Number Portability",
+   "price_usd": 0.003635,
+   "price_unit": "per call",
+   "price_text": "$0.003635 per call",
+   "verified": true,
+   "verified_note": "Page showed '2 published endpoints'; the number-portability one was the cheaper at $0.003635 per call, the other $0.007269 per result."
+  }
+ ],
+ "hunter": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/hunter",
+   "endpoints": 12,
+   "example_endpoint": "/v2/email-count",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser's Hunter page listed 12 endpoints, several priced at $0.00 per call including the one that counts a domain's email addresses."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/muhammadafzal/hunter-io-api-actor",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 7.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $7.00 / 1,000 hunter results",
+   "verified": true,
+   "verified_note": "A third-party Actor that calls Hunter.io's own API; its store page shows $7.00 per thousand returned results (small user base, ~360 runs)."
+  }
+ ],
+ "prospeo": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/prospeo",
+   "endpoints": 7,
+   "example_endpoint": "List Accepted Filter Values for a Location or a Job Title",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Prospeo page shows seven endpoints; the filter-values lookup is the cheapest at $0.0005 per call, the rest are $0.02695 or more."
+  }
+ ],
+ "blockrun": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/blockrun",
+   "endpoints": null,
+   "example_endpoint": "/api/v1/exa/find-similar",
+   "price_usd": 0.0121,
+   "price_unit": "per call",
+   "price_text": "$0.0121",
+   "verified": true,
+   "verified_note": "Monid has a live Blockrun provider page (its own endpoint list is empty), and a guide table on monid.ai/tools/datalegion prices 'blockrun.ai /api/v1/exa/find-similar' at $0.0121."
+  }
+ ],
+ "defillama": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/defillama",
+   "endpoints": null,
+   "example_endpoint": "/api/tvl/{protocol}",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the cheapest DefiLlama row I saw was \"/api/tvl/{protocol} $0.00\" (the candidate's /free/v2/chains was not on the page)."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/nexgendata/defillama-chain-tvl-rankings",
+   "endpoints": null,
+   "example_endpoint": "nexgendata/defillama-chain-tvl-rankings",
+   "price_usd": 50.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $50.00 / 1,000 chain tvl records",
+   "verified": true,
+   "verified_note": "Apify Actor page for DefiLlama Chain TVL Rankings showed a pricing badge of from $50.00 / 1,000 chain tvl records."
+  }
+ ],
+ "quicknode": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/quicknode",
+   "endpoints": null,
+   "example_endpoint": "/base-mainnet",
+   "price_usd": 1.1,
+   "price_unit": "per call",
+   "price_text": "$1.10",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists one QuickNode route, x402.quicknode.com /base-mainnet at $1.10 per call with '0 markup'; no QuickNode endpoint catalog is published."
+  }
+ ],
+ "surf": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/surf",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  }
+ ],
+ "browserbase": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/browserbase",
+   "endpoints": null,
+   "example_endpoint": "/fetch",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011",
+   "verified": true,
+   "verified_note": "Monid's Browserbase page had no endpoint table yet, but its worked examples ran x402.browserbase.com /fetch, /search and /browser/session/create at $0.011 each with no markup."
+  }
+ ],
+ "github": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/github",
+   "endpoints": 2,
+   "example_endpoint": "GitHub Issue Comments",
+   "price_usd": 0.00132,
+   "price_unit": "per call",
+   "price_text": "$0.00132 per call",
+   "verified": true,
+   "verified_note": "Two GitHub endpoints shown; issue comments is the cheaper of the pair."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/saswave/github-profile-scraper",
+   "endpoints": null,
+   "example_endpoint": "saswave/github-profile-scraper",
+   "price_usd": 0.9,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.90 / 1,000 results",
+   "verified": true,
+   "verified_note": "Popular third-party Actor (hundreds of users) pulling public GitHub profile data, pay-per-event."
+  }
+ ],
+ "sfs": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/sfs",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's /tools/sfs page loads as 'Sfs APIs — Monid' but shows 'No endpoints here yet' and no FreightSimple price."
+  }
+ ],
+ "smolmachine": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/smolmachine",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": "",
+   "verified": false,
+   "verified_note": "The page exists and is headed \"Smolmachine\", but it showed \"No endpoints here yet\" and no smol-machines endpoint or price anywhere, so I could not confirm a price."
+  }
+ ],
+ "alibaba-com": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/alibaba-com",
+   "endpoints": 1,
+   "example_endpoint": "/alibaba.search",
+   "price_usd": null,
+   "price_unit": "varies by options",
+   "price_text": "Varies — varies by options",
+   "verified": true,
+   "verified_note": "The page carries a single Alibaba endpoint, /alibaba.search for up to 25 wholesale listings, but instead of a number its price cell reads \"Varies / varies by options\"."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/devcake/alibaba-products-scraper",
+   "endpoints": null,
+   "example_endpoint": "Alibaba Products Scraper",
+   "price_usd": 1.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Third-party Actor (about 1.1k users) that pulls Alibaba.com product listings; its store page shows a pay-per-result price starting at $1.00 per 1,000 results."
+  }
+ ],
+ "autozone": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/autozone",
+   "endpoints": 1,
+   "example_endpoint": "/category",
+   "price_usd": 0.0132,
+   "price_unit": "per call",
+   "price_text": "$0.0132 per call",
+   "verified": true,
+   "verified_note": "Glasser's AutoZone page showed a single published endpoint, Category Products (/category), at $0.0132 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/shahidirfan/autozone-products-scraper",
+   "endpoints": null,
+   "example_endpoint": "AutoZone product listing scrape",
+   "price_usd": 0.8,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $0.80 / 1,000 results",
+   "verified": true,
+   "verified_note": "This AutoZone Products Scraper actor page on Apify Store (31 users, ~5.6k runs) showed $0.80 per 1,000 results."
+  }
+ ],
+ "douyin-shop": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/douyin-shop",
+   "endpoints": 4,
+   "example_endpoint": "Douyin Shop Item Comments",
+   "price_usd": 0.016236,
+   "price_unit": "per call",
+   "price_text": "$0.016236 per call",
+   "verified": true,
+   "verified_note": "Four endpoints listed; item comments was the cheapest of the three price points shown ($0.016236 / $0.024354 / $0.032472 per call)."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zen-studio/douyin-product-search-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 6.99,
+   "price_unit": "per 1k products",
+   "price_text": "from $6.99 / 1,000 products",
+   "verified": true,
+   "verified_note": "Most-installed Douyin Shop (抖音商城) product Actor found (4,871 users, 5.0 rating); the per-1,000-products rate was in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/dataapiman/api/douyin-china-tiktok-all-api/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 20 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 20 / Month",
+   "verified": true,
+   "verified_note": "Douyin/China TikTok listing covering product detail and shop product list; pricing tab showed a free Basic tier of 20 requests and a $19.99/mo Pro tier of 2,000."
+  }
+ ],
+ "ebay": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/ebay",
+   "endpoints": 1,
+   "example_endpoint": "/sold_listings",
+   "price_usd": 0.0033,
+   "price_unit": "per call",
+   "price_text": "$0.0033 per call",
+   "verified": true,
+   "verified_note": "Glasser's eBay page had a single published endpoint, eBay Sold Listings, at $0.0033 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/caffein.dev/ebay-sold-listings",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 2.5,
+   "price_unit": "per 1k results",
+   "price_text": "from $2.50 / 1,000 results",
+   "verified": true,
+   "verified_note": "A very popular eBay sold-listings Actor (over 900k runs) priced from $2.50 per thousand results on its store page."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/caffeindev/api/ebay-sold-items-listing-api/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (free tier)",
+   "price_text": "Basic $0.00 /mo — Requests 25 / Month",
+   "verified": true,
+   "verified_note": "The RapidAPI pricing tab for this eBay sold-items API shows a free Basic plan capped at 25 requests a month, with Pro at $9.00/mo."
+  }
+ ],
+ "jd": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/jd",
+   "endpoints": 3,
+   "example_endpoint": "JD.com Item Search",
+   "price_usd": 0.024354,
+   "price_unit": "per call",
+   "price_text": "$0.024354 per call",
+   "verified": true,
+   "verified_note": "Three JD.com endpoints listed; item search is the cheapest, item detail full the dearest at $0.04059."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/silentflow/jd-products-scraper",
+   "endpoints": null,
+   "example_endpoint": "silentflow/jd-products-scraper",
+   "price_usd": 1.86,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.86 / 1,000 products",
+   "verified": true,
+   "verified_note": "Widely used Actor (over a thousand users) for JD.com product, seller and review data."
+  }
+ ],
+ "keepa": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/keepa",
+   "endpoints": 14,
+   "example_endpoint": "Get Amazon Categories and Parent Trees",
+   "price_usd": 0.00144,
+   "price_unit": "per call",
+   "price_text": "$0.00144 per call",
+   "verified": true,
+   "verified_note": "Glasser's Keepa page listed 14 endpoints today and the lowest of the per-call rates shown was $0.00144, on the categories, lightning-deal, seller-info and category-name lookups."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/radeance/keepa-scraper",
+   "endpoints": null,
+   "example_endpoint": "radeance/keepa-scraper",
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $4.00 / 1,000 product results",
+   "verified": true,
+   "verified_note": "The Apify Store listing for this Keepa Actor (93 users) shows 'from $4.00 / 1,000 product results' on its pricing tab."
+  }
+ ],
+ "kroger": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/kroger",
+   "endpoints": 1,
+   "example_endpoint": "Kroger Product Page",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Kroger page showed exactly one published endpoint, a product page lookup priced at $0.011 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/e-commerce/kroger-fast-product-scraper",
+   "endpoints": null,
+   "example_endpoint": "Kroger Fast Product Scraper",
+   "price_usd": 2.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $2.00 / 1,000 product listings",
+   "verified": true,
+   "verified_note": "This Apify Actor scrapes Kroger product listings and its store page shows a headline rate of $2.00 per 1,000 listings."
+  }
+ ],
+ "meijer": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/meijer",
+   "endpoints": 1,
+   "example_endpoint": "/product",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 1 published endpoint, Meijer Product Details (/product), at $0.011 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/outstanding_vegetable/meijer-scraper",
+   "endpoints": null,
+   "example_endpoint": "outstanding_vegetable/meijer-scraper",
+   "price_usd": 0.01,
+   "price_unit": "per result",
+   "price_text": "from $0.01 / result",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Meijer Scraper showed a pricing badge of from $0.01 / result."
+  }
+ ],
+ "segari": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/segari",
+   "endpoints": 1,
+   "example_endpoint": "Segari Product Details",
+   "price_usd": 0.0264,
+   "price_unit": "per call",
+   "price_text": "$ 0.0264 per call",
+   "verified": true,
+   "verified_note": "Glasser lists Segari under Shopping with exactly one endpoint, Segari Product Details, at $0.0264 per call."
+  }
+ ],
+ "taobao": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/taobao",
+   "endpoints": 2,
+   "example_endpoint": "/item-questions",
+   "price_usd": 0.024354,
+   "price_unit": "per call",
+   "price_text": "$0.024354 per call",
+   "verified": true,
+   "verified_note": "Glasser's Taobao page listed two endpoints, Item Questions (/item-questions) and Item Reviews, both at $0.024354 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zen-studio/taobao-detail-scraper",
+   "endpoints": null,
+   "example_endpoint": "Taobao product detail scrape",
+   "price_usd": 7.99,
+   "price_unit": "per 1k products",
+   "price_text": "Pricing from $7.99 / 1,000 products",
+   "verified": true,
+   "verified_note": "This Taobao/Tmall product detail actor (6,516 users) showed $7.99 per 1,000 products on its Apify Store page."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/ecommdatahub/api/taobao-datahub",
+   "endpoints": null,
+   "example_endpoint": "Taobao/Tmall product data requests",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo (50 advanced requests, 100 requests per month)",
+   "verified": true,
+   "verified_note": "The Taobao DataHub pricing tab on RapidAPI showed a free Basic plan at $0.00/mo with 100 requests a month, then Pro at $29.99/mo."
+  }
+ ],
+ "tiktok-shop": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/tiktok-shop",
+   "endpoints": 1,
+   "example_endpoint": "TikTok Shop Creator",
+   "price_usd": 0.00605,
+   "price_unit": "per call",
+   "price_text": "$0.00605 per call",
+   "verified": true,
+   "verified_note": "Single published endpoint on the page, priced at $0.00605 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pratikdani/tiktok-shop-search-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 9.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $9.00 / 1,000 per results",
+   "verified": true,
+   "verified_note": "TikTok Shop search Actor with 2,500 users and ~110k runs; the per-1,000 rate was shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/api-creators-api-creators-default/api/tiktok-shop-scraper-api/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 25 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 25 / Month",
+   "verified": true,
+   "verified_note": "TikTok Shop Scraper API listing; pricing tab showed a free Basic tier of 25 requests and a $10.00/mo Pro tier of 3,000 plus $0.003 overage."
+  }
+ ],
+ "watsons": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/watsons",
+   "endpoints": 1,
+   "example_endpoint": "/category",
+   "price_usd": 0.0231,
+   "price_unit": "per call",
+   "price_text": "$0.0231 per call",
+   "verified": true,
+   "verified_note": "Glasser's Watsons page listed one endpoint, Watsons Malaysia Category Products, at $0.0231 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/stealth_mode/watsons-product-search-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 2.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $2.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "An Actor covering Watsons regional sites including .com.my, priced from $2.00 per thousand results; usage is low (under 200 runs)."
+  }
+ ],
+ "xianyu": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/xianyu",
+   "endpoints": 2,
+   "example_endpoint": "Xianyu Listing Search",
+   "price_usd": 0.032472,
+   "price_unit": "per call",
+   "price_text": "$0.032472 per call",
+   "verified": true,
+   "verified_note": "Both Xianyu endpoints (listing search and listing detail) are shown at the identical $0.032472 per-call rate."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zen-studio/goofish-xianyu-search-scraper",
+   "endpoints": null,
+   "example_endpoint": "zen-studio/goofish-xianyu-search-scraper",
+   "price_usd": 5.99,
+   "price_unit": "per 1k listings",
+   "price_text": "from $5.99 / 1,000 listings",
+   "verified": true,
+   "verified_note": "Popular Goofish/Xianyu search Actor; headline rate is the discounted tier, free plan is listed at $7.99 per 1,000 listings."
+  }
+ ],
+ "zepto": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/zepto",
+   "endpoints": 1,
+   "example_endpoint": "Zepto Product Details",
+   "price_usd": 0.0099,
+   "price_unit": "per call",
+   "price_text": "$0.0099 per call",
+   "verified": true,
+   "verified_note": "Glasser's Zepto page shows a single published endpoint, Zepto Product Details, at $0.0099 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/krazee_kaushik/zepto-scraper",
+   "endpoints": null,
+   "example_endpoint": "krazee_kaushik/zepto-scraper",
+   "price_usd": 2.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $2.00 / 1,000 product scrapeds",
+   "verified": true,
+   "verified_note": "This Zepto Actor (175 users, the most-used Zepto one in the store search) shows 'from $2.00 / 1,000 product scrapeds' on its Apify pricing tab."
+  }
+ ],
+ "douban": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/douban",
+   "endpoints": 6,
+   "example_endpoint": "Douban Hot Movies",
+   "price_usd": 0.016236,
+   "price_unit": "per call",
+   "price_text": "$0.016236 per call",
+   "verified": true,
+   "verified_note": "Glasser listed 6 Douban endpoints, all priced identically at $0.016236 per call, including the hot-movies list."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zhorex/douban-scraper",
+   "endpoints": null,
+   "example_endpoint": "Douban Pro Scraper — Reviews, Discussions & Subject Data",
+   "price_usd": 30.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $30.00 / 1,000 review scrapeds",
+   "verified": true,
+   "verified_note": "The most-used Douban Actor on Apify advertises $30.00 per 1,000 scraped reviews on its store page, with cheaper per-comment events listed lower down."
+  }
+ ],
+ "imdb": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/imdb",
+   "endpoints": 9,
+   "example_endpoint": "/chart-rankings",
+   "price_usd": 0.008118,
+   "price_unit": "per call",
+   "price_text": "$0.008118 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 9 published endpoints, all at $0.008118 per call, the cheapest shown being IMDb Chart Rankings (/chart-rankings)."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/epctex/imdb-advanced-scraper",
+   "endpoints": null,
+   "example_endpoint": "epctex/imdb-advanced-scraper",
+   "price_usd": 3.2,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.20 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the IMDB Advanced Scraper showed a pricing badge of from $3.20 / 1,000 results."
+  }
+ ],
+ "steam": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/steam",
+   "endpoints": 1,
+   "example_endpoint": "Steam App Detail",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$ 0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser lists Steam with one published endpoint, Steam App Detail, at $0.0005 per call."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/archergardinersheridan/api/steam-store-data/pricing",
+   "endpoints": null,
+   "example_endpoint": "Steam Store Data",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic: 300 store calls/day, then $0.10 each)",
+   "price_text": "Basic $0.00 /mo — Store 300 / Day + $0.1",
+   "verified": true,
+   "verified_note": "A third-party (not Valve) RapidAPI listing of Steam store data whose pricing tab shows a free Basic plan of 300 store calls a day with $0.10 per extra call, then Pro at $5/mo."
+  }
+ ],
+ "youku": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/youku",
+   "endpoints": 2,
+   "example_endpoint": "/user-detail",
+   "price_usd": 0.016236,
+   "price_unit": "per call",
+   "price_text": "$0.016236 per call",
+   "verified": true,
+   "verified_note": "Glasser's Youku page listed two endpoints, User Detail (/user-detail) and Video Detail, both at $0.016236 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/sian.agency/youku-video-scraper",
+   "endpoints": null,
+   "example_endpoint": "Youku video/search scrape",
+   "price_usd": 2.5,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $2.50 / 1,000 video search results",
+   "verified": true,
+   "verified_note": "The Youku Scraper actor page on Apify Store (175 users) showed $2.50 per 1,000 video search results."
+  }
+ ],
+ "edinet": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/edinet",
+   "endpoints": 1,
+   "example_endpoint": "Japan EDINET Securities Filings by Date",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "One published endpoint, a by-date securities-filings lookup, at $0.0005 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/minako-ph/japan-edinet-filings",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 5.0,
+   "price_unit": "per 1k filing records",
+   "price_text": "from $5.00 / 1,000 filing records",
+   "verified": true,
+   "verified_note": "Actor that reads the official EDINET API; its Pricing block showed the per-1,000-records rate. Small install base (2 users, ~104 runs)."
+  }
+ ],
+ "financialdatasets": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/financialdatasets",
+   "endpoints": 58,
+   "example_endpoint": "/institutional-holdings/investors",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser's Financial Datasets page listed 58 endpoints; the 13F investor lookup and the other coverage-listing calls showed $0.00 per call, with paid data calls from $0.02."
+  }
+ ],
+ "finviz": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/finviz",
+   "endpoints": 1,
+   "example_endpoint": "Finviz Ticker Sectors and Performance",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Finviz page shows exactly one published endpoint at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/finviz",
+   "endpoints": null,
+   "example_endpoint": "/get_screener_results",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "finviz /get_screener_results · not run $0.01 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Screener, insider-trading and news-sentiment endpoints all appear at $0.01."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/sheshinmcfly/finviz-stock-screener",
+   "endpoints": null,
+   "example_endpoint": "sheshinmcfly/finviz-stock-screener",
+   "price_usd": 20.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $20.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Actor page headline reads from $20.00 per 1,000 results while its pricing section states $10.00 per 1,000 results ($0.01 per stock) plus a per-start fee."
+  }
+ ],
+ "marketbeat": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/marketbeat",
+   "endpoints": 5,
+   "example_endpoint": "MarketBeat MarketRank Score",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser lists 5 MarketBeat endpoints; four are $0.011 per call and the analyst-rating-history one is $0.022, so $0.011 is the floor."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/marketbeat",
+   "endpoints": null,
+   "example_endpoint": "/get_institutional_ownership",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's marketbeat page shows no catalog entries, but its guide tables run seven marketbeat endpoints, the cheapest at $0.01 including /get_institutional_ownership and /get_profitability_metrics."
+  }
+ ],
+ "marketstack": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/marketstack",
+   "endpoints": 1,
+   "example_endpoint": "marketstack Stock Splits",
+   "price_usd": 0.001099,
+   "price_unit": "per call",
+   "price_text": "$0.001099 per call",
+   "verified": true,
+   "verified_note": "Glasser's marketstack page had a single published endpoint, a stock-splits lookup at $0.001099 per call."
+  }
+ ],
+ "nasdaq": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/nasdaq",
+   "endpoints": 5,
+   "example_endpoint": "/get_stock_dividend_history",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 5 published endpoints, all at $0.011 per call, the cheapest shown being Nasdaq Dividend History (/get_stock_dividend_history)."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/nasdaq",
+   "endpoints": null,
+   "example_endpoint": "/get_stock_earnings",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the guide showed \"nasdaq /get_stock_earnings $0.01 0 markup\", and every Nasdaq row on the page was $0.01."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/scrapesmith/nasdaq-short-interest-scraper",
+   "endpoints": null,
+   "example_endpoint": "scrapesmith/nasdaq-short-interest-scraper",
+   "price_usd": 6.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $6.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Nasdaq Short Interest Scraper showed a pricing badge of from $6.00 / 1,000 results."
+  }
+ ],
+ "secapi": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/secapi",
+   "endpoints": 28,
+   "example_endpoint": "Get an SEC Filing Document or Exhibit by Its sec.gov URL (SEC API)",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$ 0.0005 per call",
+   "verified": true,
+   "verified_note": "All 28 SEC API endpoints on the Glasser page carry the same $0.0005 per call price, so the filing-document one is tied for cheapest."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/sec-api-sec-api-default/api/sec-filings1/pricing",
+   "endpoints": null,
+   "example_endpoint": "SEC Filings",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic: 500,000 requests/month, hard limit)",
+   "price_text": "Basic $0.00 /mo — Requests 500,000 / Month, Hard Limit",
+   "verified": true,
+   "verified_note": "Listed by the sec-api vendor account itself; the pricing tab offers only one plan, a free Basic tier capped at 500,000 requests a month plus $0.001 per MB of bandwidth."
+  }
+ ],
+ "secform4": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/secform4",
+   "endpoints": 1,
+   "example_endpoint": "/get_insider_buy_sell_ratios",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's SecForm4 page showed one published endpoint, Insider Buy/Sell Ratios (/get_insider_buy_sell_ratios), at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/secform4",
+   "endpoints": null,
+   "example_endpoint": "/search",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists nine secform4 endpoints, including /search, /get_insider_buy_sell_ratios and /get_13d_filings, all at $0.01 per call with '0 markup'."
+  }
+ ],
+ "stockanalysis": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/stockanalysis",
+   "endpoints": 1,
+   "example_endpoint": "Stock Analysis Pre-Market Movers",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Exactly one published endpoint, the pre-market movers call, at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/stockanalysis",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/lulzasaur/stockanalysis-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 15.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $15.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-installed StockAnalysis.com screener Actor (11 users, ~190 runs); per-1,000-results rate shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/elisbushaj2/api/stockanalysis-data-api/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 100 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 100 / Month",
+   "verified": true,
+   "verified_note": "Listing that sells StockAnalysis.com data; pricing tab showed a free Basic tier of 100 requests and a $15.00/mo Pro tier of 10,000."
+  }
+ ],
+ "yahoo-finance": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/yahoo-finance",
+   "endpoints": null,
+   "example_endpoint": "/get_quote",
+   "price_usd": 0.05,
+   "price_unit": "per call",
+   "price_text": "$0.05",
+   "verified": true,
+   "verified_note": "Monid's Yahoo Finance page said no endpoints are published yet, but its stock-quote walkthrough priced yahoo-finance /get_quote at $0.05 with zero markup."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/architjn/yahoo-finance",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.9,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.90 / 1,000 results",
+   "verified": true,
+   "verified_note": "The most-used Yahoo Finance Actor (over 700k runs) shows a headline price of $0.90 per thousand results."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/apidojo/api/yh-finance/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (free tier)",
+   "price_text": "Basic $0.00 /mo — Requests 500 / Month",
+   "verified": true,
+   "verified_note": "The YH Finance listing's pricing tab shows a free Basic tier of 500 requests a month, then Pro at $10.00/mo."
+  }
+ ],
+ "bytedance": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/bytedance",
+   "endpoints": null,
+   "example_endpoint": "/v1/video/seedance-2.5",
+   "price_usd": 10.7,
+   "price_unit": "per 1M tokens",
+   "price_text": "bytedance /v1/video/seedance-2.5 · not run $10.70 / 1M tokens 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Only this one Seedance endpoint is priced on the page; no seedance-2.0-mini or $3.50 figure appears."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pnda/seedance-video-generator",
+   "endpoints": null,
+   "example_endpoint": "pnda/seedance-video-generator",
+   "price_usd": 72.0,
+   "price_unit": "per 1k video seconds (lite)",
+   "price_text": "from $72.00 / 1,000 video second (lite)s",
+   "verified": true,
+   "verified_note": "Actor runs ByteDance Seedance models exclusively, per-second rates $0.08-$0.90; it is third-party with very few users."
+  }
+ ],
+ "elevenlabs": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/elevenlabs",
+   "endpoints": null,
+   "example_endpoint": "/voices",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's elevenlabs page says 'No endpoints here yet' in its catalog block, yet two guide tables on it run 'elevenlabs /voices' at $0.00 alongside paid endpoints like /v1/music at $0.15 per minute."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/dev00/elevenlabs-tts-actor",
+   "endpoints": null,
+   "example_endpoint": "dev00/elevenlabs-tts-actor",
+   "price_usd": 5.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $5.00 / 1,000 elevenlabs speech syntheses",
+   "verified": true,
+   "verified_note": "This Apify Actor wrapping ElevenLabs text-to-speech (65 users) prices at 'from $5.00 / 1,000 elevenlabs speech syntheses' on its pricing tab."
+  }
+ ],
+ "fishaudio": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/fishaudio",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's Fish Audio page renders with the right title but reports 'No endpoints here yet', and the only priced audio endpoints on it are other vendors' (elevenlabs, minimax and others)."
+  }
+ ],
+ "kling": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/kling",
+   "endpoints": null,
+   "example_endpoint": "/v1/video/kling-2.5-turbo-t2v",
+   "price_usd": 0.042,
+   "price_unit": "per second",
+   "price_text": "$0.042 to $0.07 / second",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the cheapest Kling row shown was \"/v1/video/kling-2.5-turbo-t2v $0.042 to $0.07 / second\", so pricing is per video second rather than a flat $0."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/getdataforme/Klingai-category-extractor",
+   "endpoints": null,
+   "example_endpoint": "getdataforme/Klingai-category-extractor",
+   "price_usd": 9.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $9.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Klingai Category Extractor showed a pricing badge of from $9.00 / 1,000 results."
+  }
+ ],
+ "magichour": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/magichour",
+   "endpoints": 1,
+   "example_endpoint": "/v1/image/magic-hour-ai-gif",
+   "price_usd": 0.125,
+   "price_unit": "per call",
+   "price_text": "$0.1250 per call",
+   "verified": true,
+   "verified_note": "The page header counts 2 endpoints but it is the same route listed twice (once under Promotion endpoints, once under Endpoints): /v1/image/magic-hour-ai-gif at $0.1250 per call."
+  }
+ ],
+ "minimax": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/minimax",
+   "endpoints": null,
+   "example_endpoint": "/v1/image_generation",
+   "price_usd": 0.0035,
+   "price_unit": "per result",
+   "price_text": "$0.0035 / result",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists six MiniMax endpoints; the cheapest I saw was /v1/image_generation at $0.0035 per result, with video models from $0.025/second and no free or $0 MiniMax entry."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/danitn11/minimax-h3-video-generator",
+   "endpoints": null,
+   "example_endpoint": "MiniMax Hailuo H3 video generation",
+   "price_usd": 40.0,
+   "price_unit": "per 1k 480p video seconds",
+   "price_text": "Pricing from $40.00 / 1,000 480p video seconds",
+   "verified": true,
+   "verified_note": "This MiniMax Hailuo H3 video generator actor (278 users) showed $40.00 per 1,000 480p video seconds on its Apify Store page."
+  }
+ ],
+ "suzanne": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/suzanne",
+   "endpoints": null,
+   "example_endpoint": "/v1/generations/text-to-3d",
+   "price_usd": 0.8,
+   "price_unit": "per call",
+   "price_text": "$0.80",
+   "verified": true,
+   "verified_note": "Monid's Suzanne page listed no endpoints yet; the only prices shown were $0.80 per generation call for text-to-3d and photo-to-3d, and I saw no free download endpoint."
+  }
+ ],
+ "topaz": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/topaz",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Topaz has a live Monid page but its catalog says \"No endpoints here yet\" and no Topaz endpoint or price appears anywhere on it, so the 23-endpoint claim is unconfirmed."
+  }
+ ],
+ "censusdata-xyz": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/censusdata-xyz",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid serves a live provider page titled 'Censusdata Xyz' but it carries no endpoints and no prices at all, so there is no rate to confirm."
+  }
+ ],
+ "tendata": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/tendata",
+   "endpoints": 16,
+   "example_endpoint": "Tendata Company Name Search",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser showed 16 Tendata endpoints, with three count/search calls at the cheapest rate of $0.0005 per call and the record-level ones priced per result."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/tendata",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's Tendata page loads but its endpoint panel says 'No endpoints here yet' and no Tendata price is shown anywhere on it."
+  }
+ ],
+ "us-census-bureau": [
+  {
+   "source": "apify",
+   "link": "https://apify.com/alizarin_refrigerator-owner/us-census-bureau-demographics-population-data-api",
+   "endpoints": null,
+   "example_endpoint": "alizarin_refrigerator-owner/us-census-bureau-demographics-population-data-api",
+   "price_usd": 0.01,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.01 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the US Census Bureau Demographics & Population Data API showed a pricing badge of from $0.01 / 1,000 results."
+  }
+ ],
+ "builtin": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/builtin",
+   "endpoints": 2,
+   "example_endpoint": "Built In Job Details",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$ 0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser shows Built In under Jobs with two endpoints, Job Details and Job Title Suggestions, both at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/builtin",
+   "endpoints": 3,
+   "example_endpoint": "/get_job_details",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.0100 per call",
+   "verified": true,
+   "verified_note": "The rendered Monid page lists three Built In endpoints — /get_job_details, /suggest_job_titles and /search_jobs — each at $0.0100 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/shahidirfan/BuiltIn-Jobs-Scraper",
+   "endpoints": null,
+   "example_endpoint": "BuiltIn Jobs Scraper",
+   "price_usd": 0.8,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.80 / 1,000 results",
+   "verified": true,
+   "verified_note": "Third-party Actor (about 240 users) that scrapes BuiltIn.com job listings; the store page shows pay-per-result pricing from $0.80 per 1,000 results."
+  }
+ ],
+ "idealist": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/idealist",
+   "endpoints": null,
+   "example_endpoint": "/search_jobs",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists one Idealist endpoint, /search_jobs, at $0.01 per call with '0 markup'."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/santamaria-automations/idealist-scraper",
+   "endpoints": null,
+   "example_endpoint": "Idealist.org nonprofit job scrape",
+   "price_usd": 3.0,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $3.00 / 1,000 job results",
+   "verified": true,
+   "verified_note": "An Idealist.org nonprofit-jobs actor on Apify Store (35 users) showed $3.00 per 1,000 job results."
+  }
+ ],
+ "indeed": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/indeed",
+   "endpoints": 4,
+   "example_endpoint": "Indeed Company Profile",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Four published endpoints at two price points; the company-profile call was the cheaper at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/indeed",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/valig/indeed-jobs-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.07,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.07 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-installed Indeed Actor in the store search (36,547 users, ~1.78M runs, 4.7 rating); per-1,000-results rate shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/vuesdata/api/indeed-jobs-api/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 20 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 20 / Month",
+   "verified": true,
+   "verified_note": "Indeed Jobs API listing; pricing tab showed a free Basic tier of 20 requests and a $25.00/mo Pro tier of 5,000."
+  }
+ ],
+ "levels-fyi": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/levels-fyi",
+   "endpoints": 8,
+   "example_endpoint": "/get_company_benefits",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Levels.fyi page listed 8 endpoints, all flat at $0.011 per call including Company Benefits."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/parseforge/levels-fyi-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 11.99,
+   "price_unit": "per 1k results",
+   "price_text": "from $11.99 / 1,000 result items",
+   "verified": true,
+   "verified_note": "A popular Levels.fyi salary Actor (about 95k runs) priced from $11.99 per thousand result items."
+  }
+ ],
+ "theirstack": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/theirstack",
+   "endpoints": 1,
+   "example_endpoint": "Search Job Postings by Title, Country and How Recently They Were Posted (TheirStack)",
+   "price_usd": 0.035934,
+   "price_unit": "per result",
+   "price_text": "$0.035934 per result max $1.25 per run",
+   "verified": true,
+   "verified_note": "Single TheirStack endpoint, billed per result returned with a per-run cap."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/apricot_blackberry/theirstack-signal-orchestrator",
+   "endpoints": null,
+   "example_endpoint": "apricot_blackberry/theirstack-signal-orchestrator",
+   "price_usd": 40.0,
+   "price_unit": "per 1k company signals",
+   "price_text": "from $40.00 / 1,000 company signals",
+   "verified": true,
+   "verified_note": "Actor is built on TheirStack but bring-your-own TheirStack key, and has only a couple of users; per-event rows show $0.003 per company result."
+  }
+ ],
+ "upwork": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/upwork",
+   "endpoints": 1,
+   "example_endpoint": "Upwork Job Search",
+   "price_usd": 0.0077,
+   "price_unit": "per call",
+   "price_text": "$0.0077 per call",
+   "verified": true,
+   "verified_note": "Glasser's Upwork page has one published endpoint, Upwork Job Search, at $0.0077 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/neatrat/upwork-job-scraper",
+   "endpoints": null,
+   "example_endpoint": "neatrat/upwork-job-scraper",
+   "price_usd": 3.2,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.20 / 1,000 jobs",
+   "verified": true,
+   "verified_note": "The most-used Upwork Actor on Apify (7,256 users, 4.8 rating) shows 'from $3.20 / 1,000 jobs' on its pricing tab."
+  }
+ ],
+ "web3-career": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/web3-career",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "A Monid tool page for Web3 Career does exist and returns 200, but it lists no endpoints and shows no price for this provider."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/santamaria-automations/web3career-scraper",
+   "endpoints": null,
+   "example_endpoint": "Web3.career Scraper - Crypto & Web3 Jobs",
+   "price_usd": 3.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.00 / 1,000 job results",
+   "verified": true,
+   "verified_note": "An Apify Actor dedicated to web3.career job listings shows $3.00 per 1,000 job results, broken down on the page as $0.003 per result plus $0.001 per run."
+  }
+ ],
+ "wellfound": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/wellfound",
+   "endpoints": 5,
+   "example_endpoint": "/get_job_details",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 5 published endpoints, the cheapest being Wellfound Job Details (/get_job_details) at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/wellfound",
+   "endpoints": null,
+   "example_endpoint": "/get_company_jobs",
+   "price_usd": 0.02,
+   "price_unit": "per call",
+   "price_text": "$0.02",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; only two Wellfound rows carried prices, /get_company_jobs at $0.02 and /search_jobs at $0.03, and I saw no $0.01 row or any /get_job_autocomplete_roles."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/radeance/wellfound-job-listings-scraper",
+   "endpoints": null,
+   "example_endpoint": "radeance/wellfound-job-listings-scraper",
+   "price_usd": 3.5,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.50 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Wellfound Scraper showed a pricing badge of from $3.50 / 1,000 results."
+  }
+ ],
+ "strale": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/strale",
+   "endpoints": 60,
+   "example_endpoint": "Age from Date of Birth",
+   "price_usd": 0.026136,
+   "price_unit": "per call",
+   "price_text": "$ 0.026136 per call",
+   "verified": true,
+   "verified_note": "Glasser lists 60 Strale endpoints spanning $0.026136 to $1.04544 per call; the $0.026136 floor covers the simple utility calls such as Age from Date of Birth and AML Risk Score Calculator."
+  }
+ ],
+ "vaquill": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/vaquill",
+   "endpoints": 13,
+   "example_endpoint": "/us/statutes/coverage",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser's Vaquill page listed 13 endpoints; Statute Coverage (/us/statutes/coverage) was the cheapest at $0.0005 per call, the rest $0.011-$0.066."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/vaquill",
+   "endpoints": null,
+   "example_endpoint": "/us/statutes/coverage",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists eight Vaquill endpoints, with /us/statutes/coverage at $0.00 and the others $0.01-$0.06."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/vaquill/us-primary-law-mcp",
+   "endpoints": null,
+   "example_endpoint": "Vaquill US primary law lookups",
+   "price_usd": 15.0,
+   "price_unit": "per 1k credits",
+   "price_text": "Pricing from $15.00 / 1,000 vaquill data credits",
+   "verified": true,
+   "verified_note": "Vaquill's own Apify account publishes a US Primary Law actor, priced $15.00 per 1,000 Vaquill data credits on its store page."
+  }
+ ],
+ "anthropic": [
+  {
+   "source": "apify",
+   "link": "https://apify.com/hgservices/claude-api-actor",
+   "endpoints": null,
+   "example_endpoint": "hgservices/claude-api-actor",
+   "price_usd": 1.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Bring-your-own-key proxy that calls the Claude API from Apify; this Apify fee sits on top of what Anthropic bills directly."
+  }
+ ],
+ "deepseek": [
+  {
+   "source": "apify",
+   "link": "https://apify.com/hgservices/deepseek-api-actor",
+   "endpoints": null,
+   "example_endpoint": "DeepSeek API Actor",
+   "price_usd": 6.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $6.00 / 1,000 deepseek replies",
+   "verified": true,
+   "verified_note": "A small unofficial Apify Actor wraps DeepSeek chat completions and charges $6.00 per 1,000 replies according to its store page."
+  }
+ ],
+ "google-gemini": [
+  {
+   "source": "apify",
+   "link": "https://apify.com/apify/gemini-search-scraper",
+   "endpoints": null,
+   "example_endpoint": "apify/gemini-search-scraper",
+   "price_usd": 3.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.00 / 1,000 gemini searches",
+   "verified": true,
+   "verified_note": "Apify Actor page for the official Apify Gemini Search Scraper showed a pricing badge of from $3.00 / 1,000 gemini searches."
+  }
+ ],
+ "microsoft-azure-ai": [
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/microsoft-azure-org-microsoft-cognitive-services/api/microsoft-translator-text",
+   "endpoints": null,
+   "example_endpoint": "Translator Text translate call",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo (500,000 characters per month)",
+   "verified": true,
+   "verified_note": "Microsoft's own Azure Cognitive Services org on RapidAPI lists Translator Text, whose pricing tab showed a free Basic plan at $0.00/mo for 500k characters."
+  }
+ ],
+ "openai": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/openai",
+   "endpoints": null,
+   "example_endpoint": "/v1/image/gpt-image-2",
+   "price_usd": 0.005,
+   "price_unit": "per 1k tokens",
+   "price_text": "$0.005 to $0.03 / 1k tokens",
+   "verified": true,
+   "verified_note": "Monid's OpenAI page showed no endpoint table, but the image-generation examples quoted openai /v1/image/gpt-image-2 at $0.005 to $0.03 per 1k tokens with zero markup."
+  }
+ ],
+ "typesafe": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/typesafe",
+   "endpoints": 1,
+   "example_endpoint": "Jev API",
+   "price_usd": 0.0462,
+   "price_unit": "per 1M input tokens",
+   "price_text": "$0.0462 per 1M input tokens max $0.002957 per run",
+   "verified": true,
+   "verified_note": "One TypeSafe endpoint, listed under the name Jev API, priced on input tokens with a per-run cap."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/typesafe",
+   "endpoints": null,
+   "example_endpoint": "/systemone",
+   "price_usd": 0.042,
+   "price_unit": "per 1M tokens",
+   "price_text": "typesafe /systemone $0.042 / 1M tokens 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page."
+  }
+ ],
+ "apple-maps": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/apple-maps",
+   "endpoints": 2,
+   "example_endpoint": "/places",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 2 published endpoints, both at $0.0005 per call, the cheapest shown being /places."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zen-studio/apple-maps-scraper-pro",
+   "endpoints": null,
+   "example_endpoint": "zen-studio/apple-maps-scraper-pro",
+   "price_usd": 3.29,
+   "price_unit": "per 1k places",
+   "price_text": "from $3.29 / 1,000 places",
+   "verified": true,
+   "verified_note": "Apify Actor page for Apple Maps Scraper Pro showed a pricing badge of from $3.29 / 1,000 places."
+  }
+ ],
+ "google-maps": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/google-maps",
+   "endpoints": 1,
+   "example_endpoint": "Google Maps Contributor Reviews",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$ 0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser lists Google Maps under Local & places with a single endpoint, Google Maps Contributor Reviews, at $0.0005 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/compass/crawler-google-places",
+   "endpoints": null,
+   "example_endpoint": "Google Maps Scraper",
+   "price_usd": 1.5,
+   "price_unit": "per 1k scraped places",
+   "price_text": "from $1.50 / 1,000 scraped places",
+   "verified": true,
+   "verified_note": "Apify's own heavily used Google Maps Scraper (about 666k users) shows pay-per-result pricing from $1.50 per 1,000 scraped places on its store page."
+  }
+ ],
+ "gloria": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/gloria",
+   "endpoints": null,
+   "example_endpoint": "/news-ticker-summary",
+   "price_usd": 0.0341,
+   "price_unit": "per call",
+   "price_text": "$0.0341",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists one Gloria route, api.itsgloria.ai /news-ticker-summary at $0.0341 per call with '0 markup'."
+  }
+ ],
+ "hackernews": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/hackernews",
+   "endpoints": 1,
+   "example_endpoint": "Hacker News Search",
+   "price_usd": 0.00165,
+   "price_unit": "per call",
+   "price_text": "$0.00165 per call",
+   "verified": true,
+   "verified_note": "One published endpoint, a Hacker News search call, at $0.00165 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/gentle_cloud/hacker-news-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.1,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.10 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-installed Hacker News Actor found (218 users, ~7.4k runs); per-1,000-results rate shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/community/api/hacker-news/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo - Requests 0 / Month + $0",
+   "verified": true,
+   "verified_note": "RapidAPI community Hacker News listing; its pricing tab showed only a free Basic tier with no per-request charge."
+  }
+ ],
+ "opoint": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/opoint",
+   "endpoints": null,
+   "example_endpoint": "/search",
+   "price_usd": 0.06,
+   "price_unit": "per call",
+   "price_text": "$0.06",
+   "verified": true,
+   "verified_note": "Monid's Opoint page had no published endpoint list; its news walkthroughs priced opoint /search and /search-by-ids at $0.06 a call, and the free /suggest endpoint was not shown."
+  }
+ ],
+ "toutiao": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/toutiao",
+   "endpoints": 1,
+   "example_endpoint": "Toutiao Article Search",
+   "price_usd": 0.08118,
+   "price_unit": "per call",
+   "price_text": "$0.08118 per call",
+   "verified": true,
+   "verified_note": "One published Toutiao endpoint, article search, at $0.08118 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/natanielsantos/toutiao-scraper",
+   "endpoints": null,
+   "example_endpoint": "natanielsantos/toutiao-scraper",
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $4.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-used Toutiao Actor on the store, pay-per-event, pulls articles, videos and author stats."
+  }
+ ],
+ "akta": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/akta",
+   "endpoints": 12,
+   "example_endpoint": "Resolve a Company Name or Website Into Identity Records (Akta)",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser lists 12 Akta endpoints; the two resolver endpoints (company identity, industry taxonomy) are $0.00 per call and the rest run from $0.005 up to $0.33."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/akta",
+   "endpoints": null,
+   "example_endpoint": "/v1/news",
+   "price_usd": 0.0005,
+   "price_unit": "per result",
+   "price_text": "$0.0005 / result",
+   "verified": true,
+   "verified_note": "Monid's akta page shows an empty catalog, but its guide tables price three akta endpoints, the cheapest being /v1/news at $0.0005 per result; the $0 /v1/industry/search rate was not visible anywhere on the page."
+  }
+ ],
+ "apollo": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/apollo",
+   "endpoints": 10,
+   "example_endpoint": "Search People by Job Title, Seniority, Location or Employer Domain (Apollo)",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser listed 10 Apollo endpoints and showed the people-search call at $0.00 per call, while the record and enrichment calls ran $0.026 to $0.05."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/apollo",
+   "endpoints": null,
+   "example_endpoint": "/mixed_people/api_search",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's endpoint panel for this page showed nothing, but the page's own how-to section listed five apollo endpoints with per-call prices, the cheapest being $0.00 for /mixed_people/api_search, with the other four at $0.026, each tagged '0 markup'."
+  }
+ ],
+ "aviato": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/aviato",
+   "endpoints": 1,
+   "example_endpoint": "/company-founders",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 1 published endpoint, Aviato Company Founders (/company-founders), at $0.011 per call."
+  }
+ ],
+ "builtwith": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/builtwith",
+   "endpoints": 12,
+   "example_endpoint": "/trends/v6/api.json",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$ 0.0005 per call",
+   "verified": true,
+   "verified_note": "Of the 12 BuiltWith endpoints on the page only two prices appear, $0.0005 and $0.05445; the trends counter /trends/v6/api.json is one of the $0.0005 ones and its blurb calls it free."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/builtwith/builtwith-official-technology-scraper",
+   "endpoints": null,
+   "example_endpoint": "BuiltWith Official Technology Scraper",
+   "price_usd": 2.0,
+   "price_unit": "per 1k results",
+   "price_text": "$2.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Published under BuiltWith's own Apify account (about 722 users); the store page shows a flat $2.00 per 1,000 results with no cheaper tier."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/builtwith-pty-ltd-builtwith-pty-ltd-default/api/builtwith-domain/pricing",
+   "endpoints": null,
+   "example_endpoint": "BuiltWith Domain",
+   "price_usd": 0.0495,
+   "price_unit": "per call (overage above the free 50/month)",
+   "price_text": "Basic $0.00 /mo — Requests 50 / Month + $0.0495",
+   "verified": true,
+   "verified_note": "Listed by BuiltWith Pty Ltd itself; the pricing tab's free Basic plan gives 50 domain lookups a month and charges $0.0495 per request beyond that, the same rate Pro ($99/mo) uses for overage."
+  }
+ ],
+ "clay": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/clay",
+   "endpoints": null,
+   "example_endpoint": "/enrichment/company-employee-count",
+   "price_usd": 0.032,
+   "price_unit": "per call",
+   "price_text": "$0.032",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists two Clay enrichment endpoints, /enrichment/company-employee-count and /enrichment/company-job-openings, both $0.032 per call; I saw no $0 Clay entry and no /search/query-mode."
+  }
+ ],
+ "contactout": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/contactout",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  }
+ ],
+ "crunchbase": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/crunchbase",
+   "endpoints": 2,
+   "example_endpoint": "/get_investor_profile",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Crunchbase page listed exactly 2 endpoints: Investor Profile at $0.011 and Investor Search at $0.022 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/crunchbase",
+   "endpoints": null,
+   "example_endpoint": "/get_company_funding_rounds",
+   "price_usd": 0.02,
+   "price_unit": "per call",
+   "price_text": "$0.02",
+   "verified": true,
+   "verified_note": "Monid's Crunchbase page listed no endpoints yet; the cheapest crunchbase price visible anywhere on it was $0.02 per call for funding-rounds and organization search, not the $0.01 the catalog claimed."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pratikdani/crunchbase-companies-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 8.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $8.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "A heavily used Crunchbase company Actor (over 600k runs) priced from $8.00 per thousand results."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/shake-chillies-shake-chillies-default/api/crunchbase4/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (free tier)",
+   "price_text": "Basic $0.00 /mo — Requests 20 / Month",
+   "verified": true,
+   "verified_note": "This Crunchbase listing's pricing tab shows a free Basic plan of 20 requests a month, then Pro at $24.00/mo."
+  }
+ ],
+ "crustdata": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/crustdata",
+   "endpoints": 8,
+   "example_endpoint": "List Accepted Filter Values for a Company Search Field",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Three of the eight Crustdata endpoints (two filter-value lookups and company resolution) are shown at $0.00 per call; the paid ones start at $0.009 per result."
+  }
+ ],
+ "datalegion": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/datalegion",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's datalegion page is live but its catalog block reads 'No endpoints here yet' and every priced row in its guides belongs to other providers (apollo, pdl, akta, clay), so no Data Legion endpoint or price appears."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/datalegion/data-legion-enrichment",
+   "endpoints": null,
+   "example_endpoint": "datalegion/data-legion-enrichment",
+   "price_usd": 10.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $10.00 / 1,000 person base matches",
+   "verified": true,
+   "verified_note": "Data Legion's own Apify account publishes this enrichment Actor, priced 'from $10.00 / 1,000 person base matches' with a per-match table starting at $0.01."
+  }
+ ],
+ "fundable": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/fundable",
+   "endpoints": 7,
+   "example_endpoint": "Fundable Industry Lookup",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser showed 7 Fundable endpoints, with the industry and location lookups cheapest at $0.0005 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/fundable",
+   "endpoints": null,
+   "example_endpoint": "/company/search",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's Fundable page showed no endpoint catalog, but its how-to section priced fundable /company/search at $0.01 and /company at $0.06; the free /location/search endpoint from the catalog was not visible."
+  }
+ ],
+ "leadmagic": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/leadmagic",
+   "endpoints": 19,
+   "example_endpoint": "/v1/people/email-validation",
+   "price_usd": 0.00625,
+   "price_unit": "per call",
+   "price_text": "$0.00625 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 19 published endpoints, the cheapest being Verify One Email Address for Deliverability at $0.00625 per call, whose detail page gives the path /v1/people/email-validation."
+  }
+ ],
+ "lusha": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/lusha",
+   "endpoints": 19,
+   "example_endpoint": "List the Company Signal Types Lusha Tracks (Lusha)",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$ 0.00 per call",
+   "verified": true,
+   "verified_note": "Six of the 19 Lusha endpoints on the page are metadata/filter-value listings priced at $0.00 per call; everything that actually reveals a contact or company starts at $0.1248 per result."
+  }
+ ],
+ "metixai": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/metixai",
+   "endpoints": 11,
+   "example_endpoint": "/v1/contact/probe",
+   "price_usd": 0.033,
+   "price_unit": "per call",
+   "price_text": "$0.033 per call",
+   "verified": true,
+   "verified_note": "Glasser's Metix AI page listed 11 endpoints; the contact-existence check (/v1/contact/probe) and the search/detail calls were cheapest at $0.033 per call, with phone and email unlocks far higher."
+  }
+ ],
+ "orbit": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/orbit",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  }
+ ],
+ "pdl": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/pdl",
+   "endpoints": 12,
+   "example_endpoint": "/v5/company/clean",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser's People Data Labs page listed 12 endpoints; the three cleaner calls (company, location, school) were $0.00 per call while enrichment ran $0.10-$0.38."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/pdl",
+   "endpoints": null,
+   "example_endpoint": "/v5/company/enrich",
+   "price_usd": 0.1,
+   "price_unit": "per call",
+   "price_text": "$0.10",
+   "verified": true,
+   "verified_note": "Monid's PDL page had no endpoint table; the only pdl prices shown were $0.10 for company enrich and $0.10 per result for company search."
+  }
+ ],
+ "ploid": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/ploid",
+   "endpoints": null,
+   "example_endpoint": "/linkedin/search",
+   "price_usd": 0.01,
+   "price_unit": "per result",
+   "price_text": "ploid /linkedin/search $0.01 / result 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Only two Ploid endpoints are priced there, both at $0.01; no /enrich or tiered/free rate is shown."
+  }
+ ],
+ "predictleads": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/predictleads",
+   "endpoints": 28,
+   "example_endpoint": "Find Companies Similar to One Company by Domain (PredictLeads)",
+   "price_usd": 0.04,
+   "price_unit": "per result",
+   "price_text": "$0.04 per result, max $1.25 per run",
+   "verified": true,
+   "verified_note": "Glasser's PredictLeads page lists 28 endpoints today; nearly all are $0.04 (per call or per result), the similar-companies one being $0.04 per result capped at $1.25 per run."
+  }
+ ],
+ "producthunt": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/producthunt",
+   "endpoints": 1,
+   "example_endpoint": "Product Hunt Product Detail",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser's Product Hunt page had one published endpoint, a product detail lookup at $0.0005 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/maximedupre/product-hunt-scraper",
+   "endpoints": null,
+   "example_endpoint": "Product Hunt Launches Scraper",
+   "price_usd": 1.8,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.80 / 1,000 products",
+   "verified": true,
+   "verified_note": "A widely used Apify Actor for Product Hunt launches quotes $1.80 per 1,000 products on its store page, with optional email enrichment billed separately."
+  }
+ ],
+ "sumble": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/sumble",
+   "endpoints": 1,
+   "example_endpoint": "/teams",
+   "price_usd": 0.011,
+   "price_unit": "per result",
+   "price_text": "$0.011 per result",
+   "verified": true,
+   "verified_note": "Provider page listed 1 published endpoint, Sumble Teams (/teams), priced $0.011 per result rather than per call."
+  }
+ ],
+ "the-companies-api": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/the-companies-api",
+   "endpoints": 6,
+   "example_endpoint": "/search_industries",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.0100 per call",
+   "verified": true,
+   "verified_note": "The header counts 12 but it is six distinct endpoints each printed twice (Promotion endpoints and Endpoints); all six, including /search_industries, are $0.0100 per call."
+  }
+ ],
+ "ycombinator": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/ycombinator",
+   "endpoints": 6,
+   "example_endpoint": "/get_company",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Y Combinator page listed all six endpoints, including Company Profile and Partners, at a flat $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/ycombinator",
+   "endpoints": null,
+   "example_endpoint": "/get_company",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists three ycombinator endpoints (/get_company, /search_companies, /search_jobs) at $0.01 per call; /get_partners was not shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/michael.g/y-combinator-scraper",
+   "endpoints": null,
+   "example_endpoint": "YC company directory scrape",
+   "price_usd": 10.0,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $10.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "The most-used Y Combinator scraper on Apify Store (1,649 users) showed $10.00 per 1,000 results."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/fantastic-jobs-fantastic-jobs-default/api/free-y-combinator-jobs-api",
+   "endpoints": null,
+   "example_endpoint": "YC jobs listing fetch",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo (24 requests per day)",
+   "verified": true,
+   "verified_note": "The Free Y Combinator Jobs API pricing tab on RapidAPI showed only a Basic plan at $0.00/mo capped at 24 requests a day."
+  }
+ ],
+ "zoominfo": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/zoominfo",
+   "endpoints": 4,
+   "example_endpoint": "/gtm/data/v1/companies/search",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Page said 'matching endpoints 4 total' and listed the companies-search path first at $0.0005 per call, the cheapest of the four."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pratikdani/zoominfo-companies-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 15.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $15.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Most-run ZoomInfo company Actor (279 users, ~278k runs); per-1,000-results rate shown in its Pricing block."
+  }
+ ],
+ "homes-com": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/homes-com",
+   "endpoints": null,
+   "example_endpoint": "/search_properties_for_sale",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's Homes.com page listed no endpoints yet, but its property walkthroughs priced homes.com /search_properties_for_sale at $0.01, rent search at $0.02 and property details at $0.03."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/sian.agency/homes-com-property-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 1.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.00 / 1,000 extracted properties",
+   "verified": true,
+   "verified_note": "The most-used Homes.com Actor (about 16k runs) shows pay-per-result pricing from $1.00 per thousand extracted properties."
+  }
+ ],
+ "loopnet": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/loopnet",
+   "endpoints": 2,
+   "example_endpoint": "LoopNet Broker Profile",
+   "price_usd": 0.033,
+   "price_unit": "per call",
+   "price_text": "$0.033per call",
+   "verified": true,
+   "verified_note": "Two LoopNet endpoints: broker profile at $0.033 and listing search at $0.055, displayed without a space before \"per call\"."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/loopnet",
+   "endpoints": null,
+   "example_endpoint": "/search_brokers",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "loopnet /search_brokers $0.01 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Broker search is $0.01 and listing search $0.05."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/memo23/loopnet-scraper-ppe",
+   "endpoints": null,
+   "example_endpoint": "memo23/loopnet-scraper-ppe",
+   "price_usd": 1.5,
+   "price_unit": "per 1k results",
+   "price_text": "$1.50 per 1,000 results",
+   "verified": true,
+   "verified_note": "Popular LoopNet/Realla Actor (hundreds of users); extras are billed separately at $0.007 per run and $0.01 per detail page."
+  }
+ ],
+ "rentcast": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/rentcast",
+   "endpoints": 9,
+   "example_endpoint": "Estimate the Long-Term Rent of a US Home with Comparable Rentals",
+   "price_usd": 0.0814,
+   "price_unit": "per call",
+   "price_text": "$0.0814 per call",
+   "verified": true,
+   "verified_note": "All 9 RentCast endpoints on Glasser carry the same $0.0814 per-call rate, including the long-term rent estimate."
+  }
+ ],
+ "zillow": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/zillow",
+   "endpoints": 4,
+   "example_endpoint": "Zillow Agent Profile",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser listed 4 Zillow endpoints, with agent profile and agent search cheapest at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/zillow",
+   "endpoints": null,
+   "example_endpoint": "/get_agent_profile",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint panel for this page showed nothing, but the page's own how-to section listed eight zillow endpoints with per-call prices, the cheapest being $0.01 for /get_agent_profile, /search_agents and /get_property_details, each tagged '0 markup'."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/maxcopell/zillow-scraper",
+   "endpoints": null,
+   "example_endpoint": "Zillow Search Scraper",
+   "price_usd": 1.3,
+   "price_unit": "per 1k results",
+   "price_text": "from $1.30 / 1,000 results",
+   "verified": true,
+   "verified_note": "One of Apify's most-used Zillow Actors shows $1.30 per 1,000 results at the top of its store page."
+  }
+ ],
+ "openalex": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/openalex",
+   "endpoints": 9,
+   "example_endpoint": "Filter and Count Scholarly Papers by Year, Author, Institution or Topic",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 9 published endpoints with five at $0.0005 per call; no bare /works path is shown anywhere, and the text-search endpoint is dearer at $0.0011 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/taroyamada/openalex-research-intelligence",
+   "endpoints": null,
+   "example_endpoint": "taroyamada/openalex-research-intelligence",
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "$4.00 / 1,000 openalex research rows",
+   "verified": true,
+   "verified_note": "Apify Actor page for the OpenAlex Scholarly Works Scraper showed a pricing badge of $4.00 / 1,000 openalex research rows."
+  }
+ ],
+ "valyu": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/valyu",
+   "endpoints": 4,
+   "example_endpoint": "Valyu Drug Labels",
+   "price_usd": 0.0033,
+   "price_unit": "per result",
+   "price_text": "$ 0.0033 per result max $ 0.033 per run",
+   "verified": true,
+   "verified_note": "Four Valyu endpoints are listed, all priced per result with a per-run cap; Drug Labels is the cheapest at $0.0033 per result, capped at $0.033 per run."
+  }
+ ],
+ "capterra": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/capterra",
+   "endpoints": 5,
+   "example_endpoint": "/get_category_products",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Capterra page listed five endpoints, including Category Products and Software Categories, all at $0.011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/capterra",
+   "endpoints": null,
+   "example_endpoint": "/get_product_details",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists four capterra endpoints (/get_product_details, /get_category_products, /get_product_reviews, /search_software) at $0.01 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/epctex/capterra-scraper",
+   "endpoints": null,
+   "example_endpoint": "Capterra category/review scrape",
+   "price_usd": 3.5,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $3.50 / 1,000 results",
+   "verified": true,
+   "verified_note": "The Capterra Data Extractor actor on Apify Store (862 users) showed $3.50 per 1,000 results."
+  }
+ ],
+ "clutch": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/clutch",
+   "endpoints": 6,
+   "example_endpoint": "Clutch Agency Office Locations",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Six published endpoints at $0.011 or $0.022 per call; office locations was in the cheaper $0.011 group."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/clutch",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/epctex/clutchco-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 2.0,
+   "price_unit": "per 1k companies",
+   "price_text": "from $2.00 / 1,000 companies",
+   "verified": true,
+   "verified_note": "Most-installed Clutch.co Actor (2,655 users, 5.0 rating); per-1,000-companies rate shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/jaypat87/api/clutch-co-scraper1/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan, 50 requests/mo)",
+   "price_text": "Basic $0.00 /mo - Requests 50 / Month",
+   "verified": true,
+   "verified_note": "Clutch.co Scraper listing; pricing tab showed a free Basic tier of 50 requests and a $19.00/mo Pro tier of 13,000."
+  }
+ ],
+ "g2": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/g2",
+   "endpoints": 3,
+   "example_endpoint": "/get_product_overview",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser's G2 page listed 3 endpoints: Product Overview $0.011, Product Pricing $0.022 and Software Categories $0.055 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/g2",
+   "endpoints": null,
+   "example_endpoint": "/get_product_overview",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.01",
+   "verified": true,
+   "verified_note": "Monid's G2 page showed no endpoint table, but its review walkthroughs quoted g2 /get_product_overview at $0.01 with zero markup, the cheapest g2 price on the page."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/omkar-cloud/g2-product-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.5,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.50 / 1,000 rows",
+   "verified": true,
+   "verified_note": "A very popular G2 Actor (over 430k runs) priced from $0.50 per thousand rows, with a free monthly review allowance advertised."
+  }
+ ],
+ "getapp": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/getapp",
+   "endpoints": 11,
+   "example_endpoint": "GetApp Category Software List",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "All eleven GetApp endpoints carry the same $0.011 per-call price."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/getapp",
+   "endpoints": null,
+   "example_endpoint": "/get_software_details",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "getapp /get_software_details $0.01 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Seven GetApp endpoints appear there at $0.01 each; /get_software_features is not among them."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/dionysus_way/getapp-com-category-listings-scraper",
+   "endpoints": null,
+   "example_endpoint": "dionysus_way/getapp-com-category-listings-scraper",
+   "price_usd": 2.9,
+   "price_unit": "per 1k software listings",
+   "price_text": "from $2.90 / 1,000 software listings",
+   "verified": true,
+   "verified_note": "Actor dedicated to GetApp.com category pages; modest user count, pay-per-event."
+  }
+ ],
+ "google-play": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/google-play",
+   "endpoints": 2,
+   "example_endpoint": "Google Play Books Search",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Glasser's Google Play page has two endpoints, books search and movies search, both $0.0005 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/neatrat/google-play-store-reviews-scraper",
+   "endpoints": null,
+   "example_endpoint": "neatrat/google-play-store-reviews-scraper",
+   "price_usd": 0.1,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.10 / 1,000 reviews",
+   "verified": true,
+   "verified_note": "This Google Play reviews Actor (3,218 users, 5.0 rating) shows 'from $0.10 / 1,000 reviews' on its Apify pricing tab."
+  }
+ ],
+ "trustpilot": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/trustpilot",
+   "endpoints": 3,
+   "example_endpoint": "Trustpilot Categories",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser showed 3 Trustpilot endpoints, the categories and companies-by-category calls at $0.011 per call and the review summary at $0.055."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/trustpilot",
+   "endpoints": null,
+   "example_endpoint": "/get_company_overview",
+   "price_usd": 0.03,
+   "price_unit": "per call",
+   "price_text": "$0.03",
+   "verified": true,
+   "verified_note": "Monid's Trustpilot page listed no endpoint catalog, but its how-to priced trustpilot /get_company_overview and /get_company_reviews at $0.03 and the review summary at $0.05; the $0.01 user-profile endpoint from the catalog was not shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/memo23/trustpilot-scraper-ppe",
+   "endpoints": null,
+   "example_endpoint": "Trustpilot All Reviews Scraper",
+   "price_usd": 0.5,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.50 / 1,000 results",
+   "verified": true,
+   "verified_note": "A popular Apify Trustpilot reviews Actor shows $0.50 per 1,000 results, plus optional AI analysis events priced per company."
+  }
+ ],
+ "ahrefs": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/ahrefs",
+   "endpoints": 38,
+   "example_endpoint": "/v3/public/domain-rating-top-domains",
+   "price_usd": 0.0005,
+   "price_unit": "per call",
+   "price_text": "$0.0005 per call",
+   "verified": true,
+   "verified_note": "Provider page said 38 endpoints and listed /v3/public/domain-rating-top-domains at $0.0005 per call as the cheapest shown."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/ahrefs",
+   "endpoints": null,
+   "example_endpoint": "/site-explorer/pages-by-internal-links",
+   "price_usd": 0.001935,
+   "price_unit": "per result",
+   "price_text": "$0.001935 / result",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the cheapest Ahrefs row shown was \"/site-explorer/pages-by-internal-links $0.001935 / result\", and no /site-explorer/domain-rating-history or $0.00129 price appeared."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pro100chok/ahrefs-seo-tools",
+   "endpoints": null,
+   "example_endpoint": "pro100chok/ahrefs-seo-tools",
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $4.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Ahrefs All-in-One SEO Scraper showed a pricing badge of from $4.00 / 1,000 results."
+  }
+ ],
+ "cloro": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/cloro",
+   "endpoints": 1,
+   "example_endpoint": "Google Gemini App Answer",
+   "price_usd": 0.00088,
+   "price_unit": "per result",
+   "price_text": "$ 0.00088 per result max $ 0.00704 per run",
+   "verified": true,
+   "verified_note": "Glasser lists cloro under AI search with one endpoint, Google Gemini App Answer, at $0.00088 per result and a $0.00704 per-run ceiling."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/cloro",
+   "endpoints": 7,
+   "example_endpoint": "/google/search",
+   "price_usd": 0.008,
+   "price_unit": "per 10 results",
+   "price_text": "$0.008 per 10 results",
+   "verified": true,
+   "verified_note": "The rendered page lists seven cloro engines (/google/search, /chatgpt/ask, /gemini/ask, /copilot/ask, /perplexity/ask, /google/ai-mode, /google/news), every one at $0.008 per 10 results."
+  }
+ ],
+ "dataforseo": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/dataforseo",
+   "endpoints": 210,
+   "example_endpoint": "/v3/dataforseo_labs/google/historical_serps/live",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00 per call",
+   "verified": true,
+   "verified_note": "Glasser's DataForSEO page listed 210 published endpoints across 11 families; 36 of them show $0.00 per call, including the historical SERPs endpoint (max $0.0018 per run)."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/dataforseo",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": "per call",
+   "price_text": null,
+   "verified": false,
+   "verified_note": "The Monid page for Dataforseo loads but says 'No endpoints here yet', and its guide quotes no DataForSEO prices, so I could not confirm any price."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/santhej/dataforseo-labs-keyword-explorer",
+   "endpoints": null,
+   "example_endpoint": "DataForSEO Labs keyword ideas",
+   "price_usd": 2.4,
+   "price_unit": "per 1k results",
+   "price_text": "Pricing from $2.40 / 1,000 keyword results",
+   "verified": true,
+   "verified_note": "A DataForSEO Labs keyword actor on Apify Store (608 users) showed $2.40 per 1,000 keyword results."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/dataforseo/api/dataforseo-labs",
+   "endpoints": null,
+   "example_endpoint": "DataForSEO Labs keyword/SERP call",
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo (500,000 requests per month)",
+   "verified": true,
+   "verified_note": "DataForSEO's own RapidAPI org lists DataForSEO Labs, whose pricing tab showed a single Basic plan at $0.00/mo with a 500k request hard limit."
+  }
+ ],
+ "foreplay": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/foreplay",
+   "endpoints": 3,
+   "example_endpoint": "Ad Library Brands Behind a Website",
+   "price_usd": 0.01925,
+   "price_unit": "per result",
+   "price_text": "$0.01925 per result",
+   "verified": true,
+   "verified_note": "Three published endpoints, all at the same $0.01925 per result; this is the only Glasser provider in this batch priced per result rather than per call."
+  }
+ ],
+ "semrush": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/semrush",
+   "endpoints": 21,
+   "example_endpoint": "/?type=domain_ranks",
+   "price_usd": 0.00055,
+   "price_unit": "per result",
+   "price_text": "$0.00055 per result",
+   "verified": true,
+   "verified_note": "Glasser's Semrush page listed 21 endpoints; the cheapest tier, including the all-database domain overview, was $0.00055 per result."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/pro100chok/semrush-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $4.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "A popular Semrush-data Actor (about 153k runs) priced from $4.00 per thousand results."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/kakamereddy/api/semrush-keyword-magic-tool/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (free tier)",
+   "price_text": "Basic $0.00 /mo — Requests 100 / Month",
+   "verified": true,
+   "verified_note": "This Semrush keyword listing's pricing tab shows a free Basic plan of 100 requests a month, though the plan notes say the publisher has moved to a newer API."
+  }
+ ],
+ "serpstat": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/serpstat",
+   "endpoints": 11,
+   "example_endpoint": "Find Related Keywords",
+   "price_usd": 0.0005,
+   "price_unit": "per result",
+   "price_text": "$0.0005 per result max $0.04 per run",
+   "verified": true,
+   "verified_note": "Several of the eleven Serpstat endpoints share the floor rate of $0.0005 per result with per-run caps from $0.04 to $0.20."
+  }
+ ],
+ "similarweb": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/similarweb",
+   "endpoints": 7,
+   "example_endpoint": "Ad Networks Sending Paid Traffic to a Website",
+   "price_usd": 0.0825,
+   "price_unit": "per result",
+   "price_text": "$0.0825 per result, max $4.95 per run",
+   "verified": true,
+   "verified_note": "Six of the 7 Similarweb endpoints on Glasser are $0.0825 (per result or per call) and one age-group endpoint is $0.495, so $0.0825 per result is the floor."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/tri_angle/similarweb-scraper",
+   "endpoints": null,
+   "example_endpoint": "tri_angle/similarweb-scraper",
+   "price_usd": 13.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $13.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "The most-used Similarweb Actor on Apify (4,678 users, 4.6 rating) prices at 'from $13.00 / 1,000 results'."
+  }
+ ],
+ "influencersclub": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/influencersclub",
+   "endpoints": 5,
+   "example_endpoint": "Creator Lookup by Email",
+   "price_usd": 0.03289,
+   "price_unit": "per call",
+   "price_text": "$0.03289 per call",
+   "verified": true,
+   "verified_note": "Glasser listed 5 influencers.club endpoints, the email-to-creator lookup cheapest at $0.03289 per call and full profiles at $0.6578."
+  }
+ ],
+ "linkedin": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/linkedin",
+   "endpoints": 5,
+   "example_endpoint": "/group",
+   "price_usd": 0.0022,
+   "price_unit": "per call",
+   "price_text": "$0.0022 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 5 published endpoints, the cheapest being LinkedIn Group (/group) at $0.0022 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/harvestapi/linkedin-profile-scraper",
+   "endpoints": null,
+   "example_endpoint": "harvestapi/linkedin-profile-scraper",
+   "price_usd": 4.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $4.00 / 1,000 profile details",
+   "verified": true,
+   "verified_note": "Apify Actor page for the LinkedIn Profile Scraper + Email showed a pricing badge of from $4.00 / 1,000 profile details."
+  }
+ ],
+ "scrapecreators": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/scrapecreators",
+   "endpoints": 173,
+   "example_endpoint": "Amazon amazon shop page",
+   "price_usd": 0.00188,
+   "price_unit": "per call",
+   "price_text": "$ 0.00188 per call",
+   "verified": true,
+   "verified_note": "The page lists 173 ScrapeCreators endpoints across seven price points from $0.00188 to $0.051701 per call; the Amazon shop-page call sits at the $0.00188 floor shared by most of the catalog."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/scrape-creators/best-youtube-transcripts-scraper",
+   "endpoints": null,
+   "example_endpoint": "Best Youtube Transcripts Scraper",
+   "price_usd": 1.0,
+   "price_unit": "per 1k results",
+   "price_text": "$1.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Published under Scrape Creators' own Apify account (about 2.8k users); the store page shows a flat $1.00 per 1,000 results."
+  }
+ ],
+ "tikhub": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/tikhub",
+   "endpoints": 894,
+   "example_endpoint": "/api/v1/bilibili/web/fetch_all_live_areas",
+   "price_usd": 0.001,
+   "price_unit": "per call",
+   "price_text": "$0.001 per call",
+   "verified": true,
+   "verified_note": "Glasser's TikHub page reported 894 published endpoints and the Bilibili live-areas call (/api/v1/bilibili/web/fetch_all_live_areas) at $0.001 per call, the floor across the catalog."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/tikhub",
+   "endpoints": null,
+   "example_endpoint": "/api/v1/bilibili/web/fetch_one_video",
+   "price_usd": 0.001,
+   "price_unit": "per call",
+   "price_text": "$0.001",
+   "verified": true,
+   "verified_note": "Monid's endpoint catalog section for this provider reads 'No endpoints here yet', but its how-to guide on the same page lists 44 tikhub endpoints, many at $0.001 per call with '0 markup'; the YouTube captions endpoint from the candidate was not among them."
+  }
+ ],
+ "wechat": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/wechat",
+   "endpoints": 9,
+   "example_endpoint": "WeChat Channels Creator Detail",
+   "price_usd": 0.048708,
+   "price_unit": "per call",
+   "price_text": "$0.048708 per call",
+   "verified": true,
+   "verified_note": "Nine published endpoints across three price points; channels creator detail was the cheapest at $0.048708 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/zen-studio/wechat-official-account-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 4.99,
+   "price_unit": "per 1k article results",
+   "price_text": "from $4.99 / 1,000 article results",
+   "verified": true,
+   "verified_note": "Most-installed WeChat Official Account Actor (4,009 users, 5.0 rating, Rising star badge); per-1,000-articles rate shown in its Pricing block."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/dataapiman/api/weixin-wechat-official-accounts-platform/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.0,
+   "price_unit": "per month (Basic plan)",
+   "price_text": "Basic $0.00 /mo",
+   "verified": true,
+   "verified_note": "Weixin/WeChat Official Accounts Platform listing; pricing tab showed a free Basic tier with small monthly caps and a $39.99/mo Pro tier."
+  }
+ ],
+ "x": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/x",
+   "endpoints": 3,
+   "example_endpoint": "/user-verified-followers",
+   "price_usd": 0.0005,
+   "price_unit": "per result",
+   "price_text": "$0.0005 per result",
+   "verified": true,
+   "verified_note": "Glasser's X page listed 3 endpoints and the verified-followers one was the cheapest at $0.0005 per result."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/apidojo/tweet-scraper",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.4,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.40 / 1,000 tweets",
+   "verified": true,
+   "verified_note": "Apify's dominant X/Twitter Actor (over 169M runs) shows a headline price of $0.40 per thousand tweets."
+  },
+  {
+   "source": "rapidapi",
+   "link": "https://rapidapi.com/davethebeast/api/twitter241/pricing",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 1.0,
+   "price_unit": "per month",
+   "price_text": "Basic $1.00 /mo — Requests 1,000 / Month",
+   "verified": true,
+   "verified_note": "The Twttr API pricing tab starts at $1.00/mo for 1,000 requests, with Pro at $25.00/mo."
+  }
+ ],
+ "agoda": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/agoda",
+   "endpoints": 1,
+   "example_endpoint": "Agoda Hotel Reviews",
+   "price_usd": 0.0451,
+   "price_unit": "per call",
+   "price_text": "$0.0451 per call",
+   "verified": true,
+   "verified_note": "One Agoda endpoint, hotel reviews, at $0.0451 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/knagymate/fast-agoda-reviews-scraper",
+   "endpoints": null,
+   "example_endpoint": "knagymate/fast-agoda-reviews-scraper",
+   "price_usd": 3.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $3.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Popular Agoda reviews Actor (hundreds of users), pay-per-event."
+  }
+ ],
+ "booking": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/booking",
+   "endpoints": 1,
+   "example_endpoint": "Booking.com Hotel Reviews",
+   "price_usd": 0.0396,
+   "price_unit": "per call",
+   "price_text": "$0.0396 per call",
+   "verified": true,
+   "verified_note": "Glasser's Booking.com page shows one published endpoint, hotel reviews, at $0.0396 per call."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/voyager/booking-scraper",
+   "endpoints": null,
+   "example_endpoint": "voyager/booking-scraper",
+   "price_usd": 2.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $2.00 / 1,000 scraped place results",
+   "verified": true,
+   "verified_note": "Apify's own voyager account publishes Booking Scraper (10,036 users) at 'from $2.00 / 1,000 scraped place results'."
+  }
+ ],
+ "accuweather": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/accuweather",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's AccuWeather page loads with that title but shows 'No endpoints here yet' and contains no price at all."
+  }
+ ],
+ "iqair": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/iqair",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": "",
+   "verified": false,
+   "verified_note": "The page loads and is headed \"Iqair\", but its whole body is \"No endpoints here yet\", with no endpoint and no price shown at all."
+  }
+ ],
+ "weather-underground": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/weather-underground",
+   "endpoints": 10,
+   "example_endpoint": "/get_monthly_observations",
+   "price_usd": 0.01,
+   "price_unit": "per call",
+   "price_text": "$0.0100 per call",
+   "verified": true,
+   "verified_note": "The rendered page lists ten Weather Underground endpoints, nine at $0.0100 per call (including /get_monthly_observations) and one at $0.0200."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/newpo/wunderground-weather-scraper",
+   "endpoints": null,
+   "example_endpoint": "Weather Underground Forecast & History Scraper",
+   "price_usd": 10.0,
+   "price_unit": "per 1k results",
+   "price_text": "from $10.00 / 1,000 results",
+   "verified": true,
+   "verified_note": "Third-party Actor (about 69 users) scraping Weather Underground forecasts and history; the store page shows pay-per-result pricing from $10.00 per 1,000 results."
+  }
+ ],
+ "anyapi": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/anyapi",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": "per call",
+   "price_text": null,
+   "verified": false,
+   "verified_note": "The Monid page titled 'Anyapi' loads but shows 'No endpoints here yet' and its guide prices other providers (context.dev, octen, firecrawl) rather than AnyAPI, so no price was confirmable."
+  }
+ ],
+ "apify": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/apify",
+   "endpoints": 83,
+   "example_endpoint": "Amazon Search Results",
+   "price_usd": 0.00015,
+   "price_unit": "per result",
+   "price_text": "$0.00015 per result",
+   "verified": true,
+   "verified_note": "Glasser resells 83 Apify endpoints; the Amazon search results one was the cheapest of 57 distinct price points, at $0.00015 per result."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/apify",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  }
+ ],
+ "brightdata": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/brightdata",
+   "endpoints": 44,
+   "example_endpoint": "/datasets/v3/amazon-products",
+   "price_usd": 0.00165,
+   "price_unit": "per result",
+   "price_text": "$0.00165 per result",
+   "verified": true,
+   "verified_note": "Glasser's Bright Data page listed 44 dataset endpoints, every one of them flat at $0.00165 per result."
+  }
+ ],
+ "context-dev": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/context-dev",
+   "endpoints": 7,
+   "example_endpoint": "Webpage Images",
+   "price_usd": 0.002787,
+   "price_unit": "per call",
+   "price_text": "$0.002787 per call",
+   "verified": true,
+   "verified_note": "Seven Context.dev endpoints published; the webpage-images scrape is the cheapest at $0.002787 per call."
+  }
+ ],
+ "firecrawl": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/firecrawl",
+   "endpoints": 5,
+   "example_endpoint": "Search by Query with Time Filters (Firecrawl)",
+   "price_usd": 0.0002,
+   "price_unit": "per result",
+   "price_text": "$0.0002 per result, max $0.06 per run",
+   "verified": true,
+   "verified_note": "Glasser lists 5 Firecrawl endpoints; the search endpoint is the cheapest at $0.0002 per result capped at $0.06 per run, the other four being $0.001."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/firecrawl",
+   "endpoints": null,
+   "example_endpoint": "/scrape",
+   "price_usd": 0.001,
+   "price_unit": "per call",
+   "price_text": "$0.001 to $0.004",
+   "verified": true,
+   "verified_note": "Monid's firecrawl page has an empty catalog block, but its guide tables run 'firecrawl /scrape' and '/crawl' at a banded '$0.001 to $0.004'; the $0.0002 search rate was not shown."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/alizarin_refrigerator-owner/firecrawl-agent",
+   "endpoints": null,
+   "example_endpoint": "alizarin_refrigerator-owner/firecrawl-agent",
+   "price_usd": 0.01,
+   "price_unit": "per 1k results",
+   "price_text": "from $0.01 / 1,000 results",
+   "verified": true,
+   "verified_note": "This Firecrawl-powered crawler Actor (119 users) shows 'from $0.01 / 1,000 results' plus a $0.05 per-event price in its README table."
+  }
+ ],
+ "mrscraper": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/mrscraper",
+   "endpoints": null,
+   "example_endpoint": "/china-southern/flights",
+   "price_usd": 0.002,
+   "price_unit": "per call",
+   "price_text": "$0.002",
+   "verified": true,
+   "verified_note": "Monid's MrScraper page showed no endpoint catalog, but its how-to sections priced 23 mrscraper endpoints, the cheapest visible being the China Southern flights call at $0.002; the $0.001 /scrape/extract endpoint from the catalog was not shown."
+  }
+ ],
+ "tinyfish": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/tinyfish",
+   "endpoints": null,
+   "example_endpoint": "/fetch",
+   "price_usd": 0.0,
+   "price_unit": "per call",
+   "price_text": "$0.00",
+   "verified": true,
+   "verified_note": "Monid's catalog table for this provider read \"No endpoints here yet\", so no endpoint count was shown; the guide showed TinyFish rows /fetch and /search at $0.00 (the candidate's /browser-sessions/release was not on the page)."
+  }
+ ],
+ "exa": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/exa",
+   "endpoints": 8,
+   "example_endpoint": "Get the Body Text of Several Pages From Their URLs (Exa)",
+   "price_usd": 0.0011,
+   "price_unit": "per result",
+   "price_text": "$ 0.0011 per result max $ 0.05 per run",
+   "verified": true,
+   "verified_note": "Eight Exa endpoints are listed; the contents/body-text one is the cheapest at $0.0011 per result with a $0.05 per-run cap, against $0.004-$0.0165 per call for the search and answer routes."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/exa",
+   "endpoints": 2,
+   "example_endpoint": "/contents",
+   "price_usd": 0.001,
+   "price_unit": "per call",
+   "price_text": "$0.0010 per call",
+   "verified": true,
+   "verified_note": "Only two Exa endpoints on the page: /contents at $0.0010 per call and /search at \"from $0.0070 per call\"."
+  }
+ ],
+ "justoneapi": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/justoneapi",
+   "endpoints": 1,
+   "example_endpoint": "/search",
+   "price_usd": 0.032472,
+   "price_unit": "per call",
+   "price_text": "$0.032472 per call",
+   "verified": true,
+   "verified_note": "Glasser's JustOneAPI page showed one published endpoint, Social Search (/search), at $0.032472 per call."
+  }
+ ],
+ "keenable": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/keenable",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Page loaded and is titled for this provider, but where the endpoint list should be it reads \"No endpoints here yet / Check back soon — the catalog grows weekly\", and the /tools index says \"No tools yet - The registry is empty in this environment\", so no catalog price was shown."
+  }
+ ],
+ "litescrape": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/litescrape",
+   "endpoints": null,
+   "example_endpoint": "/duckduckgo/maps",
+   "price_usd": 0.00015,
+   "price_unit": "per call",
+   "price_text": "$0.00015",
+   "verified": true,
+   "verified_note": "Monid's Litescrape page published no endpoint table, but its examples priced nine litescrape routes including /duckduckgo/maps at $0.00015 per call with zero markup."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/litescrape/google-contributor-reviews",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": 0.25,
+   "price_unit": "per 1k results",
+   "price_text": "$0.25 / 1,000 successful api requests",
+   "verified": true,
+   "verified_note": "Litescrape publishes its own Actors on Apify; this one's store page shows $0.25 per 1,000 successful requests, the same rate as its sibling Actors."
+  }
+ ],
+ "octen": [
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/octen",
+   "endpoints": null,
+   "example_endpoint": "/extract",
+   "price_usd": 0.001,
+   "price_unit": "per result",
+   "price_text": "octen /extract $0.001 / result 0 markup",
+   "verified": true,
+   "verified_note": "Provider page is live on Monid but its endpoint catalog section reads \"No endpoints here yet\"; the price I quote comes from the per-endpoint cost rows inside the how-to guide on that same page. Only /extract ($0.001 per result) and /embedding ($0.01 to $0.07 per 1M tokens) are priced; no /broad-search appears."
+  }
+ ],
+ "search1api": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/search1api",
+   "endpoints": 1,
+   "example_endpoint": "Hacker News and GitHub Trending",
+   "price_usd": 0.0011,
+   "price_unit": "per call",
+   "price_text": "$0.0011 per call",
+   "verified": true,
+   "verified_note": "Glasser's Search1API page shows a single endpoint, Hacker News and GitHub Trending, at $0.0011 per call."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/search1api",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "The live Monid search1api page lists no endpoints and no search1api price row; every priced endpoint in its guides is another provider's (litescrape, cloro, ahrefs, mrscraper)."
+  }
+ ],
+ "serpapi": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/serpapi",
+   "endpoints": 58,
+   "example_endpoint": "Bing Maps Results",
+   "price_usd": 0.011,
+   "price_unit": "per call",
+   "price_text": "$0.011 per call",
+   "verified": true,
+   "verified_note": "Glasser listed 58 SerpApi-backed search endpoints, most at $0.015 per call with a handful, including Bing Maps and Google News, at $0.011."
+  },
+  {
+   "source": "monid",
+   "link": "https://monid.ai/tools/serpapi",
+   "endpoints": null,
+   "example_endpoint": null,
+   "price_usd": null,
+   "price_unit": null,
+   "price_text": null,
+   "verified": false,
+   "verified_note": "Monid's SerpApi page exists but reports 'No endpoints here yet', and every priced endpoint shown on it belongs to a different search provider."
+  }
+ ],
+ "serper": [
+  {
+   "source": "glasser",
+   "link": "https://glasser.ai/data-sources/serper",
+   "endpoints": 12,
+   "example_endpoint": "Get Google Search Suggestions for a Typed Prefix (Serper)",
+   "price_usd": 0.0011,
+   "price_unit": "per call",
+   "price_text": "$0.0011 per call",
+   "verified": true,
+   "verified_note": "Provider page listed 12 published endpoints with the cheapest at $0.0011 per call, the autocomplete-style endpoint; its detail page shows no bare /autocomplete path."
+  },
+  {
+   "source": "apify",
+   "link": "https://apify.com/umamidata/serper-google-places-scraper",
+   "endpoints": null,
+   "example_endpoint": "umamidata/serper-google-places-scraper",
+   "price_usd": 10.0,
+   "price_unit": "per 1k results",
+   "price_text": "$10.00 / 1,000 serper places page requests",
+   "verified": true,
+   "verified_note": "Apify Actor page for the Serper Google Places Scraper showed a pricing badge of $10.00 / 1,000 serper places page requests."
+  }
+ ]
+}

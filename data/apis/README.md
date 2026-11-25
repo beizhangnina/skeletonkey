@@ -10,7 +10,9 @@ or markups. Every `capability` line is our own one-sentence summary; prices and
 free tiers are left `null` because they were not verified against the vendor's
 own pricing page.
 
-Scrape date / `checked_date` on every entry: **2026-10-24**.
+Scrape date / `checked_date` on every entry: **2026-10-25** (24 ids checked a
+day later, **2026-10-26** — see `curated.STRUCTURED` in *Preserving hand-filled
+fields* below).
 
 ## Layout
 
@@ -197,7 +199,20 @@ For each key not in that base set, `build.py` (`merge_preserved` in
 
 So `python3 scripts/build.py` can only ever pick up a hand-filled value for
 one of these keys, never strip or guess one, and a row that has none of them
-regenerates byte-identical to before any of them existed. Once emitted
+regenerates byte-identical to before any of them existed.
+
+**Exception: a base/`ORDER` field.** `STRUCTURED[id]` is not limited to the
+extra keys above -- `main()` applies every key of `STRUCTURED[id]` onto the
+row (any key, not just the five ND-8 fields), *before* `merge_preserved` runs.
+For a base field such as `name` or `checked_date`, that means `STRUCTURED[id]`
+wins unconditionally on every rebuild rather than acting as a fallback: step 1
+above ("the existing shard's value... if non-null") never applies to a base
+field, because `merge_preserved` always skips `ORDER` keys -- the freshly
+computed value (base computation, then `STRUCTURED` override) is the only
+thing that reaches `emit_row`, never whatever the shard already had on disk.
+This is how the 43 `name` and 24 `checked_date` overrides in `STRUCTURED`
+below (2026-11-24, a newer research pass's values written back into the
+shards) survive every future rebuild. Once emitted
 (`emit_row`), the base fields come first, then the five ND-8 fields present on
 the row in their defined order, then any other preserved extra key in the
 order it appeared on the existing shard row. The nested value itself can be

@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/influencersclub"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.influencers.club/"
     endpoints:
       - method: "GET"
@@ -58,7 +58,7 @@ apis:
     capability: "Professional-network data: company followers, groups, comment reactions and replies."
     category: "social-media"
     provider_url: "https://www.linkedin.com"
-    docs_url: "https://learn.microsoft.com/linkedin/"
+    docs_url: "https://developer.linkedin.com/product-catalog"
     access_mode: "own-account"
     signup: "sales"
     signup_automatable: "no"
@@ -69,7 +69,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules. First-party API access is partner-gated; scraped access is contrary to LinkedIn's terms."
     source_url: "https://glasser.ai/data-sources/linkedin"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -79,7 +79,7 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "scrapecreators"
-    name: "ScrapeCreators"
+    name: "Scrape Creators"
     capability: "Public data from social platforms, ad libraries and app stores, one request per query."
     category: "social-media"
     provider_url: "https://scrapecreators.com"
@@ -94,7 +94,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/scrapecreators"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.scrapecreators.com/"
     endpoints:
       - method: "GET"
@@ -125,7 +125,7 @@ apis:
     capability: "Unified REST access to TikTok, Douyin, Xiaohongshu, Weibo, WeChat and other global and Chinese platforms."
     category: "social-media"
     provider_url: "https://tikhub.io"
-    docs_url: "https://docs.tikhub.io"
+    docs_url: "https://docs.tikhub.io/"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -136,7 +136,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/tikhub"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.tikhub.io/"
     pricing:
       model: "pay_as_you_go"
@@ -170,7 +170,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/wechat"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     usage_api:
       available: null
       method: null
@@ -180,11 +180,11 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "x"
-    name: "X"
+    name: "X API"
     capability: "Posts, threads, verified followers and community moderation data from X."
     category: "social-media"
     provider_url: "https://x.com"
-    docs_url: "https://docs.x.com"
+    docs_url: "https://docs.x.com/x-api/introduction"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -195,7 +195,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/x"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://docs.x.com/x-api/introduction"
     endpoints:
       - method: "POST"
