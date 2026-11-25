@@ -887,6 +887,9 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             domain: entry.domain ?? null,
             capabilities: entry.capabilities ?? [],
             access_mode: entry.access_mode,
+            // Only when the vendor documents more than one way in; access_mode
+            // above stays the one SkeletonKey uses.
+            access_modes: entry.access_modes ?? null,
             min_topup_usd: entry.min_topup,
             billing_unit: entry.billing_unit,
             signup_automatable: entry.signup_automatable,
@@ -1144,6 +1147,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
               url: entry.url,
               domain: entry.domain ?? null,
               access_mode: entry.access_mode,
+              access_modes: entry.access_modes ?? null,
               min_topup_usd: entry.min_topup,
               billing_unit: entry.billing_unit,
               signup_automatable: entry.signup_automatable,
@@ -1425,6 +1429,14 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             "vendor documents no credential at all; `wallet-x402` when the only way to pay is a " +
             "crypto wallet (recorded as a fact; SkeletonKey pays in fiat only).",
         ),
+      access_modes: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Only when the vendor documents MORE than one way in (a key AND a keyless x402 wallet " +
+            "challenge). Element 0 must equal access_mode -- the mode SkeletonKey actually uses, " +
+            "which is never wallet-x402 while a fiat path exists.",
+        ),
       status: z
         .string()
         .optional()
@@ -1448,14 +1460,18 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
         .array(
           z.object({
             header: z.string(),
-            format: z.string(),
+            format: z.string().nullable().optional(),
             note: z.string().nullable().optional(),
+            secret: z.boolean().nullable().optional(),
           }),
         )
         .optional()
         .describe(
-          "Every credential header, when the vendor documents more than one. Element 0 must match " +
-            "auth_header/auth_format -- that is the one the proxy injects.",
+          "Every header the vendor's docs require, when there is more than one. Element 0 must " +
+            "match auth_header/auth_format -- that is the one the proxy injects. Pass " +
+            "`secret: false` for a required header that is NOT a credential (a caller id, an API " +
+            "version): its `format` is then the literal value, or null when the vendor documents " +
+            "none, and the caller supplies it.",
         ),
       base_url: z.string().optional().describe("Base URL requests go to."),
       signup_url: z.string().optional().describe("Where signup starts (often not the docs root)."),

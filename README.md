@@ -668,7 +668,7 @@ its body into your `AGENTS.md`, or point to it from there.
 | `spend_policy()` | The global monthly cap, the per-vendor caps, and an explicit statement of what an agent may not do (enable a key, raise a cap). Read-only. |
 | `request_access(platform, reason, est_budget, max_age_days?)` | Either `has_key: true` with the proxy URL to use, or an `access_request: {request_id, status}` the human decides out of band, plus the signup plan whose final step is **human confirms** — plus the `routing` decision, the billing facts behind it, and a `staleness_warning` when the row it answered from has aged out. If the key exists but is **disabled**, it says so and points at `skeletonkey enable <alias>`. |
 | `discover_api(capability)` | The research recipe for a vendor the index has never heard of: which sources to read in which order (vendor docs → pricing page → OpenAPI spec → APIs.guru → signup pages → aggregator catalogs), which field each one fills, and the rules. Reaches no network itself. |
-| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `auth_required` and `auth_headers` too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
+| `propose_entry(...)` | Writes a discovered vendor into the **local** user index with `status: unverified`, or `docs-verified` when the caller says the vendor's own docs showed it the endpoint and its auth (`verified` is downgraded). Takes the `offering` block, `access_modes`, `auth_required` and `auth_headers` (including `secret: false` for a required non-credential header) too. Rejects a row with no source URL, a price with no `price_verified_url`, a collision with a reviewed `apis.yaml` row, or any field that looks like a credential. |
 | `register_key(alias, platform, domain, header?, format?, scheme?)` | Asks the human for the key **out of band** (a hidden prompt on `/dev/tty`), or returns the exact `skeletonkey add` command for them to run. The agent never sees the secret. `scheme` records a per-key upstream scheme; the header and format default to what the index records for that domain. |
 | `ledger(alias?)` | Recent calls and a spend summary. `cost_usd: null` means unknown, not zero. |
 | `disable(alias)` | Stops injection **and** makes the proxy refuse calls to that domain locally with `403 {"error": "key_disabled"}`. The secret stays in the vault; only a human can re-enable it. |
@@ -894,6 +894,25 @@ and neither is one whose only documented way to pay is a crypto wallet (x402 /
 MPP). SkeletonKey pays in fiat only, so `wallet-x402` is recorded as a fact
 about the vendor and is never routed to.
 
+Some vendors document **more than one** way in — glim.sh sells an API key after
+a top-up *and* answers a keyless x402 challenge; AStock's reads need no key
+while its integrator endpoints do. Those rows carry an optional
+`access_modes:` list, and `access_mode` stays the primary:
+
+```yaml
+access_mode: own-account        # the one SkeletonKey actually uses
+access_modes:
+  - own-account                 # element 0 must equal access_mode
+  - wallet-x402                 # recorded as a fact; never routed to
+```
+
+Element 0 is pinned to `access_mode` for the same reason `auth_headers[0]` is
+pinned to `auth_header`: every reader (CLI, MCP, routing) reads the single
+field, so a list that disagreed with it would be a second, silent answer to the
+same question. `null`/absent means `access_mode` is the whole story, so every
+row written before the list existed is unchanged. `skeletonkey apis show`
+prints it as `own-account (also wallet-x402)`.
+
 ### What a vendor offers: `offering`
 
 Two layers, both optional, every field null-when-unknown — so adding the block
@@ -958,10 +977,36 @@ Two fields sit alongside `auth_header` / `auth_format`:
   all, `true` when one is needed, `null` when nobody checked. Before it,
   `auth_header: null` had to mean both "needs no key" and "we never looked".
   A row may not claim `false` while naming a header.
-- **`auth_headers`** — a list of `{header, format, note}` for the vendors that
-  document more than one credential header. Each `format` must contain `{key}`,
-  at most 5, names unique, and element 0 must match `auth_header` /
-  `auth_format` when those are set, because that is the one the proxy injects.
+- **`auth_headers`** — a list of `{header, format, note, secret}` for the
+  vendors whose docs require more than one header: at most 5, names unique, and
+  element 0 must match `auth_header` / `auth_format` when those are set,
+  because that is the one the proxy injects.
+
+`secret` defaults to `true` — a credential, whose `format` must contain
+`{key}`. Pass `secret: false` for a header that is **required but is not a
+credential**; its `format` is then the literal value the vendor documents, or
+`null` when the vendor documents none, and the caller sends it. askRoger's
+reference demands three headers, only two of which are secrets:
+
+```yaml
+auth_required: true
+auth_header: api-key            # the one the proxy injects
+auth_format: "{key}"
+auth_headers:
+  - header: api-key
+    format: "{key}"
+  - header: Authorization
+    format: "Bearer {key}"      # a second credential, held by the caller
+  - header: source
+    format: null                # docs enumerate no accepted value
+    secret: false               # required, but not a secret
+    note: "The caller sends it."
+```
+
+Because `secret: false` headers are not credentials, they do **not** contradict
+`auth_required: false` — a keyless API may still require an API-version header.
+A `secret: false` element 0 is refused: the proxy injects element 0, so it has
+to be the credential.
 
 ### How `find_api` matches a capability
 
@@ -1102,6 +1147,12 @@ generated shards: the shards record `seen_in: [glasser, monid]` per provider, so
 a hand-written row that displaced a shard row keeps what the catalogs knew
 (carriage only — the shards publish no prices, so `per_call_price` stays `null`).
 
+`seen_in` also accepts **`vendor-direct`**, for a shard row read off the
+vendor's own pages with no aggregator in the loop. Such a row gets
+`aggregators: null` rather than three `carries: false` entries: no catalog was
+searched for it, so `false` would be a negative nobody established. See
+`data/apis/README.md` for how to add one.
+
 ### Keeping verified prices honest: `stale-check`
 
 A `verified_url` is a promise that somebody read a number off that page on a
@@ -1215,12 +1266,24 @@ Two rules, enforced by tests:
 
 Both rules are enforced across the whole merged index, not just `apis.yaml`.
 
-The entries shipped in this repo are all marked `example: true`, including the
-three that back the scenarios in
+Two kinds of row ship in this repo, and nothing in between.
+
+Seven are marked `example: true`, including the three that back the scenarios in
 [docs/v0.1-acceptance.md](docs/v0.1-acceptance.md) (`example-x-twitter-api`,
 `example-apify-scraping`, `example-voyage-embeddings`). They exist to show the
 shape of the file and to give `find_api` something to match. **They are not real
 offers and contain no verified prices.**
+
+The other fourteen are **vendor-direct** rows, read off each vendor's own pages
+with no sign-up and no API call: `nvidia-nim` and `treg`, plus the twelve
+vendors the treg `rea-growth` skill calls (`tinyfish`, `predictleads`,
+`dataforseo`, `akta`, `cloro`, `scrapecreators`, `serpapi`, `adyntel`,
+`anyapi`, `tikhub`, `crawl4ai`, `harvestapi`). Each names its `source` and the
+`checked_date` it was read, and the twelve also carry
+`status: docs-verified` — the vendor's own docs showed the endpoint *and* how it
+authenticates, and no call has been made. Nine of the twelve also appear in the
+generated shards; the hand-written row wins the merge and inherits what the
+catalogs knew about carriage.
 
 ## Roadmap
 
