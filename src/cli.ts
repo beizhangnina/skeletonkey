@@ -5,6 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
 import {
+  effectiveVisibility,
   HIGHLIGHTS_MAX,
   loadApiIndex,
   rankByCapability,
@@ -649,7 +650,8 @@ export function buildProgram(): Command {
     .argument("[query]", "only entries matching this capability or name")
     .option("--limit <n>", "entries to show", (value: string) => Number(value), 10)
     .option("--json", "machine-readable output", false)
-    .action((query: string | undefined, options: { limit: number; json: boolean }) => {
+    .option("--all", "include hidden rows (e.g. LLM APIs set aside from the catalog)", false)
+    .action((query: string | undefined, options: { limit: number; json: boolean; all: boolean }) => {
       cmdApisShow(query, options);
     });
 
@@ -2223,6 +2225,7 @@ function newest(a: string | null, b: string | null): string | null {
 interface ApisShowOptions {
   limit: number;
   json: boolean;
+  all: boolean;
 }
 
 /**
@@ -2230,21 +2233,33 @@ interface ApisShowOptions {
  * free, how to connect, and a few highlighted models/endpoints. The offering
  * block is optional on every row, so the absence of one is printed as such
  * rather than as a row of empty fields.
+ *
+ * Hidden rows (e.g. the 2026-11-24 LLM set-aside) are left out of a browse or
+ * capability search by default -- pass `--all` to include them. An EXACT name
+ * match always shows, hidden or not: that is a lookup, not browsing.
  */
 function cmdApisShow(query: string | undefined, options: ApisShowOptions): void {
   const home = skeletonKeyHome();
   const index = loadApiIndex({ home });
   const asked = query?.trim() ?? "";
+  const exactName = new Set(
+    index.entries
+      .filter((entry) => asked !== "" && entry.name.toLowerCase() === asked.toLowerCase())
+      .map((entry) => entry.name),
+  );
+  const visible = options.all
+    ? index.entries
+    : index.entries.filter((entry) => exactName.has(entry.name) || effectiveVisibility(entry) !== "hidden");
   const matched =
     asked === ""
-      ? index.entries
-      : rankByCapability(index.entries, asked).map((scored) => scored.entry);
+      ? visible
+      : rankByCapability(visible, asked).map((scored) => scored.entry);
   // A name is what a human types when they already know the vendor, and the
   // capability matcher is whole-word, so `treg` alone would miss `treg.to`.
   const byName =
     asked === ""
       ? []
-      : index.entries.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
+      : visible.filter((entry) => entry.name.toLowerCase().includes(asked.toLowerCase()));
   const seen = new Set<string>();
   const entries = [...byName, ...matched].filter((entry) => {
     if (seen.has(entry.name)) return false;
@@ -2266,6 +2281,7 @@ function cmdApisShow(query: string | undefined, options: ApisShowOptions): void 
             name: entry.name,
             origin: entry.origin,
             access_mode: entry.access_mode,
+            access_modes: entry.access_modes ?? null,
             url: entry.url,
             domain: entry.domain ?? null,
             auth_required: entry.auth_required ?? null,
@@ -2273,6 +2289,7 @@ function cmdApisShow(query: string | undefined, options: ApisShowOptions): void 
             status: entry.status ?? null,
             checked_date: entry.checked_date,
             offering: entry.offering ?? null,
+            visibility: effectiveVisibility(entry),
           })),
         },
         null,
@@ -2342,9 +2359,30 @@ function printOffering(entry: IndexEntry): void {
     for (const text of wrapped(label, value)) console.log(text);
   };
   const origin = entry.origin === "shard" ? `shard${entry.category === undefined ? "" : `: ${entry.category}`}` : entry.origin;
+  // Extra access modes are printed next to the primary one rather than instead
+  // of it: the primary is what SkeletonKey will actually use.
+  const alsoModes = (entry.access_modes ?? []).filter((mode) => mode !== entry.access_mode);
+  const modes = `${entry.access_mode ?? "access unknown"}${
+    alsoModes.length === 0 ? "" : ` (also ${alsoModes.join(", ")})`
+  }`;
   console.log("");
-  console.log(`${entry.name}  [${origin}, ${entry.access_mode ?? "access unknown"}]`);
+  console.log(`${entry.name}  [${origin}, ${modes}]`);
   printUsageApi(entry);
+
+  // A vendor that requires more than one header: an agent that sends only the
+  // injected one gets a 400 it cannot explain.
+  const headers = entry.auth_headers ?? [];
+  if (headers.length > 1) {
+    line(
+      "headers",
+      `${headers.length} required by the vendor's docs -- SkeletonKey injects the first; you send the rest`,
+    );
+    for (const item of headers) {
+      const value = item.secret === false ? (item.format ?? "value not documented") : (item.format ?? "{key}");
+      const kind = item.secret === false ? "not a secret" : "credential";
+      console.log(`    - ${item.header}: ${value}  [${kind}]${item.note === null || item.note === undefined ? "" : ` -- ${item.note}`}`);
+    }
+  }
 
   const offering = entry.offering ?? null;
   if (offering === null) {
