@@ -18,6 +18,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/alibaba"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "amazon-bedrock"
     name: "Amazon Bedrock"
     capability: "AWS-hosted inference for third-party foundation models under an AWS account."
@@ -35,6 +38,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "anthropic"
     name: "Anthropic"
     capability: "First-party API for the Claude model family (text, vision, tool use, long context)."
@@ -52,6 +58,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "baidu-qianfan"
     name: "Baidu AI Cloud (Qianfan)"
     capability: "Baidu's cloud model-hosting platform, used as an upstream inference route for Chinese models."
@@ -69,6 +78,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "deepseek"
     name: "DeepSeek"
     capability: "First-party API for the DeepSeek text and reasoning model family."
@@ -86,6 +98,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "google-gemini"
     name: "Google Gemini"
     capability: "Google's Gemini model family for text, image and video generation via AI Studio / Gemini API."
@@ -103,6 +118,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/gemini"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "macaron"
     name: "Macaron"
     capability: "Macaron's hosted text model family, exposed through gateway routing."
@@ -120,6 +138,9 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "microsoft-azure-ai"
     name: "Microsoft Azure AI"
     capability: "Azure-hosted inference for third-party foundation models under an Azure subscription."
@@ -137,6 +158,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "moonshot-ai"
     name: "Moonshot AI"
     capability: "First-party API for the Kimi long-context model family."
@@ -154,6 +178,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "openai"
     name: "OpenAI"
     capability: "First-party API for GPT text models and GPT Image generation and editing."
@@ -171,6 +198,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/openai"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "typesafe"
     name: "TypeSafe"
     capability: "A calibrated decision model: send state plus typed questions and get probability-weighted judgements."
@@ -188,6 +218,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/typesafe"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "xai"
     name: "xAI"
     capability: "First-party API for the Grok text and image/video generation models."
@@ -205,6 +238,9 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."
   - id: "zhipu-ai"
     name: "Z.ai (Zhipu AI)"
     capability: "First-party API for the GLM text model family."
@@ -222,3 +258,6 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
+    collection_scope: "llm"
+    visibility: "hidden"
+    visibility_note: "LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). Hidden from listings by default, not deleted; recoverable via --all or visibility: listed."

@@ -2,25 +2,26 @@
  "name": "SkeletonKey API index",
  "url": "https://skeletonkey.run/apis/",
  "generated": "2026-10-26",
- "count": 162,
+ "count": 149,
  "counts": {
-  "verified": 102,
-  "unverified": 15,
+  "verified": 91,
+  "unverified": 14,
   "sales-only": 8,
-  "no-public-api": 37
+  "no-public-api": 36
  },
+ "hidden_count": 13,
  "route_counts": {
-  "total": 448,
-  "verified": 374,
+  "total": 428,
+  "verified": 356,
   "by_source": {
-   "direct": 162,
-   "glasser": 103,
-   "monid": 83,
-   "apify-store": 80,
-   "rapidapi": 20
+   "direct": 149,
+   "glasser": 102,
+   "monid": 81,
+   "apify-store": 77,
+   "rapidapi": 19
   }
  },
- "note": "Verified rows were read on the vendor's own pages on checked_date. Unverified rows carry no prices.",
+ "note": "Verified rows were read on the vendor's own pages on checked_date. Unverified rows carry no prices. hidden_count rows (collection_scope \"llm\", set aside 2026-11-24) are excluded from count/counts and from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.",
  "schema": "https://skeletonkey.run/llms.txt",
  "apis": [
   {
@@ -179,7 +180,15 @@
    "sources": [
     "https://gasprices.aaa.com/",
     "https://gasprices.aaa.com/subscribe/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "accuweather",
@@ -353,7 +362,14 @@
     "https://developer.accuweather.com/documentation/overview",
     "https://developer.accuweather.com/signin",
     "https://apidev.accuweather.com/developers/authentication"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agentline",
@@ -531,7 +547,14 @@
     "https://docs.agentline.cloud",
     "https://docs.agentline.cloud/authentication",
     "https://docs.agentline.cloud/quickstart"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agentmail",
@@ -694,7 +717,14 @@
     "https://docs.agentmail.to/faq",
     "https://www.agentmail.to/pricing",
     "https://console.agentmail.to/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "agoda",
@@ -864,7 +894,15 @@
     "https://developer.agoda.com/demand/docs/best-practices-certification-process",
     "https://partners.agoda.com/",
     "https://partners.agoda.com/DeveloperPortal/APIDoc/ContactUs"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ahrefs",
@@ -1141,7 +1179,14 @@
     "https://docs.ahrefs.com/en/api/reference/public/get-domain-rating-free",
     "https://ahrefs.com/pricing",
     "https://ahrefs.com/signup"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "akta",
@@ -1347,7 +1392,14 @@
     "https://docs.akta.pro/getting-started/overview",
     "https://docs.akta.pro/api-reference/news-signals",
     "https://playground.akta.pro/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "alibaba-cloud",
@@ -1505,7 +1557,14 @@
     "https://www.alibabacloud.com/help/en/model-studio/token-plan-overview",
     "https://www.alibabacloud.com/free",
     "https://account.alibabacloud.com/register/intl_register.htm"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "alibaba-com",
@@ -1689,7 +1748,14 @@
     "https://openapi.alibaba.com/app/index.htm",
     "https://openapi-api.alibaba.com/rest/alibaba.icbu.product.list",
     "https://developer.alibaba.com/docs/doc.htm?treeId=684&articleId=118416&docType=1"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "amazon-bedrock",
@@ -1826,7 +1892,14 @@
     "https://aws.amazon.com/free/",
     "https://repost.aws/knowledge-center/create-and-activate-aws-account",
     "https://signin.aws.amazon.com/signup?request_type=builderId"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "anthropic",
@@ -2045,7 +2118,14 @@
     "https://platform.claude.com/docs/en/api/overview",
     "https://claude.com/pricing",
     "https://platform.claude.com/login"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "anyapi",
@@ -2184,7 +2264,14 @@
     "https://getanyapi.com/docs/agent-payments",
     "https://getanyapi.com/docs/agent-self-signup",
     "https://getanyapi.com/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apify",
@@ -2426,7 +2513,14 @@
     "https://docs.apify.com/api/v2",
     "https://docs.apify.com/account/console",
     "https://console.apify.com/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apollo",
@@ -2637,7 +2731,14 @@
     "https://www.apollo.io/pricing",
     "https://www.apollo.io/sign-up",
     "https://app.apollo.io/#/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "apple-maps",
@@ -2819,7 +2920,14 @@
     "https://developer.apple.com/documentation/mapkitjs/creating-a-maps-token",
     "https://developer.apple.com/programs/",
     "https://developer.apple.com/support/compare-memberships/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "lmarena",
@@ -3032,7 +3140,15 @@
     "https://arena.ai/robots.txt",
     "https://help.arena.ai/",
     "https://help.arena.ai/articles/7258407731-arena-how-to-create-an-account"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "artificial-analysis",
@@ -3228,7 +3344,14 @@
     "https://artificialanalysis.ai/login",
     "https://artificialanalysis.ai/api-reference",
     "https://artificialanalysis.ai/api-reference/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "autozone",
@@ -3390,7 +3513,15 @@
     "https://www.autozone.com/robots.txt",
     "https://dv-driver-authentication.autozone.com/",
     "https://openwebs.autozone.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "aviato",
@@ -3519,7 +3650,14 @@
     "https://docs.data.aviato.co/api-reference/company/enrich",
     "https://docs.data.aviato.co/api-reference/person/enrich",
     "https://data.aviato.co/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "bid-cars",
@@ -3728,7 +3866,15 @@
    "sources": [
     "https://bid.cars/en/",
     "https://bid.cars/en/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "blockrun",
@@ -3987,7 +4133,14 @@
     "https://blockrun.ai/docs/getting-started/sdk-developers",
     "https://blockrun.ai/docs/products/intelligence/pricing",
     "https://user.blockrun.ai/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "booking",
@@ -4150,7 +4303,15 @@
     "https://developers.booking.com/demand/docs/getting-started/prerequisites",
     "https://developers.booking.com/demand/docs/development-guide/authentication/",
     "https://developers.booking.com/demand/docs/open-api/about-api-references"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "brightdata",
@@ -4355,7 +4516,14 @@
     "https://brightdata.com/products/serp-api",
     "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request",
     "https://brightdata.com/cp/start"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "browserbase",
@@ -4516,7 +4684,14 @@
     "https://docs.browserbase.com/introduction",
     "https://docs.browserbase.com/reference/api/create-a-session",
     "https://www.browserbase.com/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "builtin",
@@ -4728,7 +4903,15 @@
     "https://builtin.com/auth/signup",
     "https://accounts.builtin.com/Signup",
     "https://employers.builtin.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "builtwith",
@@ -5005,7 +5188,14 @@
     "https://builtwith.com/plans",
     "https://builtwith.com/all-products",
     "https://kb.builtwith.com/general-questions/plans-and-pricing-explained/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "bytedance",
@@ -5271,7 +5461,14 @@
     "https://www.byteplus.com/activity/free",
     "https://www.byteplus.com/en/pricing",
     "https://console.byteplus.com/auth/signup"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "capminal",
@@ -5345,7 +5542,14 @@
     "https://www.capminal.ai/",
     "https://www.capminal.ai/gateway",
     "https://capminal.gitbook.io/docs/capminal/opencap"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "capterra",
@@ -5553,7 +5757,15 @@
    ],
    "sources": [
     "https://www.capterra.com/robots.txt"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "carfax",
@@ -5808,7 +6020,15 @@
    "sources": [
     "https://developer.carfax.com/docs/connect",
     "https://www.carfax.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "cars-com",
@@ -5970,7 +6190,15 @@
     "https://developer.cars.com/",
     "https://developer.cars.com/faq-category/search-api",
     "https://www.cars.com/contact/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "clay",
@@ -6157,7 +6385,14 @@
     "https://developers.clay.com/quickstart.md",
     "https://developers.clay.com/public-api/authentication.md",
     "https://app.clay.com/signup?source=website"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "cloro",
@@ -6414,7 +6649,14 @@
     "https://cloro.dev/docs/guides/account",
     "https://cloro.dev/docs/api-reference/endpoint/states",
     "https://dashboard.cloro.dev/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "clutch",
@@ -6690,7 +6932,14 @@
     "https://clutch.co/",
     "https://bot.clutch.co/mcp",
     "https://bot.clutch.co/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "contactout",
@@ -6805,7 +7054,15 @@
     "https://contactout.com/register",
     "https://contactout.com/meeting",
     "https://contactout.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "context-dev",
@@ -6993,7 +7250,14 @@
     "https://context.dev/signup",
     "https://docs.context.dev/",
     "https://www.context.dev/auth.md"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "crunchbase",
@@ -7250,7 +7514,15 @@
     "https://data.crunchbase.com/docs/crunchbase-basic",
     "https://about.crunchbase.com/products/crunchbase-api",
     "https://about.crunchbase.com/products/crunchbase-mcp"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "crustdata",
@@ -7378,7 +7650,14 @@
     "https://crustdata.com/pricing",
     "https://docs.crustdata.com/",
     "https://app.crustdata.com/auth/login"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "datalegion",
@@ -7609,7 +7888,14 @@
     "https://datalegion.ai/docs/api-reference/overview.md",
     "https://datalegion.ai/docs/getting-started/quickstart",
     "https://datalegion.ai/products/company/enrichment-api"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "dataforseo",
@@ -7922,7 +8208,14 @@
     "https://docs.dataforseo.com/v3/auth/",
     "https://dataforseo.com/help-center/minimum-payment",
     "https://dataforseo.com/help-center/how-does-your-free-unlimited-trial-work"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "deepseek",
@@ -8088,7 +8381,14 @@
    "sources": [
     "https://api-docs.deepseek.com/",
     "https://api-docs.deepseek.com/quick_start/pricing"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "defillama",
@@ -8296,7 +8596,14 @@
     "https://api-docs.defillama.com/llms-pro.txt",
     "https://docs.llama.fi/pro-api",
     "https://defillama.com/subscription"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ebay",
@@ -8530,7 +8837,14 @@
     "https://developer.ebay.com/develop/guides/sell/using-ebay-restful-apis",
     "https://developer.ebay.com/develop/guides/sell/authorization",
     "https://developer.ebay.com/support/faq"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "edinet",
@@ -8717,7 +9031,14 @@
     "https://api.edinet-fsa.go.jp/api/v2/documents.json?date=2026-10-01&type=1",
     "https://api.edinet-fsa.go.jp/api/auth/index.aspx?mode=1",
     "https://disclosure2.edinet-fsa.go.jp/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "edmunds",
@@ -8927,7 +9248,15 @@
     "https://developer.edmunds.com/dealership_api_program.html",
     "https://developer.edmunds.com/api-documentation/overview/",
     "https://developer.edmunds.com/contact_us.html"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "elevenlabs",
@@ -9155,7 +9484,14 @@
     "https://elevenlabs.io/pricing",
     "https://elevenlabs.io/pricing/api",
     "https://elevenlabs.io/app/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "emc2ai",
@@ -9310,7 +9646,14 @@
     "https://emc2ai.io/docs",
     "https://emc2ai.io/api/mcp",
     "https://emc2ai.io/api/einstein/v1/inference/models"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "exa",
@@ -9564,7 +9907,14 @@
     "https://exa.ai/pricing",
     "https://exa.ai/docs",
     "https://exa.ai/docs/reference/getting-started"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "financialdatasets",
@@ -9722,7 +10072,14 @@
     "https://docs.financialdatasets.ai/",
     "https://docs.financialdatasets.ai/quickstart",
     "https://docs.financialdatasets.ai/x402"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "finviz",
@@ -9935,7 +10292,15 @@
     "https://finviz.com/register",
     "https://finviz.com/knowledge-base",
     "https://finviz.com/api/v1/screener-export-csv"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "firecrawl",
@@ -10208,7 +10573,14 @@
     "https://www.firecrawl.dev/pricing",
     "https://docs.firecrawl.dev/api-reference/introduction",
     "https://www.firecrawl.dev/signin/signup"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "fishaudio",
@@ -10419,7 +10791,14 @@
     "https://docs.fish.audio/developer-guide/models-pricing/models-overview.md",
     "https://fish.audio/",
     "https://fish.audio/plan/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "foreplay",
@@ -10575,7 +10954,14 @@
     "https://public.api.foreplay.co/docs",
     "https://public.api.foreplay.co/openapi.json",
     "https://app.foreplay.co/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sfs",
@@ -10687,7 +11073,15 @@
     "https://dashboard.freightsimple.com/api-docs",
     "https://help.freightsimple.com/features/public-api",
     "https://dashboard.freightsimple.com/create-account"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "fundable",
@@ -10893,7 +11287,14 @@
     "https://docs.tryfundable.ai/usage",
     "https://www.tryfundable.ai/home",
     "https://www.tryfundable.ai/sign-up"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "g2",
@@ -11163,7 +11564,14 @@
     "https://sell.g2.com/",
     "https://sell.g2.com/plans",
     "https://my.g2.com/developers"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-gemini",
@@ -11390,7 +11798,14 @@
    "sources": [
     "https://ai.google.dev/gemini-api/docs/pricing",
     "https://ai.google.dev/gemini-api/docs/api-key"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "getapp",
@@ -11600,7 +12015,15 @@
     "https://www.getapp.com/",
     "https://www.getapp.com/about/",
     "https://www.getapp.com/robots.txt"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "github",
@@ -11809,7 +12232,14 @@
     "https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github",
     "https://github.com/developers",
     "https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "gloria",
@@ -12000,7 +12430,14 @@
     "https://docs.itsgloria.ai/",
     "https://docs.itsgloria.ai/gloria-data-platform/api-integration",
     "https://docs.itsgloria.ai/gloria-data-platform/x402-integration"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-maps",
@@ -12249,7 +12686,14 @@
     "https://docs.cloud.google.com/docs/authentication/api-keys-use",
     "https://docs.cloud.google.com/billing/docs/how-to/manage-billing-account",
     "https://console.cloud.google.com/google/maps-apis/start"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "google-play",
@@ -12418,7 +12862,15 @@
     "https://developers.google.com/play/developer/reporting",
     "https://support.google.com/googleplay/android-developer/answer/6112435",
     "https://play.google.com/console/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hackernews",
@@ -12646,7 +13098,14 @@
     "https://news.ycombinator.com/news",
     "https://github.com/HackerNews/API",
     "https://raw.githubusercontent.com/HackerNews/API/master/README.md"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hlrlookup",
@@ -12849,7 +13308,14 @@
     "https://www.hlrlookup.com/docs/hlrlookup-docs.html",
     "https://www.hlrlookup.com/frequently-asked-questions",
     "https://portal.hlrlookup.com/Register-An-Account"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "homes-com",
@@ -13010,7 +13476,15 @@
    "sources": [
     "https://www.homes.com/",
     "https://www.homes.com/robots.txt"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "hunter",
@@ -13228,7 +13702,14 @@
     "https://hunter.io/api-documentation/v2",
     "https://hunter.io/pricing",
     "https://hunter.io/users/sign_up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "idealist",
@@ -13391,7 +13872,15 @@
     "https://www.idealist.org/en/help/how-much-does-it-cost-to-post-listings-on-your-site",
     "https://www.idealist.org/en/help/what-are-job-and-internship-packs-and-how-much-do-they-cost",
     "https://www.idealist.org/sign-up-to-post"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "imdb",
@@ -13555,7 +14044,15 @@
     "https://data.imdb.com/documentation/api-documentation/getting-access/",
     "https://data.imdb.com/documentation/api-documentation/calling-the-api/",
     "https://data.imdb.com/documentation/api-documentation/key-concepts/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "indeed",
@@ -13813,7 +14310,15 @@
     "https://docs.indeed.com/sitemap.xml",
     "https://docs.indeed.com/robots.txt",
     "https://uk.indeed.com/hire/pricing"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "influencersclub",
@@ -13979,7 +14484,14 @@
     "https://influencers.club/influencer-api/",
     "https://docs.influencers.club/",
     "https://dashboard.influencers.club/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "iqair",
@@ -14115,7 +14627,14 @@
     "https://api-docs.iqair.com/",
     "https://www.iqair.com/sg/support/knowledge-base/access-airvisuals-aqi-air-quality-and-pollution-api",
     "https://www.iqair.com/account/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "jd",
@@ -14294,7 +14813,14 @@
     "https://jos.jd.com/commondoc?listId=33",
     "https://open.jd.com/",
     "https://breg.jd.com/regaccount/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "justoneapi",
@@ -14423,7 +14949,14 @@
     "https://docs.justoneapi.com/en/api/",
     "https://docs.justoneapi.com/en/api/taobao-and-tmall/product-details-v1",
     "https://dashboard.justoneapi.com/en/register"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kadec0",
@@ -14539,7 +15072,14 @@
     "https://api.kadec0.xyz/v1/hackernews",
     "https://api.kadec0.xyz/docs",
     "https://api.kadec0.xyz/openapi.json"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "keenable",
@@ -14705,7 +15245,14 @@
     "https://docs.keenable.ai/credits",
     "https://docs.keenable.ai/pay-per-request",
     "https://app.keenable.ai/signup"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "keepa",
@@ -14923,7 +15470,14 @@
     "https://keepa.com/api/pricing",
     "https://keepa.com/api-docs/",
     "https://keepa.com/api-docs/plans-tokens.html"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kbb",
@@ -15082,7 +15636,15 @@
     "https://b2b.kbb.com/industry-solutions/info-driver-web-service-idws/",
     "https://developer.kbb.com/",
     "https://developer.kbb.com/idws/1-Default"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kling",
@@ -15340,7 +15902,14 @@
     "https://kling.ai/document-api/api/video/3-0-omni",
     "https://kling.ai/document-api/productBilling/prePaidResourcePackage",
     "https://kling.ai/llms.txt"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "kroger",
@@ -15524,7 +16093,14 @@
     "https://developer.kroger.com/",
     "https://developer.kroger.com/api/v1/developer/content/manifests.json",
     "https://developer.kroger.com/api/v1/developer/content/search.json"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "leadmagic",
@@ -15684,7 +16260,14 @@
     "https://leadmagic.io/pricing",
     "https://docs.leadmagic.io/",
     "https://app.leadmagic.io/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "levels-fyi",
@@ -15867,7 +16450,14 @@
     "https://www.levels.fyi/offerings/data",
     "https://www.levels.fyi/signup",
     "https://www.levels.fyi/pricing"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "linkedin",
@@ -16047,7 +16637,14 @@
     "https://www.linkedin.com/signup",
     "https://api.linkedin.com/v2/me",
     "https://api.linkedin.com/rest/me"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "litescrape",
@@ -16241,7 +16838,14 @@
     "https://litescrape.com/docs/google-search",
     "https://litescrape.com/docs/reference",
     "https://litescrape.com/playground"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "loopnet",
@@ -16449,7 +17053,15 @@
    ],
    "sources": [
     "https://www.loopnet.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "lusha",
@@ -16618,7 +17230,14 @@
     "https://docs.lusha.com/api-reference/overview",
     "https://docs.lusha.com/enrichment/enrich-contacts",
     "https://auth.lusha.com/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "macaron",
@@ -16678,7 +17297,15 @@
     "https://macaron.im/qa",
     "https://macaron.im/robots.txt",
     "https://macaron.im/sitemap.xml"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "magichour",
@@ -16887,7 +17514,14 @@
     "https://docs.magichour.ai/get-started/quick-start",
     "https://docs.magichour.ai/billing/overview",
     "https://docs.magichour.ai/billing/usage-based-pricing"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "marketbeat",
@@ -17045,7 +17679,15 @@
    "sources": [
     "https://www.marketbeat.com/",
     "https://www.marketbeat.com/subscribe/all-access/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "marketstack",
@@ -17212,7 +17854,14 @@
     "https://marketstack.com/faq",
     "https://marketstack.com/product",
     "https://marketstack.com/signup/free"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "meijer",
@@ -17375,7 +18024,15 @@
     "https://capiportal.meijer.com/",
     "https://apiportal.meijer.com/signup/",
     "https://apiportal.meijer.com/apis"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "metixai",
@@ -17540,7 +18197,14 @@
     "https://platform.metix.ai/docs/api",
     "https://platform.metix.ai/docs/credits",
     "https://platform.metix.ai/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "microsoft-azure-ai",
@@ -17669,7 +18333,14 @@
     "https://azure.microsoft.com/en-us/pricing/details/microsoft-foundry/",
     "https://azure.microsoft.com/en-us/pricing/details/azure-openai/",
     "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=azurefaq"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "minimax",
@@ -17963,7 +18634,14 @@
     "https://platform.minimax.io/docs/pricing/overview",
     "https://platform.minimax.io/docs/guides/pricing-credits",
     "https://platform.minimax.io/login"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "moonshot-ai",
@@ -18154,7 +18832,14 @@
     "https://platform.kimi.ai/docs/pricing/chat",
     "https://platform.kimi.ai/docs/get-your-api-key",
     "https://platform.kimi.ai/login"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "mrscraper",
@@ -18348,7 +19033,14 @@
     "https://docs.mrscraper.com/docs/api/v3/scraper/ai/ai-init",
     "https://app.mrscraper.com/auth/login",
     "https://app.mrscraper.com/auth/register"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "nasdaq",
@@ -18572,7 +19264,14 @@
    "sources": [
     "https://data.nasdaq.com/tools/api",
     "https://next-qc.cdn.data.nasdaq.com/sign-up"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "octen",
@@ -18819,7 +19518,14 @@
     "https://docs.octen.ai/overview/pricing",
     "https://docs.octen.ai/api-reference/search",
     "https://auth.octen.ai/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "openai",
@@ -19019,7 +19725,14 @@
     "https://developers.openai.com/api/reference/overview",
     "https://developers.openai.com/api/docs/quickstart",
     "https://auth.openai.com/create-account"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "openalex",
@@ -19244,7 +19957,14 @@
     "https://help.openalex.org/access/pricing/",
     "https://help.openalex.org/access/example-costs/",
     "https://developers.openalex.org/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "opoint",
@@ -19370,7 +20090,14 @@
     "https://api-docs.opoint.com/guides/getting-started-with-searching",
     "https://opoint.com/products/api-solutions",
     "https://opoint.com/contact"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "orbit",
@@ -19576,7 +20303,14 @@
     "https://docs.orbitsearch.com/quickstart.md",
     "https://docs.orbitsearch.com/concepts/credits.md",
     "https://api.orbitsearch.com/v3/pricing"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "pdl",
@@ -19776,7 +20510,14 @@
     "https://docs.peopledatalabs.com/docs/authentication",
     "https://www.peopledatalabs.com/pricing",
     "https://dashboard.peopledatalabs.com/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ploid",
@@ -19932,7 +20673,14 @@
     "https://ploid.com/documentation",
     "https://ploid.com/documentation/api",
     "https://ploid.com/login"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "predictleads",
@@ -20108,7 +20856,14 @@
     "https://predictleads.com/sign_up",
     "https://docs.predictleads.com/",
     "https://docs.predictleads.com/api_endpoints/introduction/authentication"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "producthunt",
@@ -20296,7 +21051,14 @@
     "https://api-v2-docs.producthunt.com/operation/query/",
     "https://www.producthunt.com/login",
     "https://www.producthunt.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "prospeo",
@@ -20465,7 +21227,14 @@
     "https://prospeo.io/pricing",
     "https://prospeo.io/signup",
     "https://help.prospeo.io/en/article/plans-and-pricing-overview-cdloq9/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "quicknode",
@@ -20654,7 +21423,14 @@
     "https://www.quicknode.com/docs/welcome",
     "https://www.quicknode.com/docs/ethereum/endpoint-security",
     "https://www.quicknode.com/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "recall",
@@ -20827,7 +21603,14 @@
     "https://www.recall.ai/signup",
     "https://us-west-2.recall.ai/accounts/signup/",
     "https://us-west-2.recall.ai/auth/signup"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "rentcast",
@@ -20986,7 +21769,14 @@
     "https://developers.rentcast.io/reference/introduction",
     "https://developers.rentcast.io/reference/authentication",
     "https://app.rentcast.io/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "saperly",
@@ -21157,7 +21947,14 @@
     "https://saperly.com/docs/guides/billing/",
     "https://saperly.com/docs/quickstart/",
     "https://saperly.com/docs/api-reference/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "scrapecreators",
@@ -21370,7 +22167,14 @@
     "https://docs.scrapecreators.com/openapi.json",
     "https://app.scrapecreators.com/",
     "https://scrapecreators.com/enterprise"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "search1api",
@@ -21625,7 +22429,14 @@
     "https://s1.dev/docs/essentials/authentication.md",
     "https://s1.dev/auth.md",
     "https://app.s1.dev/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "secapi",
@@ -21843,7 +22654,14 @@
     "https://sec-api.io/docs",
     "https://sec-api.io/login",
     "https://sec-api.io/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "secform4",
@@ -22001,7 +22819,15 @@
    "sources": [
     "https://www.secform4.com/",
     "https://www.secform4.com/account/sign-up"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "segari",
@@ -22111,7 +22937,15 @@
    "sources": [
     "https://segari.id/",
     "https://segari.id/robots.txt"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "semrush",
@@ -22408,7 +23242,14 @@
     "https://developer.semrush.com/api/basics/api-units-balance/",
     "https://www.semrush.com/prices/",
     "https://www.semrush.com/signup/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serpapi",
@@ -22660,7 +23501,14 @@
     "https://serpapi.com/pricing",
     "https://serpapi.com/search-api",
     "https://serpapi.com/users/sign_up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serper",
@@ -22869,7 +23717,14 @@
     "https://serper.dev/",
     "https://serper.dev/api-keys",
     "https://serper.dev/playground"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "serpstat",
@@ -23034,7 +23889,14 @@
     "https://serpstat.com/pay/",
     "https://serpstat.com/page/api-pricing/",
     "https://serpstat.com/signup/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "similarweb",
@@ -23211,7 +24073,14 @@
     "https://www.similarweb.com/corp/pricing/",
     "https://www.similarweb.com/packages/web/",
     "https://www.similarweb.com/corp/contact-us/"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "smolmachine",
@@ -23413,7 +24282,14 @@
     "https://smolmachines.com/docs/",
     "https://smolmachines.com/docs/cloud/api-explorer",
     "https://smolmachines.com/console"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sonilo",
@@ -23552,7 +24428,14 @@
     "https://platform.sonilo.com/docs",
     "https://platform.sonilo.com/pricing",
     "https://platform.sonilo.com/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "xai",
@@ -23696,7 +24579,14 @@
     "https://x.ai",
     "https://x.ai/api",
     "https://accounts.x.ai/sign-up"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "steam",
@@ -23880,7 +24770,14 @@
     "https://partner.steamgames.com/doc/webapi_overview",
     "https://partner.steamgames.com/doc/webapi_overview/auth",
     "https://store.steampowered.com/join/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "stockanalysis",
@@ -24138,7 +25035,15 @@
     "https://stockanalysis.com/",
     "https://stockanalysis.com/pro/",
     "https://stockanalysis.com/about/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "strale",
@@ -24298,7 +25203,14 @@
     "https://api.strale.io/v1/pricing",
     "https://strale.dev/pricing",
     "https://strale.dev/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "sumble",
@@ -24453,7 +25365,14 @@
     "https://docs.sumble.com/get-started/get-started-with-sumble",
     "https://api.sumble.com/openapi.json?version=v1",
     "https://api.sumble.com/openapi.json?version=v9"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "surf",
@@ -24618,7 +25537,14 @@
     "https://surf-api.com/docs",
     "https://surf-api.com/pricing",
     "https://surf-api.com/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "suzanne",
@@ -24749,7 +25675,14 @@
     "https://console.suzanne3d.com/documentation/authentication",
     "https://console.suzanne3d.com/sign-up",
     "https://www.suzanne3d.com/pricing"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "taobao",
@@ -24979,7 +25912,14 @@
     "https://open.taobao.global/doc/api.htm",
     "https://reg.taobao.com/member/new_register.jhtml?from=tbtop&ex_info=&ex_sign=",
     "https://api.taobao.com/router/rest"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tendata",
@@ -25137,7 +26077,15 @@
     "https://www.tendata.com/news/11037.html",
     "https://www.tendata.com/news/6513.html",
     "https://www.tendata.com/us/contact/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "the-companies-api",
@@ -25306,7 +26254,14 @@
     "https://www.thecompaniesapi.com/api/search-companies",
     "https://www.thecompaniesapi.com/pricing",
     "https://www.thecompaniesapi.com/auth/login"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "theirstack",
@@ -25577,7 +26532,14 @@
     "https://theirstack.com/en/docs/api-reference/authentication",
     "https://theirstack.com/en",
     "https://app.theirstack.com/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tikhub",
@@ -25815,7 +26777,14 @@
     "https://docs.tikhub.io/",
     "https://api.tikhub.io/",
     "https://user.tikhub.io/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tiktok-shop",
@@ -26054,7 +27023,14 @@
     "https://partner.tiktokshop.com/api/v1/document/detail?document_id=6506bc942f024f02be400315&workspace_id=3",
     "https://partner.tiktokshop.com/account/sign-up",
     "https://partner.tiktokshop.com/dev/api-testing-tool"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "tinyfish",
@@ -26235,7 +27211,14 @@
     "https://docs.tinyfish.ai/browser-api",
     "https://docs.tinyfish.ai/monitor/api-reference",
     "https://agent.tinyfish.ai/sign-up"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "topaz",
@@ -26399,7 +27382,14 @@
     "https://www.topazlabs.com/enhance-api",
     "https://account.topazlabs.com/",
     "https://topazlabs.com/wp-login.php?action=register"
-   ]
+   ],
+   "collection_scope": "tool",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "trustpilot",
@@ -26627,7 +27617,14 @@
     "https://developers.trustpilot.com/introduction/",
     "https://business.trustpilot.com/pricing",
     "https://business.trustpilot.com/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "typesafe",
@@ -26831,7 +27828,14 @@
     "https://docs.typesafe.ai/introduction",
     "https://typesafe.ai/",
     "https://console.typesafe.ai/login"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "us-census-bureau",
@@ -26972,7 +27976,14 @@
     "https://api.census.gov/data/key_signup.html",
     "https://www.census.gov/data/developers/about/terms-of-service.html",
     "https://api.census.gov/data/2023/acs/acs1?get=NAME&for=state:01"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "upwork",
@@ -27155,7 +28166,14 @@
     "https://www.upwork.com/nx/signup/?signupType=freelancer",
     "https://support.upwork.com/hc/en-us/articles/24492534968211-How-to-sign-up-as-a-freelancer-on-Upwork",
     "https://support.upwork.com/hc/en-us/articles/360001176427-How-to-verify-your-identity-as-a-freelancer"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "censusdata-xyz",
@@ -27287,7 +28305,14 @@
    "sources": [
     "https://censusdata.xyz/",
     "https://censusdata.xyz/skill"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "valyu",
@@ -27453,7 +28478,14 @@
     "https://docs.valyu.ai/quickstart",
     "https://docs.valyu.ai/api-reference/overview",
     "https://platform.valyu.ai/auth/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "vaquill",
@@ -27717,7 +28749,14 @@
     "https://api.vaquill.ai/api/v1/api-credits/pricing",
     "https://app.vaquill.ai/auth/signup",
     "https://app.vaquill.ai/auth/login"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "watsons",
@@ -27876,7 +28915,15 @@
    "sources": [
     "https://www.watsons.com.my/",
     "https://www.watsons.com.my/register"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "weather-underground",
@@ -28054,7 +29101,14 @@
     "https://www.wunderground.com/login?action=member-apikeys",
     "https://www.wunderground.com/signup",
     "https://support.weather.com/s/article/How-to-Get-a-Copy-of-Your-Personal-Weather-Station-PWS-Data"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "web3-career",
@@ -28241,7 +29295,14 @@
     "https://docs.bondex.app/api-reference/openapi-documentation/authentication",
     "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api",
     "https://docs.bondex.app/api-reference/web3-career-jobs-api/api-reference"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "wechat",
@@ -28472,7 +29533,14 @@
     "https://open.weixin.qq.com/",
     "https://open.weixin.qq.com/cgi-bin/frame?t=home/web_tmpl&lang=zh_CN",
     "https://mp.weixin.qq.com/cgi-bin/registermidpage?action=index&lang=zh_CN"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "wellfound",
@@ -28683,7 +29751,15 @@
     "https://wellfound.com/",
     "https://wellfound.com/recruit/pricing",
     "https://wellfound.com/jobs/signup"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "x",
@@ -29099,7 +30175,14 @@
     "https://docs.x.com/x-api/getting-started/getting-access",
     "https://docs.x.com/fundamentals/authentication/overview",
     "https://console.x.com"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "ycombinator",
@@ -29360,7 +30443,15 @@
     "https://www.ycombinator.com/robots.txt",
     "https://news.ycombinator.com/",
     "https://news.ycombinator.com/newsfaq.html"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "yahoo-finance",
@@ -29571,7 +30662,15 @@
     "https://developer.yahoo.com/api/",
     "https://developer.yahoo.com/oauth/",
     "https://finance.yahoo.com/about/plans/select-plan/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zhipu-ai",
@@ -29721,7 +30820,14 @@
     "https://z.ai/model-api",
     "https://z.ai/pricing",
     "https://chat.z.ai/auth"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zepto",
@@ -29899,7 +31005,14 @@
     "https://www.zeptonow.com/login",
     "https://www.zeptonow.com/privacy-policy",
     "https://www.zeptonow.com/terms-of-service"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zillow",
@@ -30121,7 +31234,14 @@
    "sources": [
     "https://www.zillowgroup.com/developers/",
     "https://www.zillowgroup.com/developers/api/zestimate/zestimates-api/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "zoominfo",
@@ -30293,7 +31413,15 @@
     "https://docs.gtm.ai/docs/rate-limits",
     "https://docs.gtm.ai/llms.txt",
     "https://developer.zoominfo.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "toutiao",
@@ -30469,7 +31597,14 @@
     "https://www.toutiao.com/cooperation/",
     "https://www.toutiao.com/privacy_protection/",
     "https://open.toutiao.com/"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "youku",
@@ -30633,7 +31768,15 @@
     "https://open.youku.com/",
     "https://open.youku.com/open",
     "https://open.youku.com/reference"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "douyin-shop",
@@ -30893,7 +32036,14 @@
     "https://op.jinritemai.com/docs/guide-docs/133",
     "https://op.jinritemai.com/docs/api-docs/158/2908",
     "https://op.jinritemai.com/docs/guide-docs/1041/1072"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "baidu-qianfan",
@@ -31043,7 +32193,14 @@
     "https://cloud.baidu.com/doc/UserGuide/s/8jwvy3c96",
     "https://cloud.baidu.com/price/all.html",
     "https://login.bce.baidu.com/new-reg"
-   ]
+   ],
+   "collection_scope": "llm",
+   "visibility": "hidden",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "douban",
@@ -31204,7 +32361,15 @@
     "https://www.douban.com/about",
     "https://www.douban.com/about/contactus",
     "https://api.douban.com/v2/movie/top250"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "auth": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   },
   {
    "slug": "xianyu",
@@ -31380,7 +32545,14 @@
     "https://www.goofish.com/login?spm=a21ybx.seo.sitemap.1",
     "https://open.goofish.com/doc/quick-start.html",
     "https://open.goofish.com/doc/development/dev/server.html"
-   ]
+   ],
+   "collection_scope": "data",
+   "visibility": "listed",
+   "visibility_note": null,
+   "official_docs_url": null,
+   "pricing": null,
+   "endpoints": null,
+   "endpoints_note": null
   }
  ],
  "aggregators": [
@@ -32565,7 +33737,10 @@
      "verified": true,
      "listing_url": "https://glasser.ai/data-sources/xianyu"
     }
-   ]
+   ],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "monid",
@@ -33529,7 +34704,10 @@
      "verified": true,
      "listing_url": "https://monid.ai/tools/zillow"
     }
-   ]
+   ],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "apify-store",
@@ -34461,7 +35639,10 @@
      "verified": true,
      "listing_url": "https://apify.com/zen-studio/goofish-xianyu-search-scraper"
     }
-   ]
+   ],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "rapidapi",
@@ -34732,7 +35913,10 @@
      "verified": true,
      "listing_url": "https://rapidapi.com/dataapiman/api/douyin-china-tiktok-all-api/pricing"
     }
-   ]
+   ],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "agentic-market",
@@ -34774,7 +35958,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/agentic-market/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "api-market",
@@ -34822,7 +36009,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/api-market/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "apilayer",
@@ -34863,7 +36053,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/apilayer/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "eden-ai",
@@ -34910,7 +36103,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/eden-ai/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "flatkey",
@@ -34956,7 +36152,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/flatkey/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "openrouter",
@@ -35001,7 +36200,56 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/openrouter/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "hidden",
+   "visibility_note": "LLM router aggregator; set aside with LLM APIs 2026-11-24, restorable."
+  },
+  {
+   "slug": "treg",
+   "name": "treg",
+   "url": "https://treg.to/",
+   "what_it_is": "A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid balance. SkeletonKey lists it as a catalog entry, not as a recommended access layer: hold your own vendor accounts and keys where you can, rather than routing everything through one gateway key.",
+   "api_base_url": "https://treg.to",
+   "auth": {
+    "header": "X-Treg-Token",
+    "format": "{key}"
+   },
+   "signup": {
+    "methods": [
+     "github",
+     "google",
+     "email"
+    ],
+    "url": "https://treg.to/",
+    "requires_card": null
+   },
+   "billing_model": "Metered per call from a prepaid balance, at cost with 0% markup stated; a new verified account gets a one-time free credit of $1.00. treg publishes no single per-call price across its catalog.",
+   "payment_model": [
+    "prepaid_credits",
+    "payg"
+   ],
+   "payment_methods": [],
+   "fee_or_markup_policy": "States 0% markup: calls are billed \"at cost\" from the prepaid balance (treg's own skill.md, read 2026-10-28).",
+   "free_credit": "a new verified account gets a one-time free credit of $1.00.",
+   "rate_limits": null,
+   "provider_count_claimed": "4,000+ tools across 119 providers (treg.to/catalog: \"4,064 endpoints across 113 platforms and 119 providers\", read 2026-10-28)",
+   "docs_url": "https://treg.to/integrate.md",
+   "pricing_url": "https://treg.to/skill.md",
+   "verified": true,
+   "checked_date": "2026-10-28",
+   "sources": [
+    "https://treg.to/llms.txt",
+    "https://treg.to/skill.md",
+    "https://treg.to/integrate.md",
+    "https://treg.to/catalog"
+   ],
+   "page": "https://skeletonkey.run/apis/aggregators/treg/",
+   "vendor_count": 0,
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "x402scan",
@@ -35038,7 +36286,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/x402scan/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   },
   {
    "slug": "zyla-api-hub",
@@ -35082,7 +36333,10 @@
    ],
    "page": "https://skeletonkey.run/apis/aggregators/zyla-api-hub/",
    "vendor_count": 0,
-   "vendors": []
+   "vendors": [],
+   "collection_scope": "aggregator",
+   "visibility": "listed",
+   "visibility_note": null
   }
  ]
 }

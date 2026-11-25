@@ -325,7 +325,7 @@ describe("auth_required and auth_headers", () => {
         auth_required: false,
         auth_headers: [{ header: "X-Key", format: "{key}" }],
       }),
-    ).toMatch(/auth_required: false contradicts auth_headers having entries/);
+    ).toMatch(/auth_required: false contradicts auth_headers having a credential header/);
   });
 
   it("accepts several credential headers, with element 0 matching the primary pair", () => {

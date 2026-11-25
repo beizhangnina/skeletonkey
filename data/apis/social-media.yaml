@@ -18,6 +18,41 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/influencersclub"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.influencers.club/"
+    endpoints:
+      - method: "GET"
+        path: "/public/v1/accounts/credits/"
+        summary: "Check the account's remaining credits and total credits consumed."
+        returns: "Fields credits_available (remaining credits) and credits_used (total credits consumed)."
+        docs_url: "https://docs.influencers.club/openapi/account-credits-and-usage"
+      - method: "POST"
+        path: "/public/v1/creators/audience/overlap/"
+        summary: "Compare audience overlap among 2-10 creators on one platform."
+        returns: "Per-creator overlap and unique audience percentages plus totals for followers and unique followers."
+        docs_url: "https://docs.influencers.club/openapi/audience-overlap"
+      - method: "POST"
+        path: "/public/v1/creators/content/posts/"
+        summary: "Fetch a creator's recent posts on a specified platform."
+        returns: "List of recent posts with IDs, URLs, captions, media URLs, timestamps, and engagement metrics."
+        docs_url: "https://docs.influencers.club/openapi/creator-posts"
+      - method: "POST"
+        path: "/public/v1/creators/enrich/handle/analytics/"
+        summary: "Enrich a creator with performance analytics data using their handle."
+        returns: "Engagement/growth detail, posting frequency, income estimates, audience data, and optional lookalikes."
+        docs_url: "https://docs.influencers.club/openapi/enrich-by-handle-analytics"
+      - method: "GET"
+        path: "/public/v1/social/listening/usage/"
+        summary: "Get current social-listening limits and active subscription counts."
+        returns: "Current social-listening limits and active subscription counts for the client's scope."
+        docs_url: "https://docs.influencers.club/openapi/usage"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "/public/v1/accounts/credits/"
+      docs_url: "https://docs.influencers.club/openapi/account-credits-and-usage/account_credits_usage_retrieve.md"
+      limits: "Bearer auth (Authorization: Bearer YOUR_API_KEY); endpoint itself costs 0 credits"
+      notes: null
+      checked_date: 2026-11-24
   - id: "linkedin"
     name: "LinkedIn"
     capability: "Professional-network data: company followers, groups, comment reactions and replies."
@@ -35,6 +70,14 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules. First-party API access is partner-gated; scraped access is contrary to LinkedIn's terms."
     source_url: "https://glasser.ai/data-sources/linkedin"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "scrapecreators"
     name: "ScrapeCreators"
     capability: "Public data from social platforms, ad libraries and app stores, one request per query."
@@ -52,6 +95,31 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/scrapecreators"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.scrapecreators.com/"
+    endpoints:
+      - method: "GET"
+        path: "/v1/spotify/podcast/episodes"
+        summary: "Get Spotify podcast episodes."
+        returns: "Returns podcast metadata and a list of episodes with audio, cover art, and description."
+        docs_url: "https://docs.scrapecreators.com/v1/spotify/podcast/episodes"
+      - method: "GET"
+        path: "/v1/instagram/post/comment/replies"
+        summary: "Get replies to an Instagram comment."
+        returns: "Returns a list of replies to a specific Instagram comment, including user details."
+        docs_url: "https://docs.scrapecreators.com/v1/instagram/post/comment/replies"
+      - method: "GET"
+        path: "/v1/threads/user/posts"
+        summary: "Get a user's public Threads posts, limited to roughly the latest 20–30 posts."
+        returns: "Returns a user's public Threads posts."
+        docs_url: "https://docs.scrapecreators.com/v1/threads/user/posts"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.scrapecreators.com/v1/account/credit-balance"
+      docs_url: "https://scrapecreators.com/scrape-creators/endpoints/get-credit-balance"
+      limits: null
+      notes: null
+      checked_date: 2026-11-24
   - id: "tikhub"
     name: "TikHub"
     capability: "Unified REST access to TikTok, Douyin, Xiaohongshu, Weibo, WeChat and other global and Chinese platforms."
@@ -69,6 +137,23 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/tikhub"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.tikhub.io/"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: null
+      starting_price_usd: 0.025
+      unit: "per call (batch gift-name lookup endpoint)"
+      pricing_url: null
+      notes: "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.tikhub.io/api/v1/tikhub/user/get_user_daily_usage"
+      docs_url: "https://docs.tikhub.io/186826051e0.md"
+      limits: "请求头携带 API Key"
+      notes: "账户每日使用情况"
+      checked_date: 2026-11-24
   - id: "wechat"
     name: "WeChat"
     capability: "WeChat search index trends, Mini Program search and Channels creator marketplace data."
@@ -86,6 +171,14 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/wechat"
     checked_date: 2026-10-24
+    usage_api:
+      available: null
+      method: null
+      path: null
+      docs_url: null
+      limits: null
+      notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
+      checked_date: 2026-11-24
   - id: "x"
     name: "X"
     capability: "Posts, threads, verified followers and community moderation data from X."
@@ -103,3 +196,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/x"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.x.com/x-api/introduction"
+    endpoints:
+      - method: "POST"
+        path: "/2/tweets/search/stream/rules"
+        summary: "Add (or manage) filtering rules for the filtered stream, e.g. one rule tracking a specific account."
+        returns: "The result of the rule add/management request; rules then govern which posts the stream delivers."
+        docs_url: "https://docs.x.com/x-api/introduction"
+      - method: "GET"
+        path: "/2/tweets/search/stream"
+        summary: "Connect to the filtered stream to receive matching posts in near real-time as they are published."
+        returns: "A near real-time stream of posts matching your defined filtering rules."
+        docs_url: "https://docs.x.com/x-api/introduction"
+      - method: "GET"
+        path: "/2/tweets/search/all"
+        summary: "Full-archive search over the complete history of public posts back to 2006, using query operators."
+        returns: "Posts matching the query, searchable across the full public archive."
+        docs_url: "https://docs.x.com/x-api/introduction"
+      - method: "GET"
+        path: "/2/usage/tweets"
+        summary: "Retrieve usage data to track Post consumption against budget and generate usage reports."
+        returns: "Daily Post consumption counts."
+        docs_url: "https://docs.x.com/x-api/getting-started/pricing"
+    usage_api:
+      available: true
+      method: "GET"
+      path: "https://api.x.com/2/usage/credits"
+      docs_url: "https://docs.x.com/x-api/usage/get-usage-credits"
+      limits: null
+      notes: null
+      checked_date: 2026-11-24
