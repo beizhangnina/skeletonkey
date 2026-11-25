@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools/blockrun"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://blockrun.ai/docs"
     pricing:
       model: "pay_as_you_go"
@@ -76,7 +76,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -90,7 +90,7 @@ apis:
     capability: "DeFi analytics: TVL by protocol and chain, token prices, stablecoins, yields, fees, volumes and unlocks."
     category: "crypto-web3"
     provider_url: "https://defillama.com"
-    docs_url: "https://api-docs.defillama.com"
+    docs_url: "https://api-docs.defillama.com/"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -101,7 +101,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/defillama"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://api-docs.defillama.com/"
     pricing:
       model: "subscription"
@@ -155,7 +155,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://emc2ai.io/docs"
     pricing:
       model: "pay_as_you_go"
@@ -203,7 +203,7 @@ apis:
     capability: "Blockchain RPC and indexer endpoints across chains."
     category: "crypto-web3"
     provider_url: "https://www.quicknode.com"
-    docs_url: "https://www.quicknode.com/docs"
+    docs_url: "https://www.quicknode.com/docs/welcome"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -214,7 +214,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/quicknode"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://www.quicknode.com/docs/welcome"
     pricing:
       model: "subscription"
@@ -248,7 +248,7 @@ apis:
       notes: "Admin API 用量"
       checked_date: 2026-11-24
   - id: "surf"
-    name: "Surf"
+    name: "Surfapi"
     capability: "Crypto market, derivatives, on-chain, wallet, prediction-market and VC research data."
     category: "crypto-web3"
     provider_url: null
@@ -263,7 +263,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/surf"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://surf-api.com/docs"
     pricing:
       model: "freemium"

@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/capterra"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
@@ -44,7 +44,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/clutch"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -69,7 +69,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/g2"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://documentation.g2.com/docs/g2-api"
     endpoints:
       - method: "GET"
@@ -101,7 +101,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/getapp"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     endpoints: []
     endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
@@ -128,7 +128,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/google-play"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     endpoints: []
     endpoints_note: "Google publishes no API for third-party app metadata, ratings or reviews; its only APIs are publisher-scoped, for managing one's own app."
     usage_api:
@@ -155,7 +155,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/trustpilot"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null

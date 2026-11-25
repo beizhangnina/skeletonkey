@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/homes-com"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product."
     usage_api:
@@ -44,7 +44,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/loopnet"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
@@ -56,11 +56,11 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "rentcast"
-    name: "RentCast"
+    name: "RentCast API"
     capability: "US property records, owner detail, value and rent estimates, listings and market statistics."
     category: "real-estate"
     provider_url: "https://www.rentcast.io"
-    docs_url: "https://developers.rentcast.io"
+    docs_url: "https://developers.rentcast.io/reference/introduction"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -71,7 +71,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/rentcast"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://developers.rentcast.io/reference/introduction"
     pricing:
       model: "freemium"
@@ -130,7 +130,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/zillow"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
