@@ -18,7 +18,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/douban"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No developer portal exists any more: developers.douban.com and open.douban.com do not resolve at all, and www.douban.com/developers and /api return nothing. The legacy API host is still up - GET https://api.douban.com/v2/movie/t"
   - id: "imdb"
@@ -38,7 +37,6 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/imdb"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); developer.imdb.com now 301-redirects to data.imdb.com, the current developer site. Products: 'New IMDb API' (GraphQL) plus bulk data, in IMDb Ratings, Essential Metadata and Box Office Mojo packages with Meters/User Reviews/Pare"
   - id: "steam"
@@ -59,9 +57,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/steam"
     checked_date: 2026-10-24
     official_docs_url: "https://partner.steamgames.com/doc/webapi"
-    auth: null
-    pricing: null
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "youku"
     name: "Youku"
@@ -80,6 +75,5 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/youku"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); youku.com/api, /developers and /pricing all return 404. The only open-platform presence is open.youku.com, which presents itself as the Youku OTT open platform (内容合作 content partnership, 能力开放 capability opening, 优酷AI, and indust"

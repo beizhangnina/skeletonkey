@@ -19,8 +19,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/openalex"
     checked_date: 2026-10-24
     official_docs_url: "https://help.openalex.org/api/"
-    auth: null
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/works"

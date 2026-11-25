@@ -19,7 +19,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/strale"
     checked_date: 2026-10-24
     official_docs_url: "https://strale.dev/docs"
-    auth: null
     pricing:
       model: "pay_as_you_go"
       free_tier: true

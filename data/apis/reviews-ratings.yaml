@@ -18,7 +18,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/capterra"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Still unreadable. Every HTML page on www.capterra.com returns a Cloudflare 'Just a moment...' interstitial to curl with a browser User-Agent, to the r.jina.ai reader, and to the saved snapshots: /, /pricing, /api, /developers, /"
   - id: "clutch"
@@ -38,10 +37,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/clutch"
     checked_date: 2026-10-24
-    official_docs_url: null
-    auth: null
-    pricing: null
-    endpoints: null
   - id: "g2"
     name: "G2"
     capability: "Software product reviews, category rankings and pricing pages."
@@ -60,8 +55,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/g2"
     checked_date: 2026-10-24
     official_docs_url: "https://documentation.g2.com/docs/g2-api"
-    auth: null
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/api/v2/products"
@@ -85,7 +78,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/getapp"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); No public or self-serve API exists on GetApp's own domain, so there is no base_url, auth or pricing to verify - hence status stays unverified with no_public_api true. Evidence: robots.txt disallows the internal paths /api/*, /ap"
   - id: "google-play"
@@ -105,7 +97,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/google-play"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); no_public_api is kept true in the sense that matters for this index: Google publishes no API for third-party Google Play app metadata, ratings or reviews. The documented APIs are publisher-scoped - the REST reference states the"
   - id: "trustpilot"

@@ -19,8 +19,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/influencersclub"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.influencers.club/"
-    auth: null
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/public/v1/accounts/credits/"
@@ -82,8 +80,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/scrapecreators"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.scrapecreators.com/"
-    auth: null
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/v1/spotify/podcast/episodes"
@@ -118,7 +114,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/tikhub"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.tikhub.io/"
-    auth: null
     pricing:
       model: "pay_as_you_go"
       free_tier: null
@@ -126,7 +121,6 @@ apis:
       unit: "per call (batch gift-name lookup endpoint)"
       pricing_url: null
       notes: "Only per-call price stated is for one endpoint (batch gift names: $0.025/call, suggest 50 IDs); no general pricing, plans, or free tier described in the provided text."
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "wechat"
     name: "WeChat"
@@ -163,8 +157,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/x"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.x.com/x-api/introduction"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/2/tweets/search/stream/rules"

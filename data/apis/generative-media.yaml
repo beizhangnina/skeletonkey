@@ -19,9 +19,6 @@ apis:
     source_url: "https://monid.ai/tools/bytedance"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.byteplus.com/en/docs/ModelArk/quick-start"
-    auth: null
-    pricing: null
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "elevenlabs"
     name: "ElevenLabs"
@@ -82,8 +79,6 @@ apis:
     source_url: "https://monid.ai/tools/fishaudio"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.fish.audio"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v1/tts"
@@ -128,7 +123,6 @@ apis:
     source_url: "https://monid.ai/tools/kling"
     checked_date: 2026-10-24
     official_docs_url: "https://kling.ai/document-api/api/video/3-0-omni"
-    auth: null
     pricing:
       model: "pay_as_you_go"
       free_tier: true
@@ -136,7 +130,6 @@ apis:
       unit: "USD per second of generated video (lowest listed per-second rate)"
       pricing_url: null
       notes: "Developer API billed per unit of generation (e.g., $0.084/sec std text-to-video); prepaid resource packages also offered. Consumer Basic plan is free at 0 USD."
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "magichour"
     name: "Magic Hour"
@@ -156,8 +149,6 @@ apis:
     source_url: "https://monid.ai/tools/magichour"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.magichour.ai/introduction"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v1/ai-image-generator"
@@ -197,8 +188,6 @@ apis:
     source_url: "https://monid.ai/tools/minimax"
     checked_date: 2026-10-24
     official_docs_url: "https://platform.minimax.io/docs/api-reference/text-chat-openai"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v1/chat/completions"
@@ -223,7 +212,6 @@ apis:
     source_url: "https://flatkey.ai/models"
     checked_date: 2026-10-24
     official_docs_url: "https://platform.sonilo.com/docs"
-    auth: null
     pricing:
       model: "pay_as_you_go"
       free_tier: true
@@ -292,7 +280,6 @@ apis:
     source_url: "https://monid.ai/tools/topaz"
     checked_date: 2026-10-24
     official_docs_url: "https://developer.topazlabs.com/"
-    auth: null
     pricing:
       model: "prepaid_credits"
       free_tier: null

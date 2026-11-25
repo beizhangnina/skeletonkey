@@ -19,8 +19,6 @@ apis:
     source_url: "https://monid.ai/tools/anyapi"
     checked_date: 2026-10-24
     official_docs_url: "https://getanyapi.com/docs"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v1/run/{sku}"
@@ -65,9 +63,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/apify"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.apify.com/api/v2"
-    auth: null
-    pricing: null
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "brightdata"
     name: "Bright Data"
@@ -87,8 +82,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/brightdata"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/dca/trigger_hp"
@@ -113,7 +106,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/context-dev"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.context.dev/"
-    auth: null
     pricing:
       model: "subscription"
       free_tier: true
@@ -160,8 +152,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/firecrawl"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.firecrawl.dev"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v2/scrape"
@@ -196,7 +186,6 @@ apis:
       header: "x-api-token"
       format: "<API_KEY>"
       docs_url: "https://docs.mrscraper.com/llms-full.txt"
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/api/v1/subscription-accounts"
@@ -231,7 +220,6 @@ apis:
     source_url: "https://monid.ai/tools/tinyfish"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.tinyfish.ai/"
-    auth: null
     pricing:
       model: "prepaid_credits"
       free_tier: true

@@ -75,7 +75,6 @@ apis:
       header: "Authorization"
       format: "Bearer <API_KEY>"
       docs_url: "https://docs.github.com/en/rest/migrations/users"
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/user/migrations"
@@ -110,9 +109,6 @@ apis:
     source_url: "https://monid.ai/tools"
     checked_date: 2026-10-24
     official_docs_url: "https://api.kadec0.xyz/docs"
-    auth: null
-    pricing: null
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "sfs"
     name: "Simple FS"
@@ -131,7 +127,6 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site. Operated by the Monid aggregator itself rather than an independent vendor."
     source_url: "https://monid.ai/tools/sfs"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); API access is real and fully documented but not self-serve. The Redocly API docs say: 'Please reach out to your account manager to begin the process of setting up API access. API keys are issued by FreightSimple once access is a"
   - id: "smolmachine"
@@ -152,8 +147,6 @@ apis:
     source_url: "https://monid.ai/tools/smolmachine"
     checked_date: 2026-10-24
     official_docs_url: "https://smolmachines.com/docs/cloud/api-reference"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/v1/machines"

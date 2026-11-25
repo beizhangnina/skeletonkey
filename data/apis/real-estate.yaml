@@ -18,7 +18,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/homes-com"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Every www.homes.com URL — home page, robots.txt, /developers, /api, /pricing — returns an Akamai 'Access Denied' 403 to non-browser clients, both directly and through a reader proxy, so nothing on the main domain could be read t"
   - id: "loopnet"
@@ -38,7 +37,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/loopnet"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Live homepage now accessible and confirms commercial property marketplace; saved generic developer/API/pricing pages were denied, and signup retry was also denied. No documented public self-serve API, auth, or API prices found."
   - id: "rentcast"
@@ -59,7 +57,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/rentcast"
     checked_date: 2026-10-24
     official_docs_url: "https://developers.rentcast.io/reference/introduction"
-    auth: null
     pricing:
       model: "freemium"
       free_tier: true

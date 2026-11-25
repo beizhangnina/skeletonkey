@@ -18,7 +18,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/builtin"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); Re-checked live: builtin.com/api, builtin.com/developers and builtin.com/pricing all return real 404s (not SPA shells), and there is no developer portal, API reference or API pricing anywhere on the vendor's domains. The employe"
   - id: "idealist"
@@ -38,7 +37,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/idealist"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Auth confirmed verbatim in the Job Posting API docs: 'You must use the API key as the username for Basic HTTP authentication. Use an empty string for the password', with a Python sample using BASE_URL = 'https://www.idealist.org"
   - id: "indeed"
@@ -58,7 +56,6 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/indeed"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-26); Indeed's developer documentation could not be read: https://docs.indeed.com/, every /docs.indeed.com/* page, https://www.indeed.com/developers, https://developer.indeed.com (redirects to partners.indeed.com), https://partners.in"
   - id: "levels-fyi"
@@ -169,8 +166,6 @@ apis:
     source_url: "https://monid.ai/tools/web3-career"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
-    auth: null
-    pricing: null
     endpoints:
       - method: "GET"
         path: "/api/v1"
@@ -194,6 +189,5 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/wellfound"
     checked_date: 2026-10-24
-    official_docs_url: null
     endpoints: []
     endpoints_note: "No public self-serve API documented by the vendor (checked 2026-10-25); No public developer API or documentation: /api, /mcp and /.well-known/mcp.json all 404, and /developers redirects to the marketing /hire page. The Reach Starter tier advertises 'Use Reach with your AI assistant', but no endpoint"

@@ -19,8 +19,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/hlrlookup"
     checked_date: 2026-10-24
     official_docs_url: "https://www.hlrlookup.com/docs/hlrlookup-docs.html"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/apiv2/hlr"
@@ -55,8 +53,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/hunter"
     checked_date: 2026-10-24
     official_docs_url: "https://hunter.io/api-documentation/v2"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/discover"
@@ -86,8 +82,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/prospeo"
     checked_date: 2026-10-24
     official_docs_url: "https://prospeo.io/api-docs/authentication"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/enrich-person"

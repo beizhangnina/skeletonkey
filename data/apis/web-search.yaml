@@ -31,7 +31,6 @@ apis:
       unit: null
       pricing_url: null
       notes: "Free Starter plan with $10 monthly credits plus one-time $10 onboarding bonus; paid usage is pay-as-you-go, with annual Growth and Enterprise plans."
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "justoneapi"
     name: "JustOneAPI"
@@ -180,7 +179,6 @@ apis:
     source_url: "https://monid.ai/tools/octen"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.octen.ai/"
-    auth: null
     pricing:
       model: "pay_as_you_go"
       free_tier: null
@@ -232,7 +230,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/search1api"
     checked_date: 2026-10-24
     official_docs_url: "https://s1.dev/docs"
-    auth: null
     pricing:
       model: "prepaid_credits"
       free_tier: null
@@ -284,7 +281,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/serpapi"
     checked_date: 2026-10-24
     official_docs_url: "https://serpapi.com/search-api"
-    auth: null
     pricing:
       model: "subscription"
       free_tier: null
@@ -321,7 +317,6 @@ apis:
     source_url: "https://glasser.ai/data-sources/serper"
     checked_date: 2026-10-24
     official_docs_url: "https://serper.dev"
-    auth: null
     pricing:
       model: "freemium"
       free_tier: true
@@ -329,5 +324,4 @@ apis:
       unit: "queries"
       pricing_url: null
       notes: "Page advertises 2,500 free queries with no credit card required and 'an unbeatable price'; no rate card, tiers, or per-query dollar amounts are stated."
-    endpoints: null
     endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."

@@ -131,8 +131,6 @@ apis:
     source_url: "https://monid.ai/tools/recall"
     checked_date: 2026-10-24
     official_docs_url: "https://docs.recall.ai/reference/authentication"
-    auth: null
-    pricing: null
     endpoints:
       - method: "POST"
         path: "/api/v1/calendar/user/disconnect/"
@@ -172,7 +170,6 @@ apis:
     source_url: "https://monid.ai/tools/saperly"
     checked_date: 2026-10-24
     official_docs_url: "https://saperly.com/docs/"
-    auth: null
     pricing:
       model: "prepaid_credits"
       free_tier: true
