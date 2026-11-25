@@ -18,6 +18,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/homes-com"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No self-serve public API, authentication or pricing is documented; any API access appears to be a partner integration, not a public product."
     usage_api:
       available: null
       method: null
@@ -43,6 +45,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/loopnet"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No public self-serve API is documented by the vendor."
     usage_api:
       available: null
       method: null
@@ -68,6 +72,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/rentcast"
     checked_date: 2026-10-24
+    official_docs_url: "https://developers.rentcast.io/reference/introduction"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: "API requests per month"
+      pricing_url: null
+      notes: "Free plan of 50 requests/month; paid plans scale with request volume; current pricing listed on the RentCast website, enterprise plans via contact."
+    endpoints:
+      - method: "GET"
+        path: "/properties"
+        summary: "Search property records by address, city, state, zip code, or a circular lat/long radius, with filters like property type, beds, baths, size and sale date; paginated."
+        returns: "List of property records with structural attributes, features, tax assessments, sale history and owner details."
+        docs_url: "https://developers.rentcast.io/reference/property-records"
+      - method: "GET"
+        path: "/properties/random"
+        summary: "Returns a random sample of property records, up to a specified limit, useful for testing or sampling."
+        returns: "List of randomly selected property records including attributes, tax assessments, sale history and owner details."
+        docs_url: "https://developers.rentcast.io/reference/property-records-random"
+      - method: "GET"
+        path: "/avm/rent/long-term"
+        summary: "Returns a long-term rent estimate for a property by address or latitude/longitude, with tunable comp settings such as maxRadius, daysOld and compCount."
+        returns: "Rent estimate, subject property attributes, and comparable rental listings sorted by correlation."
+        docs_url: "https://developers.rentcast.io/reference/rent-estimate-long-term"
+      - method: "GET"
+        path: "/markets"
+        summary: "Returns aggregate sale and/or rental market statistics and historical trends for a single US zip code, with dataType and historyRange options."
+        returns: "Aggregate market data in saleData and rentalData fields, plus historical record entries."
+        docs_url: "https://developers.rentcast.io/reference/market-statistics"
+      - method: "GET"
+        path: "/listings/rental/long-term/{id}"
+        summary: "Returns a single long-term rental listing matching an internal property/listing id obtained from /properties, /avm or /listings endpoints."
+        returns: "Listing record with listed rent, listing date, status, listing contacts and property attributes."
+        docs_url: "https://developers.rentcast.io/reference/rental-listing-long-term-by-id"
     usage_api:
       available: null
       method: null

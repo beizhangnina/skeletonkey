@@ -18,6 +18,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/akta"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.akta.pro/"
+    auth:
+      type: "api_key"
+      header: "x-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://docs.akta.pro/docs/company-data/quick-start.md"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per API call"
+      pricing_url: null
+      notes: "Usage is metered in credits that vary by endpoint/section; some commands are billed per record."
+    endpoints:
+      - method: "GET"
+        path: "/api/v1/news"
+        summary: "Fetch news articles enriched with AI summaries, sentiment, event types, publisher metadata, industry tags, and company mentions; supports filters and pagination."
+        returns: "JSON with total, limit, offset, count and a data array of enriched article objects including full_text, entities, and scores."
+        docs_url: "https://docs.akta.pro/api-reference/news-signals"
+      - method: "GET"
+        path: "/v1/company/employee-reviews"
+        summary: "Fetch a company's employee review data: overall rating, dimension-level ratings per provider, and a paginated list of individual reviews."
+        returns: "JSON with data.employee_reviews (overall_rating, other_ratings, reviews) plus limit, offset, and credits_consumed."
+        docs_url: "https://docs.akta.pro/llms-full.txt"
+      - method: "POST"
+        path: "/api/v1/list/filter-builder/"
+        summary: "Converts a natural language description of target companies into the structured filters object accepted by the List Generation API."
+        returns: "JSON with a data.filters object of dotted-path filter keys and a credits_consumed value; no companies are returned."
+        docs_url: "https://docs.akta.pro/api-reference/supporting-apis/filter-builder.md"
+      - method: "GET"
+        path: "/api/v1/company/search/"
+        summary: "Resolve a company from a free-text query; the overview page uses it as the first request to try."
+        returns: "JSON with a data array of companies, each with name, website, company_status, and product_category."
+        docs_url: "https://docs.akta.pro/getting-started/overview"
+      - method: "GET"
+        path: "/api/v1/company/enrichment/"
+        summary: "Enrich a company by UUID or website, requesting one or more data sections such as firmographic."
+        returns: "JSON with data.uuid, the requested section objects (e.g. firmographic), and credits_consumed."
+        docs_url: "https://docs.akta.pro/docs/company-data/quick-start.md"
     usage_api:
       available: null
       method: null
@@ -43,6 +82,38 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apollo"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.apollo.io/reference/authentication"
+    auth:
+      type: "api_key"
+      header: "x-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://docs.apollo.io/reference/authentication"
+    endpoints:
+      - method: "POST"
+        path: "/accounts/search"
+        summary: "Search for accounts (companies saved in Apollo) in your team's workspace using keyword and stage filters."
+        returns: "Matching accounts; results are capped at 50,000 records (100 per page, up to 500 pages)."
+        docs_url: "https://docs.apollo.io/reference/search-for-accounts"
+      - method: "PATCH"
+        path: "/opportunities/{opportunity_id}"
+        summary: "Update details of an existing deal: owner, name, amount, stage, close date, and typed custom fields."
+        returns: "Documented responses: 200 success, plus 401, 403, 422, and 429 error responses."
+        docs_url: "https://docs.apollo.io/reference/update-deal"
+      - method: "GET"
+        path: "/opportunity_stages"
+        summary: "Retrieve every deal stage available in your team's Apollo account, including each stage's unique ID."
+        returns: "Information about all deal stages in the account; stage IDs are used when creating or updating deals."
+        docs_url: "https://docs.apollo.io/reference/list-deal-stages"
+      - method: "GET"
+        path: "/contact_stages"
+        summary: "Retrieve the IDs of the contact stages available in your team's Apollo account."
+        returns: "The IDs for the available contact stages, usable when updating contacts or bulk-updating contact stages."
+        docs_url: "https://docs.apollo.io/reference/list-contact-stages"
+      - method: "GET"
+        path: "/users/api_profile"
+        summary: "Get the current user profile to confirm which user your API key acts as."
+        returns: "A user profile whose id is the acting user, matching owner fields such as object_owner_id."
+        docs_url: "https://docs.apollo.io/reference/authentication"
     usage_api:
       available: true
       method: "POST"
@@ -93,6 +164,20 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/builtwith"
     checked_date: 2026-10-24
+    official_docs_url: "https://api.builtwith.com/"
+    auth:
+      type: "api_key"
+      header: "Authorization"
+      format: "API <API_KEY>"
+      docs_url: "https://api.builtwith.com/llms-full.txt"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: 0.5
+      unit: "10 lookups"
+      pricing_url: null
+      notes: "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null
@@ -118,6 +203,38 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/clay"
     checked_date: 2026-10-24
+    official_docs_url: "https://developers.clay.com"
+    auth:
+      type: "api_key"
+      header: "clay-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://developers.clay.com/public-api/authentication.md"
+    endpoints:
+      - method: "GET"
+        path: "/me"
+        summary: "Returns the Clay user and workspace tied to the API key used in the request."
+        returns: "A JSON object containing user details (id, name, email, cli_onboarded) and workspace details (id, name)."
+        docs_url: "https://developers.clay.com/api-reference/me/get-the-authenticated-user.md"
+      - method: "POST"
+        path: "/search/query-mode"
+        summary: "Starts a new Clay search from a Clay advanced search query; the source type is auto-detected."
+        returns: "A newly created search, with the detected source type returned in the response."
+        docs_url: "https://developers.clay.com/llms-full.txt"
+      - method: "GET"
+        path: "/credits/balance"
+        summary: "Returns current workspace credit balances plus the API key owner's personal monthly credit limit."
+        returns: "Current credit balances for the workspace; reading balances does not consume credits."
+        docs_url: "https://developers.clay.com/llms-full.txt"
+      - method: "POST"
+        path: "/routines/{routine_id}/run"
+        summary: "Starts an asynchronous routine run for a given routine, accepting up to 100 input items."
+        returns: "An asynchronous routine run that can be polled for progress and paginated results."
+        docs_url: "https://developers.clay.com/llms-full.txt"
+      - method: "POST"
+        path: "/tables/query"
+        summary: "Runs a structured query against Clay table data and returns records with field metadata, paginated by cursor."
+        returns: "Records with field metadata plus a cursor for the next page; scans are least-recently-updated-first."
+        docs_url: "https://developers.clay.com/api-reference/tables/run-a-structured-query-across-one-or-more-tables.md"
     usage_api:
       available: null
       method: null
@@ -143,6 +260,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/contactout"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "API keys are issued only after booking a sales meeting; no per-call API price is published."
     usage_api:
       available: null
       method: null
@@ -168,6 +287,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/crunchbase"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "API access is available only through the Crunchbase sales team; no price is published."
     usage_api:
       available: null
       method: null
@@ -218,6 +339,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/datalegion"
     checked_date: 2026-10-24
+    official_docs_url: "https://datalegion.ai/docs"
+    auth:
+      type: "api_key"
+      header: "API-Key"
+      format: "<API_KEY>"
+      docs_url: "https://datalegion.ai/llms.txt"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credit"
+      pricing_url: null
+      notes: "Credit-based: each returned record costs a credit; count, utility, and report tools are free. Self-serve credits or enterprise contracts."
+    endpoints:
+      - method: "POST"
+        path: "/person/enrich"
+        summary: "Look up and enrich a single person record by email, phone, name, LinkedIn, or other identifiers."
+        returns: "A person profile record with a confidence level; a 404 means no match and uses no credits."
+        docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+      - method: "POST"
+        path: "/person/search"
+        summary: "Query people using filters on record field names, SQL, or a query object."
+        returns: "Matching person records with paging via cursor."
+        docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+      - method: "POST"
+        path: "/company/enrich"
+        summary: "Look up and enrich a single company record by domain, name, ticker, or LinkedIn."
+        returns: "A company profile record with firmographic, location, and workforce fields."
+        docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+      - method: "POST"
+        path: "/company/search"
+        summary: "Query companies using filters on record field names, SQL, or a query object."
+        returns: "Matching company records with paging via cursor."
+        docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
+      - method: "POST"
+        path: "/utility/clean"
+        summary: "Normalize emails, phones, names, domains, and other fields."
+        returns: "Cleaned values for each submitted field, alongside the original values."
+        docs_url: "https://datalegion.ai/docs/integrations/mcp-server"
     usage_api:
       available: null
       method: null
@@ -243,6 +403,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/fundable"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.tryfundable.ai/"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: 0.06
+      unit: "per credit"
+      pricing_url: null
+      notes: "250 one-time signup credits; purchased credits $0.06 each; Pro is $100/month with 2,000 monthly credits."
+    endpoints:
+      - method: "POST"
+        path: "/companies"
+        summary: "Default company discovery endpoint; returns company metadata plus the full latest funding round, with filtering, pagination, sorting, and semantic search."
+        returns: "Company records including metadata and the complete latest deal (plus latest-deal source articles)."
+        docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+      - method: "POST"
+        path: "/deals"
+        summary: "Search funding rounds across complete company histories for round-level analysis where filters must match any historical deal."
+        returns: "Deal records with full round details; related companies and investors referenced primarily by ID."
+        docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+      - method: "GET"
+        path: "/company"
+        summary: "Get full company details and the latest funding round using a UUID, domain, LinkedIn, or Crunchbase identifier."
+        returns: "Company data, the latest funding round, and its source articles."
+        docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+      - method: "POST"
+        path: "/people"
+        summary: "Discover individuals; company mode returns founders or employees, investor mode returns angels or lead partners attached to firms."
+        returns: "People records rather than companies, rounds, or firms."
+        docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
+      - method: "GET"
+        path: "/credits"
+        summary: "Retrieve the authenticated account's current monthly and purchased credit balances; free and does not accept a user ID."
+        returns: "Credit balance information for the account tied to the API key."
+        docs_url: "https://docs.tryfundable.ai/api-reference/introduction.md"
     usage_api:
       available: true
       method: "GET"
@@ -268,6 +462,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/leadmagic"
     checked_date: 2026-10-24
+    official_docs_url: "https://leadmagic.io/docs/api-reference"
+    pricing:
+      model: "subscription"
+      free_tier: null
+      starting_price_usd: 99
+      unit: "per month (credit-based plans)"
+      pricing_url: null
+      notes: "Credit-based; credits deducted only for valid results. Some search endpoints run zero-credit on Professional/Ultimate under fair use; validation costs 0.25 credits per definitive result."
+    endpoints:
+      - method: "POST"
+        path: "/v1/people/email-validation"
+        summary: "Validate a single email address via SMTP and engagement signals, returning valid, invalid or unknown status with MX and free company enrichment."
+        returns: "email, email_status (valid/invalid/unknown), credits_consumed, message, mx_record, mx_provider, mx_gateway, and company fields"
+        docs_url: "https://leadmagic.io/docs/api-reference/email-validation"
+      - method: "POST"
+        path: "/v1/people/email-finder"
+        summary: "Find a professional work email address from a person's name and company; results are auto-validated for deliverability."
+        returns: "Work email address (per endpoint listing); documentation for this endpoint's response is not on the supplied pages"
+        docs_url: "https://leadmagic.io/docs/api-reference"
+      - method: "POST"
+        path: "/v3/local-leads/search"
+        summary: "Search local business listings by city, postal code, category, name or map radius; pages hold 25 full listings."
+        returns: "Full business listings including address, coordinates, phones, emails, website and social links"
+        docs_url: "https://leadmagic.io/docs/changelog"
+      - method: "GET"
+        path: "/v3/local-leads/categories"
+        summary: "List local lead category names; described as free."
+        returns: "Category names (per changelog description)"
+        docs_url: "https://leadmagic.io/docs/changelog"
+      - method: "POST"
+        path: "/v3/people/search"
+        summary: "People search for base profile discovery at companies or across an ICP; contact values require separate enrichment."
+        returns: "Base profile records (contact values not included); paged by signed cursor"
+        docs_url: "https://leadmagic.io/docs/api-reference"
     usage_api:
       available: null
       method: null
@@ -293,6 +521,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/lusha"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.lusha.com/api-reference/overview"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per billable action"
+      pricing_url: null
+      notes: "Account usage response reports a credits balance and per-action credit costs (e.g. api_search, email, phone); no USD prices stated."
+    endpoints:
+      - method: "POST"
+        path: "/v3/contacts/search"
+        summary: "Search for contacts by identifiers such as name plus company domain, LinkedIn URL, or email; accepts batches and echoes back clientReferenceId."
+        returns: "Matching contacts and what data is available on each; revealing emails and phones requires a separate Enrich call."
+        docs_url: "https://docs.lusha.com/api-reference/overview"
+      - method: "GET"
+        path: "/v3/account/usage"
+        summary: "Returns a single snapshot of account status: credit balance, rate-limit usage per window, plan details, and per-action credit pricing."
+        returns: "JSON with credits (total/used/remaining), rateLimits (daily/hourly/minute), plan, and pricing map of action to credits."
+        docs_url: "https://docs.lusha.com/llms-full.txt"
+      - method: "POST"
+        path: "/v3/companies/tables"
+        summary: "Creates a new, empty companies table, optionally seeded with an initial list of company IDs. Billing is free."
+        returns: "Not described in the provided text beyond creating the table (free per billing note)."
+        docs_url: "https://docs.lusha.com/llms-full.txt"
+      - method: "GET"
+        path: "/v3/companies/tables/{table_id}"
+        summary: "Retrieves a companies table's metadata and its current processing status. Billing is free."
+        returns: "Table metadata and current processing status."
+        docs_url: "https://docs.lusha.com/llms-full.txt"
+      - method: "GET"
+        path: "/v3/contacts/tables/columns"
+        summary: "Lists every Lusha data column that can be added to a contacts table (22 columns), with no request body or parameters."
+        returns: "Column entries with category, displayName, columnKey, and type; free, no credits charged."
+        docs_url: "https://docs.lusha.com/llms-full.txt"
     usage_api:
       available: true
       method: "GET"
@@ -318,6 +580,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/metixai"
     checked_date: 2026-10-24
+    official_docs_url: "https://platform.metix.ai/docs"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://platform.metix.ai/llms.txt"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: "API Credits"
+      pricing_url: null
+      notes: "Billed in API Credits; empty Query Spec searches are free, contact unlock is billed per value returned. No dollar amount is stated in these pages."
+    endpoints:
+      - method: "POST"
+        path: "/v1/people-search"
+        summary: "Natural-language people search; returns encrypted profile IDs only, which must then be sent to the profile detail route to get records."
+        returns: "Encrypted profile IDs (e.g. profile_ids array), not record data."
+        docs_url: "https://platform.metix.ai/llms.txt"
+      - method: "POST"
+        path: "/v1/people/query"
+        summary: "Query Spec (structured) search over the people dataset; returns encrypted IDs for a second detail call."
+        returns: "Encrypted string IDs plus a paging cursor while more pages remain."
+        docs_url: "https://platform.metix.ai/llms.txt"
+      - method: "POST"
+        path: "/entity/v1/profiles/detail-by-id"
+        summary: "Fetch full profile records for up to 100 profile IDs obtained from a people search."
+        returns: "Full public profile records and the IDs that could not be resolved."
+        docs_url: "https://platform.metix.ai/docs/api/people/record"
+      - method: "POST"
+        path: "/v1/companies/query"
+        summary: "Query Spec search over organizations, used to build account lists and attach company context to people and jobs."
+        returns: "Encrypted string company IDs, not company records."
+        docs_url: "https://platform.metix.ai/docs/api/companies"
+      - method: "POST"
+        path: "/entity/v1/companies/detail-by-id"
+        summary: "Fetch company records, including headquarters, funding round and stock listings, for up to 100 company IDs."
+        returns: "Company record fields such as name, size, industry, headquarters, funding and listings."
+        docs_url: "https://platform.metix.ai/docs/api/companies/record"
     usage_api:
       available: null
       method: null
@@ -343,6 +644,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/orbit"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.orbitsearch.com"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.orbitsearch.com/authentication"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: null
+      starting_price_usd: null
+      unit: "credits per profile"
+      pricing_url: null
+      notes: "Credits are consumed for profile work; face search costs 100 credits per profile vs 10 for normal full generation."
+    endpoints:
+      - method: "POST"
+        path: "/v3/search"
+        summary: "Start a people search and return one pollable search resource; builds selected results to the requested profile depth."
+        returns: "A search resource with search_id, status, results, profile data, confidence, and billing."
+        docs_url: "https://docs.orbitsearch.com/api/search/search.md"
+      - method: "POST"
+        path: "/v3/enrich/{profile_id}"
+        summary: "Enrich a known profile by Orbit ID or slug, choosing quick, partial, full, or regenerate."
+        returns: "An enrich snapshot with request_id, status, operation, profile, and billing; 202 when running, 200 when terminal."
+        docs_url: "https://docs.orbitsearch.com/api/enrich/enrich-profile.md"
+      - method: "POST"
+        path: "/v3/faces/index-search"
+        summary: "Search the face index using a face reference and bounding box to find matching Orbit profiles."
+        returns: "Matches array with profile_id, similarity, and image_url; empty when the index has no match."
+        docs_url: "https://docs.orbitsearch.com/api/search/faces-index-search.md"
+      - method: "POST"
+        path: "/v3/agents/signup"
+        summary: "Create an Orbit workspace and API key for an agent without dashboard sign-in."
+        returns: "API key, scopes, signup credits, sign-up URL, and organization_id."
+        docs_url: "https://docs.orbitsearch.com/llms-full.txt"
     usage_api:
       available: null
       method: null
@@ -368,6 +703,18 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/pdl"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.peopledatalabs.com/docs/authentication"
+    endpoints:
+      - method: "GET"
+        path: "/v5/person/enrich"
+        summary: "Person Enrichment endpoint; call with parameters such as company and email to enrich a person profile."
+        returns: "A JSON API response containing the enriched person record."
+        docs_url: "https://docs.peopledatalabs.com/docs/authentication"
+      - method: "GET"
+        path: "/v5/person/subjectrequest"
+        summary: "Subject Request API endpoint that lets customers fetch a list of opted-out consumer IDs."
+        returns: "A stream of lines listing opted out IDs (fetched with stream=True)."
+        docs_url: "https://docs.peopledatalabs.com/docs/subject-request-api"
     usage_api:
       available: null
       method: null
@@ -393,6 +740,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/ploid"
     checked_date: 2026-10-24
+    official_docs_url: "https://ploid.com/documentation"
+    endpoints:
+      - method: "POST"
+        path: "/v1/person"
+        summary: "Research one identified person and get a reviewed report with professional history, source links, and field-level provenance; may return 202 with a run to poll."
+        returns: "Reviewed summary, up to 25 deduplicated source_links, identity, professional/presence/signals sections, and provenance per field, plus usage metadata."
+        docs_url: "https://ploid.com/documentation/api/person"
+      - method: "POST"
+        path: "/v1/search"
+        summary: "Synchronous people search from a semantic query, structured hard filters, and optional plain-English criteria; returns up to 150 ranked matches inline."
+        returns: "List of matching people with filter_match entries per filter, optional contents fields, and meta.next_offset while more matches remain."
+        docs_url: "https://ploid.com/documentation/api/search"
+      - method: "POST"
+        path: "/v1/sets"
+        summary: "Create a background People Set that compiles a query into a search plan and admits only people who pass every verified criterion (preview)."
+        returns: "201 with the Set id, the search, a pricing estimate, and events_url and items_url for following progress."
+        docs_url: "https://ploid.com/documentation/api/sets"
+      - method: "POST"
+        path: "/v1/github/search"
+        summary: "Search Ploid's index of GitHub accounts by company, repository, commits, activity, language, and profile flags, optionally attaching live profiles (beta)."
+        returns: "Paginated results with login, repos, repo_count, activity stats, optional live profile, returned/offset/limit/next_offset and usage metadata."
+        docs_url: "https://ploid.com/documentation/api/github"
+      - method: "GET"
+        path: "/v1/linkedin/profile"
+        summary: "Read a public LinkedIn profile by URL without caller-provided cookies, proxies, or provider keys."
+        returns: "Public LinkedIn profile data for the requested URL, drawn from the documented public LinkedIn read operations."
+        docs_url: "https://ploid.com/documentation/api/social"
     usage_api:
       available: null
       method: null
@@ -418,6 +792,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/predictleads"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.predictleads.com/api_endpoints/introduction/authentication"
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
     usage_api:
       available: null
       method: null
@@ -443,6 +819,23 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/producthunt"
     checked_date: 2026-10-24
+    official_docs_url: "https://api.producthunt.com/v2/docs"
+    endpoints:
+      - method: "GET"
+        path: "/v2/oauth/authorize"
+        summary: "Redirect the user here to log in to Product Hunt and grant the app access; on approval the user is returned to redirect_uri with a code (access grant)."
+        returns: "An HTML authorization page after which the user is redirected back to redirect_uri with a code parameter and state."
+        docs_url: "https://api.producthunt.com/v2/docs/oauth_user_authentication/oauth_authorize_ask_for_access_grant_code_on_behalf_of_the_user"
+      - method: "POST"
+        path: "/v2/oauth/token"
+        summary: "Exchange the access_grant code (authorization_code grant) together with client_id, client_secret and redirect_uri for an access token."
+        returns: "JSON body containing access_token and token_type (bearer)."
+        docs_url: "https://api.producthunt.com/v2/docs/oauth_user_authentication/oauth_token_use_the_access_grant_code_you_received_through_the_redirect_to_request_an_access_token"
+      - method: "GET"
+        path: "/v2/api/graphql"
+        summary: "GraphQL access using a client-level token for public fields; user-level fields such as isVoted return default values (false)."
+        returns: "JSON GraphQL response where user-scoped fields fall back to defaults and viewer is null."
+        docs_url: "https://api.producthunt.com/v2/docs/oauth_client_only_authentication/unauthorized_oauth_oauth_test_invalid_access_to_user-level_content_with_just_an_client_level_token_will_lead_to_errors"
     usage_api:
       available: null
       method: null
@@ -468,6 +861,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/sumble"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.sumble.com/api"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.sumble.com/api/api"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: "credits (per endpoint, per row/attribute)"
+      pricing_url: null
+      notes: "Free plan exists (personal email signups); per-call credit costs vary by endpoint; 402 returned for insufficient credits."
+    endpoints:
+      - method: "POST"
+        path: "/v9/organizations"
+        summary: "Resolve a list of companies or search by technology, job function, industry and firmographic filters, composing which attributes and metrics return."
+        returns: "organizations rows with requested attributes (id, name, slug, url, employee_count, industry, jobs_count), plus credits_used, credits_remaining, total, source_data_url."
+        docs_url: "https://docs.sumble.com/llms-full.txt"
+      - method: "POST"
+        path: "/v9/teams"
+        summary: "Unified teams endpoint: resolve up to 1,000 team IDs (list mode) or search teams by organization_ids plus optional query and since, composing returned attributes."
+        returns: "teams array with team_id, name, sumble_url, selectable attributes (organization, breadcrumbs, jobs_count, score, etc.), related_people and job_posts; matched_count, total."
+        docs_url: "https://docs.sumble.com/api/core-data/teams"
+      - method: "POST"
+        path: "/v9/jobs/title-lookup"
+        summary: "Resolve a list of job titles (1-1000) to canonical Sumble job function and job level identifiers, one result per input in order."
+        returns: "results array pairing each input title with job_function and job_level (incl. level_rank), plus matched_count, credits_used, credits_remaining, optional file."
+        docs_url: "https://docs.sumble.com/api/lookups/job-title-lookup"
+      - method: "POST"
+        path: "/support/data-quality"
+        summary: "Report a data quality issue programmatically; the request is free and a reply goes to your account email."
+        returns: "Support request handling; both support endpoints are free."
+        docs_url: "https://docs.sumble.com/api/api"
+      - method: "POST"
+        path: "/support"
+        summary: "Submit a general support request programmatically; free of charge and replies are sent to your account email."
+        returns: "Support request handling; both support endpoints are free."
+        docs_url: "https://docs.sumble.com/api/api"
     usage_api:
       available: null
       method: null
@@ -493,6 +925,33 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/the-companies-api"
     checked_date: 2026-10-24
+    official_docs_url: "https://www.thecompaniesapi.com/api"
+    endpoints:
+      - method: "GET"
+        path: "/v2/companies/:domain"
+        summary: "Enrich a company by sending its domain name; returns a full company profile with 80+ data points. Costs 1 credit per request."
+        returns: "A \"company\" object: the company profile from the database (empty object, no credits charged, if not found)."
+        docs_url: "https://www.thecompaniesapi.com/api/enrich-company-from-domain"
+      - method: "GET"
+        path: "/v2/companies/:domain/email-patterns"
+        summary: "Send a domain and retrieve all the email patterns the company uses, with the usage percentage for each pattern."
+        returns: "A \"patterns\" array: the email patterns used."
+        docs_url: "https://www.thecompaniesapi.com/api/fetch-company-email-patterns"
+      - method: "GET"
+        path: "/v2/companies/similar"
+        summary: "Send one or more domains and get a list of similar companies (competitors, your customers, etc.). Costs 1 credit per company."
+        returns: "A \"companies\" array of similar companies for the given domains, plus a \"meta\" object with meta information."
+        docs_url: "https://www.thecompaniesapi.com/api/search-similar-companies"
+      - method: "POST"
+        path: "/v2/lists"
+        summary: "Create a list of companies to organize and group them; requires a name and a list type (companies)."
+        returns: "The created list object with fields such as analytics, createdAt, dynamic, id, imported, integrations, name, query."
+        docs_url: "https://www.thecompaniesapi.com/api/create-list"
+      - method: "PATCH"
+        path: "/v2/lists/:listId/companies/toggle"
+        summary: "Add (attach) or remove (detach) up to 1,000 companies in a list using their domains or company IDs."
+        returns: "The updated list object, including analytics such as companiesCount."
+        docs_url: "https://www.thecompaniesapi.com/api/toggle-companies-in-list"
     usage_api:
       available: true
       method: "GET"
@@ -518,6 +977,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/ycombinator"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "Y Combinator publishes no API, developer documentation or pricing; its public company directory is not an open data product."
     usage_api:
       available: null
       method: null
@@ -543,6 +1004,8 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/zoominfo"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "API access requires an existing ZoomInfo subscription through a login-gated developer portal; no self-serve signup or public pricing exists."
     usage_api:
       available: null
       method: null
