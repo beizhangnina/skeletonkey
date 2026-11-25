@@ -125,11 +125,6 @@ apis:
       pricing_url: "https://docs.dataforseo.com/v3/keywords_data/bing/keyword_performance/task_get/"
       notes: "Charged per task posted; results retrievable within 30 days for free. Cost to be calculated on the Pricing page; no price figures stated in the provided text."
     endpoints:
-      - method: "GET"
-        path: "/v3/keywords_data/bing/keyword_performance/task_get/$id"
-        summary: "Retrieve Bing keyword performance results for a previously posted task by its unique task id."
-        returns: "JSON with a tasks array containing keyword KPI metrics (ad position, clicks, impressions) per keyword, device type, location and language."
-        docs_url: "https://docs.dataforseo.com/v3/keywords_data/bing/keyword_performance/task_get/"
       - method: "POST"
         path: "/v3/app_data/google/app_listings/search/live"
         summary: "Live search of apps published on Google Play filtered by title, description and categories, with live results."

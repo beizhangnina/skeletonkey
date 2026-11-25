@@ -44,7 +44,7 @@ apis:
     auth:
       type: "api_key"
       header: "xi-api-key"
-      format: "xi-api-key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://elevenlabs.io/docs/api-reference/authentication"
     pricing:
       model: "subscription"

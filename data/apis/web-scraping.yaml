@@ -91,11 +91,6 @@ apis:
     pricing: null
     endpoints:
       - method: "POST"
-        path: "/serp/req?zone=YOUR_ZONE_NAME"
-        summary: "Submits an asynchronous SERP job for the given zone and returns immediately."
-        returns: "A response_id that you save and later use to collect the result."
-        docs_url: "https://docs.brightdata.com/scraping-automation/serp-api/send-your-first-request"
-      - method: "POST"
         path: "/dca/trigger_hp"
         summary: "Trigger a media extraction job to retrieve video, audio, captions, thumbnails and storyboards."
         returns: "Acknowledgement with success flag, inputs count and job_id."

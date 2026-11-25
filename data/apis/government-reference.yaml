@@ -22,7 +22,7 @@ apis:
     auth:
       type: "api_key"
       header: "X-API-Key"
-      format: "X-API-Key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://censusdata.xyz/skill"
     pricing:
       model: "free"
@@ -36,11 +36,6 @@ apis:
         path: "/health"
         summary: "Service health check endpoint."
         returns: null
-        docs_url: "https://censusdata.xyz/skill"
-      - method: "GET"
-        path: "/query?q=<natural_language_query>"
-        summary: "Run a natural-language Census query with a URL-encoded q parameter."
-        returns: "JSON with original query, natural-language summary, and raw Census data points."
         docs_url: "https://censusdata.xyz/skill"
       - method: "POST"
         path: "/query"

@@ -22,7 +22,7 @@ apis:
     auth:
       type: "api_key"
       header: "x-api-key"
-      format: "x-api-key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://docs.akta.pro/docs/company-data/quick-start.md"
     pricing:
       model: "pay_as_you_go"
@@ -78,7 +78,7 @@ apis:
     auth:
       type: "api_key"
       header: "x-api-key"
-      format: "x-api-key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://docs.apollo.io/reference/authentication"
     pricing: null
     endpoints:
@@ -154,32 +154,8 @@ apis:
       unit: "10 lookups"
       pricing_url: "https://api.builtwith.com/llms-full.txt"
       notes: "Also supports account API credits, Stripe MPP, and x402 USDC pay-per-lookup."
-    endpoints:
-      - method: "GET"
-        path: "/v26/api.{json|xml|csv|xlsx}"
-        summary: "Domain technology and metadata lookup."
-        returns: "Technology and metadata for the requested domain."
-        docs_url: "https://api.builtwith.com/llms-full.txt"
-      - method: "GET"
-        path: "/lists13/api.{json|xml|txt|csv|tsv}"
-        summary: "Lists websites using a specified technology."
-        returns: "Sites using the technology, in JSON/XML/TXT/CSV/TSV formats."
-        docs_url: "https://api.builtwith.com/llms-full.txt"
-      - method: "GET"
-        path: "/ask1/api.{json|xml|txt|csv|tsv}"
-        summary: "Runs natural language website list lookups."
-        returns: "Website list sample or committed report results."
-        docs_url: "https://api.builtwith.com/llms-full.txt"
-      - method: "GET"
-        path: "/vat1/api.{json|xml|csv}"
-        summary: "Looks up company registration numbers for websites."
-        returns: "VAT, GSTIN, CNPJ and other registration numbers."
-        docs_url: "https://api.builtwith.com/llms-full.txt"
-      - method: "GET"
-        path: "/mcp2/api.{json|xml|csv|txt}"
-        summary: "Searches and browses the BuiltWith MCP registry."
-        returns: "MCP registry records, including endpoint URLs and tools when available."
-        docs_url: "https://api.builtwith.com/llms-full.txt"
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "clay"
     name: "Clay"
     capability: "GTM data platform: cross-entity people and company search plus managed enrichment waterfalls."
@@ -201,7 +177,7 @@ apis:
     auth:
       type: "api_key"
       header: "clay-api-key"
-      format: "clay-api-key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://developers.clay.com/public-api/authentication.md"
     pricing: null
     endpoints:
@@ -302,7 +278,7 @@ apis:
     auth:
       type: "api_key"
       header: "API-Key"
-      format: "API-Key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://datalegion.ai/llms.txt"
     pricing:
       model: "prepaid_credits"

@@ -44,7 +44,7 @@ apis:
     auth:
       type: "api_key"
       header: "X-API-KEY"
-      format: "X-API-KEY: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://docs.financialdatasets.ai/llms.txt"
     pricing: null
     endpoints:

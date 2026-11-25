@@ -22,7 +22,7 @@ apis:
     auth:
       type: "api_key"
       header: "X-BB-API-Key"
-      format: "X-BB-API-Key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://docs.browserbase.com/reference/api/create-an-agent.md"
     pricing:
       model: "freemium"

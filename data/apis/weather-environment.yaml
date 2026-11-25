@@ -27,12 +27,8 @@ apis:
       unit: "per month"
       pricing_url: "https://developer.accuweather.com/documentation/overview"
       notes: "Free tier: $0/month, 500 daily Core Weather calls (14-day trial). Starter: $2/month for 15,000 monthly calls. Core Weather and MinuteCast billed separately."
-    endpoints:
-      - method: "GET"
-        path: "/forecasts/v1/daily/1day/349727"
-        summary: "Fetches the 1-day daily forecast for a location key; the example uses New York, NY with location key 349727 and a bearer auth header."
-        returns: "A JSON forecast payload returned by the fetch call and printed to the console."
-        docs_url: "https://developer.accuweather.com"
+    endpoints: null
+    endpoints_note: "Official docs fetched 2026-11-24 but no endpoint path could be verified from page text (e.g. JS-rendered docs); left unverified."
   - id: "iqair"
     name: "IQAir"
     capability: "Real-time and historical air-quality readings, city rankings and pollution maps."

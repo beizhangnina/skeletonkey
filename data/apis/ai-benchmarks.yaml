@@ -22,7 +22,7 @@ apis:
     auth:
       type: "api_key"
       header: "x-api-key"
-      format: "x-api-key: <API_KEY>"
+      format: "<API_KEY>"
       docs_url: "https://artificialanalysis.ai/data-api/docs"
     pricing:
       model: "freemium"
