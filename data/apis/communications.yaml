@@ -18,6 +18,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentline"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.agentline.cloud"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.agentline.cloud/authentication"
+    pricing:
+      model: "subscription"
+      free_tier: true
+      starting_price_usd: 20
+      unit: "per month"
+      pricing_url: null
+      notes: "First US/CA number free with 7-day trial (10 call min, 10 SMS). Extra numbers $3.00/mo; calls beyond allowance $0.12/min; SMS beyond allowance $0.02/message."
+    endpoints:
+      - method: "POST"
+        path: "/v1/agents"
+        summary: "Create a new AI voice agent with a system prompt, greeting, voice, and voicemail settings; then attach a phone number to it."
+        returns: "The created agent object, including id, account_id, name, voice settings, and created_at."
+        docs_url: "https://docs.agentline.cloud/api-reference/agents/create-agent.md"
+      - method: "GET"
+        path: "/v1/events"
+        summary: "Poll the event mailbox for call completions, transcripts, and failures; events are deleted once consumed."
+        returns: "Pending telephony events, filterable by agent_id and event_type, with a limit of 1-200."
+        docs_url: "https://docs.agentline.cloud/api-reference/events/list-events.md"
+      - method: "PATCH"
+        path: "/v1/numbers/{number_id}/reassign"
+        summary: "Move an existing phone number from one AI agent to another; the target agent must not already have an active number."
+        returns: "Successful response (200); the number stays active, only agent ownership changes."
+        docs_url: "https://docs.agentline.cloud/api-reference/numbers/reassign-number.md"
+      - method: "POST"
+        path: "/v1/calls"
+        summary: "Place an outbound call from the agent's number; the agent handles the conversation using its prompt, voice, and greeting."
+        returns: "Right after dialing: call id, agent_id, from_number, to_number, direction, status, started_at."
+        docs_url: "https://docs.agentline.cloud/llms-full.txt"
+      - method: "GET"
+        path: "/v1/billing/expenditure/numbers"
+        summary: "List phone number provisioning charges, paginated by limit and offset."
+        returns: "Cost of each phone number bought, including the number, country, and current status."
+        docs_url: "https://docs.agentline.cloud/api-reference/billing/get-number-expenditure.md"
     usage_api:
       available: true
       method: "GET"
@@ -43,6 +82,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentmail"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.agentmail.to"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://docs.agentmail.to/api-reference/pods/forwarding/get.md"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Free tier limited to 3 inboxes and 100 emails per day with no credit card required."
+    endpoints:
+      - method: "POST"
+        path: "/v0/agent/sign-up"
+        summary: "Creates a new agent organization with an inbox and an API key, sending a 6-digit OTP to the human's email for verification."
+        returns: "Signup response (agent_AgentSignupResponse); errors return 400 validation errors."
+        docs_url: "https://docs.agentmail.to/openapi.json"
+      - method: "POST"
+        path: "/v0/agent/verify"
+        summary: "Verifies an agent organization with the 6-digit OTP emailed to the human, upgrading it to agent_verified and applying Free plan entitlements."
+        returns: "Verification response (agent_AgentVerifyResponse)."
+        docs_url: "https://docs.agentmail.to/openapi.json"
+      - method: "POST"
+        path: "/v0/agent/human"
+        summary: "Attaches a human to an unverified agent organization by emailing them a 6-digit OTP to submit to the verify endpoint."
+        returns: "Attach-human response (agent_AgentAttachHumanResponse); 400 validation errors, 409 conflicts."
+        docs_url: "https://docs.agentmail.to/openapi.json"
+      - method: "POST"
+        path: "/v0/inboxes/{inbox_id}/files"
+        summary: "Starts a file upload for an inbox: creates a pending file at a path and returns an upload target to PUT bytes to."
+        returns: "Create-file response with a pending file and upload target; 400/403/404/409 errors possible."
+        docs_url: "https://docs.agentmail.to/openapi.json"
+      - method: "GET"
+        path: "/v0/pods/{pod_id}/forwarding"
+        summary: "Retrieves the forwarding destinations configured at the pod level, which its inboxes inherit when they set none."
+        returns: "200 with destinations (nullable string list) and unverified addresses; 403/404 errors."
+        docs_url: "https://docs.agentmail.to/api-reference/pods/forwarding/get.md"
     usage_api:
       available: true
       method: "GET"
@@ -68,6 +146,28 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/recall"
     checked_date: 2026-10-24
+    official_docs_url: "https://docs.recall.ai/reference/authentication"
+    endpoints:
+      - method: "POST"
+        path: "/api/v1/calendar/user/disconnect/"
+        summary: "Disconnects the calendar for a specific platform (google or microsoft); takes a required 'platform' body param."
+        returns: "200 response on success; the response body schema is not shown on the page."
+        docs_url: "https://docs.recall.ai/reference/calendar_user_disconnect_create"
+      - method: "GET"
+        path: "/api/v1/realtime_endpoint/{id}/"
+        summary: "Retrieves a single realtime endpoint identified by a UUID path parameter."
+        returns: "200 response; the response body schema is not shown on the page."
+        docs_url: "https://docs.recall.ai/reference/realtime_endpoint_retrieve"
+      - method: "PATCH"
+        path: "/api/v1/transcript/{id}/"
+        summary: "Updates a transcript artifact identified by UUID; accepts a metadata object in the body."
+        returns: "200 response; the response body schema is not shown on the page."
+        docs_url: "https://docs.recall.ai/reference/transcript_partial_update"
+      - method: "PUT"
+        path: "/api/v2/google-login-groups/{id}/"
+        summary: "Updates an existing Google Login Group; requires name and login_mode (always or only_if_required)."
+        returns: "200 response; the response body schema is not shown on the page."
+        docs_url: "https://docs.recall.ai/reference/google_login_groups_update"
     usage_api:
       available: true
       method: "GET"
@@ -93,6 +193,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/saperly"
     checked_date: 2026-10-24
+    official_docs_url: "https://saperly.com/docs/"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Prepaid balance metered per call and per message via reserve → settle; $5 free signup credit and first number free for 30 days."
+    endpoints:
+      - method: "POST"
+        path: "/connections"
+        summary: "Create a reusable connection (the handler/brain: instructions + voice) that can later be attached to one or many phone numbers."
+        returns: "The created connection object, including its id, which is used as the handler."
+        docs_url: "https://saperly.com/llms.txt"
+      - method: "POST"
+        path: "/numbers"
+        summary: "Provision a real phone number under your workspace, optionally specifying country and area code."
+        returns: "The provisioned number, including its id and phoneNumber."
+        docs_url: "https://saperly.com/llms.txt"
+      - method: "POST"
+        path: "/numbers/{id}/connection"
+        summary: "Attach an existing connection to a specific number so that connection answers that line."
+        returns: "Result of binding the connection to the number (the number's handler is set)."
+        docs_url: "https://saperly.com/llms.txt"
+      - method: "POST"
+        path: "/calls"
+        summary: "Place an outbound voice call from one of your numbers to a destination number."
+        returns: "The outbound call record/result."
+        docs_url: "https://saperly.com/llms.txt"
+      - method: "POST"
+        path: "/messages"
+        summary: "Send an SMS from one of your numbers to a recipient, over compliant registered routes."
+        returns: "The sent message object (e.g. the message record returned by messaging.send)."
+        docs_url: "https://saperly.com/llms.txt"
     usage_api:
       available: null
       method: null

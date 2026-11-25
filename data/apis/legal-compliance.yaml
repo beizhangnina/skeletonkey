@@ -18,6 +18,40 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/strale"
     checked_date: 2026-10-24
+    official_docs_url: "https://strale.dev/docs"
+    pricing:
+      model: "pay_as_you_go"
+      free_tier: true
+      starting_price_usd: null
+      unit: "per call"
+      pricing_url: null
+      notes: "Prepaid wallet, charged only when a call succeeds; free tools cost nothing; keyless free tools allow 300 calls a month per IP; hourly spend limit EUR 100 by default; minimum top-up EUR 10.00."
+    endpoints:
+      - method: "POST"
+        path: "/v1/do"
+        summary: "Runs one tool by capability_slug (or a free-text task) with an inputs object and a max_price_cents ceiling; the single endpoint behind every tool."
+        returns: "HTTP 200 with a result block (transaction_id, status, price_cents, latency_ms, wallet_balance_cents, output, provenance) plus meta.audit; slow tools return 202 with a poll_url."
+        docs_url: "https://strale.dev/docs"
+      - method: "GET"
+        path: "/v1/transactions/{transaction_id}"
+        summary: "Fetches a past call by its transaction ID; used to poll background calls that returned 202 until they complete or fail."
+        returns: "The call record with status, input and output, price, latency, provenance and the audit record."
+        docs_url: "https://strale.dev/docs"
+      - method: "GET"
+        path: "/v1/capabilities"
+        summary: "Lists the whole tool catalogue, including each tool's inputs, outputs and price."
+        returns: "Every tool with its inputs, outputs and price."
+        docs_url: "https://strale.dev/docs"
+      - method: "GET"
+        path: "/v1/wallet/balance"
+        summary: "Reads the prepaid wallet balance for the authenticated account."
+        returns: "Your balance in euro cents."
+        docs_url: "https://strale.dev/docs"
+      - method: "POST"
+        path: "/v1/solutions/{slug}/execute"
+        summary: "Runs a bundled check (several tools as one call at one price); body takes inputs and an optional max_price_cents, and a key is required."
+        returns: "result.status (completed, partial or failed), result.steps keyed by tool, result.errors and result.gated; charged in full unless every step failed."
+        docs_url: "https://strale.dev/docs/api"
     usage_api:
       available: null
       method: null
@@ -43,6 +77,45 @@ apis:
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/vaquill"
     checked_date: 2026-10-24
+    official_docs_url: "https://www.vaquill.ai/docs"
+    auth:
+      type: "bearer"
+      header: "Authorization"
+      format: "Bearer <API_KEY>"
+      docs_url: "https://www.vaquill.ai/llms.txt"
+    pricing:
+      model: "prepaid_credits"
+      free_tier: true
+      starting_price_usd: null
+      unit: "API credits"
+      pricing_url: null
+      notes: "Calls are metered in credits; 1,000 free welcome credits ($10) are granted once per person."
+    endpoints:
+      - method: "GET"
+        path: "/us/statutes/coverage"
+        summary: "Returns coverage totals and currency information for US statutes and related corpora."
+        returns: "Coverage counts and what each corpus is current through."
+        docs_url: "https://www.vaquill.ai/docs"
+      - method: "GET"
+        path: "/us/statutes/section/{actId}/changes"
+        summary: "Lists observed additions, amendments and removals for one statute section."
+        returns: "Change events with kind, detected time, citation and diff availability."
+        docs_url: "https://www.vaquill.ai/docs/api-guide/concepts/section-intelligence"
+      - method: "GET"
+        path: "/us/statutes/section/{actId}/cited-by"
+        summary: "Returns sections whose text cross-references the section identified by actId."
+        returns: "Citing sections in statutory order with paging metadata."
+        docs_url: "https://www.vaquill.ai/docs/api-guide/concepts/section-intelligence"
+      - method: "POST"
+        path: "/us/session-laws/search"
+        summary: "Searches state session laws by question, title, quoted phrase, citation, code section or bill number."
+        returns: "Best-matching laws with matched passages, snippets, count and paging."
+        docs_url: "https://www.vaquill.ai/docs/api-guide/session-laws"
+      - method: "GET"
+        path: "/us/session-laws/{sessionLawId}"
+        summary: "Returns one state session law with identity, dates, outcome, sources and affected code sections."
+        returns: "The law record, including dates, enactment outcome and source links."
+        docs_url: "https://www.vaquill.ai/docs/api-guide/session-laws"
     usage_api:
       available: null
       method: null

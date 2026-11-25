@@ -18,6 +18,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/aaa-gas-prices"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No public API; the site publishes consumer fuel-price averages and news, not API documentation or signup."
     usage_api:
       available: null
       method: null
@@ -43,6 +45,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/bid-cars"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No public developer API; signup is for a consumer vehicle-auction account, not developer access."
     usage_api:
       available: null
       method: null
@@ -68,6 +72,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/carfax"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "A partner-only GraphQL API (CARFAX Connect) exists using OAuth 2.0, but it is not self-serve and requires an existing partnership."
     usage_api:
       available: null
       method: null
@@ -93,6 +99,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/cars-com"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No public developer API; the former developer portal now leads only to a sales contact page."
     usage_api:
       available: null
       method: null
@@ -118,6 +126,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/edmunds"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "The former public API program was retired; access is now limited to select partners, dealers and advertisers through an account executive."
     usage_api:
       available: null
       method: null
@@ -143,6 +153,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/kbb"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "A developer portal lists several valuation and VIN APIs, but access runs through a sales contact form, not self-serve signup."
     usage_api:
       available: null
       method: null

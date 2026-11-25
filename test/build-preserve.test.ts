@@ -329,12 +329,19 @@ print("generic-roundtrip-ok")
 });
 
 describe.skipIf(!python)("emit_row reproduces shipped rows byte-for-byte", () => {
-  it("emits exactly the existing text for rows picked from web-search.yaml", () => {
+  it("rows picked from web-search.yaml, including ones ND-10 filled with structured fields", () => {
     const original = fs.readFileSync(WEB_SEARCH_YAML, "utf8");
     for (const id of ["exa", "justoneapi", "serpapi"]) {
       expect(original).toContain(`id: "${id}"`);
     }
 
+    // exa and serpapi now carry ND-10 structured fields (official_docs_url,
+    // auth, pricing, endpoints[, endpoints_note]); justoneapi still carries
+    // none. For each row, strip whichever non-null STRUCTURED_FIELDS it has
+    // -- simulating a fresh build.py pass, which never knows these values --
+    // then run it through merge_preserved() + emit_row() exactly as main()
+    // does, and assert the result reproduces the shipped text byte-for-byte.
+    // This proves the preservation path, not just emit_row in isolation.
     const result = runPy(`
 import build, validate, json
 
@@ -343,9 +350,13 @@ parsed = validate.load(${JSON.stringify(WEB_SEARCH_YAML)})
 rows = {row["id"]: row for row in parsed["apis"]}
 
 for pid in ("exa", "justoneapi", "serpapi"):
-    row = rows[pid]
-    assert not (set(row) & set(build.STRUCTURED_FIELDS)), (pid, row)
-    emitted = build.emit_row(row)
+    old_row = rows[pid]
+    new_row = dict(old_row)
+    for field in build.STRUCTURED_FIELDS:
+        if new_row.get(field) is not None:
+            del new_row[field]
+    merged = build.merge_preserved(new_row, old_row)
+    emitted = build.emit_row(merged)
     marker = '  - id: "%s"' % pid
     start = original.index(marker)
     # the next top-level list item, or end of file

@@ -18,6 +18,45 @@ apis:
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/artificial-analysis"
     checked_date: 2026-10-24
+    official_docs_url: "https://artificialanalysis.ai/data-api/docs"
+    auth:
+      type: "api_key"
+      header: "x-api-key"
+      format: "<API_KEY>"
+      docs_url: "https://artificialanalysis.ai/data-api/docs"
+    pricing:
+      model: "freemium"
+      free_tier: true
+      starting_price_usd: null
+      unit: null
+      pricing_url: null
+      notes: "Three tiers: Free, Pro, Commercial. Free tier gets 100 requests per 24-hour window; paid tier prices are not stated in the text (Commercial: contact the team)."
+    endpoints:
+      - method: "GET"
+        path: "/api/v2/language/models/free"
+        summary: "Free-tier sibling of the language models list; returns the public subset of fields (headline indices, six Capability Indexes, median performance, input/output pricing)."
+        returns: "Paginated envelope with tier, intelligence_index_version, pagination and a data array of models with evaluations, index cost, pricing and performance."
+        docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+      - method: "GET"
+        path: "/api/v2/language/models"
+        summary: "Pro+ only list of language models with evaluations, pricing and performance metrics; accepts a page query parameter."
+        returns: "Language model data including evaluations (headline indices, the six Capability Indexes, and per-benchmark scores), pricing, and performance metrics."
+        docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+      - method: "GET"
+        path: "/api/v2/language/models/{id_or_slug}/performance"
+        summary: "Get performance over time for a single language model, addressed by id or slug."
+        returns: null
+        docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+      - method: "GET"
+        path: "/api/v2/language/providers"
+        summary: "Get all language model API providers; listed under the Language Model Providers section, marked Commercial only."
+        returns: null
+        docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
+      - method: "GET"
+        path: "/api/v2/language/agents/coding"
+        summary: "Get the coding agents leaderboard with Coding Agent Index scores, cost, time and token usage."
+        returns: null
+        docs_url: "https://artificialanalysis.ai/data-api/docs/reference"
     usage_api:
       available: null
       method: null
@@ -43,6 +82,8 @@ apis:
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/lmarena"
     checked_date: 2026-10-24
+    endpoints: []
+    endpoints_note: "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries."
     usage_api:
       available: null
       method: null
