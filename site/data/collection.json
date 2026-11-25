@@ -1,0 +1,38 @@
+{
+  "_comment": "Overlay for the catalog-scope decision (Bei, 2026-11-24): tool/data APIs and aggregators are collected, LLM APIs are set aside (hidden by default, not deleted). Read by scripts/build_apis.py. vendor_overrides/aggregator_overrides keys are the external index's own slug/id; unknown fields are null.",
+  "vendor_overrides": {},
+  "aggregator_overrides": {
+    "openrouter": {
+      "visibility": "hidden",
+      "visibility_note": "LLM router aggregator; set aside with LLM APIs 2026-11-24, restorable."
+    }
+  },
+  "extra_aggregators": [
+    {
+      "slug": "treg",
+      "name": "treg",
+      "url": "https://treg.to/",
+      "what_it_is": "A third-party intermediary that resells per-call access to many third-party tool and data APIs through its own token and base URL, billed from a prepaid balance. SkeletonKey lists it as a catalog entry, not as a recommended access layer: hold your own vendor accounts and keys where you can, rather than routing everything through one gateway key.",
+      "api_base_url": "https://treg.to",
+      "auth_header": "X-Treg-Token",
+      "auth_format": "{key}",
+      "signup_methods": ["github", "google", "email"],
+      "signup_url": "https://treg.to/",
+      "requires_card": null,
+      "billing_model": "Metered per call from a prepaid balance, at cost with 0% markup stated; a new verified account gets a one-time free credit of $1.00. treg publishes no single per-call price across its catalog.",
+      "payment_methods": null,
+      "fee_or_markup_policy": "States 0% markup: calls are billed \"at cost\" from the prepaid balance (treg's own skill.md, read 2026-10-28).",
+      "provider_count_claimed": "4,000+ tools across 119 providers (treg.to/catalog: \"4,064 endpoints across 113 platforms and 119 providers\", read 2026-10-28)",
+      "docs_url": "https://treg.to/integrate.md",
+      "pricing_url": "https://treg.to/skill.md",
+      "verified": true,
+      "source_urls": [
+        "https://treg.to/llms.txt",
+        "https://treg.to/skill.md",
+        "https://treg.to/integrate.md",
+        "https://treg.to/catalog"
+      ],
+      "checked_date": "2026-10-28"
+    }
+  ]
+}

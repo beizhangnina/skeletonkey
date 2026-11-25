@@ -17,7 +17,43 @@ HEAD = HEAD.replace('<a class="head-link"', '<a class="head-link head-apis" href
 FOOT = re.search(r'<footer class="site-foot">.*?</footer>', home, re.S).group(0)
 CATS = {'glasser': ('Glasser', 'https://glasser.ai'), 'monid': ('Monid', 'https://monid.ai'), 'flatkey': ('Flatkey', 'https://flatkey.ai')}
 
-AGGS = json.load(open(os.path.join(RDIR, 'aggregators.json')))
+# ---- catalog scope (Bei, 2026-11-24) ----------------------------------------
+# tool/data APIs and aggregators (treg, glasser, monid, ...) are collected;
+# LLM APIs are set aside: hidden from listings by default, never deleted. The
+# overlay in site/data/collection.json carries per-row exceptions (none of the
+# derivation below needed them, so vendor_overrides ships empty) plus treg's
+# profile, which does not exist in the external research index. Mirrors
+# src/apis.ts effectiveCollectionScope/effectiveVisibility and validate.py's
+# copy of it -- same category set, same rule.
+COLLECTION = json.load(open(os.path.join(ROOT, 'data', 'collection.json')))
+VENDOR_OVERRIDES = COLLECTION.get('vendor_overrides') or {}
+AGGREGATOR_OVERRIDES = COLLECTION.get('aggregator_overrides') or {}
+EXTRA_AGGREGATORS = COLLECTION.get('extra_aggregators') or []
+TOOL_SCOPE_CATEGORIES = {'generative-media', 'web-search', 'web-scraping', 'seo-marketing',
+                         'developer-infra', 'communications', 'contact-verification'}
+
+def derive_collection_scope(category):
+    if category == 'llm-models':
+        return 'llm'
+    if category in TOOL_SCOPE_CATEGORIES:
+        return 'tool'
+    return 'data'
+
+def vendor_collection(r):
+    """(collection_scope, visibility, visibility_note) for one vendor row: an
+    overlay override wins, else the row's own field (external index rows never
+    set one), else category derivation -- same precedence as apis.yaml."""
+    ov = VENDOR_OVERRIDES.get(r['id']) or {}
+    scope = ov.get('collection_scope') or derive_collection_scope(r.get('category'))
+    visibility = ov.get('visibility') or ('hidden' if scope == 'llm' else 'listed')
+    return scope, visibility, ov.get('visibility_note')
+
+AGGS = json.load(open(os.path.join(RDIR, 'aggregators.json'))) + EXTRA_AGGREGATORS
+for _a in AGGS:
+    _ov = AGGREGATOR_OVERRIDES.get(_a['slug']) or {}
+    _a['collection_scope'] = 'aggregator'
+    _a['visibility'] = _ov.get('visibility') or 'listed'
+    _a['visibility_note'] = _ov.get('visibility_note')
 AGG = {a['slug']: a for a in AGGS}
 SRC_MAP = {'glasser': 'glasser', 'monid': 'monid', 'flatkey': 'flatkey', 'apify': 'apify-store', 'rapidapi': 'rapidapi'}
 KEY_UNKNOWN = {'apify-store', 'rapidapi'}   # third-party listings: we did not confirm whether a vendor key is needed
@@ -244,6 +280,7 @@ def public(r):
     out['routes'] = rt
     out['when_to_pick'] = when_to_pick(r, st, rt)
     out['sources'] = [u for u in (r.get('source_urls') or []) if url_ok(u)]
+    out['collection_scope'], out['visibility'], out['visibility_note'] = vendor_collection(r)
     # ND-8 structured core fields: pass through as-is when the source row has
     # them, null when it doesn't. A structured `auth` dict is a superset of
     # the legacy {type, header, format} shape (it adds docs_url), so it
@@ -254,11 +291,19 @@ def public(r):
         out[k] = r.get(k)
     return out
 
-rows = sorted((public(r) for r in doc['entries'] if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())
+# ALL_ROWS keeps every vendor (hidden ones get their page generated too, so a
+# direct URL still works); `rows` is the listing/browsing surface -- hidden
+# rows (the LLM set-aside) are left out of the /apis/ index, llms.txt and the
+# apis.json count/counts, same rule src/apis.ts and the CLI/MCP apply.
+ALL_ROWS = sorted((public(r) for r in doc['entries'] if r.get('conflicts_or_notes') != 'not yet researched'), key=lambda x: x['name'].lower())
+rows = [x for x in ALL_ROWS if x['visibility'] != 'hidden']
+hidden_rows = [x for x in ALL_ROWS if x['visibility'] == 'hidden']
 
 # ---------- aggregator profiles ----------
+# Unfiltered on purpose: an aggregator's own "vendors routed through it" count
+# is not one of the listing surfaces the LLM set-aside excludes from.
 VEND = {a['slug']: [] for a in AGGS}
-for x in rows:
+for x in ALL_ROWS:
     for rt in x['routes'][1:]:
         if rt['source_slug'] in VEND:
             VEND[rt['source_slug']].append({'slug': x['slug'], 'name': x['name'], 'category': x['category'],
@@ -280,9 +325,15 @@ def agg_public(a):
             'pricing_url': a.get('pricing_url') if url_ok(a.get('pricing_url')) else None,
             'verified': bool(a.get('verified')), 'checked_date': str(a.get('checked_date') or TODAY),
             'sources': [u for u in (a.get('source_urls') or []) if url_ok(u)],
-            'page': f'{SITE}/apis/aggregators/{a["slug"]}/', 'vendor_count': len(v), 'vendors': v}
+            'page': f'{SITE}/apis/aggregators/{a["slug"]}/', 'vendor_count': len(v), 'vendors': v,
+            'collection_scope': a.get('collection_scope') or 'aggregator',
+            'visibility': a.get('visibility') or 'listed', 'visibility_note': a.get('visibility_note')}
 
 aggs = [agg_public(a) for a in sorted(AGGS, key=lambda a: (-len(VEND.get(a['slug'], [])), a['name'].lower()))]
+# The aggregator-index listing and llms.txt leave out hidden aggregators (the
+# OpenRouter override); each one still gets its own page (see the write loop
+# below, which iterates the unfiltered `aggs`).
+VISIBLE_AGGS = [a for a in aggs if a['visibility'] != 'hidden']
 
 # ---------- html ----------
 def page(title, desc, path, body, extra_head=''):
@@ -459,16 +510,16 @@ def agg_body(a):
     if a['sources']: b.append('<section class="ap-card"><h2>Sources</h2><ul class="ap-src">' + ''.join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(u)}</a></li>' for u in a['sources']) + '</ul></section>')
     return '\n'.join(b)
 
-def agg_index_body():
+def agg_index_body(aggs_list):
     li = ''.join(f'<li><a href="/apis/aggregators/{E(a["slug"])}/"><span class="ap-name">{E(a["name"])}</span>{vbadge(a["verified"])}'
                  f'<span class="ap-cat">{a["vendor_count"]} vendor{"" if a["vendor_count"] == 1 else "s"} routed'
                  f'{" · "+E(", ".join(a["payment_model"])) if a["payment_model"] else ""}</span>'
-                 f'<span class="ap-sum">{E(brief(a["what_it_is"], 180))}</span></a></li>' for a in aggs)
-    nv = sum(1 for a in aggs if a['verified'])
+                 f'<span class="ap-sum">{E(brief(a["what_it_is"], 180))}</span></a></li>' for a in aggs_list)
+    nv = sum(1 for a in aggs_list if a['verified'])
     return (f'<nav class="ap-crumb" aria-label="Breadcrumb"><a href="/apis/">API index</a> <span aria-hidden="true">/</span> Aggregators</nav>'
             f'<h1 class="ap-title">Aggregator gateways</h1>'
-            f'<p class="ap-lede">{len(aggs)} gateways that resell or index other vendors\' APIs behind one account, one key and one balance. '
-            f'{nv} verified on their own docs and pricing pages, {len(aggs)-nv} unverified. Each vendor page lists its routes side by side so you can see what a gateway gives up in coverage. '
+            f'<p class="ap-lede">{len(aggs_list)} gateways that resell or index other vendors\' APIs behind one account, one key and one balance. '
+            f'{nv} verified on their own docs and pricing pages, {len(aggs_list)-nv} unverified. Each vendor page lists its routes side by side so you can see what a gateway gives up in coverage. '
             f'Machine-readable: <a href="/apis.json">/apis.json</a>.</p>'
             f'<ul class="ap-list">{li}</ul>'
             f'<p class="ap-small">Payment model tokens come from our own reading of each gateway\'s billing pages: '
@@ -476,11 +527,13 @@ def agg_index_body():
 
 out = os.path.join(PUB, 'apis'); shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
 shutil.copy(os.path.join(ROOT, 'scripts', 'apis.css'), os.path.join(out, 'apis.css'))
-for x in rows:
+# Every vendor's own page is generated, hidden or not: a direct URL keeps
+# working, which is what makes "hidden" recoverable rather than deleted.
+for x in ALL_ROWS:
     os.makedirs(os.path.join(out, x['slug']))
     open(os.path.join(out, x['slug'], 'index.html'), 'w').write(page(f'{x["name"]} API — SkeletonKey API index', (x.get('summary') or x['name'])[:155], f'/apis/{x["slug"]}/', vendor_body(x)))
 os.makedirs(os.path.join(out, 'aggregators'))
-open(os.path.join(out, 'aggregators', 'index.html'), 'w').write(page('Aggregator gateways — SkeletonKey API index', f'{len(aggs)} API aggregator gateways compared on signup, payment, vendor key and coverage.', '/apis/aggregators/', agg_index_body()))
+open(os.path.join(out, 'aggregators', 'index.html'), 'w').write(page('Aggregator gateways — SkeletonKey API index', f'{len(VISIBLE_AGGS)} API aggregator gateways compared on signup, payment, vendor key and coverage.', '/apis/aggregators/', agg_index_body(VISIBLE_AGGS)))
 for a in aggs:
     os.makedirs(os.path.join(out, 'aggregators', a['slug']))
     open(os.path.join(out, 'aggregators', a['slug'], 'index.html'), 'w').write(
@@ -514,12 +567,15 @@ for x in rows:
     for rt in x['routes']: by_src[rt['source_slug']] = by_src.get(rt['source_slug'], 0) + 1
 vrt = sum(1 for x in rows for rt in x['routes'] if rt['verified'])
 json.dump({'name': 'SkeletonKey API index', 'url': f'{SITE}/apis/', 'generated': str(doc.get('checked_date')), 'count': len(rows), 'counts': cnt,
+           'hidden_count': len(hidden_rows),
            'route_counts': {'total': nrt, 'verified': vrt, 'by_source': dict(sorted(by_src.items(), key=lambda kv: -kv[1]))},
-           'note': 'Verified rows were read on the vendor\'s own pages on checked_date. Unverified rows carry no prices.',
-           'schema': f'{SITE}/llms.txt', 'apis': rows, 'aggregators': aggs},
+           'note': 'Verified rows were read on the vendor\'s own pages on checked_date. Unverified rows carry no prices. '
+                   'hidden_count rows (collection_scope "llm", set aside 2026-11-24) are excluded from count/counts and '
+                   'from the /apis/ index and llms.txt, but stay in `apis` below and keep their own page.',
+           'schema': f'{SITE}/llms.txt', 'apis': ALL_ROWS, 'aggregators': aggs},
           open(os.path.join(PUB, 'apis.json'), 'w'), indent=1, ensure_ascii=False, default=str)
 
-L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor\'s own pages, plus {nrt} routes ({vrt} verified) to reach them: direct from the vendor or through one of {len(aggs)} aggregator gateways. Full data: {SITE}/apis.json', '',
+L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for agents, with auth header, base URL, pricing and signup facts checked against each vendor\'s own pages, plus {nrt} routes ({vrt} verified) to reach them: direct from the vendor or through one of {len(VISIBLE_AGGS)} aggregator gateways. Full data: {SITE}/apis.json', '',
      'Status: verified = pricing and auth read on the vendor site; unverified = not confirmed, no prices shown; sales-only = no public prices; no-public-api = reachable only through an aggregator catalog.', '',
      '## /apis.json schema', '',
      'Top level: `name`, `url`, `generated`, `count`, `counts` (per status), `route_counts` {`total`, `verified`, `by_source`}, `note`, `apis` (array of vendors), `aggregators` (array of gateway profiles).', '',
@@ -541,7 +597,7 @@ L = ['# SkeletonKey API index', '', f'> {len(rows)} APIs and data sources for ag
      'Aggregator object (`aggregators[]`): `slug`, `name`, `url`, `what_it_is`, `api_base_url`, `auth` {`header`,`format`}, `signup` {`methods`,`url`,`requires_card`}, `billing_model`, `payment_model` (same tokens as above), `payment_methods`, `fee_or_markup_policy`, `free_credit`, `rate_limits`, `provider_count_claimed`, `docs_url`, `pricing_url`, `verified`, `checked_date`, `sources`, `page`, `vendor_count`, `vendors[]` {`slug`,`name`,`category`,`page`,`price_text`,`example_endpoint`,`endpoints_exposed`,`verified`,`listing_url`}.', '',
      '## Aggregator gateways', '',
      f'- [All gateways]({SITE}/apis/aggregators/): compare signup, payment model, vendor key and coverage.']
-for a in aggs:
+for a in VISIBLE_AGGS:
     L.append(f'- [{a["name"]}]({a["page"]}): {"verified" if a["verified"] else "unverified"}, {a["vendor_count"]} vendors routed. {brief(a["what_it_is"], 160)}')
 L.append('')
 for c in cats:

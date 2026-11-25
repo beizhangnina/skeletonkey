@@ -20,6 +20,7 @@ import {
   AGGREGATOR_NAMES,
   BILLING_MODELS,
   CONNECT_AUTH_KINDS,
+  effectiveVisibility,
   HIGHLIGHTS_MAX,
   OFFERING_SUMMARY_MAX,
   SERVICE_CATEGORIES,
@@ -795,7 +796,9 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       "data/apis/*.yaml, merged. Returns how each one is paid for (verified billing model), " +
       "which aggregators resell it and at what published per-call price, a recommended " +
       "{route, reason}, how it authenticates, and whether SkeletonKey already holds a key. " +
-      "Prices are null when unknown -- null never means free. On a miss, call discover_api.",
+      "Prices are null when unknown -- null never means free. Hidden rows (e.g. LLM APIs set " +
+      "aside from the catalog) are left out unless include_hidden is true. On a miss, call " +
+      "discover_api.",
     readOnly: true,
     inputSchema: {
       capability: z
@@ -812,20 +815,31 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
           "Warn about rows whose facts were verified longer ago than this (default 90, or " +
             "SKELETONKEY_STALE_DAYS).",
         ),
+      include_hidden: z
+        .boolean()
+        .optional()
+        .describe(
+          "Include rows hidden from listings by default (e.g. LLM APIs set aside from the " +
+            "catalog 2026-11-24). Default false.",
+        ),
     },
     async handler(args, ctx) {
       const capability = required(args, "capability");
       const rawLimit = typeof args["limit"] === "number" ? args["limit"] : 25;
       const limit = Math.min(200, Math.max(1, Math.trunc(rawLimit)));
       const maxAgeDays = staleWindow(ctx, args);
+      const includeHidden = args["include_hidden"] === true;
       // Flip any discovered row that a real 2xx call has since proven.
       const promotion = promote(ctx);
       const index = apiIndex(ctx);
       const keys = readKeys(ctx.home).keys;
+      const searchable = includeHidden
+        ? index.entries
+        : index.entries.filter((entry) => effectiveVisibility(entry) !== "hidden");
       // Whole-word matching, scored: strongest evidence first, and ties keep
       // index order, which puts apis.yaml rows (the ones that know the auth
       // header) ahead of generated shard rows.
-      const ranked = rankByCapability(index.entries, capability);
+      const ranked = rankByCapability(searchable, capability);
       const terms = queryTokens(capability);
       const matches = ranked.map((row) => row.entry);
       const shown = ranked.slice(0, limit);
@@ -834,6 +848,7 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
       ).length;
       return {
         capability,
+        include_hidden: includeHidden,
         search_terms: terms.tokens,
         ignored_terms: terms.ignored,
         ...(terms.tokens.length === 0
@@ -897,10 +912,14 @@ export const SKELETONKEY_TOOLS: SkeletonKeyToolDef[] = [
             ...(entry.category === undefined ? {} : { index_category: entry.category }),
             ...(entry.vendor_url === undefined ? {} : { vendor_url: entry.vendor_url }),
             key_in_skeletonkey: key ? { alias: key.alias, disabled: key.disabled } : null,
+            visibility: effectiveVisibility(entry),
           };
         }),
         reminders: [
           "min_topup_usd: null means nobody has checked the price. Do not guess one.",
+          "include_hidden: false (the default) leaves out rows hidden from listings, e.g. LLM APIs " +
+            "set aside from the catalog 2026-11-24. Pass include_hidden: true to see them -- hidden " +
+            "is never deleted.",
           "billing.model: null means nobody checked how the vendor charges. It never means free.",
           "aggregators[].per_call_price_usd: null means that aggregator publishes no comparable " +
             "per-call price, not that the call is free. A price always comes with price_verified_url.",

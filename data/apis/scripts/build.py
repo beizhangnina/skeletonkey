@@ -27,6 +27,13 @@ SHARDS = os.path.join(HERE, '..')
 OUT = os.environ.get('SKELETONKEY_BUILD_OUT') or SHARDS
 CHECKED = '2026-10-24'
 
+# Catalog scope (Bei, 2026-11-24): llm-models rows are set aside -- hidden from
+# listings by default, not deleted -- same meaning as src/apis.ts
+# effectiveCollectionScope/effectiveVisibility and validate.py's mirror of it.
+LLM_VISIBILITY_NOTE = ('LLM API; set aside from the tool/data/aggregator catalog 2026-11-24 (Bei). '
+                       'Hidden from listings by default, not deleted; recoverable via --all or '
+                       'visibility: listed.')
+
 def r(p): return json.load(open(os.path.join(RAW, p)))
 
 # ---- slug normalisation across catalogs -------------------------------------
@@ -431,6 +438,13 @@ def main():
             'source_url': curated.VENDOR_DIRECT[pid] if direct else source_url(pid, x),
             'checked_date': CHECKED,
         }
+        # ND-7: every llm-models row is set aside. Emitted after the base
+        # fields as ordinary extras; a hand-filled value on the existing shard
+        # row (e.g. `visibility: listed`) still wins via merge_preserved().
+        if cat == 'llm-models':
+            row['collection_scope'] = 'llm'
+            row['visibility'] = 'hidden'
+            row['visibility_note'] = LLM_VISIBILITY_NOTE
         # The three aggregator catalogs do not publish a vendor's own docs
         # URL, auth/pricing specifics, endpoint catalog or any other
         # hand-filled extra, so the only way a freshly built row carries one
