@@ -6,7 +6,7 @@ apis:
     capability: "Open scholarly index of papers, authors, institutions and citation links."
     category: "research-academic"
     provider_url: "https://openalex.org"
-    docs_url: "https://docs.openalex.org"
+    docs_url: "https://help.openalex.org/api/"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/openalex"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://help.openalex.org/api/"
     pricing:
       model: null
@@ -71,7 +71,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/valyu"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.valyu.ai/home"
     auth:
       type: "api_key"

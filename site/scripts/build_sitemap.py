@@ -42,10 +42,10 @@ RE_CANON_LINE = re.compile(r'(<link\s+rel="canonical"\s+href=".*?"\s*>\s*\n)')
 RE_DESC_LINE = re.compile(r'(<meta\s+name="description"\s+content=".*?"\s*>\s*\n)')
 
 
-def pages():
-    """Every index.html under public/, sorted for a stable sitemap."""
+def pages(pub_dir=PUB):
+    """Every index.html under pub_dir (default public/), sorted for a stable sitemap."""
     out = []
-    for dirpath, dirnames, filenames in os.walk(PUB):
+    for dirpath, dirnames, filenames in os.walk(pub_dir):
         dirnames.sort()
         if 'index.html' in filenames:
             out.append(os.path.join(dirpath, 'index.html'))
@@ -94,23 +94,23 @@ def inject_og(path):
     return True
 
 
-def loc_for(path, html):
+def loc_for(path, html, pub_dir=PUB):
     """The absolute URL for a page: its own canonical, else the path under SITE."""
     canon = canonical_of(html)
     if canon.startswith(SITE + '/') or canon == SITE + '/':
         return canon
-    rel = os.path.relpath(path, PUB).replace(os.sep, '/')
+    rel = os.path.relpath(path, pub_dir).replace(os.sep, '/')
     if rel == 'index.html':
         return SITE + '/'
     return f'{SITE}/{rel.rsplit("/", 1)[0]}/'
 
 
-def hidden_page_paths():
+def hidden_page_paths(pub_dir=PUB):
     """`/apis/<slug>/` and `/apis/aggregators/<slug>/` for every row or
     aggregator apis.json marks hidden (the 2026-11-24 LLM set-aside). The page
     stays on disk -- this only keeps it out of the sitemap. Returns an empty
     set when apis.json has not been generated yet."""
-    apis_json = os.path.join(PUB, 'apis.json')
+    apis_json = os.path.join(pub_dir, 'apis.json')
     if not os.path.isfile(apis_json):
         return set()
     data = json.load(open(apis_json, encoding='utf-8'))
@@ -119,13 +119,15 @@ def hidden_page_paths():
     return hidden
 
 
-def write_sitemap():
-    """Collect every page's URL and write public/sitemap.xml. Returns the locs."""
-    hidden = hidden_page_paths()
+def write_sitemap(pub_dir=None):
+    """Collect every page's URL under pub_dir (default public/) and write
+    <pub_dir>/sitemap.xml. Returns the locs."""
+    pub_dir = pub_dir or PUB
+    hidden = hidden_page_paths(pub_dir)
     urls = []
-    for path in pages():
+    for path in pages(pub_dir):
         html = open(path, encoding='utf-8').read()
-        url = loc_for(path, html)
+        url = loc_for(path, html, pub_dir)
         if not url.startswith('https://'):
             raise SystemExit(f'refusing to write a non-https URL: {url}')
         if url[len(SITE):] in hidden:
@@ -142,7 +144,7 @@ def write_sitemap():
         lines.append('  </url>')
     lines.append('</urlset>')
     lines.append('')
-    out = os.path.join(PUB, 'sitemap.xml')
+    out = os.path.join(pub_dir, 'sitemap.xml')
     open(out, 'w', encoding='utf-8').write('\n'.join(lines))
 
     # Fail loudly here rather than shipping a sitemap Google cannot parse.

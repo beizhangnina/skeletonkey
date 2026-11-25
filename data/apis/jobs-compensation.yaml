@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/builtin"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; Built In offers only sales-led employer-brand visibility services, not data access."
     usage_api:
@@ -44,7 +44,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/idealist"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     endpoints: []
     endpoints_note: "A Job Posting API exists but is gated to approved US organizations with purchased job credits; production keys are issued only on request."
     usage_api:
@@ -71,7 +71,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/indeed"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     endpoints: []
     endpoints_note: "A partner-gated developer platform exists for ATS and job-board partners, but there is no self-serve signup or published API pricing."
     usage_api:
@@ -98,7 +98,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/levels-fyi"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -123,7 +123,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/theirstack"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://theirstack.com/en/docs/api-reference/quickstart"
     auth:
       type: "bearer"
@@ -192,7 +192,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/upwork"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -202,7 +202,7 @@ apis:
       notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
       checked_date: 2026-11-24
   - id: "web3-career"
-    name: "Web3 Career"
+    name: "Web3 Jobs"
     capability: "Crypto and web3 job listings with salary data and remote filters."
     category: "jobs-compensation"
     provider_url: "https://web3.career"
@@ -217,7 +217,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/web3-career"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.bondex.app/api-reference/openapi-documentation/web3.career-jobs-api"
     pricing:
       model: null
@@ -261,7 +261,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/wellfound"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API is published; an AI-assistant feature is advertised with no public endpoint or key."
     usage_api:

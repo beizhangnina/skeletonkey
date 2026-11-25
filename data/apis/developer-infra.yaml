@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/browserbase"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.browserbase.com"
     auth:
       type: "api_key"
@@ -70,7 +70,7 @@ apis:
     capability: "Issue and pull-request search plus issue comments over public repositories."
     category: "developer-infra"
     provider_url: "https://github.com"
-    docs_url: "https://docs.github.com/rest"
+    docs_url: "https://docs.github.com/en/rest"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -81,7 +81,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/github"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.github.com/en/rest"
     auth:
       type: "bearer"
@@ -125,7 +125,7 @@ apis:
       notes: "部分能：账单用量 GET /users/{username}/settings/billing/usage 等（https://docs.github.com/en/rest/billing/usage）仅适用于 enhanced billing platform 账户，组织级需管理员权限"
       checked_date: 2026-11-24
   - id: "kadec0"
-    name: "kadec0"
+    name: "Kadec0"
     capability: "Mixed utility endpoints (search, scrape, trends, email validation, DeFi TVL) behind one API."
     category: "developer-infra"
     provider_url: null
@@ -140,7 +140,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://monid.ai/tools"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://api.kadec0.xyz/docs"
     pricing:
       model: null
@@ -164,7 +164,7 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "sfs"
-    name: "Simple FS"
+    name: "FreightSimple"
     capability: "Remote per-workspace file system for agents with unix-style verbs and signed share URLs."
     category: "developer-infra"
     provider_url: null
@@ -179,7 +179,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site. Operated by the Monid aggregator itself rather than an independent vendor."
     source_url: "https://monid.ai/tools/sfs"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "A fully documented freight API exists but is not self-serve; an account manager must approve access and issue the API key."
     usage_api:
@@ -191,7 +191,7 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "smolmachine"
-    name: "Smol Machines"
+    name: "smol machines"
     capability: "Persistent Linux microVM sandboxes for agents, created from a container image."
     category: "developer-infra"
     provider_url: "https://smolmachines.com"
@@ -206,7 +206,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/smolmachine"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://smolmachines.com/docs/cloud/api-reference"
     pricing:
       model: null

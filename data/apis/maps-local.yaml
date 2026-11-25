@@ -6,7 +6,7 @@ apis:
     capability: "Place details and ratings from Apple's mapping data."
     category: "maps-local"
     provider_url: "https://www.apple.com/maps/"
-    docs_url: "https://developer.apple.com/maps/"
+    docs_url: "https://developer.apple.com/documentation/applemapsserverapi/"
     access_mode: "own-account"
     signup: "unknown"
     signup_automatable: "unknown"
@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/apple-maps"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -27,11 +27,11 @@ apis:
       notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
       checked_date: 2026-11-24
   - id: "google-maps"
-    name: "Google Maps"
+    name: "Google Maps Platform"
     capability: "Place data and contributor reviews from Google's mapping platform."
     category: "maps-local"
     provider_url: "https://maps.google.com"
-    docs_url: "https://developers.google.com/maps"
+    docs_url: "https://developers.google.com/maps/documentation"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -42,7 +42,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/google-maps"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://developers.google.com/maps/documentation"
     pricing:
       model: null

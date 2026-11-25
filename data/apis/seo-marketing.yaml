@@ -6,7 +6,7 @@ apis:
     capability: "Backlink index, domain authority metrics and organic/paid keyword data from a large independent web crawl."
     category: "seo-marketing"
     provider_url: "https://ahrefs.com"
-    docs_url: "https://docs.ahrefs.com"
+    docs_url: "https://docs.ahrefs.com/en/api/docs/introduction"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/ahrefs"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.ahrefs.com/en/api/docs/introduction"
     pricing:
       model: null
@@ -83,7 +83,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/cloro"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://cloro.dev/docs/"
     auth:
       type: "bearer"
@@ -141,7 +141,7 @@ apis:
     capability: "SERP, keyword, backlink, app-store and local-pack data across search engines, billed per task."
     category: "seo-marketing"
     provider_url: "https://dataforseo.com"
-    docs_url: "https://docs.dataforseo.com"
+    docs_url: "https://docs.dataforseo.com/v3/auth/"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -152,7 +152,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/dataforseo"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.dataforseo.com/v3/auth/"
     pricing:
       model: "pay_as_you_go"
@@ -201,7 +201,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/foreplay"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://public.api.foreplay.co/docs"
     pricing:
       model: null
@@ -233,7 +233,7 @@ apis:
     capability: "Keyword, domain and competitive SEO metrics from an owned keyword database."
     category: "seo-marketing"
     provider_url: "https://www.semrush.com"
-    docs_url: "https://developer.semrush.com"
+    docs_url: "https://developer.semrush.com/api/basics/get-started/"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -244,7 +244,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/semrush"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://developer.semrush.com/api/basics/get-started/"
     pricing:
       model: null
@@ -308,7 +308,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpstat"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://api-docs.serpstat.com/docs/serpstat-public-api/jenasqbwtxdlr-introduction-to-serpstat-api"
     pricing:
       model: null
@@ -347,7 +347,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/similarweb"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null

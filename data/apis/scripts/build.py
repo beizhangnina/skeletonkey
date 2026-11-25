@@ -25,7 +25,13 @@ SHARDS = os.path.join(HERE, '..')
 # Where the shards are written. Overridable so a test can build into a temp
 # directory instead of overwriting the committed shards; unset in normal use.
 OUT = os.environ.get('SKELETONKEY_BUILD_OUT') or SHARDS
-CHECKED = '2026-10-24'
+# A newer research pass (skeletonkey-index-research/index.yaml) checked 138
+# of the 162 ids on 2026-10-25; the other 24 it checked a day later, on
+# 2026-10-26 (see curated.STRUCTURED's `checked_date` entries). PM decision
+# (2026-11-24, Bei) was to write that newer pass's dates back into the
+# shards, so this constant moves from '2026-10-24' to the majority date and
+# the 24-id minority is overridden per-row via curated.STRUCTURED.
+CHECKED = '2026-10-25'
 
 # Catalog scope (Bei, 2026-11-24): llm-models rows are set aside -- hidden from
 # listings by default, not deleted -- same meaning as src/apis.ts

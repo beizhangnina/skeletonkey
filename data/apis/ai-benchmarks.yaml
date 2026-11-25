@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/artificial-analysis"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://artificialanalysis.ai/data-api/docs"
     auth:
       type: "api_key"
@@ -71,7 +71,7 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "lmarena"
-    name: "LMArena"
+    name: "Arena (formerly LMArena)"
     capability: "Crowd-voted head-to-head model leaderboards across text, code, vision, image and video."
     category: "ai-benchmarks"
     provider_url: "https://lmarena.ai"
@@ -86,7 +86,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/lmarena"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; the service is a consumer web app, with enterprise evaluation work arranged through sales inquiries."
     usage_api:

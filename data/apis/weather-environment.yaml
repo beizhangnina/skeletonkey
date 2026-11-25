@@ -6,7 +6,7 @@ apis:
     capability: "Current conditions, multi-day forecasts and health/air alerts for any location worldwide."
     category: "weather-environment"
     provider_url: "https://www.accuweather.com"
-    docs_url: "https://developer.accuweather.com"
+    docs_url: "https://developer.accuweather.com/documentation/overview"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/accuweather"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://developer.accuweather.com/documentation/overview"
     pricing:
       model: "subscription"
@@ -56,7 +56,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/iqair"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://api-docs.iqair.com/"
     pricing:
       model: null
@@ -95,7 +95,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/weather-underground"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null

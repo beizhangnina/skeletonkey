@@ -17,7 +17,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentline"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.agentline.cloud"
     auth:
       type: "bearer"
@@ -90,7 +90,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/agentmail"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.agentmail.to"
     auth:
       type: "bearer"
@@ -148,7 +148,7 @@ apis:
     capability: "Meeting bots that join video calls as a participant and return recordings and transcripts."
     category: "communications"
     provider_url: "https://www.recall.ai"
-    docs_url: "https://docs.recall.ai"
+    docs_url: "https://docs.recall.ai/reference/authentication"
     access_mode: "own-account"
     signup: "unknown"
     signup_automatable: "unknown"
@@ -159,7 +159,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/recall"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.recall.ai/reference/authentication"
     pricing:
       model: null
@@ -218,7 +218,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/saperly"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://saperly.com/docs/"
     pricing:
       model: "prepaid_credits"

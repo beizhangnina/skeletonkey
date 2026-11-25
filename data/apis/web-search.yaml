@@ -6,7 +6,7 @@ apis:
     capability: "Meaning-ranked neural web search with page retrieval, highlights and structured extraction."
     category: "web-search"
     provider_url: "https://exa.ai"
-    docs_url: "https://docs.exa.ai"
+    docs_url: "https://exa.ai/docs"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/exa"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://exa.ai/docs"
     auth:
       type: "bearer"
@@ -46,7 +46,7 @@ apis:
       notes: "另有 GET https://admin-api.exa.ai/team-management/api-keys/{id}/usage（https://exa.ai/docs/reference/team-management/get-api-key-usage），start_date 最多回溯 180 天"
       checked_date: 2026-11-24
   - id: "justoneapi"
-    name: "JustOneAPI"
+    name: "Just One API"
     capability: "Single search surface across Chinese news and social platforms."
     category: "web-search"
     provider_url: null
@@ -61,7 +61,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Access path and terms were not verified from the vendor's own site."
     source_url: "https://glasser.ai/data-sources/justoneapi"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -86,7 +86,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/keenable"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.keenable.ai/"
     auth:
       type: "api_key"
@@ -155,7 +155,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/litescrape"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://litescrape.com/docs"
     auth:
       type: "bearer"
@@ -224,7 +224,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://monid.ai/tools/octen"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.octen.ai/"
     pricing:
       model: "pay_as_you_go"
@@ -288,7 +288,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/search1api"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://s1.dev/docs"
     pricing:
       model: "prepaid_credits"
@@ -352,7 +352,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serpapi"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://serpapi.com/search-api"
     pricing:
       model: "subscription"
@@ -401,7 +401,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/serper"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://serper.dev"
     pricing:
       model: "freemium"

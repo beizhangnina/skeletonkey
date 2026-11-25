@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/hlrlookup"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://www.hlrlookup.com/docs/hlrlookup-docs.html"
     pricing:
       model: null
@@ -60,7 +60,7 @@ apis:
     capability: "Finds and verifies professional email addresses for a domain or a named person."
     category: "contact-verification"
     provider_url: "https://hunter.io"
-    docs_url: "https://hunter.io/api-documentation"
+    docs_url: "https://hunter.io/api-documentation/v2"
     access_mode: "own-account"
     signup: "self-serve"
     signup_automatable: "unknown"
@@ -71,7 +71,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/hunter"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://hunter.io/api-documentation/v2"
     pricing:
       model: null
@@ -120,7 +120,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/prospeo"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://prospeo.io/api-docs/authentication"
     pricing:
       model: null

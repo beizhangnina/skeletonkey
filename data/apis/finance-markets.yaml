@@ -17,7 +17,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/edinet"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-26
     official_docs_url: "https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html"
     pricing:
       model: null
@@ -56,7 +56,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/financialdatasets"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.financialdatasets.ai/"
     auth:
       type: "api_key"
@@ -125,7 +125,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/finviz"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; the vendor's 'APIs' link leads only to its Elite consumer subscription page."
     usage_api:
@@ -152,7 +152,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/marketbeat"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; the vendor offers consumer research subscriptions and CSV exports instead."
     usage_api:
@@ -179,7 +179,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/marketstack"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://docs.apilayer.com/marketstack/docs/api-documentation"
     pricing:
       model: null
@@ -208,7 +208,7 @@ apis:
       notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
       checked_date: 2026-11-24
   - id: "nasdaq"
-    name: "Nasdaq"
+    name: "Nasdaq Data Link"
     capability: "Market data: quotes, financials, earnings calendars, dividends, option chains and screeners."
     category: "finance-markets"
     provider_url: "https://www.nasdaq.com"
@@ -223,7 +223,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/nasdaq"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     usage_api:
       available: null
       method: null
@@ -248,7 +248,7 @@ apis:
     seen_in: ["glasser"]
     tos_notes: "Direct vendor account is the documented path; review the vendor's own API terms, rate limits and redistribution rules."
     source_url: "https://glasser.ai/data-sources/secapi"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     official_docs_url: "https://sec-api.io/docs"
     pricing:
       model: "freemium"
@@ -272,7 +272,7 @@ apis:
       notes: "官方文档中未找到可拉取 usage/额度/账单的 API（本次只读文档）"
       checked_date: 2026-11-24
   - id: "secform4"
-    name: "SecForm4"
+    name: "SecForm4.com"
     capability: "Insider buy/sell activity, 13D/13G filings and institutional holdings parsed from SEC filings."
     category: "finance-markets"
     provider_url: "https://www.secform4.com"
@@ -287,7 +287,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/secform4"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; the vendor offers a web-based filings screener and CSV export instead."
     usage_api:
@@ -299,7 +299,7 @@ apis:
       notes: "索引中没有该厂商的官方文档链接，未核实（不是“没有 usage API”）"
       checked_date: 2026-11-24
   - id: "stockanalysis"
-    name: "Stock Analysis"
+    name: "StockAnalysis.com"
     capability: "Stock overviews, statistics, IPO calendar and pre-market movers."
     category: "finance-markets"
     provider_url: "https://stockanalysis.com"
@@ -314,7 +314,7 @@ apis:
     seen_in: ["glasser", "monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://glasser.ai/data-sources/stockanalysis"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public developer API; the vendor sells consumer website subscriptions instead."
     usage_api:
@@ -341,7 +341,7 @@ apis:
     seen_in: ["monid"]
     tos_notes: "No first-party public data API was identified; the catalogs appear to reach this source through a scraping intermediary. Read the site's own terms before scraping it directly."
     source_url: "https://monid.ai/tools/yahoo-finance"
-    checked_date: 2026-10-24
+    checked_date: 2026-10-25
     endpoints: []
     endpoints_note: "No public finance API; Yahoo's developer site lists only a Fantasy Sports API and sign-in APIs."
     usage_api:
